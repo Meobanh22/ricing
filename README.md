@@ -9,8 +9,8 @@ Bộ công cụ custom desktop phong cách Sylveon & Serena (Pokemon) dành cho 
 ### 🪟 Trên Windows:
 1. **Clone repository này về máy:**
    ```powershell
-   git clone git@github.com:Meobanh22/sylveon-rice.git
-   cd sylveon-rice
+   git clone git@github.com:Meobanh22/ricing.git
+   cd ricing
    ```
 2. Chạy file cài đặt tự động:
    ```powershell
@@ -26,8 +26,8 @@ Bộ công cụ custom desktop phong cách Sylveon & Serena (Pokemon) dành cho 
 ### 🐧 Trên Linux:
 1. **Clone repository về máy:**
    ```bash
-   git clone git@github.com:Meobanh22/sylveon-rice.git
-   cd sylveon-rice
+   git clone git@github.com:Meobanh22/ricing.git
+   cd ricing
    ```
 2. Chạy script setup:
    ```bash
