@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Sylveon Cursor Playground ✨</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    body {
+      background: linear-gradient(135deg, #fcebf2 0%, #edf4fc 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      color: #5c2a34;
+    }
+    h1 {
+      font-size: 26px;
+      margin-bottom: 8px;
+      color: #d15678;
+    }
+    p.subtitle {
+      font-size: 14px;
+      color: #8c5b68;
+      margin-bottom: 25px;
+    }
+    .container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      max-width: 900px;
+      width: 100%;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(8px);
+      border: 2px solid #f6c8d8;
+      border-radius: 20px;
+      padding: 30px 20px;
+      text-align: center;
+      transition: all 0.25s ease;
+      box-shadow: 0 8px 24px rgba(230, 160, 185, 0.15);
+      user-select: none;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(230, 160, 185, 0.25);
+      border-color: #f691ab;
+    }
+    .card-wait {
+      cursor: url('sylveon_custom/sylveon_wait.ani'), wait !important;
+      background: linear-gradient(135deg, #fff2f7 0%, #f4f8fe 100%);
+      border: 2px dashed #f691ab;
+      grid-column: 1 / -1;
+      padding: 40px 20px;
+    }
+    .card-progress {
+      cursor: url('sylveon_custom/sylveon_busy.cur'), progress !important;
+    }
+    .card-pointer {
+      cursor: url('sylveon_custom/sylveon_link.cur'), pointer !important;
+    }
+    .card-text {
+      cursor: url('sylveon_custom/sylveon_text.cur'), text !important;
+    }
+    .card-crosshair {
+      cursor: url('sylveon_custom/sylveon_precision.cur'), crosshair !important;
+    }
+    .badge {
+      display: inline-block;
+      background: #f691ab;
+      color: white;
+      font-size: 11px;
+      font-weight: bold;
+      padding: 4px 12px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #75090f;
+    }
+    .desc {
+      font-size: 13px;
+      color: #7a505b;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎀 Sylveon Cursor Playground ✨</h1>
+  <p class="subtitle">Rê chuột vào các ô bên dưới để ngắm hoạt ảnh con trỏ hiển thị trực tiếp!</p>
+
+  <div class="container">
+    <!-- KHUNG TEST WAIT CHÍNH -->
+    <div class="card card-wait">
+      <span class="badge" style="background: #e85d88; font-size: 13px; padding: 6px 16px;">VÙNG TEST WAIT RÕ NHẤT (BUSY)</span>
+      <div style="margin: 10px auto; width: 110px; height: 110px;">
+        <img src="sylveon_custom/sylveon_wait_preview.gif" alt="Sylveon Wait Animation" style="width: 100%; height: 100%; object-fit: contain;">
+      </div>
+      <div class="title" style="font-size: 22px;">⏳ Rê chuột vào toàn bộ khung này!</div>
+      <div class="desc" style="font-size: 15px;">
+        Khi chuột ở trong ô này, con trỏ sẽ biến thành <b>Dải ruy băng 24 frames múa lượn</b> liên tục!<br>
+        Màu xanh ở đuôi ruy băng đã được đồng bộ chuẩn tone <b>Xanh ngọc pastel (#75BAE4 & #A0DAF6)</b> tiệp màu với cả bộ.
+      </div>
+    </div>
+
+    <!-- KHUNG TEST WORKING IN BACKGROUND -->
+    <div class="card card-progress">
+      <span class="badge">AppStarting</span>
+      <div class="title">🏃 Chạy nền (Progress)</div>
+      <div class="desc">Bé Sylveon ngồi kèm đồng hồ cát xoay tròn.</div>
+    </div>
+
+    <!-- KHUNG TEST LINK -->
+    <div class="card card-pointer">
+      <span class="badge">Link Select</span>
+      <div class="title">👉 Chỉ liên kết (Hand)</div>
+      <div class="desc">Chiếc nơ ruy băng uốn cong sạch sẽ chuẩn xác.</div>
+    </div>
+
+    <!-- KHUNG TEST TEXT -->
+    <div class="card card-text">
+      <span class="badge">I-Beam</span>
+      <div class="title">📝 Chọn văn bản (Text)</div>
+      <div class="desc">Con trỏ chữ I-Beam nhỏ nhắn 18px vừa vặn 1 dòng văn bản.</div>
+    </div>
+
+    <!-- KHUNG TEST PRECISION -->
+    <div class="card card-crosshair">
+      <span class="badge">Precision</span>
+      <div class="title">🎯 Tâm ngắm (Crosshair)</div>
+      <div class="desc">Hồng tâm chính xác kết hợp chibi Sylveon.</div>
+    </div>
+  </div>
+
+</body>
+</html>
+
