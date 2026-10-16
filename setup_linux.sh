@@ -43,3 +43,4 @@ else
 fi
 
 echo -e "\n\033[1;36m✨ HOÀN TẤT SETUP TRÊN LINUX! Chúc bạn rice máy xinh lung linh! ✨\033[0m\n"
+
