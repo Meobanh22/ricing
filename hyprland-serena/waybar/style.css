@@ -135,6 +135,12 @@ window#waybar {
     padding: 2px 4px 2px 7px;
     margin: 2px 3px;
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.40);
+    transition: all 0.25s ease;
+}
+
+.modules-right:hover {
+    border-color: #FF6B8B;
+    box-shadow: 0 0 14px rgba(229, 57, 53, 0.45);
 }
 
 #custom-ime,

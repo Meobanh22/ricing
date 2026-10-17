@@ -65,8 +65,9 @@
     "exec": "~/.config/hypr/scripts/get_ime.sh",
     "interval": 1,
     "format": "{}",
-    "tooltip": "Click to toggle Vietnamese Input Method",
-    "on-click": "~/.config/hypr/scripts/toggle_vietnamese.sh"
+    "tooltip": "Left-Click: Open Control Center | Right-Click: Toggle IME",
+    "on-click": "~/.config/hypr/scripts/toggle_control_center.sh",
+    "on-click-right": "~/.config/hypr/scripts/toggle_vietnamese.sh"
   },
 
   "pulseaudio": {
@@ -78,15 +79,18 @@
       "headset": "󰋋",
       "default": ["󰕿", "󰖀", "󰕾"]
     },
-    "on-click": "pavucontrol"
+    "tooltip-format": "{volume}% - Left-Click: Open Control Center | Right-Click: Sound Settings",
+    "on-click": "~/.config/hypr/scripts/toggle_control_center.sh",
+    "on-click-right": "pavucontrol"
   },
 
   "network": {
     "format-wifi": "󰖩 {essid}",
     "format-ethernet": "󰈀 Wired",
     "format-disconnected": "󰖪 Offline",
-    "tooltip-format": "Signal: {signalStrength}%",
-    "on-click": "nm-connection-editor"
+    "tooltip-format": "{essid} ({signalStrength}%)\nLeft-Click: Open Control Center | Right-Click: Wi-Fi Settings",
+    "on-click": "~/.config/hypr/scripts/toggle_control_center.sh",
+    "on-click-right": "nm-connection-editor"
   },
 
   "battery": {
@@ -99,11 +103,13 @@
     "format-charging": "󰂄 {capacity}%",
     "format-plugged": "󰚥 {capacity}%",
     "format-alt": "{icon} {time}",
-    "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
+    "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
+    "tooltip-format": "{capacity}% ({time})\nLeft-Click: Open Control Center",
+    "on-click": "~/.config/hypr/scripts/toggle_control_center.sh"
   },
 
   "custom/notification": {
-    "tooltip": false,
+    "tooltip": "Left-Click: Open Control Center | Right-Click: Toggle DND",
     "format": "{icon}",
     "format-icons": {
       "notification": "󱅫",

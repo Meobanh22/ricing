@@ -245,7 +245,7 @@ class SerenaControlCenter(Gtk.Window):
             GtkLayerShell.set_anchor(self, GtkLayerShell.Edge.RIGHT, True)
             GtkLayerShell.set_anchor(self, GtkLayerShell.Edge.BOTTOM, False)
             GtkLayerShell.set_anchor(self, GtkLayerShell.Edge.LEFT, False)
-            GtkLayerShell.set_margin(self, GtkLayerShell.Edge.TOP, 46)
+            GtkLayerShell.set_margin(self, GtkLayerShell.Edge.TOP, 44)
             GtkLayerShell.set_margin(self, GtkLayerShell.Edge.RIGHT, 14)
             GtkLayerShell.set_keyboard_mode(self, GtkLayerShell.KeyboardMode.ON_DEMAND)
         else:
@@ -257,7 +257,7 @@ class SerenaControlCenter(Gtk.Window):
                     geom = monitor.get_geometry()
                     dash_w = 360
                     x = geom.x + geom.width - dash_w - 14
-                    y = geom.y + 46
+                    y = geom.y + 44
                     self.move(x, y)
 
         # RGBA transparent visual
@@ -671,3 +671,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
