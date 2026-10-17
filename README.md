@@ -23,21 +23,24 @@ Bộ công cụ custom desktop phong cách Sylveon & Serena (Pokemon) dành cho 
    - Bộ đổi hình nền C++ & AHK sẽ tự kích hoạt.
    - Con trỏ chuột Sylveon Custom tự kích hoạt.
 
-### 🐧 Trên Linux:
+### 🐧 Trên Linux (Ubuntu / Arch / Hyprland):
 1. **Clone repository về máy:**
    ```bash
    git clone git@github.com:Meobanh22/ricing.git
    cd ricing
    ```
-2. Chạy script setup:
+2. **Cài đặt trọn bộ giao diện Serena & Sylveon (1-Click cho Hyprland):**
+   ```bash
+   chmod +x ./install_serena_hyprland.sh
+   ./install_serena_hyprland.sh
+   ```
+   *Script sẽ tự động đồng bộ Waybar, SwayNC Control Center, Hyprlock, Wlogout, Rofi, Kitty, Btop và Con trỏ chuột Sylveon Custom.*
+
+3. **Hoặc chỉ cài Fastfetch & Wallpapers:**
    ```bash
    chmod +x ./setup_linux.sh
    ./setup_linux.sh
    ```
-3. Script sẽ tự động:
-   - Đồng bộ cấu hình Fastfetch và Sylveon Chibi ASCII logo vào `~/.config/fastfetch/`.
-   - Symlink kho hình nền Sylveon vào `~/Pictures/wallpapers`.
-   - Có thể dùng với `swww`, `hyprpaper`, `feh` hoặc daemon chuyển ảnh nền tuỳ Window Manager (Hyprland, i3, KDE, GNOME).
 
 ---
 

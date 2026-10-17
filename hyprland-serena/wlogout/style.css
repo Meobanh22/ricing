@@ -1,0 +1,84 @@
+/* ==============================================================================
+   🌹 SERENA RED & SYLVEON MINIMALIST WLOGOUT THEME
+   Style: Minimalist 1-Row Floating Dock (5 Essential Buttons)
+   Colors: Serena Crimson (#E53935), Ribbon Rose (#FF6B8B), Midnight (#181825)
+============================================================================== */
+
+* {
+    font-family: "JetBrainsMono Nerd Font", "FiraCode Nerd Font", "Segoe UI", sans-serif;
+    background-image: none;
+    box-shadow: none;
+}
+
+window {
+    background-color: rgba(15, 15, 23, 0.78);
+}
+
+button {
+    color: #BAC2DE;
+    font-size: 13px;
+    font-weight: bold;
+    background-color: rgba(24, 24, 37, 0.75);
+    border: 1.5px solid rgba(229, 57, 53, 0.35);
+    border-radius: 20px;
+    margin: 10px;
+    background-repeat: no-repeat;
+    background-position: center 32%;
+    background-size: 28%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.35);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    outline-style: none;
+}
+
+button:focus,
+button:active,
+button:hover {
+    color: #FFFFFF;
+    background-color: #E53935;
+    border: 1.5px solid #FF6B8B;
+    background-size: 32%;
+    margin: 6px;
+    box-shadow: 0 0 25px rgba(229, 57, 53, 0.65);
+}
+
+button span {
+    font-size: 13px;
+    font-weight: bold;
+}
+
+/* --- ICONS (MINIMALIST WHITE VECTORS) --- */
+#lock {
+    background-image: image(url("./icons/lock.svg"), url("./icons/lock.png"));
+}
+#lock:hover, #lock:focus {
+    background-image: image(url("./icons/lock.svg"), url("./icons/lock.png"));
+}
+
+#suspend {
+    background-image: image(url("./icons/suspend.svg"), url("./icons/suspend.png"));
+}
+#suspend:hover, #suspend:focus {
+    background-image: image(url("./icons/suspend.svg"), url("./icons/suspend.png"));
+}
+
+#logout {
+    background-image: image(url("./icons/logout.svg"), url("./icons/logout.png"));
+}
+#logout:hover, #logout:focus {
+    background-image: image(url("./icons/logout.svg"), url("./icons/logout.png"));
+}
+
+#reboot {
+    background-image: image(url("./icons/reboot.svg"), url("./icons/reboot.png"));
+}
+#reboot:hover, #reboot:focus {
+    background-image: image(url("./icons/reboot.svg"), url("./icons/reboot.png"));
+}
+
+#shutdown {
+    background-image: image(url("./icons/shutdown.svg"), url("./icons/shutdown.png"));
+}
+#shutdown:hover, #shutdown:focus {
+    background-image: image(url("./icons/shutdown.svg"), url("./icons/shutdown.png"));
+}
+

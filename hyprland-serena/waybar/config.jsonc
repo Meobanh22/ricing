@@ -1,0 +1,131 @@
+{
+  "layer": "top",
+  "position": "top",
+  "margin-top": 8,
+  "margin-left": 14,
+  "margin-right": 14,
+  "spacing": 8,
+
+  "modules-left": [
+    "custom/menu",
+    "hyprland/workspaces",
+    "custom/media"
+  ],
+
+  "modules-center": [
+    "clock"
+  ],
+
+  "modules-right": [
+    "custom/ime",
+    "pulseaudio",
+    "network",
+    "battery",
+    "custom/notification",
+    "custom/power"
+  ],
+
+  "custom/menu": {
+    "format": " Search",
+    "tooltip": "Click to open Application Menu",
+    "on-click": "rofi -show drun -theme ~/.config/rofiSearch/config.rasi"
+  },
+
+  "hyprland/workspaces": {
+    "disable-scroll": true,
+    "all-outputs": true,
+    "active-only": false,
+    "format": "{name}",
+    "persistent-workspaces": {
+      "*": 5
+    }
+  },
+
+  "custom/media": {
+    "format": "{}",
+    "return-type": "json",
+    "exec": "bash ~/.config/hypr/scripts/get_media.sh",
+    "interval": 1,
+    "on-click": "playerctl play-pause",
+    "on-click-right": "playerctl next",
+    "on-click-middle": "playerctl previous",
+    "escape": true
+  },
+
+  "clock": {
+    "format": "<span color='#FF6B8B'></span> <span color='#FF8A80'><b>{0:%H}</b></span><span color='#FF4081'>:</span><span color='#FF80AB'><b>{0:%M}</b></span><span color='#FF4081'>:</span><span color='#FFE082'><b>{0:%S}</b></span>  <span color='#E53935'>|</span>  <span color='#FF5252'>󰸗</span> <span color='#FF8A80'><b>{0:%d}</b></span><span color='#FF4081'>/</span><span color='#FFAB91'><b>{0:%m}</b></span>",
+    "format-alt": "<span color='#FF6B8B'></span> <span color='#FF8A80'><b>{0:%H}</b></span><span color='#FF4081'>:</span><span color='#FF80AB'><b>{0:%M}</b></span>  <span color='#E53935'>|</span>  <span color='#FF5252'>󰸗</span> <span color='#FF8A80'><b>{0:%A}</b></span>, <span color='#FFE082'><b>{0:%d %B %Y}</b></span>",
+    "interval": 1,
+    "tooltip-format": "<tt><small>{calendar}</small></tt>",
+    "tooltip": "Click to open Dashboard",
+    "on-click": "python3 ~/.config/hypr/scripts/serena_dashboard.py"
+  },
+
+  "custom/ime": {
+    "exec": "~/.config/hypr/scripts/get_ime.sh",
+    "interval": 1,
+    "format": "{}",
+    "tooltip": "Click to toggle Vietnamese Input Method",
+    "on-click": "~/.config/hypr/scripts/toggle_vietnamese.sh"
+  },
+
+  "pulseaudio": {
+    "format": "{icon} {volume}%",
+    "format-muted": "󰖁 Muted",
+    "format-icons": {
+      "headphone": "󰋋",
+      "hands-free": "󰋋",
+      "headset": "󰋋",
+      "default": ["󰕿", "󰖀", "󰕾"]
+    },
+    "on-click": "pavucontrol"
+  },
+
+  "network": {
+    "format-wifi": "󰖩 {essid}",
+    "format-ethernet": "󰈀 Wired",
+    "format-disconnected": "󰖪 Offline",
+    "tooltip-format": "Signal: {signalStrength}%",
+    "on-click": "nm-connection-editor"
+  },
+
+  "battery": {
+    "states": {
+      "good": 95,
+      "warning": 30,
+      "critical": 15
+    },
+    "format": "{icon} {capacity}%",
+    "format-charging": "󰂄 {capacity}%",
+    "format-plugged": "󰚥 {capacity}%",
+    "format-alt": "{icon} {time}",
+    "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
+  },
+
+  "custom/notification": {
+    "tooltip": false,
+    "format": "{icon}",
+    "format-icons": {
+      "notification": "󱅫",
+      "none": "󰂚",
+      "dnd-notification": "󱅫",
+      "dnd-none": "󰂛",
+      "inhibited-notification": "󱅫",
+      "inhibited-none": "󰂚",
+      "dnd-inhibited-notification": "󱅫",
+      "dnd-inhibited-none": "󰂛"
+    },
+    "return-type": "json",
+    "exec-if": "which swaync-client",
+    "exec": "swaync-client -swb",
+    "on-click": "~/.config/hypr/scripts/toggle_control_center.sh",
+    "on-click-right": "swaync-client -d -sw",
+    "escape": true
+  },
+
+  "custom/power": {
+    "format": "",
+    "tooltip": "Click to open Power Menu",
+    "on-click": "~/.config/hypr/scripts/Wlogout.sh"
+  }
+}

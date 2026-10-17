@@ -1,0 +1,49 @@
+/* ==============================================================================
+   🌸 SERENA CRIMSON ROFI COLOR PALETTE
+============================================================================== */
+
+* {
+active-background: #FF6B8B;
+active-foreground: #FFFFFF;
+normal-background: #181825ee;
+normal-foreground: #F5F5F5;
+urgent-background: #E53935;
+urgent-foreground: #FFFFFF;
+
+alternate-active-background: #E53935;
+alternate-active-foreground: #FFFFFF;
+alternate-normal-background: #1e1e2eee;
+alternate-normal-foreground: #BAC2DE;
+alternate-urgent-background: #E53935;
+alternate-urgent-foreground: #FFFFFF;
+
+selected-active-background: #E53935;
+selected-active-foreground: #FFFFFF;
+selected-normal-background: #E53935;
+selected-normal-foreground: #FFFFFF;
+selected-urgent-background: #FF6B8B;
+selected-urgent-foreground: #FFFFFF;
+
+background-color: transparent;
+background: rgba(24, 24, 37, 0.90);
+foreground: #F5F5F5;
+border-color: #E53935;
+
+color0: #181825;
+color1: #E53935;
+color2: #FF6B8B;
+color3: #FFB74D;
+color4: #61B8FF;
+color5: #F06292;
+color6: #FF8A80;
+color7: #F5F5F5;
+color8: #6C7086;
+color9: #E53935;
+color10: #FF6B8B;
+color11: #FFB74D;
+color12: #61B8FF;
+color13: #F06292;
+color14: #FF8A80;
+color15: #FFFFFF;
+}
+

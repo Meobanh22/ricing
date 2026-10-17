@@ -1,0 +1,95 @@
+/* ==============================================================================
+   🌸 SERENA CRIMSON ROFI LAUNCHER THEME
+   Glassmorphism, Rounded Corners, Serena Red (#E53935) & Ribbon Rose (#FF6B8B)
+============================================================================== */
+
+configuration {
+    modi: "drun,run,filebrowser";
+    font: "JetBrainsMono Nerd Font 12";
+    show-icons: true;
+    icon-theme: "Papirus";
+    display-drun: "🌸 Apps";
+    display-run: "⚡ Run";
+    display-filebrowser: "📁 Files";
+    drun-display-format: "{name}";
+}
+
+* {
+    bg-col: #181825ee;
+    bg-col-light: #28283cee;
+    border-col: #E53935;
+    selected-col: #E53935;
+    rose-accent: #FF6B8B;
+    fg-col: #F5F5F5;
+    fg-col2: #BAC2DE;
+    grey: #6C7086;
+    background-color: transparent;
+    width: 650px;
+}
+
+window {
+    height: 480px;
+    border: 2px;
+    border-color: @border-col;
+    border-radius: 20px;
+    background-color: @bg-col;
+    padding: 16px;
+}
+
+mainbox {
+    background-color: transparent;
+    spacing: 12px;
+}
+
+inputbar {
+    children: [prompt, entry];
+    background-color: @bg-col-light;
+    border: 1px;
+    border-color: @rose-accent;
+    border-radius: 14px;
+    padding: 8px 14px;
+}
+
+prompt {
+    background-color: @selected-col;
+    padding: 6px 12px;
+    text-color: #FFFFFF;
+    border-radius: 8px;
+    margin: 0px 8px 0px 0px;
+    font-weight: bold;
+}
+
+entry {
+    padding: 6px;
+    text-color: @fg-col;
+    placeholder: "Tìm kiếm ứng dụng...";
+    placeholder-color: @grey;
+}
+
+listview {
+    border: 0px;
+    padding: 6px 0px 0px;
+    margin: 10px 0px 0px 10px;
+    columns: 2;
+    lines: 6;
+    background-color: transparent;
+    spacing: 6px;
+}
+
+element {
+    padding: 10px;
+    background-color: transparent;
+    text-color: @fg-col2;
+    border-radius: 12px;
+}
+
+element-icon {
+    size: 28px;
+    margin: 0 10px 0 0;
+}
+
+element selected {
+    background-color: #E53935;
+    text-color: #FFFFFF;
+    font-weight: bold;
+}

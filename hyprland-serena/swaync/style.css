@@ -1,0 +1,336 @@
+/* ==============================================================================
+   🌸 SERENA RED & SYLVEON SWAYNC NOTIFICATION CENTER THEME
+   Colors: Serena Crimson (#E53935), Ribbon Rose (#FF6B8B), Charcoal (#181825)
+   Design: Dark frosted glass, high-contrast crisp text, elegant rose/crimson accents
+============================================================================== */
+
+* {
+    font-family: "JetBrainsMono Nerd Font", "FiraCode Nerd Font", "Segoe UI", sans-serif;
+    font-weight: 600;
+}
+
+/* --- TOÀN BỘ KHUNG PANEL ĐIỀU KHIỂN & THÔNG BÁO --- */
+.control-center {
+    background: rgba(24, 24, 37, 0.96);
+    border: 1.5px solid rgba(229, 57, 53, 0.65);
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.65);
+    padding: 8px 6px;
+    color: #FFFFFF;
+}
+
+.control-center-list {
+    background: transparent;
+    padding: 4px;
+}
+
+.control-center-list-placeholder {
+    color: #BAC2DE;
+    opacity: 0.6;
+    font-size: 13px;
+    padding: 16px;
+}
+
+/* Khung cửa sổ nền mờ */
+.blank-window {
+    background: transparent;
+}
+
+/* --- THANH TRẠNG THÁI TRÊN CÙNG (LIVE STATUS BAR PILL) --- */
+.widget-label {
+    background: rgba(30, 30, 46, 0.9);
+    border: 1px solid rgba(229, 57, 53, 0.45);
+    border-radius: 12px;
+    padding: 6px 10px;
+    margin: 4px 8px 6px 8px;
+}
+
+.widget-label > label {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #BAC2DE;
+    letter-spacing: 0.5px;
+}
+
+/* --- NÚT DND (KHÔNG LÀM PHIỀN) --- */
+.widget-dnd {
+    background: rgba(30, 30, 46, 0.85);
+    border: 1px solid rgba(229, 57, 53, 0.35);
+    border-radius: 14px;
+    padding: 8px 14px;
+    margin: 4px 8px 8px 8px;
+    color: #FFFFFF;
+    font-weight: bold;
+    font-size: 13px;
+}
+
+.widget-dnd > switch {
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(20, 20, 30, 0.9);
+    min-width: 44px;
+    min-height: 22px;
+}
+
+.widget-dnd > switch:checked {
+    background: linear-gradient(135deg, #E53935 0%, #FF6B8B 100%);
+    border-color: #FF6B8B;
+}
+
+.widget-dnd > switch slider {
+    background: #FFFFFF;
+    border-radius: 10px;
+    min-width: 16px;
+    min-height: 16px;
+}
+
+/* --- THANH THANH GẠT ÂM LƯỢNG & ĐỘ SÁNG (SLIDERS) --- */
+.widget-volume,
+.widget-backlight {
+    background: rgba(30, 30, 46, 0.85);
+    border: 1px solid rgba(229, 57, 53, 0.35);
+    border-radius: 14px;
+    padding: 8px 12px;
+    margin: 4px 8px;
+    color: #FFFFFF;
+}
+
+.widget-volume label,
+.widget-backlight label {
+    font-size: 16px;
+    color: #FF6B8B;
+    margin-right: 8px;
+    min-width: 24px;
+}
+
+.widget-volume > box > button {
+    background: rgba(229, 57, 53, 0.25);
+    color: #FF6B8B;
+    border-radius: 8px;
+    border: 1px solid rgba(229, 57, 53, 0.5);
+    padding: 4px 8px;
+    font-size: 12px;
+}
+
+.widget-volume > box > button:hover {
+    background: #E53935;
+    color: #FFFFFF;
+}
+
+/* Track & Progress của slider */
+scale {
+    margin: 4px 6px;
+    padding: 0;
+}
+
+scale trough {
+    background-color: rgba(49, 50, 68, 0.85);
+    border-radius: 8px;
+    min-height: 8px;
+}
+
+scale trough highlight {
+    background: linear-gradient(90deg, #E53935 0%, #FF6B8B 100%);
+    border-radius: 8px;
+}
+
+scale slider {
+    background-color: #FFFFFF;
+    border: 2.5px solid #E53935;
+    border-radius: 100%;
+    min-width: 14px;
+    min-height: 14px;
+    margin: -3px;
+    box-shadow: 0 0 8px rgba(229, 57, 53, 0.6);
+}
+
+scale slider:hover {
+    box-shadow: 0 0 12px rgba(255, 107, 139, 0.95);
+    background-color: #FFF0F5;
+}
+
+/* --- LƯỚI NÚT CHỨC NĂNG NHANH (QUICK ACTIONS GRID) --- */
+.widget-buttons-grid {
+    background: rgba(30, 30, 46, 0.85);
+    border: 1px solid rgba(229, 57, 53, 0.35);
+    border-radius: 14px;
+    padding: 6px 4px;
+    margin: 6px 8px;
+}
+
+.widget-buttons-grid flowbox {
+    padding: 0;
+    margin: 0;
+}
+
+.widget-buttons-grid flowboxchild {
+    padding: 0;
+    margin: 0;
+}
+
+.widget-buttons-grid > flowbox > flowboxchild > button {
+    margin: 2px 3px;
+    padding: 10px 0;
+    min-width: 76px;
+    background: rgba(24, 24, 37, 0.88);
+    border: 1px solid rgba(229, 57, 53, 0.3);
+    border-radius: 12px;
+    color: #FFFFFF;
+    font-size: 18px;
+    transition: all 0.2s ease;
+}
+
+.widget-buttons-grid > flowbox > flowboxchild > button:hover {
+    background: linear-gradient(135deg, #E53935 0%, #FF6B8B 100%);
+    border-color: #FF6B8B;
+    color: #FFFFFF;
+    box-shadow: 0 3px 12px rgba(229, 57, 53, 0.55);
+}
+
+/* Nút nguồn (nút cuối cùng) giống hệt nút nguồn đỏ trên thanh Waybar */
+.widget-buttons-grid > flowbox > flowboxchild:last-child > button {
+    background: linear-gradient(135deg, #E53935 0%, #FF6B8B 100%);
+    border-color: #FF6B8B;
+    box-shadow: 0 2px 8px rgba(229, 57, 53, 0.45);
+}
+
+.widget-buttons-grid > flowbox > flowboxchild:last-child > button:hover {
+    background: #E53935;
+    box-shadow: 0 0 14px rgba(255, 107, 139, 0.95);
+}
+
+/* --- TIÊU ĐỀ THÔNG BÁO & NÚT XÓA HẾT --- */
+.widget-title {
+    color: #FFFFFF;
+    background: transparent;
+    padding: 6px 12px 2px 12px;
+    margin: 4px 8px;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.widget-title > button {
+    font-size: 11.5px;
+    font-weight: bold;
+    color: #FF8A80;
+    border-radius: 8px;
+    background: rgba(229, 57, 53, 0.2);
+    border: 1px solid rgba(229, 57, 53, 0.5);
+    padding: 3px 10px;
+    transition: all 0.2s ease;
+}
+
+.widget-title > button:hover {
+    background: #E53935;
+    color: #FFFFFF;
+    box-shadow: 0 0 10px rgba(229, 57, 53, 0.7);
+}
+
+/* --- TỪNG THẺ THÔNG BÁO (NOTIFICATION CARDS) --- */
+.notification-row {
+    outline: none;
+    background: transparent;
+    margin: 0;
+    padding: 0;
+}
+
+.notification-row:focus,
+.notification-row:hover {
+    background: transparent;
+}
+
+.notification {
+    background: rgba(30, 30, 46, 0.95);
+    padding: 10px 14px;
+    margin: 4px 8px;
+    border-radius: 14px;
+    border: 1.5px solid rgba(229, 57, 53, 0.35);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
+    transition: all 0.2s ease;
+}
+
+.notification:hover {
+    border-color: #FF6B8B;
+    background: rgba(36, 36, 56, 0.98);
+    box-shadow: 0 4px 14px rgba(229, 57, 53, 0.3);
+}
+
+.notification.critical {
+    border: 2px solid #FF1744;
+    background: rgba(45, 20, 30, 0.95);
+    box-shadow: 0 0 12px rgba(255, 23, 68, 0.4);
+}
+
+.notification-default-action {
+    margin: 0;
+    padding: 0;
+    border-radius: 12px;
+}
+
+.summary {
+    font-size: 13px;
+    font-weight: 800;
+    color: #FFFFFF;
+    background: transparent;
+}
+
+.time {
+    font-size: 11px;
+    font-weight: 600;
+    color: #FF8A80;
+    background: transparent;
+    margin-right: 12px;
+}
+
+.body {
+    font-size: 12px;
+    font-weight: 500;
+    color: #FFCDD2;
+    background: transparent;
+    margin-top: 3px;
+}
+
+.body-image {
+    margin-top: 6px;
+    border-radius: 8px;
+}
+
+.close-button {
+    background: rgba(229, 57, 53, 0.25);
+    color: #FFFFFF;
+    border-radius: 8px;
+    border: 1px solid rgba(229, 57, 53, 0.6);
+    padding: 2px 6px;
+    margin-top: 4px;
+    margin-right: 4px;
+    transition: all 0.2s ease;
+}
+
+.close-button:hover {
+    background: #E53935;
+    color: #FFFFFF;
+    box-shadow: 0 0 8px rgba(229, 57, 53, 0.7);
+}
+
+.notification-action {
+    border: 1px solid rgba(229, 57, 53, 0.4);
+    background: rgba(24, 24, 37, 0.85);
+    border-radius: 8px;
+    color: #FFFFFF;
+    margin: 4px 2px;
+    padding: 4px 10px;
+    font-size: 11.5px;
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+
+.notification-action:hover {
+    background: linear-gradient(135deg, #E53935 0%, #FF6B8B 100%);
+    border-color: #FF6B8B;
+    color: #FFFFFF;
+}
+
+/* --- BONG BÓNG THÔNG BÁO NỔI NGOÀI MÀN HÌNH (NẾU CÓ) --- */
+.floating-notifications {
+    background: transparent;
+}

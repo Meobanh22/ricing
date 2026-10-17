@@ -5,24 +5,14 @@
     "source": "~/.config/fastfetch/sylveon_chibi.txt",
     "padding": {
       "top": 1,
-      "right": 3
+      "right": 2
     }
   },
   "display": {
     "separator": " 🌸 ",
     "color": {
-      "keys": "magenta",
-      "title": "cyan"
-    },
-    "percent": {
-      "type": 3
-    },
-    "bar": {
-      "char": {
-        "elapsed": "■",
-        "total": "□"
-      },
-      "width": 10
+      "keys": "red",
+      "title": "light_red"
     }
   },
   "modules": [
@@ -32,15 +22,17 @@
     },
     {
       "type": "separator",
-      "string": "┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈"
+      "string": "┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈"
     },
     {
       "type": "os",
-      "key": " OS"
+      "key": " OS",
+      "format": "{2} {9} LTS"
     },
     {
       "type": "host",
-      "key": "󰌢 Host"
+      "key": "󰌢 Host",
+      "format": "HP Pavilion x360"
     },
     {
       "type": "uptime",
@@ -57,28 +49,32 @@
     {
       "type": "cpu",
       "key": " CPU",
-      "showPeCoreCount": true
+      "format": "Intel i5-1135G7 ({4}) @ {7}"
     },
     {
       "type": "gpu",
-      "key": "󰾲 GPU"
+      "key": "󰾲 GPU",
+      "format": "{2}"
     },
     {
       "type": "memory",
-      "key": "󰍛 Memory"
+      "key": "󰍛 Memory",
+      "format": "{1} / {2} ({3})"
     },
     {
       "type": "disk",
-      "key": " Disk (C:)",
-      "folders": "C:/"
+      "key": " Disk",
+      "folders": "/",
+      "format": "{1} / {2} ({3})"
     },
     {
       "type": "battery",
-      "key": " Battery"
+      "key": " Battery",
+      "format": "{4} [{5}]"
     },
     {
       "type": "separator",
-      "string": "┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈"
+      "string": "┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈"
     },
     {
       "type": "colors",
