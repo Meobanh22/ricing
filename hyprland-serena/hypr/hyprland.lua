@@ -199,6 +199,13 @@ hl.window_rule({
     float = true,
 })
 
+hl.window_rule({
+    name = "serena-control-center-rule",
+    match = { class = "^(serena-control-center)$" },
+    float = true,
+    animation = "slide top",
+})
+
 ---------------------
 ---- LAYER RULES ----
 ---------------------
@@ -206,6 +213,18 @@ hl.layer_rule({
     name = "rofi-blur",
     match = { namespace = "rofi" },
     blur = true,
+})
+
+hl.layer_rule({
+    name = "serena-cc-blur",
+    match = { namespace = "serena-control-center" },
+    blur = true,
+})
+
+hl.layer_rule({
+    name = "serena-cc-anim",
+    match = { namespace = "serena-control-center" },
+    animation = "slide top",
 })
 
 ---------------------
