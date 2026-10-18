@@ -200,19 +200,19 @@ scale#serena-vol-scale slider:hover {
     box-shadow: none;
 }
 
-/* Notification Items - Borderless Minimalist */
+/* Notification Items - Transparent Minimalist */
 .notif-item {
-    background-color: rgba(36, 12, 24, 0.70);
+    background-color: transparent;
     border: none;
-    border-radius: 14px;
-    padding: 10px 12px;
-    margin: 3px 0;
+    border-radius: 12px;
+    padding: 8px 10px;
+    margin: 2px 0;
     transition: background-color 0.15s ease;
     box-shadow: none;
 }
 
 .notif-item:hover {
-    background-color: rgba(56, 18, 36, 0.90);
+    background-color: rgba(56, 18, 36, 0.45);
     border: none;
     box-shadow: none;
 }
@@ -285,19 +285,19 @@ scale#serena-vol-scale slider:hover {
     background-color: rgba(255, 42, 85, 0.18);
 }
 
-/* Bottom Power Menu Card - Borderless Minimalist */
+/* Bottom Power Menu Card - Transparent Minimalist */
 .btn-power-card {
-    background-color: rgba(40, 14, 26, 0.85);
+    background-color: transparent;
     border: none;
-    border-radius: 16px;
-    padding: 10px 16px;
+    border-radius: 14px;
+    padding: 10px 14px;
     transition: background-color 0.15s ease;
     box-shadow: none;
 }
 
 .btn-power-card.card-hover,
 .btn-power-card:hover {
-    background-color: rgba(62, 22, 40, 0.95);
+    background-color: rgba(56, 18, 36, 0.45);
     border: none;
     box-shadow: none;
 }
