@@ -1,43 +1,43 @@
 /* ==============================================================================
-   🌸 SERENA WINE & RUBY MINIMALIST PALETTE
-   Official Serena Palette for Waybar
+   🌸 SERENA RED RIBBON PALETTE (Phong cách 1: Đỏ tươi ruy-băng)
+   Official Serena Ribbon Palette for Waybar (#FF2A55 & #180810 system)
    ============================================================================== */
 
 /* Deep Wine & Ruby Neutral Containers */
 @define-color bg_darkest #10050a;
-@define-color bg_primary #160a10;
-@define-color bg_surface #24101a;
-@define-color bg_surface_subtle #2d1221;
-@define-color bg_surface_hover #381424;
+@define-color bg_primary #180810;
+@define-color bg_surface #280e1a;
+@define-color bg_surface_subtle #341222;
+@define-color bg_surface_hover #401428;
 
-@define-color bg_pill rgba(22, 10, 16, 0.94);
-@define-color bg_card rgba(36, 16, 26, 0.95);
-@define-color bg_subtle rgba(45, 18, 33, 0.85);
+@define-color bg_pill rgba(24, 8, 16, 0.96);
+@define-color bg_card rgba(40, 14, 26, 0.95);
+@define-color bg_subtle rgba(52, 18, 34, 0.85);
 
-/* Clean Ruby/Coral Borders - No Glowing Shadows */
-@define-color border_subtle rgba(225, 45, 75, 0.38);
-@define-color border_focus #ff6b8b;
-@define-color border_card rgba(225, 45, 75, 0.50);
+/* Clean Ribbon Borders - No Glowing Shadows */
+@define-color border_subtle rgba(255, 42, 85, 0.38);
+@define-color border_focus #ff2a55;
+@define-color border_card rgba(255, 42, 85, 0.45);
 
 /* Role & Accent Colors */
-@define-color role_crimson #e63956;
-@define-color role_crimson_hover #ff4d6d;
-@define-color role_crimson_subtle rgba(230, 57, 86, 0.2);
+@define-color role_crimson #ff2a55;
+@define-color role_crimson_hover #ff597b;
+@define-color role_crimson_subtle rgba(255, 42, 85, 0.20);
 
-@define-color role_pink #ff6b8b;
-@define-color role_pink_hover #ffa6bc;
-@define-color role_pink_subtle rgba(255, 107, 139, 0.2);
+@define-color role_pink #ff2a55;
+@define-color role_pink_hover #ff597b;
+@define-color role_pink_subtle rgba(255, 42, 85, 0.20);
 
 @define-color role_amber #e59a44;
 @define-color role_amber_muted #b7823c;
 @define-color role_orange #e65e34;
 
-@define-color role_lavender #caaab8;
+@define-color role_lavender #e8c2d0;
 @define-color role_dusk_blue #7772c2;
 @define-color role_sage #7fa873;
 
 /* Text & Foreground */
-@define-color text_primary #fff0f3;      /* Warm Rose-Ivory */
-@define-color text_secondary #caaab8;    /* Soft Lavender-Rose */
-@define-color text_muted #8f7481;        /* Dusty Mauve */
+@define-color text_primary #fff0f5;      /* Warm Rose-Ivory */
+@define-color text_secondary #e8c2d0;    /* Soft Lavender-Rose */
+@define-color text_muted #a68595;        /* Dusty Mauve */
 @define-color text_white #ffffff;        /* Pure White */

@@ -227,25 +227,27 @@ window#waybar {
 /* 5. Notification Module */
 #custom-notification {
     font-size: 13px;
+    color: @role_pink;
 }
 
-/* 6. Power Action Button: Clean Minimalist Circle */
+/* 6. Power Action Button: Subdued in normal state, vibrant #FF2A55 on hover */
 #custom-power {
-    color: @text_white;
-    background-color: @role_crimson;
+    color: @text_secondary;
+    background-color: rgba(255, 42, 85, 0.14);
     font-size: 12.5px;
     padding: 2px 8px;
     margin: 1px 1px 1px 5px;
-    border: 1px solid rgba(255, 107, 139, 0.60);
+    border: 1px solid rgba(255, 42, 85, 0.38);
     border-radius: 50%;
     box-shadow: none;
     text-shadow: none;
-    transition: background-color 0.15s ease, border-color 0.15s ease;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 #custom-power:hover {
-    background-color: @role_pink;
-    border-color: @role_pink_hover;
+    color: @text_white;
+    background-color: @role_crimson;
+    border-color: @role_crimson_hover;
     box-shadow: none;
 }
 

@@ -57,10 +57,10 @@ eventbox {
     border: none;
 }
 
-/* Main Outer Card - Deep Wine Container with Clean Ruby Border */
+/* Main Outer Card - Deep Red-Black Container with Clean Ribbon Border */
 #cc-main-card {
-    background-color: rgba(22, 10, 16, 0.96);
-    border: 1.5px solid rgba(225, 45, 75, 0.50);
+    background-color: rgba(24, 8, 16, 0.97);
+    border: 1.5px solid rgba(255, 42, 85, 0.40);
     border-radius: 24px;
     padding: 18px 18px 16px 18px;
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.80);
@@ -69,7 +69,7 @@ eventbox {
 
 /* Close Button */
 .btn-close {
-    color: #B89BA8;
+    color: #E8C2D0;
     background: transparent;
     border: none;
     font-size: 14px;
@@ -79,14 +79,14 @@ eventbox {
 }
 
 .btn-close:hover {
-    color: #FF6B8B;
-    background-color: rgba(225, 45, 75, 0.20);
+    color: #FF2A55;
+    background-color: rgba(255, 42, 85, 0.20);
 }
 
 /* Quick Action Cards (Top 3 Cards) - Minimalist Vibe */
 .quick-card {
-    background-color: rgba(36, 16, 26, 0.92);
-    border: 1px solid rgba(225, 45, 75, 0.38);
+    background-color: rgba(40, 14, 26, 0.94);
+    border: 1px solid rgba(255, 42, 85, 0.35);
     border-radius: 16px;
     padding: 12px 6px 10px 6px;
     transition: background-color 0.15s ease, border-color 0.15s ease;
@@ -96,24 +96,24 @@ eventbox {
 /* Card Hover Effect: Color change only, minimalist without shadows or glows */
 .quick-card.card-hover,
 .quick-card:hover {
-    background-color: rgba(56, 20, 36, 0.95);
-    border-color: #FF6B8B;
+    background-color: rgba(64, 20, 40, 0.96);
+    border-color: #FF2A55;
     box-shadow: none;
 }
 
 .card-icon {
-    color: #FF6B8B;
+    color: #FF2A55;
     transition: color 0.15s ease;
 }
 
 .card-hover .card-icon,
 .quick-card:hover .card-icon {
-    color: #FFA6BC;
+    color: #FF597B;
     text-shadow: none;
 }
 
 .card-title {
-    color: #FFF0F3;
+    color: #FFF0F5;
     transition: color 0.15s ease;
 }
 
@@ -140,7 +140,7 @@ scale.horizontal trough,
 scale#serena-vol-scale trough {
     background-image: none;
     background-color: rgba(60, 24, 38, 0.85);
-    border: 1px solid rgba(225, 45, 75, 0.45);
+    border: 1px solid rgba(255, 42, 85, 0.40);
     border-radius: 3px;
     min-height: 5px;
     box-shadow: none;
@@ -160,8 +160,8 @@ scale.horizontal#serena-vol-scale trough highlight,
 #serena-vol-scale highlight:focus,
 #serena-vol-scale highlight:active {
     background-image: none;
-    background-color: #E63956;
-    border: 1px solid #FF6B8B;
+    background-color: #FF2A55;
+    border: 1px solid #FF2A55;
     border-radius: 3px;
     box-shadow: none;
 }
@@ -172,7 +172,7 @@ scale.horizontal slider,
 scale#serena-vol-scale slider {
     background-image: none;
     background-color: #FFFFFF;
-    border: 2px solid #E63956;
+    border: 2px solid #FF2A55;
     border-radius: 50%;
     min-width: 12px;
     min-height: 12px;
@@ -185,15 +185,15 @@ scale slider:hover,
 scale.horizontal slider:hover,
 #serena-vol-scale slider:hover,
 scale#serena-vol-scale slider:hover {
-    background-color: #FFF0F3;
-    border-color: #FF6B8B;
+    background-color: #FFF0F5;
+    border-color: #FF597B;
     box-shadow: none;
 }
 
 /* Notification Items - Minimalist */
 .notif-item {
-    background-color: rgba(32, 14, 23, 0.82);
-    border: 1px solid rgba(225, 45, 75, 0.25);
+    background-color: rgba(36, 12, 24, 0.82);
+    border: 1px solid rgba(255, 42, 85, 0.25);
     border-radius: 14px;
     padding: 10px 12px;
     margin: 3px 0;
@@ -202,8 +202,8 @@ scale#serena-vol-scale slider:hover {
 }
 
 .notif-item:hover {
-    background-color: rgba(48, 18, 34, 0.95);
-    border-color: rgba(255, 107, 139, 0.65);
+    background-color: rgba(56, 18, 36, 0.95);
+    border-color: rgba(255, 42, 85, 0.60);
     box-shadow: none;
 }
 
@@ -222,7 +222,7 @@ scale#serena-vol-scale slider:hover {
 .notif-badge-spotify { background-color: #1DB954; }
 .notif-badge-terminal { background-color: #4A148C; }
 .notif-badge-system { background-color: #8E24AA; }
-.notif-badge-default { background-color: #C2185B; }
+.notif-badge-default { background-color: #FF2A55; }
 
 /* Custom Minimalist Scrollbar */
 #cc-notif-scroll {
@@ -246,7 +246,7 @@ scale#serena-vol-scale slider:hover {
 }
 
 #cc-notif-scroll scrollbar slider {
-    background-color: rgba(225, 45, 75, 0.40);
+    background-color: rgba(255, 42, 85, 0.40);
     border-radius: 4px;
     min-width: 4px;
     border: none;
@@ -254,13 +254,13 @@ scale#serena-vol-scale slider:hover {
 }
 
 #cc-notif-scroll scrollbar slider:hover {
-    background-color: #FF6B8B;
+    background-color: #FF2A55;
     min-width: 6px;
 }
 
 /* Clear All Button */
 .btn-clear-all {
-    color: #CAAAB8;
+    color: #E8C2D0;
     background: transparent;
     border: none;
     font-size: 11px;
@@ -271,14 +271,14 @@ scale#serena-vol-scale slider:hover {
 }
 
 .btn-clear-all:hover {
-    color: #FF6B8B;
-    background-color: rgba(225, 45, 75, 0.18);
+    color: #FF2A55;
+    background-color: rgba(255, 42, 85, 0.18);
 }
 
 /* Bottom Power Menu Card - Minimalist */
 .btn-power-card {
-    background-color: rgba(36, 16, 26, 0.92);
-    border: 1px solid rgba(225, 45, 75, 0.38);
+    background-color: rgba(40, 14, 26, 0.94);
+    border: 1px solid rgba(255, 42, 85, 0.35);
     border-radius: 16px;
     padding: 10px 16px;
     transition: background-color 0.15s ease, border-color 0.15s ease;
@@ -287,32 +287,41 @@ scale#serena-vol-scale slider:hover {
 
 .btn-power-card.card-hover,
 .btn-power-card:hover {
-    background-color: rgba(56, 20, 36, 0.95);
-    border-color: #FF6B8B;
+    background-color: rgba(64, 20, 40, 0.96);
+    border-color: #FF2A55;
     box-shadow: none;
 }
 
-/* Perfectly circular Power Ring with centered icon */
+/* Subtle Power Ring: Soft muted in normal state, vibrant #FF2A55 on hover */
 .power-icon-circle {
-    border: 1.5px solid rgba(225, 45, 75, 0.70);
+    border: 1.5px solid rgba(255, 42, 85, 0.40);
     border-radius: 14px;
     min-width: 28px;
     min-height: 28px;
     padding: 0;
     margin: 0;
-    background-color: rgba(225, 45, 75, 0.12);
+    background-color: rgba(255, 42, 85, 0.12);
     transition: background-color 0.15s ease, border-color 0.15s ease;
     box-shadow: none;
 }
 
+.power-icon {
+    color: #E8C2D0;
+    transition: color 0.15s ease;
+}
+
 .btn-power-card.card-hover .power-icon-circle {
-    border-color: #FF6B8B;
-    background-color: rgba(225, 45, 75, 0.25);
+    border-color: #FF2A55;
+    background-color: rgba(255, 42, 85, 0.25);
     box-shadow: none;
 }
 
+.btn-power-card.card-hover .power-icon {
+    color: #FF2A55;
+}
+
 .power-label {
-    color: #FFF0F3;
+    color: #FFF0F5;
     transition: color 0.15s ease;
 }
 
@@ -322,12 +331,12 @@ scale#serena-vol-scale slider:hover {
 }
 
 .power-arrow {
-    color: #A88D9B;
+    color: #A68595;
     transition: color 0.15s ease;
 }
 
 .btn-power-card.card-hover .power-arrow {
-    color: #FF6B8B;
+    color: #FF2A55;
     text-shadow: none;
 }
 """
@@ -543,17 +552,17 @@ class SerenaControlCenter(Gtk.Window):
         header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
 
         lbl_flower = Gtk.Label()
-        lbl_flower.set_markup("<span font='22' color='#FF6B8B'>🌸</span>")
+        lbl_flower.set_markup("<span font='22' color='#FF2A55'>🌸</span>")
         header_box.pack_start(lbl_flower, False, False, 0)
 
         title_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=1)
         lbl_title = Gtk.Label()
-        lbl_title.set_markup("<span font='15' weight='bold' color='#FFF0F3'>Control Center</span>")
+        lbl_title.set_markup("<span font='15' weight='bold' color='#FFF0F5'>Control Center</span>")
         lbl_title.set_halign(Gtk.Align.START)
         title_vbox.pack_start(lbl_title, False, False, 0)
 
         lbl_sub = Gtk.Label()
-        lbl_sub.set_markup("<span font='10.5' color='#A88D9B'>Quick settings &amp; notifications</span>")
+        lbl_sub.set_markup("<span font='10.5' color='#A68595'>Quick settings &amp; notifications</span>")
         lbl_sub.set_halign(Gtk.Align.START)
         title_vbox.pack_start(lbl_sub, False, False, 0)
 
@@ -593,11 +602,11 @@ class SerenaControlCenter(Gtk.Window):
         vbox_ime.pack_start(lbl_ime_title, False, False, 2)
 
         self.lbl_ime_sub = Gtk.Label()
-        self.lbl_ime_sub.set_markup(f"<span font='10.5' color='#CAAAB8'>{self.status['ime_sub']}</span>")
+        self.lbl_ime_sub.set_markup(f"<span font='10.5' color='#E8C2D0'>{self.status['ime_sub']}</span>")
         vbox_ime.pack_start(self.lbl_ime_sub, False, False, 0)
 
         self.lbl_ime_note = Gtk.Label()
-        self.lbl_ime_note.set_markup(f"<span font='9.5' color='#8F7481'>{self.status['ime_note']}</span>")
+        self.lbl_ime_note.set_markup(f"<span font='9.5' color='#A68595'>{self.status['ime_note']}</span>")
         vbox_ime.pack_start(self.lbl_ime_note, False, False, 0)
 
         card_ime.add(vbox_ime)
@@ -624,11 +633,11 @@ class SerenaControlCenter(Gtk.Window):
         vbox_wifi.pack_start(lbl_wifi_title, False, False, 2)
 
         self.lbl_wifi_sub = Gtk.Label()
-        self.lbl_wifi_sub.set_markup(f"<span font='10.5' color='#CAAAB8'>{self.status['wifi_sub']}</span>")
+        self.lbl_wifi_sub.set_markup(f"<span font='10.5' color='#E8C2D0'>{self.status['wifi_sub']}</span>")
         vbox_wifi.pack_start(self.lbl_wifi_sub, False, False, 0)
 
         self.lbl_wifi_ssid = Gtk.Label()
-        self.lbl_wifi_ssid.set_markup(f"<span font='9.5' color='#8F7481'>{self.status['wifi_ssid']}</span>")
+        self.lbl_wifi_ssid.set_markup(f"<span font='9.5' color='#A68595'>{self.status['wifi_ssid']}</span>")
         vbox_wifi.pack_start(self.lbl_wifi_ssid, False, False, 0)
 
         card_wifi.add(vbox_wifi)
@@ -655,7 +664,7 @@ class SerenaControlCenter(Gtk.Window):
         vbox_audio.pack_start(lbl_audio_title, False, False, 2)
 
         self.lbl_vol_val = Gtk.Label()
-        self.lbl_vol_val.set_markup(f"<span font='10.5' color='#CAAAB8'>{self.status['vol']}%</span>")
+        self.lbl_vol_val.set_markup(f"<span font='10.5' color='#E8C2D0'>{self.status['vol']}%</span>")
         vbox_audio.pack_start(self.lbl_vol_val, False, False, 0)
 
         # Mini Volume Scale
@@ -679,7 +688,7 @@ class SerenaControlCenter(Gtk.Window):
         notif_header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         
         lbl_notif_title = Gtk.Label()
-        lbl_notif_title.set_markup("<span font='13.5' weight='bold' color='#FFF0F3'>Notifications</span>")
+        lbl_notif_title.set_markup("<span font='13.5' weight='bold' color='#FFF0F5'>Notifications</span>")
         lbl_notif_title.set_halign(Gtk.Align.START)
         notif_header.pack_start(lbl_notif_title, True, True, 0)
 
@@ -689,7 +698,7 @@ class SerenaControlCenter(Gtk.Window):
         notif_header.pack_end(btn_clear, False, False, 0)
 
         self.lbl_notif_count = Gtk.Label()
-        self.lbl_notif_count.set_markup("<span font='11' color='#A88D9B'>0 new</span>")
+        self.lbl_notif_count.set_markup("<span font='11' color='#A68595'>0 new</span>")
         self.lbl_notif_count.set_margin_end(12)
         notif_header.pack_end(self.lbl_notif_count, False, False, 0)
 
@@ -730,7 +739,8 @@ class SerenaControlCenter(Gtk.Window):
         power_circle.set_size_request(28, 28)
 
         lbl_power_icon = Gtk.Label()
-        lbl_power_icon.set_markup("<span font='12.5' color='#FF6B8B'></span>")
+        lbl_power_icon.get_style_context().add_class("power-icon")
+        lbl_power_icon.set_markup("<span font='12.5'></span>")
         lbl_power_icon.set_valign(Gtk.Align.CENTER)
         lbl_power_icon.set_halign(Gtk.Align.CENTER)
         lbl_power_icon.set_xalign(0.5)
@@ -785,11 +795,11 @@ class SerenaControlCenter(Gtk.Window):
             empty_box.pack_start(lbl_icon, False, False, 0)
 
             lbl_empty = Gtk.Label()
-            lbl_empty.set_markup("<span font='11' weight='bold' color='#CAAAB8'>No new notifications</span>")
+            lbl_empty.set_markup("<span font='11' weight='bold' color='#E8C2D0'>No new notifications</span>")
             empty_box.pack_start(lbl_empty, False, False, 0)
 
             lbl_sub = Gtk.Label()
-            lbl_sub.set_markup("<span font='9.5' color='#8F7481'>You're all caught up!</span>")
+            lbl_sub.set_markup("<span font='9.5' color='#A68595'>You're all caught up!</span>")
             empty_box.pack_start(lbl_sub, False, False, 0)
 
             self.notif_box.pack_start(empty_box, True, True, 0)
@@ -842,27 +852,27 @@ class SerenaControlCenter(Gtk.Window):
         row1 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         lbl_app = Gtk.Label()
         safe_app = GLib.markup_escape_text(app_title)
-        lbl_app.set_markup(f"<span font='12' weight='bold' color='#FFF0F3'>{safe_app}</span>")
+        lbl_app.set_markup(f"<span font='12' weight='bold' color='#FFF0F5'>{safe_app}</span>")
         lbl_app.set_halign(Gtk.Align.START)
         row1.pack_start(lbl_app, True, True, 0)
 
         lbl_time = Gtk.Label()
         safe_time = GLib.markup_escape_text(time_ago)
-        lbl_time.set_markup(f"<span font='10' color='#8F7481'>{safe_time}</span>")
+        lbl_time.set_markup(f"<span font='10' color='#A68595'>{safe_time}</span>")
         row1.pack_end(lbl_time, False, False, 0)
         vbox_content.pack_start(row1, False, False, 0)
 
         if headline:
             lbl_head = Gtk.Label()
             safe_head = GLib.markup_escape_text(headline[:45] + ("..." if len(headline) > 45 else ""))
-            lbl_head.set_markup(f"<span font='11.5' color='#FFF0F3'>{safe_head}</span>")
+            lbl_head.set_markup(f"<span font='11.5' color='#FFF0F5'>{safe_head}</span>")
             lbl_head.set_halign(Gtk.Align.START)
             vbox_content.pack_start(lbl_head, False, False, 0)
 
         if detail:
             lbl_detail = Gtk.Label()
             safe_detail = GLib.markup_escape_text(detail[:60] + ("..." if len(detail) > 60 else ""))
-            lbl_detail.set_markup(f"<span font='10.5' color='#A88D9B'>{safe_detail}</span>")
+            lbl_detail.set_markup(f"<span font='10.5' color='#A68595'>{safe_detail}</span>")
             lbl_detail.set_halign(Gtk.Align.START)
             vbox_content.pack_start(lbl_detail, False, False, 0)
 
@@ -914,7 +924,7 @@ class SerenaControlCenter(Gtk.Window):
         if self.updating_sliders:
             return
         val = int(scale.get_value())
-        self.lbl_vol_val.set_markup(f"<span font='10.5' color='#CAAAB8'>{val}%</span>")
+        self.lbl_vol_val.set_markup(f"<span font='10.5' color='#E8C2D0'>{val}%</span>")
         self.update_vol_icon(val, False)
         self.status['vol'] = val
         self.status['muted'] = False
@@ -940,8 +950,8 @@ class SerenaControlCenter(Gtk.Window):
         self.status['ime_note'] = note
 
         GLib.idle_add(lambda: (
-            self.lbl_ime_sub.set_markup(f"<span font='10.5' color='#CAAAB8'>{sub}</span>"),
-            self.lbl_ime_note.set_markup(f"<span font='9.5' color='#8F7481'>{note}</span>")
+            self.lbl_ime_sub.set_markup(f"<span font='10.5' color='#E8C2D0'>{sub}</span>"),
+            self.lbl_ime_note.set_markup(f"<span font='9.5' color='#A68595'>{note}</span>")
         ))
 
     def refresh_all_status_async(self):
@@ -955,7 +965,7 @@ class SerenaControlCenter(Gtk.Window):
                 self.updating_sliders = True
                 try:
                     self.vol_scale.set_value(vol)
-                    self.lbl_vol_val.set_markup(f"<span font='10.5' color='#CAAAB8'>{vol}%</span>")
+                    self.lbl_vol_val.set_markup(f"<span font='10.5' color='#E8C2D0'>{vol}%</span>")
                     self.update_vol_icon(vol, muted)
                 finally:
                     self.updating_sliders = False
@@ -976,8 +986,8 @@ class SerenaControlCenter(Gtk.Window):
             self.status['wifi_sub'] = sub
             self.status['wifi_ssid'] = ssid
             GLib.idle_add(lambda: (
-                self.lbl_wifi_sub.set_markup(f"<span font='10.5' color='#CAAAB8'>{sub}</span>"),
-                self.lbl_wifi_ssid.set_markup(f"<span font='9.5' color='#8F7481'>{ssid}</span>")
+                self.lbl_wifi_sub.set_markup(f"<span font='10.5' color='#E8C2D0'>{sub}</span>"),
+                self.lbl_wifi_ssid.set_markup(f"<span font='9.5' color='#A68595'>{ssid}</span>")
             ))
         except Exception:
             pass

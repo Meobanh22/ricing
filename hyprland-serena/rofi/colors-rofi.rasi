@@ -1,31 +1,31 @@
 /* ==============================================================================
-   🌸 SERENA & FENNEKIN ROFI COLOR PALETTE (WINE & CRIMSON)
-   Extracted from Serena & Fennekin Desktop Theme
+   🌸 SERENA ROFI COLOR PALETTE (PHONG CÁCH 1: RED RIBBON)
+   Extracted from Serena Red Ribbon Theme (#FF2A55)
    ============================================================================== */
 
 * {
     /* Deep Wine & Ruby Containers */
-    bg-col:             #160810f4;
-    bg-col-light:       #1f0c17;
-    bg-surface-hover:   #2a101f;
-    border-col:         #e12d4b55;
-    border-focus:       #e63956;
+    bg-col:             #180810f4;
+    bg-col-light:       #280e1a;
+    bg-surface-hover:   #401428;
+    border-col:         #ff2a5555;
+    border-focus:       #ff2a55;
 
     /* Internal Component Accents */
-    crimson-accent:     #c82a2b;
-    crimson-hover:      #db3b32;
-    pink-accent:        #ff6b8b;
+    crimson-accent:     #ff2a55;
+    crimson-hover:      #ff597b;
+    pink-accent:        #ff2a55;
     amber-accent:       #e59a44;
-    lavender-accent:    #caaab8;
+    lavender-accent:    #e8c2d0;
     dusk-blue-accent:   #7772c2;
 
     /* Text & Foreground */
-    fg-col:             #fff0f3;
-    fg-secondary:       #caaab8;
-    fg-muted:           #8f7481;
+    fg-col:             #fff0f5;
+    fg-secondary:       #e8c2d0;
+    fg-muted:           #a68595;
     fg-white:           #ffffff;
 
     /* Selection & Urgency */
-    selected-col:       #c82a2b;
+    selected-col:       #ff2a55;
     urgent-col:         #e65e34;
 }
