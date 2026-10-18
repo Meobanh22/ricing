@@ -21,7 +21,6 @@
     "pulseaudio",
     "network",
     "battery",
-    "custom/notification",
     "custom/power"
   ],
 
@@ -65,9 +64,8 @@
     "exec": "~/.config/hypr/scripts/get_ime.sh",
     "interval": 1,
     "format": "{}",
-    "tooltip": "Left-Click: Open Control Center | Right-Click: Toggle IME",
-    "on-click": "~/.config/hypr/scripts/toggle_control_center.sh",
-    "on-click-right": "~/.config/hypr/scripts/toggle_vietnamese.sh"
+    "tooltip": "Bộ gõ Tiếng Việt / Tiếng Anh (Click để chuyển đổi)",
+    "on-click": "~/.config/hypr/scripts/toggle_vietnamese.sh"
   },
 
   "pulseaudio": {
@@ -79,18 +77,18 @@
       "headset": "󰋋",
       "default": ["󰕿", "󰖀", "󰕾"]
     },
-    "tooltip-format": "{volume}% - Left-Click: Open Control Center | Right-Click: Sound Settings",
-    "on-click": "~/.config/hypr/scripts/toggle_control_center.sh",
-    "on-click-right": "pavucontrol"
+    "tooltip-format": "{volume}% (Click mở Pavucontrol | Chuột phải mở Control Center)",
+    "on-click": "pavucontrol",
+    "on-click-right": "~/.config/hypr/scripts/toggle_control_center.sh"
   },
 
   "network": {
     "format-wifi": "󰖩 {essid}",
     "format-ethernet": "󰈀 Wired",
     "format-disconnected": "󰖪 Offline",
-    "tooltip-format": "{essid} ({signalStrength}%)\nLeft-Click: Open Control Center | Right-Click: Wi-Fi Settings",
-    "on-click": "~/.config/hypr/scripts/toggle_control_center.sh",
-    "on-click-right": "nm-connection-editor"
+    "tooltip-format": "Tín hiệu: {signalStrength}%\n{essid} (Click mở Cài đặt Wi-Fi | Chuột phải mở Control Center)",
+    "on-click": "nm-connection-editor",
+    "on-click-right": "~/.config/hypr/scripts/toggle_control_center.sh"
   },
 
   "battery": {
@@ -104,34 +102,13 @@
     "format-plugged": "󰚥 {capacity}%",
     "format-alt": "{icon} {time}",
     "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
-    "tooltip-format": "{capacity}% ({time})\nLeft-Click: Open Control Center",
-    "on-click": "~/.config/hypr/scripts/toggle_control_center.sh"
-  },
-
-  "custom/notification": {
-    "tooltip": "Left-Click: Open Control Center | Right-Click: Toggle DND",
-    "format": "{icon}",
-    "format-icons": {
-      "notification": "󱅫",
-      "none": "󰂚",
-      "dnd-notification": "󱅫",
-      "dnd-none": "󰂛",
-      "inhibited-notification": "󱅫",
-      "inhibited-none": "󰂚",
-      "dnd-inhibited-notification": "󱅫",
-      "dnd-inhibited-none": "󰂛"
-    },
-    "return-type": "json",
-    "exec-if": "which swaync-client",
-    "exec": "swaync-client -swb",
-    "on-click": "~/.config/hypr/scripts/toggle_control_center.sh",
-    "on-click-right": "swaync-client -d -sw",
-    "escape": true
+    "tooltip-format": "Pin: {capacity}% ({time})\nChuột phải mở Control Center",
+    "on-click-right": "~/.config/hypr/scripts/toggle_control_center.sh"
   },
 
   "custom/power": {
     "format": "",
-    "tooltip": "Click to open Power Menu",
+    "tooltip": "Menu nguồn tắt máy (Click để mở)",
     "on-click": "~/.config/hypr/scripts/Wlogout.sh"
   }
 }
