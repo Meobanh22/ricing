@@ -185,8 +185,8 @@ hl.window_rule({
 })
 
 hl.window_rule({
-    name = "serena-dashboard-rule",
-    match = { class = "^(serena-dashboard)$" },
+    name = "dashboard-rule",
+    match = { class = "^(dashboard|serena-dashboard)$" },
     float = true,
     animation = "slide top",
 })
@@ -198,8 +198,8 @@ hl.window_rule({
 })
 
 hl.window_rule({
-    name = "serena-control-center-rule",
-    match = { class = "^(serena-control-center)$" },
+    name = "control-center-rule",
+    match = { class = "^(control-center|serena-control-center)$" },
     float = true,
     animation = "slide top",
 })
@@ -220,8 +220,8 @@ hl.layer_rule({
 })
 
 hl.layer_rule({
-    name = "serena-cc-anim",
-    match = { namespace = "serena-control-center" },
+    name = "cc-anim",
+    match = { namespace = "^(control-center|serena-control-center)$" },
     animation = "slide top",
 })
 

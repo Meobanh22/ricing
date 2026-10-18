@@ -350,16 +350,6 @@ class Dashboard(Gtk.Window):
         row_os.pack_start(lbl_os, False, False, 0)
         info_list_box.pack_start(row_os, False, False, 0)
 
-        # Edition
-        row_ed = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
-        lbl_ed_ic = Gtk.Label(label="🌸")
-        lbl_ed_ic.get_style_context().add_class("info-icon")
-        lbl_ed = Gtk.Label(label="Serena Anime Rice")
-        lbl_ed.get_style_context().add_class("info-item")
-        row_ed.pack_start(lbl_ed_ic, False, False, 0)
-        row_ed.pack_start(lbl_ed, False, False, 0)
-        info_list_box.pack_start(row_ed, False, False, 0)
-
         profile_box.pack_start(info_list_box, False, False, 2)
         main_box.pack_start(profile_box, False, False, 0)
 
@@ -370,7 +360,7 @@ class Dashboard(Gtk.Window):
 
         # Top Header (Title + Close Button)
         header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        lbl_brand = Gtk.Label(label="🌸 SERENA PROFILE DASHBOARD 🌸")
+        lbl_brand = Gtk.Label(label="🌸 PROFILE DASHBOARD 🌸")
         lbl_brand.get_style_context().add_class("title-serena")
         header_box.pack_start(lbl_brand, True, True, 0)
 
@@ -428,10 +418,10 @@ class Dashboard(Gtk.Window):
         weather_card.get_style_context().add_class("card-tile")
         weather_card.set_valign(Gtk.Align.FILL)
 
-        lbl_wt_title = Gtk.Label(label="🌤️ WEATHER")
-        lbl_wt_title.get_style_context().add_class("card-title")
-        lbl_wt_title.set_halign(Gtk.Align.START)
-        weather_card.pack_start(lbl_wt_title, False, False, 0)
+        self.lbl_wt_title = Gtk.Label(label="🌤️ WEATHER")
+        self.lbl_wt_title.get_style_context().add_class("card-title")
+        self.lbl_wt_title.set_halign(Gtk.Align.START)
+        weather_card.pack_start(self.lbl_wt_title, False, False, 0)
 
         self.lbl_temp = Gtk.Label(label="--°C")
         self.lbl_temp.get_style_context().add_class("temp-text")
@@ -475,6 +465,26 @@ class Dashboard(Gtk.Window):
         return True
 
     def fetch_weather_async(self):
+        def get_weather_icon(desc, hour):
+            low = desc.lower()
+            is_day = 6 <= hour < 18
+            if "thunder" in low or "lightning" in low:
+                return "⛈️"
+            elif "snow" in low or "ice" in low or "sleet" in low or "blizzard" in low:
+                return "❄️"
+            elif "rain" in low or "drizzle" in low or "shower" in low:
+                return "🌧️"
+            elif "fog" in low or "mist" in low or "haze" in low:
+                return "🌫️"
+            elif "partly cloudy" in low or "few clouds" in low:
+                return "⛅" if is_day else "☁️"
+            elif "cloud" in low or "overcast" in low:
+                return "☁️"
+            elif "clear" in low or "sunny" in low:
+                return "☀️" if is_day else "🌙"
+            else:
+                return "🌤️" if is_day else "🌙"
+
         try:
             url = "https://wttr.in/?format=j1"
             req = urllib.request.Request(url, headers={'User-Agent': 'curl/8.0'})
@@ -487,6 +497,9 @@ class Dashboard(Gtk.Window):
                 wind = curr['windspeedKmph']
 
                 def update_labels():
+                    current_hour = datetime.datetime.now().hour
+                    icon = get_weather_icon(desc, current_hour)
+                    self.lbl_wt_title.set_text(f"{icon} WEATHER")
                     self.lbl_temp.set_text(f"{temp_c}°C")
                     self.lbl_weather_desc.set_text(desc)
                     self.lbl_humidity.set_text(f"💧 {humidity}%  |  💨 {wind} km/h")
