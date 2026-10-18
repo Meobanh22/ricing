@@ -1,70 +1,71 @@
 # ==============================================================================
-# 🌸 SERENA & SYLVEON THEME FOR BTOP
-# Colors: Serena Crimson (#E53935), Ribbon Rose (#FF6B8B), Sylveon Blue (#61B8FF)
+# 🌸 SERENA & FENNEKIN BTOP THEME (FLAT UI)
+# Extracted directly from serena_fennekin_wallpaper_hd.jpg
+# Colors: Serena Crimson (#C82A2B), Amber (#E59A44), Midnight (#161726)
 # ==============================================================================
 
 # Main background and foreground
-theme[main_bg]="#181825"
-theme[main_fg]="#FFFFFF"
-theme[title]="#FF6B8B"
-theme[hi_fg]="#FF8A80"
+theme[main_bg]="#161726"
+theme[main_fg]="#FFF1D4"
+theme[title]="#C82A2B"
+theme[hi_fg]="#E59A44"
 
 # Selected items
-theme[selected_bg]="#E53935"
+theme[selected_bg]="#C82A2B"
 theme[selected_fg]="#FFFFFF"
 
 # Inactive items
-theme[inactive_fg]="#585B70"
+theme[inactive_fg]="#757091"
 
 # Graph text & miscellaneous
-theme[graph_text]="#BAC2DE"
-theme[meter_bg]="#313244"
-theme[proc_misc]="#FFB74D"
+theme[graph_text]="#B4A5D0"
+theme[meter_bg]="#202135"
+theme[proc_misc]="#E59A44"
 
-# Box borders (Serena Red & Sylveon Accents)
-theme[cpu_box]="#E53935"
-theme[mem_box]="#FF6B8B"
-theme[net_box]="#61B8FF"
-theme[proc_box]="#F06292"
-theme[div_line]="#45475A"
+# Box borders
+theme[cpu_box]="#C82A2B"
+theme[mem_box]="#E59A44"
+theme[net_box]="#5E5BAA"
+theme[proc_box]="#88293F"
+theme[div_line]="#2E3048"
 
-# Temperature gradient (Honey Amber -> Rose -> Serena Red)
-theme[temp_start]="#FFB74D"
-theme[temp_mid]="#FF6B8B"
-theme[temp_end]="#E53935"
+# Temperature gradient (Amber Fur -> Warm Crimson)
+theme[temp_start]="#B7823C"
+theme[temp_mid]="#E59A44"
+theme[temp_end]="#C82A2B"
 
-# CPU gradient (Honey Amber -> Ribbon Rose -> Serena Red)
-theme[cpu_start]="#FFB74D"
-theme[cpu_mid]="#FF6B8B"
-theme[cpu_end]="#E53935"
+# CPU gradient (Amber Fur -> Warm Crimson)
+theme[cpu_start]="#B7823C"
+theme[cpu_mid]="#E59A44"
+theme[cpu_end]="#C82A2B"
 
-# Memory gradients
-theme[free_start]="#A6E3A1"
-theme[free_mid]="#94E2D5"
-theme[free_end]="#61B8FF"
+# Memory gradients (Sage Foliage -> Amber -> Crimson)
+theme[free_start]="#7FA873"
+theme[free_mid]="#98BD8D"
+theme[free_end]="#B7823C"
 
-theme[cached_start]="#61B8FF"
-theme[cached_mid]="#89DCEB"
-theme[cached_end]="#F5C2E7"
+theme[cached_start]="#5E5BAA"
+theme[cached_mid]="#7772C2"
+theme[cached_end]="#B4A5D0"
 
-theme[available_start]="#BAC2DE"
-theme[available_mid]="#FFCDD2"
-theme[available_end]="#FF8A80"
+theme[available_start]="#7FA873"
+theme[available_mid]="#B7823C"
+theme[available_end]="#E59A44"
 
-theme[used_start]="#FFB74D"
-theme[used_mid]="#FF6B8B"
-theme[used_end]="#E53935"
+theme[used_start]="#B7823C"
+theme[used_mid]="#E59A44"
+theme[used_end]="#C82A2B"
 
-# Network gradients (Sylveon Sky Blue to Rose)
-theme[download_start]="#61B8FF"
-theme[download_mid]="#89B4FA"
-theme[download_end]="#F5C2E7"
+# Network gradients (Dusk Indigo -> Twilight Sky)
+theme[download_start]="#5E5BAA"
+theme[download_mid]="#7772C2"
+theme[download_end]="#B4A5D0"
 
-theme[upload_start]="#F5C2E7"
-theme[upload_mid]="#FF6B8B"
-theme[upload_end]="#E53935"
+theme[upload_start]="#88293F"
+theme[upload_mid]="#C82A2B"
+theme[upload_end]="#DB3B32"
 
 # Process list gradients
-theme[process_start]="#FFB74D"
-theme[process_mid]="#FF6B8B"
-theme[process_end]="#E53935"
+theme[process_start]="#B7823C"
+theme[process_mid]="#E59A44"
+theme[process_end]="#C82A2B"

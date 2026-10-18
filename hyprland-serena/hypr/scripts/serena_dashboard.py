@@ -30,102 +30,105 @@ window#dashboard-window {
 }
 
 #main-card {
-    background-color: rgba(24, 24, 37, 0.92);
-    border: 1.5px solid rgba(229, 57, 53, 0.6);
-    border-radius: 24px;
-    padding: 20px 26px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65);
+    background-color: rgba(22, 23, 38, 0.96);
+    border: 1px solid #2E3048;
+    border-radius: 16px;
+    padding: 20px 24px;
+    box-shadow: none;
 }
 
 .title-serena {
-    color: #FF6B8B;
-    font-size: 13px;
-    font-weight: bold;
+    color: #C82A2B;
+    font-size: 12.5px;
+    font-weight: 800;
     letter-spacing: 2px;
 }
 
 .btn-close {
-    color: #BAC2DE;
+    color: #B4A5D0;
     background: transparent;
-    border: none;
-    font-size: 14px;
-    padding: 2px 8px;
-    border-radius: 8px;
+    border: 1px solid transparent;
+    font-size: 13px;
+    padding: 2px 7px;
+    border-radius: 6px;
+    transition: all 0.15s ease;
 }
 
 .btn-close:hover {
-    background: #E53935;
-    color: #FFFFFF;
+    background: #2E3048;
+    color: #C82A2B;
+    border-color: #C82A2B;
 }
 
 .clock-digits {
-    color: #FFFFFF;
-    font-size: 48px;
+    color: #FFF1D4;
+    font-size: 46px;
     font-weight: 800;
 }
 
 .clock-seconds {
-    color: #FFB74D;
-    font-size: 22px;
+    color: #E59A44;
+    font-size: 20px;
     font-weight: 700;
 }
 
 .date-text {
-    color: #BAC2DE;
-    font-size: 13.5px;
-    font-weight: 600;
-}
-
-.temp-text {
-    color: #FF8A80;
-    font-size: 34px;
-    font-weight: 800;
-}
-
-.weather-desc {
-    color: #FFD180;
+    color: #B4A5D0;
     font-size: 13px;
     font-weight: 600;
 }
 
+.temp-text {
+    color: #E59A44;
+    font-size: 32px;
+    font-weight: 800;
+}
+
+.weather-desc {
+    color: #FFF1D4;
+    font-size: 12.5px;
+    font-weight: 600;
+}
+
 .stat-label {
-    color: #A6ADC8;
+    color: #B4A5D0;
     font-size: 11.5px;
-    font-weight: bold;
+    font-weight: 600;
 }
 
 .stat-value {
-    color: #F5F5F5;
+    color: #FFF1D4;
     font-size: 11.5px;
-    font-weight: bold;
+    font-weight: 700;
 }
 
 calendar {
-    color: #CDD6F4;
+    color: #FFF1D4;
     background-color: transparent;
     border: none;
     font-size: 11px;
 }
 
 calendar:selected {
-    background-color: #E53935;
+    background-color: #C82A2B;
     color: #FFFFFF;
     border-radius: 6px;
 }
 
 calendar.header {
-    color: #FF6B8B;
+    color: #7772C2;
     font-weight: bold;
 }
 
 progressbar progress {
-    background-color: #E53935;
-    border-radius: 6px;
+    background-color: #C82A2B;
+    border-radius: 4px;
 }
 
 progressbar trough {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 6px;
+    background-color: #202135;
+    border: 1px solid #2E3048;
+    border-radius: 4px;
     min-height: 8px;
 }
 """
@@ -323,6 +326,8 @@ class SerenaDashboard(Gtk.Window):
                 total_delta = total - self._prev_total
                 cpu_pct = 100.0 * (1.0 - idle_delta / max(1, total_delta))
             else:
+
+/* --- WORKSPACES (WINE CAPSULE PILL) --- */
                 cpu_pct = 5.0
             self._prev_idle = idle
             self._prev_total = total

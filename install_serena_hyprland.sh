@@ -92,14 +92,18 @@ chmod +x "$HOME/.config/hypr/scripts/"* 2>/dev/null || true
 cp "$SCRIPT_DIR/hyprland-serena/kitty/kitty.conf" "$HOME/.config/kitty/kitty.conf"
 
 # Waybar (Bố cục ilyamiro chuẩn đẹp)
+cp "$SCRIPT_DIR/hyprland-serena/waybar/palette.css" "$HOME/.config/waybar/palette.css" 2>/dev/null || true
 cp "$SCRIPT_DIR/hyprland-serena/waybar/config.jsonc" "$HOME/.config/waybar/config"
 cp "$SCRIPT_DIR/hyprland-serena/waybar/config.jsonc" "$HOME/.config/waybar/config.jsonc"
 cp "$SCRIPT_DIR/hyprland-serena/waybar/style.css" "$HOME/.config/waybar/style.css"
 
 # Rofi
 cp "$SCRIPT_DIR/hyprland-serena/rofi/colors-rofi.rasi" "$HOME/.config/rofi/wallust/colors-rofi.rasi" 2>/dev/null || true
+cp "$SCRIPT_DIR/hyprland-serena/rofi/colors-rofi.rasi" "$HOME/.config/rofi/colors-rofi.rasi" 2>/dev/null || true
 cp "$SCRIPT_DIR/hyprland-serena/rofi/serena.rasi" "$HOME/.config/rofi/serena.rasi"
 cp "$SCRIPT_DIR/hyprland-serena/rofi/serena.rasi" "$HOME/.config/rofi/config.rasi"
+mkdir -p "$HOME/.config/rofiSearch"
+cp "$SCRIPT_DIR/hyprland-serena/rofi/serena.rasi" "$HOME/.config/rofiSearch/config.rasi" 2>/dev/null || true
 
 # Fastfetch gọn gàng
 cp "$SCRIPT_DIR/fastfetch/sylveon_chibi.txt" "$HOME/.config/fastfetch/"
@@ -119,10 +123,16 @@ cp -r "$SCRIPT_DIR/hyprland-serena/wlogout/icons/"* "$HOME/.config/wlogout/icons
 # SwayNC (Trung tâm thông báo im lặng, không popup ra ngoài)
 mkdir -p "$HOME/.config/swaync"
 cp "$SCRIPT_DIR/hyprland-serena/swaync/config.json" "$HOME/.config/swaync/config.json" 2>/dev/null || true
+cp "$SCRIPT_DIR/hyprland-serena/swaync/style.css" "$HOME/.config/swaync/style.css" 2>/dev/null || true
 pkill -x swaync 2>/dev/null || true
 nohup swaync >/dev/null 2>&1 &
 
-echo -e "  ${GREEN}✔ Đã đồng bộ Hyprland, Waybar, Rofi, Fastfetch, Wlogout & SwayNC!${NC}"
+# Btop Task Manager Theme
+mkdir -p "$HOME/.config/btop/themes"
+cp "$SCRIPT_DIR/hyprland-serena/btop/themes/serena.theme" "$HOME/.config/btop/themes/serena.theme" 2>/dev/null || true
+cp "$SCRIPT_DIR/hyprland-serena/btop/btop.conf" "$HOME/.config/btop/btop.conf" 2>/dev/null || true
+
+echo -e "  ${GREEN}✔ Đã đồng bộ Hyprland, Waybar, Rofi, Fastfetch, Wlogout, SwayNC & Btop!${NC}"
 
 # =====================================================
 # [4/6] HÌNH NỀN SERENA

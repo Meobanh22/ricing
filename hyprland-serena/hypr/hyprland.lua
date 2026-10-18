@@ -12,8 +12,8 @@
 -- Scale 1.2 (120%) chuẩn tỷ lệ pixel 1600x900 sắc nét cho màn hình 14 inch Full HD
 hl.monitor({
     output   = "eDP-1",
-    mode     = "preferred",
-    position = "auto",
+    mode     = "1920x1080@60",
+    position = "0x0",
     scale    = "1.2",
 })
 hl.monitor({
@@ -67,8 +67,9 @@ hl.on("hyprland.start", function ()
     -- 5. Kích hoạt bộ gõ Tiếng Việt Fcitx5 (hoặc IBus fallback)
     hl.exec_cmd("(fcitx5 -d --replace || ~/.config/hypr/scripts/init_ime.sh)")
 
-    -- 6. Trung tâm thông báo (SwayNC)
+    -- 6. Trung tâm thông báo (SwayNC & Serena Real Notification Daemon)
     hl.exec_cmd("swaync &")
+    hl.exec_cmd("python3 ~/.config/hypr/scripts/serena_notif_daemon.py &")
 
     -- 7. Khởi động Dịch vụ lưu trữ mật khẩu & mã hóa (GNOME Keyring)
     hl.exec_cmd("gnome-keyring-daemon --start --components=secrets,pkcs11,ssh")
@@ -106,8 +107,8 @@ hl.config({
         border_size = 2,
 
         col = {
-            active_border   = { colors = { "rgb(E53935)", "rgb(FF6B8B)" }, angle = 45 },
-            inactive_border = "rgba(24182588)",
+            active_border   = "rgb(c82a2b)",
+            inactive_border = "rgba(2e3048cc)",
         },
 
         layout = "dwindle",
@@ -115,27 +116,23 @@ hl.config({
     },
 
     decoration = {
-        rounding = 14,
+        rounding = 12,
 
-        active_opacity     = 0.94,
-        inactive_opacity   = 0.85,
+        active_opacity     = 0.96,
+        inactive_opacity   = 0.88,
         fullscreen_opacity = 1.0,
 
         blur = {
             enabled           = true,
-            size              = 6,
-            passes            = 3,
+            size              = 5,
+            passes            = 2,
             new_optimizations = true,
             ignore_opacity    = true,
             xray              = false,
         },
 
         shadow = {
-            enabled        = true,
-            range          = 22,
-            render_power   = 3,
-            color          = "rgba(00000055)",
-            color_inactive = "rgba(00000033)",
+            enabled        = false,
         },
     },
 

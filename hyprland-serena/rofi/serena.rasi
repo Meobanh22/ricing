@@ -1,7 +1,8 @@
 /* ==============================================================================
-   🌸 SERENA CRIMSON ROFI LAUNCHER THEME
-   Glassmorphism, Rounded Corners, Serena Red (#E53935) & Ribbon Rose (#FF6B8B)
-============================================================================== */
+   🌸 SERENA & FENNEKIN ROFI FLAT LAUNCHER THEME
+   Clean Flat UI: Thin borders, flat surfaces, zero harsh shadows, unified palette.
+   Colors: Serena Crimson (#C82A2B), Midnight Dusk (#161726), Warm Ivory (#FFF1D4)
+   ============================================================================== */
 
 configuration {
     modi: "drun,run,filebrowser";
@@ -15,23 +16,25 @@ configuration {
 }
 
 * {
-    bg-col: #181825ee;
-    bg-col-light: #28283cee;
-    border-col: #E53935;
-    selected-col: #E53935;
-    rose-accent: #FF6B8B;
-    fg-col: #F5F5F5;
-    fg-col2: #BAC2DE;
-    grey: #6C7086;
+    bg-col:             #161726f4;
+    bg-col-light:       #1c1d30;
+    border-col:         #2e3048;
+    selected-col:       #c82a2b;
+    crimson-hover:      #db3b32;
+    fg-col:             #fff1d4;
+    fg-secondary:       #b4a5d0;
+    fg-muted:           #757091;
+    fg-white:           #ffffff;
+
     background-color: transparent;
-    width: 650px;
+    width: 640px;
 }
 
 window {
-    height: 480px;
-    border: 2px;
+    height: 460px;
+    border: 1px;
     border-color: @border-col;
-    border-radius: 20px;
+    border-radius: 16px;
     background-color: @bg-col;
     padding: 16px;
 }
@@ -45,15 +48,15 @@ inputbar {
     children: [prompt, entry];
     background-color: @bg-col-light;
     border: 1px;
-    border-color: @rose-accent;
-    border-radius: 14px;
-    padding: 8px 14px;
+    border-color: @border-col;
+    border-radius: 12px;
+    padding: 8px 12px;
 }
 
 prompt {
     background-color: @selected-col;
     padding: 6px 12px;
-    text-color: #FFFFFF;
+    text-color: @fg-white;
     border-radius: 8px;
     margin: 0px 8px 0px 0px;
     font-weight: bold;
@@ -63,13 +66,13 @@ entry {
     padding: 6px;
     text-color: @fg-col;
     placeholder: "Tìm kiếm ứng dụng...";
-    placeholder-color: @grey;
+    placeholder-color: @fg-muted;
 }
 
 listview {
     border: 0px;
     padding: 6px 0px 0px;
-    margin: 10px 0px 0px 10px;
+    margin: 8px 0px 0px 0px;
     columns: 2;
     lines: 6;
     background-color: transparent;
@@ -77,19 +80,24 @@ listview {
 }
 
 element {
-    padding: 10px;
+    padding: 8px 12px;
     background-color: transparent;
-    text-color: @fg-col2;
-    border-radius: 12px;
+    text-color: @fg-secondary;
+    border-radius: 10px;
 }
 
 element-icon {
-    size: 28px;
+    size: 26px;
     margin: 0 10px 0 0;
 }
 
+element-text {
+    vertical-align: 0.5;
+    text-color: inherit;
+    font-weight: 600;
+}
+
 element selected {
-    background-color: #E53935;
-    text-color: #FFFFFF;
-    font-weight: bold;
+    background-color: @selected-col;
+    text-color: @fg-white;
 }

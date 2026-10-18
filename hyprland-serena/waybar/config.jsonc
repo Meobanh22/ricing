@@ -21,13 +21,14 @@
     "pulseaudio",
     "network",
     "battery",
+    "custom/notification",
     "custom/power"
   ],
 
   "custom/menu": {
-    "format": " Search",
-    "tooltip": "Click to open Application Menu",
-    "on-click": "rofi -show drun -theme ~/.config/rofiSearch/config.rasi"
+    "format": "<span color='#ff6b8b'>🌸</span> <span color='#fff0f3'><b>SERENA</b></span> <span color='#ff6b8b'>🌸</span>",
+    "tooltip": "Application Menu (Super + D)",
+    "on-click": "rofi -show drun -theme ~/.config/rofi/serena.rasi"
   },
 
   "hyprland/workspaces": {
@@ -52,11 +53,11 @@
   },
 
   "clock": {
-    "format": "<span color='#FF6B8B'></span> <span color='#FF8A80'><b>{0:%H}</b></span><span color='#FF4081'>:</span><span color='#FF80AB'><b>{0:%M}</b></span><span color='#FF4081'>:</span><span color='#FFE082'><b>{0:%S}</b></span>  <span color='#E53935'>|</span>  <span color='#FF5252'>󰸗</span> <span color='#FF8A80'><b>{0:%d}</b></span><span color='#FF4081'>/</span><span color='#FFAB91'><b>{0:%m}</b></span>",
-    "format-alt": "<span color='#FF6B8B'></span> <span color='#FF8A80'><b>{0:%H}</b></span><span color='#FF4081'>:</span><span color='#FF80AB'><b>{0:%M}</b></span>  <span color='#E53935'>|</span>  <span color='#FF5252'>󰸗</span> <span color='#FF8A80'><b>{0:%A}</b></span>, <span color='#FFE082'><b>{0:%d %B %Y}</b></span>",
+    "format": "<span color='#ff6b8b'></span> <span color='#fff0f3'><b>{0:%H:%M}</b></span>  <span color='#ff6b8b'>·</span>  <span color='#caaab8'>{0:%d/%m}</span>",
+    "format-alt": "<span color='#ff6b8b'></span> <span color='#fff0f3'><b>{0:%H:%M:%S}</b></span>  <span color='#ff6b8b'>·</span>  <span color='#caaab8'>{0:%A, %d/%m/%Y}</span>",
     "interval": 1,
     "tooltip-format": "<tt><small>{calendar}</small></tt>",
-    "tooltip": "Click to open Dashboard",
+    "tooltip": "Calendar & Dashboard (Super + C)",
     "on-click": "python3 ~/.config/hypr/scripts/serena_dashboard.py"
   },
 
@@ -64,7 +65,7 @@
     "exec": "~/.config/hypr/scripts/get_ime.sh",
     "interval": 1,
     "format": "{}",
-    "tooltip": "Bộ gõ Tiếng Việt / Tiếng Anh (Click để chuyển đổi)",
+    "tooltip": "Input Method VIE / ENG (Click to toggle)",
     "on-click": "~/.config/hypr/scripts/toggle_vietnamese.sh"
   },
 
@@ -77,7 +78,7 @@
       "headset": "󰋋",
       "default": ["󰕿", "󰖀", "󰕾"]
     },
-    "tooltip-format": "{volume}% (Click mở Pavucontrol | Chuột phải mở Control Center)",
+    "tooltip-format": "Volume: {volume}%\n(Click: Pavucontrol | Right-click: Control Center)",
     "on-click": "pavucontrol",
     "on-click-right": "~/.config/hypr/scripts/toggle_control_center.sh"
   },
@@ -86,7 +87,7 @@
     "format-wifi": "󰖩 {essid}",
     "format-ethernet": "󰈀 Wired",
     "format-disconnected": "󰖪 Offline",
-    "tooltip-format": "Tín hiệu: {signalStrength}%\n{essid} (Click mở Cài đặt Wi-Fi | Chuột phải mở Control Center)",
+    "tooltip-format": "Wi-Fi: {essid} ({signalStrength}%)\n(Click: Network Settings | Right-click: Control Center)",
     "on-click": "nm-connection-editor",
     "on-click-right": "~/.config/hypr/scripts/toggle_control_center.sh"
   },
@@ -102,13 +103,20 @@
     "format-plugged": "󰚥 {capacity}%",
     "format-alt": "{icon} {time}",
     "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
-    "tooltip-format": "Pin: {capacity}% ({time})\nChuột phải mở Control Center",
+    "tooltip-format": "Battery: {capacity}% ({time})\n(Right-click: Control Center)",
+    "on-click-right": "~/.config/hypr/scripts/toggle_control_center.sh"
+  },
+
+  "custom/notification": {
+    "format": "󰂚",
+    "tooltip": "Control Center & Notifications (Super + N)",
+    "on-click": "~/.config/hypr/scripts/toggle_control_center.sh",
     "on-click-right": "~/.config/hypr/scripts/toggle_control_center.sh"
   },
 
   "custom/power": {
     "format": "",
-    "tooltip": "Menu nguồn tắt máy (Click để mở)",
+    "tooltip": "Power Menu (Click to open)",
     "on-click": "~/.config/hypr/scripts/Wlogout.sh"
   }
 }

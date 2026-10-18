@@ -1,0 +1,43 @@
+/* ==============================================================================
+   🌸 SERENA WINE & RUBY MINIMALIST PALETTE
+   Official Serena Palette for Waybar
+   ============================================================================== */
+
+/* Deep Wine & Ruby Neutral Containers */
+@define-color bg_darkest #10050a;
+@define-color bg_primary #160a10;
+@define-color bg_surface #24101a;
+@define-color bg_surface_subtle #2d1221;
+@define-color bg_surface_hover #381424;
+
+@define-color bg_pill rgba(22, 10, 16, 0.94);
+@define-color bg_card rgba(36, 16, 26, 0.95);
+@define-color bg_subtle rgba(45, 18, 33, 0.85);
+
+/* Clean Ruby/Coral Borders - No Glowing Shadows */
+@define-color border_subtle rgba(225, 45, 75, 0.38);
+@define-color border_focus #ff6b8b;
+@define-color border_card rgba(225, 45, 75, 0.50);
+
+/* Role & Accent Colors */
+@define-color role_crimson #e63956;
+@define-color role_crimson_hover #ff4d6d;
+@define-color role_crimson_subtle rgba(230, 57, 86, 0.2);
+
+@define-color role_pink #ff6b8b;
+@define-color role_pink_hover #ffa6bc;
+@define-color role_pink_subtle rgba(255, 107, 139, 0.2);
+
+@define-color role_amber #e59a44;
+@define-color role_amber_muted #b7823c;
+@define-color role_orange #e65e34;
+
+@define-color role_lavender #caaab8;
+@define-color role_dusk_blue #7772c2;
+@define-color role_sage #7fa873;
+
+/* Text & Foreground */
+@define-color text_primary #fff0f3;      /* Warm Rose-Ivory */
+@define-color text_secondary #caaab8;    /* Soft Lavender-Rose */
+@define-color text_muted #8f7481;        /* Dusty Mauve */
+@define-color text_white #ffffff;        /* Pure White */
