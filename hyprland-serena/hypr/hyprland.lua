@@ -244,7 +244,7 @@ hl.bind(mainMod .. " + F", function() hl.dispatch("fullscreen", "0") end)
 
 -- Bảng điều khiển & Tiện ích mở rộng
 hl.bind(mainMod .. " + ESCAPE",         hl.dsp.exec_cmd("~/.config/hypr/scripts/Wlogout.sh"))
-hl.bind(mainMod .. " + S",              hl.dsp.exec_cmd("python3 ~/.config/hypr/scripts/dashboard.py"))
+hl.bind(mainMod .. " + S",              hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle_dashboard.sh"))
 hl.bind(mainMod .. " + N",              hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle_control_center.sh"))
 hl.bind("CTRL + SHIFT + ESCAPE",        hl.dsp.exec_cmd("kitty --class btop-serena -T 'Task Manager' btop"))
 

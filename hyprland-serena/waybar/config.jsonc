@@ -57,8 +57,8 @@
     "format-alt": "<span color='#ff2a55'></span> <span color='#fff0f5'><b>{0:%H:%M:%S}</b></span>  <span color='#ff2a55'>·</span>  <span color='#e8c2d0'>{0:%A, %d/%m/%Y}</span>",
     "interval": 1,
     "tooltip-format": "<tt><small>{calendar}</small></tt>",
-    "tooltip": "Calendar & Dashboard (Super + C)",
-    "on-click": "python3 ~/.config/hypr/scripts/dashboard.py"
+    "tooltip": "Calendar & Dashboard (Super + S)",
+    "on-click": "~/.config/hypr/scripts/toggle_dashboard.sh"
   },
 
   "custom/ime": {

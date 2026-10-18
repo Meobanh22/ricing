@@ -15,6 +15,7 @@ import datetime
 import threading
 import urllib.request
 import json
+import signal
 import gi
 
 gi.require_version('Gtk', '3.0')
@@ -195,11 +196,19 @@ class Dashboard(Gtk.Window):
         if visual and screen.is_composited():
             self.set_visual(visual)
 
+        self.launch_time = time.time()
+        self.mouse_entered = False
+
         self.apply_css()
         self.build_ui()
 
         # Bấm Escape để tắt
         self.connect("key-press-event", self.on_key_press)
+
+        # Lắng nghe sự kiện hover và click ra ngoài (focus-out)
+        self.add_events(Gdk.EventMask.FOCUS_CHANGE_MASK | Gdk.EventMask.ENTER_NOTIFY_MASK)
+        self.connect("enter-notify-event", self.on_enter_notify)
+        self.connect("focus-out-event", self.on_focus_out)
 
         # Cập nhật thời gian & Uptime mỗi giây
         GLib.timeout_add(1000, self.update_clock)
@@ -207,9 +216,28 @@ class Dashboard(Gtk.Window):
         # Cập nhật thời tiết bất đồng bộ
         threading.Thread(target=self.fetch_weather_async, daemon=True).start()
 
+    def on_enter_notify(self, widget, event):
+        self.mouse_entered = True
+        return False
+
+    def on_focus_out(self, widget, event):
+        if time.time() - getattr(self, "launch_time", 0) < 0.8:
+            return False
+        if getattr(self, "mouse_entered", False):
+            self.close_and_quit()
+        return False
+
+    def close_and_quit(self):
+        if os.path.exists(PID_FILE):
+            try:
+                os.remove(PID_FILE)
+            except Exception:
+                pass
+        Gtk.main_quit()
+
     def on_key_press(self, widget, event):
         if event.keyval == Gdk.KEY_Escape:
-            Gtk.main_quit()
+            self.close_and_quit()
             return True
         return False
 
@@ -366,7 +394,7 @@ class Dashboard(Gtk.Window):
 
         btn_close = Gtk.Button(label="✕")
         btn_close.get_style_context().add_class("btn-close")
-        btn_close.connect("clicked", lambda x: Gtk.main_quit())
+        btn_close.connect("clicked", lambda x: self.close_and_quit())
         header_box.pack_end(btn_close, False, False, 0)
         right_box.pack_start(header_box, False, False, 0)
 
@@ -509,23 +537,22 @@ class Dashboard(Gtk.Window):
             pass
 
 def main():
-    # Toggle logic: nếu đang mở thì đóng, nếu chưa thì mở
-    if os.path.exists(PID_FILE):
-        try:
-            with open(PID_FILE, "r") as f:
-                pid = int(f.read().strip())
-            os.kill(pid, 15) # SIGTERM
-            os.remove(PID_FILE)
-            return
-        except Exception:
-            if os.path.exists(PID_FILE):
-                os.remove(PID_FILE)
+    def sig_handler(signum, frame):
+        GLib.idle_add(Gtk.main_quit)
 
-    with open(PID_FILE, "w") as f:
-        f.write(str(os.getpid()))
+    signal.signal(signal.SIGTERM, sig_handler)
+    signal.signal(signal.SIGINT, sig_handler)
+
+    my_pid = os.getpid()
+    try:
+        with open(PID_FILE, "w") as f:
+            f.write(str(my_pid))
+    except Exception:
+        pass
 
     app = Dashboard()
-    def cleanup_and_quit(*args):
+
+    def cleanup(*args):
         if os.path.exists(PID_FILE):
             try:
                 os.remove(PID_FILE)
@@ -533,9 +560,16 @@ def main():
                 pass
         Gtk.main_quit()
 
-    app.connect("destroy", cleanup_and_quit)
+    app.connect("destroy", cleanup)
     app.show_all()
-    Gtk.main()
+    try:
+        Gtk.main()
+    finally:
+        if os.path.exists(PID_FILE):
+            try:
+                os.remove(PID_FILE)
+            except Exception:
+                pass
 
 if __name__ == "__main__":
     main()
