@@ -33,6 +33,10 @@ hl.env("GDK_BACKEND", "wayland,x11,*")
 hl.env("QT_QPA_PLATFORM", "wayland;xcb")
 hl.env("BROWSER", "microsoft-edge-stable")
 
+-- Tối ưu phần cứng & tiết kiệm pin (Intel Iris Xe + Firefox Wayland VA-API)
+hl.env("MOZ_ENABLE_WAYLAND", "1")
+hl.env("LIBVA_DRIVER_NAME", "iHD")
+
 -- Bộ gõ Tiếng Việt (Fcitx5 Native Wayland chuẩn mượt)
 hl.env("GTK_IM_MODULE", "fcitx")
 hl.env("QT_IM_MODULE", "fcitx")
@@ -233,14 +237,14 @@ local mainMod = "SUPER"
 -- Ứng dụng thường dùng
 hl.bind(mainMod .. " + RETURN", hl.dsp.exec_cmd("kitty || gnome-terminal"))
 hl.bind(mainMod .. " + SPACE",  hl.dsp.exec_cmd("~/.config/hypr/scripts/OpenApps.sh"))
-hl.bind(mainMod .. " + D",      hl.dsp.exec_cmd("~/.config/hypr/scripts/OpenApps.sh"))
 hl.bind(mainMod .. " + E",      hl.dsp.exec_cmd("thunar || nautilus"))
 hl.bind(mainMod .. " + B",      hl.dsp.exec_cmd("microsoft-edge-stable || microsoft-edge || firefox || google-chrome"))
+hl.bind(mainMod .. " + C",      hl.dsp.exec_cmd("code"))
 
 -- Quản lý cửa sổ
 hl.bind(mainMod .. " + Q", hl.dsp.window.close())
 hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
-hl.bind(mainMod .. " + F", function() hl.dispatch("fullscreen", "0") end)
+hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())
 
 -- Bảng điều khiển & Tiện ích mở rộng
 hl.bind(mainMod .. " + ESCAPE",         hl.dsp.exec_cmd("~/.config/hypr/scripts/Wlogout.sh"))
@@ -252,8 +256,15 @@ hl.bind("CTRL + SHIFT + ESCAPE",        hl.dsp.exec_cmd("kitty --class btop-sere
 hl.bind(mainMod .. " + L",         hl.dsp.exec_cmd("hyprlock"))
 hl.bind("Print",                   hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot.sh area"))
 hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot.sh area"))
-hl.bind("CTRL + SPACE",            hl.dsp.exec_cmd("fcitx5-remote -t || ~/.config/hypr/scripts/toggle_vietnamese.sh"))
 hl.bind(mainMod .. " + W",         hl.dsp.exec_cmd("python3 ~/.config/hypr/scripts/wallpaper_switcher.py next"))
+
+-- Bộ gõ tiếng Việt: chuyển đổi ngôn ngữ bằng Ctrl + Shift (hoặc Alt + Z chuẩn Unikey)
+hl.bind("CTRL + Shift_L",   hl.dsp.exec_cmd("fcitx5-remote -t || ~/.config/hypr/scripts/toggle_vietnamese.sh"))
+hl.bind("SHIFT + Control_L", hl.dsp.exec_cmd("fcitx5-remote -t || ~/.config/hypr/scripts/toggle_vietnamese.sh"))
+hl.bind("CTRL + Shift_R",   hl.dsp.exec_cmd("fcitx5-remote -t || ~/.config/hypr/scripts/toggle_vietnamese.sh"))
+hl.bind("SHIFT + Control_R", hl.dsp.exec_cmd("fcitx5-remote -t || ~/.config/hypr/scripts/toggle_vietnamese.sh"))
+hl.bind("ALT + Z",          hl.dsp.exec_cmd("fcitx5-remote -t || ~/.config/hypr/scripts/toggle_vietnamese.sh"))
+hl.bind("ALT + z",          hl.dsp.exec_cmd("fcitx5-remote -t || ~/.config/hypr/scripts/toggle_vietnamese.sh"))
 
 -- Phím đa phương tiện (Volume & Brightness)
 hl.bind("XF86AudioRaiseVolume",  hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"),   { locked = true, repeating = true })
