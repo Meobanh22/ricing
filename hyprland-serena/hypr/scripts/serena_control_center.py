@@ -41,6 +41,8 @@ CSS_DATA = b"""
 
 window#control-center-window {
     background: transparent;
+    border: none;
+    box-shadow: none;
 }
 
 /* Reset all button / eventbox styles to eliminate GTK Adwaita white bleed */
@@ -57,19 +59,19 @@ eventbox {
     border: none;
 }
 
-/* Main Outer Card - Deep Wine Container with Clean Neutral Border */
+/* Main Outer Card - Exact Warm Obsidian-Wine from Image (#201011) */
 #cc-main-card {
-    background-color: rgba(22, 8, 15, 0.98);
+    background-color: rgba(32, 16, 18, 0.98);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 24px;
-    padding: 18px 18px 16px 18px;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.80);
-    min-width: 380px;
+    border-radius: 20px;
+    padding: 16px 14px 14px 14px;
+    box-shadow: none;
+    min-width: 315px;
 }
 
-/* Header Flower Box */
+/* Header Flower Box - Exact from Image (#301f20) */
 .header-flower-box {
-    background-color: rgba(45, 16, 30, 0.85);
+    background-color: rgba(48, 31, 32, 0.95);
     border-radius: 10px;
     min-width: 34px;
     min-height: 34px;
@@ -93,12 +95,12 @@ eventbox {
     background-color: rgba(255, 42, 85, 0.15);
 }
 
-/* Quick Action Cards (Top 3 Cards) - Borderless Minimalist */
+/* Quick Action Cards (Top 3 Cards) - Exact from Image (#2a1a1f) */
 .quick-card {
-    background-color: rgba(40, 14, 26, 0.85);
+    background-color: rgba(42, 26, 31, 0.95);
     border: none;
-    border-radius: 16px;
-    padding: 12px 6px 10px 6px;
+    border-radius: 14px;
+    padding: 11px 4px 9px 4px;
     transition: background-color 0.15s ease;
     box-shadow: none;
 }
@@ -106,7 +108,7 @@ eventbox {
 /* Card Hover Effect: Subtle background shift only, zero borders */
 .quick-card.card-hover,
 .quick-card:hover {
-    background-color: rgba(62, 22, 40, 0.95);
+    background-color: rgba(58, 34, 42, 0.98);
     border: none;
     box-shadow: none;
 }
@@ -439,7 +441,7 @@ class SerenaControlCenter(Gtk.Window):
                 monitor = display.get_primary_monitor() or display.get_monitor(0)
                 if monitor:
                     geom = monitor.get_geometry()
-                    dash_w = 390
+                    dash_w = 320
                     x = geom.x + geom.width - dash_w - 14
                     y = geom.y + 44
                     self.move(x, y)
@@ -521,11 +523,32 @@ class SerenaControlCenter(Gtk.Window):
         return False
 
     def on_audio_card_clicked(self, widget, event):
-        # If clicked above the slider, toggle mute
-        scale_alloc = self.vol_scale.get_allocation()
-        if event.y < scale_alloc.y:
-            self.toggle_audio_mute(widget, event)
+        self.toggle_audio_mute(widget, event)
         return False
+
+    def on_audio_card_scroll(self, widget, event):
+        vol = self.status.get('vol', 50)
+        direction = event.direction
+        if direction == Gdk.ScrollDirection.UP:
+            vol = min(100, vol + 5)
+        elif direction == Gdk.ScrollDirection.DOWN:
+            vol = max(0, vol - 5)
+        elif direction == Gdk.ScrollDirection.SMOOTH:
+            _, delta_x, delta_y = event.get_scroll_deltas()
+            if delta_y < 0:
+                vol = min(100, vol + 5)
+            elif delta_y > 0:
+                vol = max(0, vol - 5)
+            else:
+                return False
+        else:
+            return False
+        self.status['vol'] = vol
+        self.status['muted'] = False
+        self.lbl_vol_val.set_markup(f"<span font='10' color='#E8C2D0'>{vol}%</span>")
+        self.update_vol_icon(vol, False)
+        threading.Thread(target=lambda: subprocess.run(['pamixer', '--set-volume', str(val)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL), daemon=True).start()
+        return True
 
     def on_key_press(self, widget, event):
         if event.keyval == Gdk.KEY_Escape:
@@ -599,7 +622,7 @@ class SerenaControlCenter(Gtk.Window):
         # =====================================================
         # 2. TOP 3 QUICK ACTION CARDS (Input Method | Wi-Fi | Volume)
         # =====================================================
-        quick_grid = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        quick_grid = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
         quick_grid.set_homogeneous(True)
 
         # --- Card 1: Input Method ---
@@ -619,16 +642,14 @@ class SerenaControlCenter(Gtk.Window):
 
         lbl_ime_title = Gtk.Label()
         lbl_ime_title.get_style_context().add_class("card-title")
-        lbl_ime_title.set_markup("<span font='10.2' weight='bold'>Input Method</span>")
+        lbl_ime_title.set_markup("<span font='11' weight='bold'>Input</span>")
         vbox_ime.pack_start(lbl_ime_title, False, False, 2)
 
         self.lbl_ime_sub = Gtk.Label()
-        self.lbl_ime_sub.set_markup(f"<span font='10.5' color='#E8C2D0'>{self.status['ime_sub']}</span>")
+        self.lbl_ime_sub.set_markup(f"<span font='10' color='#E8C2D0'>{self.status['ime_sub']}</span>")
         vbox_ime.pack_start(self.lbl_ime_sub, False, False, 0)
 
         self.lbl_ime_note = Gtk.Label()
-        self.lbl_ime_note.set_markup(f"<span font='9.5' color='#A68595'>{self.status['ime_note']}</span>")
-        vbox_ime.pack_start(self.lbl_ime_note, False, False, 0)
 
         card_ime.add(vbox_ime)
         quick_grid.pack_start(card_ime, True, True, 0)
@@ -650,16 +671,14 @@ class SerenaControlCenter(Gtk.Window):
 
         lbl_wifi_title = Gtk.Label()
         lbl_wifi_title.get_style_context().add_class("card-title")
-        lbl_wifi_title.set_markup("<span font='11.5' weight='bold'>Wi-Fi</span>")
+        lbl_wifi_title.set_markup("<span font='11' weight='bold'>Wi-Fi</span>")
         vbox_wifi.pack_start(lbl_wifi_title, False, False, 2)
 
         self.lbl_wifi_sub = Gtk.Label()
-        self.lbl_wifi_sub.set_markup(f"<span font='10.5' color='#E8C2D0'>{self.status['wifi_sub']}</span>")
+        self.lbl_wifi_sub.set_markup(f"<span font='10' color='#E8C2D0'>{self.status['wifi_sub']}</span>")
         vbox_wifi.pack_start(self.lbl_wifi_sub, False, False, 0)
 
         self.lbl_wifi_ssid = Gtk.Label()
-        self.lbl_wifi_ssid.set_markup(f"<span font='9.5' color='#A68595'>{self.status['wifi_ssid']}</span>")
-        vbox_wifi.pack_start(self.lbl_wifi_ssid, False, False, 0)
 
         card_wifi.add(vbox_wifi)
         quick_grid.pack_start(card_wifi, True, True, 0)
@@ -667,7 +686,9 @@ class SerenaControlCenter(Gtk.Window):
         # --- Card 3: Volume ---
         self.card_audio = Gtk.EventBox()
         self.card_audio.get_style_context().add_class("quick-card")
+        self.card_audio.add_events(Gdk.EventMask.SCROLL_MASK)
         self.card_audio.connect("button-press-event", self.on_audio_card_clicked)
+        self.card_audio.connect("scroll-event", self.on_audio_card_scroll)
         self.card_audio.connect("enter-notify-event", self.on_card_hover_enter)
         self.card_audio.connect("leave-notify-event", self.on_card_hover_leave)
 
@@ -681,23 +702,22 @@ class SerenaControlCenter(Gtk.Window):
 
         lbl_audio_title = Gtk.Label()
         lbl_audio_title.get_style_context().add_class("card-title")
-        lbl_audio_title.set_markup("<span font='11.5' weight='bold'>Volume</span>")
+        lbl_audio_title.set_markup("<span font='11' weight='bold'>Volume</span>")
         vbox_audio.pack_start(lbl_audio_title, False, False, 2)
 
         self.lbl_vol_val = Gtk.Label()
-        self.lbl_vol_val.set_markup(f"<span font='10.5' color='#E8C2D0'>{self.status['vol']}%</span>")
+        self.lbl_vol_val.set_markup(f"<span font='10' color='#E8C2D0'>{self.status['vol']}%</span>")
         vbox_audio.pack_start(self.lbl_vol_val, False, False, 0)
 
-        # Mini Volume Scale
         self.vol_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0, 100, 1)
         self.vol_scale.set_name("serena-vol-scale")
         self.vol_scale.set_draw_value(False)
         self.vol_scale.set_value(self.status['vol'])
         self.vol_scale.connect("value-changed", self.on_vol_changed)
-        vbox_audio.pack_start(self.vol_scale, False, False, 0)
 
         self.card_audio.add(vbox_audio)
         quick_grid.pack_start(self.card_audio, True, True, 0)
+        card.pack_start(quick_grid, False, False, 0)
         card.pack_start(quick_grid, False, False, 0)
 
         # Update initial icon
@@ -971,7 +991,7 @@ class SerenaControlCenter(Gtk.Window):
         self.status['ime_note'] = note
 
         GLib.idle_add(lambda: (
-            self.lbl_ime_sub.set_markup(f"<span font='10.5' color='#E8C2D0'>{sub}</span>"),
+            self.lbl_ime_sub.set_markup(f"<span font='10' color='#E8C2D0'>{sub}</span>"),
             self.lbl_ime_note.set_markup(f"<span font='9.5' color='#A68595'>{note}</span>")
         ))
 
@@ -986,7 +1006,7 @@ class SerenaControlCenter(Gtk.Window):
                 self.updating_sliders = True
                 try:
                     self.vol_scale.set_value(vol)
-                    self.lbl_vol_val.set_markup(f"<span font='10.5' color='#E8C2D0'>{vol}%</span>")
+                    self.lbl_vol_val.set_markup(f"<span font='10' color='#E8C2D0'>{vol}%</span>")
                     self.update_vol_icon(vol, muted)
                 finally:
                     self.updating_sliders = False
@@ -1007,7 +1027,7 @@ class SerenaControlCenter(Gtk.Window):
             self.status['wifi_sub'] = sub
             self.status['wifi_ssid'] = ssid
             GLib.idle_add(lambda: (
-                self.lbl_wifi_sub.set_markup(f"<span font='10.5' color='#E8C2D0'>{sub}</span>"),
+                self.lbl_wifi_sub.set_markup(f"<span font='10' color='#E8C2D0'>{sub}</span>"),
                 self.lbl_wifi_ssid.set_markup(f"<span font='9.5' color='#A68595'>{ssid}</span>")
             ))
         except Exception:
