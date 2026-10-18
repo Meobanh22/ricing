@@ -26,7 +26,7 @@
   ],
 
   "custom/menu": {
-    "format": "<span color='#ff6b8b'>🌸</span> <span color='#fff0f3'><b>SERENA</b></span> <span color='#ff6b8b'>🌸</span>",
+    "format": "<span color='#ff2a55'>🌸</span> <span color='#fff0f5'><b>SERENA</b></span> <span color='#ff2a55'>🌸</span>",
     "tooltip": "Application Menu (Super + D)",
     "on-click": "rofi -show drun -theme ~/.config/rofi/serena.rasi"
   },
@@ -49,12 +49,12 @@
     "on-click": "playerctl play-pause",
     "on-click-right": "playerctl next",
     "on-click-middle": "playerctl previous",
-    "escape": true
+    "escape": false
   },
 
   "clock": {
-    "format": "<span color='#ff6b8b'></span> <span color='#fff0f3'><b>{0:%H:%M}</b></span>  <span color='#ff6b8b'>·</span>  <span color='#caaab8'>{0:%d/%m}</span>",
-    "format-alt": "<span color='#ff6b8b'></span> <span color='#fff0f3'><b>{0:%H:%M:%S}</b></span>  <span color='#ff6b8b'>·</span>  <span color='#caaab8'>{0:%A, %d/%m/%Y}</span>",
+    "format": "<span color='#ff2a55'></span> <span color='#fff0f5'><b>{0:%H:%M}</b></span>  <span color='#ff2a55'>·</span>  <span color='#e8c2d0'>{0:%d/%m}</span>",
+    "format-alt": "<span color='#ff2a55'></span> <span color='#fff0f5'><b>{0:%H:%M:%S}</b></span>  <span color='#ff2a55'>·</span>  <span color='#e8c2d0'>{0:%A, %d/%m/%Y}</span>",
     "interval": 1,
     "tooltip-format": "<tt><small>{calendar}</small></tt>",
     "tooltip": "Calendar & Dashboard (Super + C)",
@@ -64,14 +64,14 @@
   "custom/ime": {
     "exec": "~/.config/hypr/scripts/get_ime.sh",
     "interval": 1,
-    "format": "{}",
+    "format": "<span color='#ff2a55'>󰌌</span> {}",
     "tooltip": "Input Method VIE / ENG (Click to toggle)",
     "on-click": "~/.config/hypr/scripts/toggle_vietnamese.sh"
   },
 
   "pulseaudio": {
-    "format": "{icon} {volume}%",
-    "format-muted": "󰖁 Muted",
+    "format": "<span color='#ff2a55'>{icon}</span> {volume}%",
+    "format-muted": "<span color='#a68595'>󰖁</span> Muted",
     "format-icons": {
       "headphone": "󰋋",
       "hands-free": "󰋋",
@@ -84,9 +84,9 @@
   },
 
   "network": {
-    "format-wifi": "󰖩 {essid}",
-    "format-ethernet": "󰈀 Wired",
-    "format-disconnected": "󰖪 Offline",
+    "format-wifi": "<span color='#ff2a55'>󰖩</span> {essid}",
+    "format-ethernet": "<span color='#ff2a55'>󰈀</span> Wired",
+    "format-disconnected": "<span color='#a68595'>󰖪</span> Offline",
     "tooltip-format": "Wi-Fi: {essid} ({signalStrength}%)\n(Click: Network Settings | Right-click: Control Center)",
     "on-click": "nm-connection-editor",
     "on-click-right": "~/.config/hypr/scripts/toggle_control_center.sh"
@@ -98,17 +98,17 @@
       "warning": 30,
       "critical": 15
     },
-    "format": "{icon} {capacity}%",
-    "format-charging": "󰂄 {capacity}%",
-    "format-plugged": "󰚥 {capacity}%",
-    "format-alt": "{icon} {time}",
+    "format": "<span color='#ff2a55'>{icon}</span> {capacity}%",
+    "format-charging": "<span color='#7fa873'>󰂄</span> {capacity}%",
+    "format-plugged": "<span color='#7fa873'>󰚥</span> {capacity}%",
+    "format-alt": "<span color='#ff2a55'>{icon}</span> {time}",
     "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
     "tooltip-format": "Battery: {capacity}% ({time})\n(Right-click: Control Center)",
     "on-click-right": "~/.config/hypr/scripts/toggle_control_center.sh"
   },
 
   "custom/notification": {
-    "format": "󰂚",
+    "format": "<span color='#ff2a55'>󰂚</span>",
     "tooltip": "Control Center & Notifications (Super + N)",
     "on-click": "~/.config/hypr/scripts/toggle_control_center.sh",
     "on-click-right": "~/.config/hypr/scripts/toggle_control_center.sh"
