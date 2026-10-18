@@ -31,6 +31,7 @@ hl.env("XDG_SESSION_TYPE", "wayland")
 hl.env("XDG_SESSION_DESKTOP", "Hyprland")
 hl.env("GDK_BACKEND", "wayland,x11,*")
 hl.env("QT_QPA_PLATFORM", "wayland;xcb")
+hl.env("BROWSER", "microsoft-edge-stable")
 
 -- Bộ gõ Tiếng Việt (Fcitx5 Native Wayland chuẩn mượt)
 hl.env("GTK_IM_MODULE", "fcitx")
@@ -236,7 +237,7 @@ local mainMod = "SUPER"
 hl.bind(mainMod .. " + RETURN", hl.dsp.exec_cmd("kitty || gnome-terminal"))
 hl.bind(mainMod .. " + SPACE",  hl.dsp.exec_cmd("~/.config/hypr/scripts/OpenApps.sh"))
 hl.bind(mainMod .. " + E",      hl.dsp.exec_cmd("thunar || nautilus"))
-hl.bind(mainMod .. " + B",      hl.dsp.exec_cmd("firefox || google-chrome || brave-browser"))
+hl.bind(mainMod .. " + B",      hl.dsp.exec_cmd("microsoft-edge-stable || microsoft-edge || firefox || google-chrome"))
 
 -- Quản lý cửa sổ
 hl.bind(mainMod .. " + Q", hl.dsp.window.close())
