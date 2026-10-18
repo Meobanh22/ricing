@@ -27,3 +27,4 @@ fi
 rm -f "$PID_FILE"
 python3 "$SCRIPT_PATH" &
 exit 0
+

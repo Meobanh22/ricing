@@ -196,36 +196,17 @@ class Dashboard(Gtk.Window):
         if visual and screen.is_composited():
             self.set_visual(visual)
 
-        self.launch_time = time.time()
-        self.mouse_entered = False
-
         self.apply_css()
         self.build_ui()
 
         # Bấm Escape để tắt
         self.connect("key-press-event", self.on_key_press)
 
-        # Lắng nghe sự kiện hover và click ra ngoài (focus-out)
-        self.add_events(Gdk.EventMask.FOCUS_CHANGE_MASK | Gdk.EventMask.ENTER_NOTIFY_MASK)
-        self.connect("enter-notify-event", self.on_enter_notify)
-        self.connect("focus-out-event", self.on_focus_out)
-
         # Cập nhật thời gian & Uptime mỗi giây
         GLib.timeout_add(1000, self.update_clock)
         
         # Cập nhật thời tiết bất đồng bộ
         threading.Thread(target=self.fetch_weather_async, daemon=True).start()
-
-    def on_enter_notify(self, widget, event):
-        self.mouse_entered = True
-        return False
-
-    def on_focus_out(self, widget, event):
-        if time.time() - getattr(self, "launch_time", 0) < 0.8:
-            return False
-        if getattr(self, "mouse_entered", False):
-            self.close_and_quit()
-        return False
 
     def close_and_quit(self):
         if os.path.exists(PID_FILE):
