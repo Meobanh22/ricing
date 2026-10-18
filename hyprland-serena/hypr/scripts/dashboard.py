@@ -133,13 +133,13 @@ progressbar trough {
 }
 """
 
-PID_FILE = "/tmp/serena_dashboard.pid"
+PID_FILE = "/tmp/dashboard.pid"
 
-class SerenaDashboard(Gtk.Window):
+class Dashboard(Gtk.Window):
     def __init__(self):
-        super().__init__(title="Serena Dashboard")
+        super().__init__(title="Dashboard")
         self.set_name("dashboard-window")
-        self.set_wmclass("serena-dashboard", "serena-dashboard")
+        self.set_wmclass("dashboard", "dashboard")
         self.set_decorated(False)
         self.set_resizable(False)
 
@@ -326,8 +326,6 @@ class SerenaDashboard(Gtk.Window):
                 total_delta = total - self._prev_total
                 cpu_pct = 100.0 * (1.0 - idle_delta / max(1, total_delta))
             else:
-
-/* --- WORKSPACES (WINE CAPSULE PILL) --- */
                 cpu_pct = 5.0
             self._prev_idle = idle
             self._prev_total = total
@@ -393,7 +391,7 @@ def main():
     with open(PID_FILE, "w") as f:
         f.write(str(os.getpid()))
 
-    app = SerenaDashboard()
+    app = Dashboard()
     def cleanup_and_quit(*args):
         if os.path.exists(PID_FILE):
             try:

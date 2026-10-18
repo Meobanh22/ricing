@@ -3,8 +3,8 @@
 # 🌸 SERENA CONTROL CENTER TOGGLE (ULTRA-FAST & RELIABLE TOGGLE DISPATCHER)
 # ==============================================================================
 
-SCRIPT_PATH="$HOME/.config/hypr/scripts/serena_control_center.py"
-PID_FILE="/tmp/serena_control_center.pid"
+SCRIPT_PATH="$HOME/.config/hypr/scripts/control_center.py"
+PID_FILE="/tmp/control_center.pid"
 
 # 1. Kiểm tra nhanh bằng PID file (cực nhanh 0.1ms, không cần scan /proc)
 if [ -f "$PID_FILE" ]; then
@@ -17,8 +17,8 @@ if [ -f "$PID_FILE" ]; then
 fi
 
 # Fallback an toàn: nếu PID file bị lệch, dùng pkill
-if pgrep -f "serena_control_center.py" > /dev/null 2>&1; then
-    pkill -f "serena_control_center.py" 2>/dev/null || true
+if pgrep -f "control_center.py" > /dev/null 2>&1; then
+    pkill -f "control_center.py" 2>/dev/null || true
     rm -f "$PID_FILE"
     exit 0
 fi

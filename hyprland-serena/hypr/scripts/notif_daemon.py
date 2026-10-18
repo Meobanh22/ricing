@@ -19,8 +19,8 @@ import dbus
 from dbus.mainloop.glib import DBusGMainLoop
 from gi.repository import GLib
 
-CACHE_FILE = os.path.expanduser("~/.cache/serena_notifications.json")
-PID_FILE = "/tmp/serena_notif_daemon.pid"
+CACHE_FILE = os.path.expanduser("~/.cache/notifications.json")
+PID_FILE = "/tmp/notif_daemon.pid"
 
 MAX_NOTIFICATIONS = 20
 

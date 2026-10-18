@@ -1,0 +1,22 @@
+{
+    "python-envs.defaultEnvManager": "ms-python.python:system",
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportMissingImports": "none",
+        "reportMissingModuleSource": "none"
+    },
+    "python.analysis.extraPaths": [
+        "/usr/lib/python3/dist-packages",
+        "/usr/local/lib/python3.12/dist-packages"
+    ],
+    "css.lint.unknownAtRules": "ignore",
+    "less.lint.unknownAtRules": "ignore",
+    "scss.lint.unknownAtRules": "ignore",
+    "css.lint.validProperties": [
+        "-gtk-*"
+    ],
+    "files.associations": {
+        "*.rasi": "css",
+        "config": "jsonc",
+        "*.theme": "ini"
+    }
+}

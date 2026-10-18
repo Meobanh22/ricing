@@ -58,7 +58,7 @@
     "interval": 1,
     "tooltip-format": "<tt><small>{calendar}</small></tt>",
     "tooltip": "Calendar & Dashboard (Super + C)",
-    "on-click": "python3 ~/.config/hypr/scripts/serena_dashboard.py"
+    "on-click": "python3 ~/.config/hypr/scripts/dashboard.py"
   },
 
   "custom/ime": {

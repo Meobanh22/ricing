@@ -67,9 +67,9 @@ hl.on("hyprland.start", function ()
     -- 5. Kích hoạt bộ gõ Tiếng Việt Fcitx5 (hoặc IBus fallback)
     hl.exec_cmd("(fcitx5 -d --replace || ~/.config/hypr/scripts/init_ime.sh)")
 
-    -- 6. Trung tâm thông báo (SwayNC & Serena Real Notification Daemon)
+    -- 6. Trung tâm thông báo (SwayNC & Notification Daemon)
     hl.exec_cmd("swaync &")
-    hl.exec_cmd("python3 ~/.config/hypr/scripts/serena_notif_daemon.py &")
+    hl.exec_cmd("python3 ~/.config/hypr/scripts/notif_daemon.py &")
 
     -- 7. Khởi động Dịch vụ lưu trữ mật khẩu & mã hóa (GNOME Keyring)
     hl.exec_cmd("gnome-keyring-daemon --start --components=secrets,pkcs11,ssh")
@@ -243,7 +243,7 @@ hl.bind(mainMod .. " + F", function() hl.dispatch("fullscreen", "0") end)
 
 -- Bảng điều khiển & Tiện ích mở rộng
 hl.bind(mainMod .. " + ESCAPE",         hl.dsp.exec_cmd("~/.config/hypr/scripts/Wlogout.sh"))
-hl.bind(mainMod .. " + S",              hl.dsp.exec_cmd("python3 ~/.config/hypr/scripts/serena_dashboard.py"))
+hl.bind(mainMod .. " + S",              hl.dsp.exec_cmd("python3 ~/.config/hypr/scripts/dashboard.py"))
 hl.bind(mainMod .. " + N",              hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle_control_center.sh"))
 hl.bind("CTRL + SHIFT + ESCAPE",        hl.dsp.exec_cmd("kitty --class btop-serena -T 'Task Manager' btop"))
 

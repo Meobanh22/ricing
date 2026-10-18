@@ -224,6 +224,7 @@ if [ "$XDG_CURRENT_DESKTOP" = "Hyprland" ] || pgrep -x "Hyprland" &>/dev/null; t
         tail -5 "$HOME/.cache/waybar.log" 2>/dev/null || true
     fi
 
+    pkill -f dashboard.py 2>/dev/null || true
     pkill -f serena_dashboard.py 2>/dev/null || true
 fi
 

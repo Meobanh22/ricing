@@ -30,9 +30,9 @@ except Exception:
 
 from gi.repository import Gtk, Gdk, GLib
 
-PID_FILE = "/tmp/serena_control_center.pid"
-CACHE_FILE = os.path.expanduser("~/.cache/serena_notifications.json")
-STATUS_CACHE_FILE = "/tmp/serena_status.json"
+PID_FILE = "/tmp/control_center.pid"
+CACHE_FILE = os.path.expanduser("~/.cache/notifications.json")
+STATUS_CACHE_FILE = "/tmp/status.json"
 
 CSS_DATA = b"""
 * {
@@ -138,8 +138,8 @@ eventbox {
 /* Compact Volume Scale Slider */
 scale,
 scale.horizontal,
-#serena-vol-scale,
-scale#serena-vol-scale {
+#vol-scale,
+scale#vol-scale {
     margin: 4px 6px 2px 6px;
     padding: 0;
     -gtk-outline-radius: 3px;
@@ -148,8 +148,8 @@ scale#serena-vol-scale {
 
 scale trough,
 scale.horizontal trough,
-#serena-vol-scale trough,
-scale#serena-vol-scale trough {
+#vol-scale trough,
+scale#vol-scale trough {
     background-image: none;
     background-color: rgba(60, 24, 38, 0.85);
     border: none;
@@ -162,15 +162,15 @@ scale highlight,
 scale.horizontal highlight,
 scale trough highlight,
 scale.horizontal trough highlight,
-#serena-vol-scale highlight,
-scale#serena-vol-scale highlight,
-scale.horizontal#serena-vol-scale highlight,
-#serena-vol-scale trough highlight,
-scale#serena-vol-scale trough highlight,
-scale.horizontal#serena-vol-scale trough highlight,
-#serena-vol-scale highlight:hover,
-#serena-vol-scale highlight:focus,
-#serena-vol-scale highlight:active {
+#vol-scale highlight,
+scale#vol-scale highlight,
+scale.horizontal#vol-scale highlight,
+#vol-scale trough highlight,
+scale#vol-scale trough highlight,
+scale.horizontal#vol-scale trough highlight,
+#vol-scale highlight:hover,
+#vol-scale highlight:focus,
+#vol-scale highlight:active {
     background-image: none;
     background-color: #FF2A55;
     border: none;
@@ -180,8 +180,8 @@ scale.horizontal#serena-vol-scale trough highlight,
 
 scale slider,
 scale.horizontal slider,
-#serena-vol-scale slider,
-scale#serena-vol-scale slider {
+#vol-scale slider,
+scale#vol-scale slider {
     background-image: none;
     background-color: #FFFFFF;
     border: 2px solid #FF2A55;
@@ -195,8 +195,8 @@ scale#serena-vol-scale slider {
 
 scale slider:hover,
 scale.horizontal slider:hover,
-#serena-vol-scale slider:hover,
-scale#serena-vol-scale slider:hover {
+#vol-scale slider:hover,
+scale#vol-scale slider:hover {
     background-color: #FFF0F5;
     border-color: #FF597B;
     box-shadow: none;
@@ -388,7 +388,7 @@ def get_badge_info(app_name):
         return "notif-badge-default", "󰂚"
 
 def ensure_notif_daemon():
-    daemon_pid_file = "/tmp/serena_notif_daemon.pid"
+    daemon_pid_file = "/tmp/notif_daemon.pid"
     if os.path.exists(daemon_pid_file):
         try:
             with open(daemon_pid_file) as f:
@@ -398,17 +398,17 @@ def ensure_notif_daemon():
         except Exception:
             pass
 
-    script = os.path.expanduser("~/.config/hypr/scripts/serena_notif_daemon.py")
+    script = os.path.expanduser("~/.config/hypr/scripts/notif_daemon.py")
     if not os.path.exists(script):
-        script = "/home/meobanh/custom/ricing/hyprland-serena/hypr/scripts/serena_notif_daemon.py"
+        script = "/home/meobanh/custom/ricing/hyprland-serena/hypr/scripts/notif_daemon.py"
     try:
         subprocess.Popen(["python3", script], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except Exception:
         pass
 
-class SerenaControlCenter(Gtk.Window):
+class ControlCenter(Gtk.Window):
     def __init__(self):
-        super().__init__(title="Serena Control Center")
+        super().__init__(title="Control Center")
         self.set_name("control-center-window")
         self.set_decorated(False)
         self.set_resizable(False)
@@ -425,7 +425,7 @@ class SerenaControlCenter(Gtk.Window):
 
         if HAS_LAYER_SHELL:
             GtkLayerShell.init_for_window(self)
-            GtkLayerShell.set_namespace(self, "serena-control-center")
+            GtkLayerShell.set_namespace(self, "control-center")
             GtkLayerShell.set_layer(self, GtkLayerShell.Layer.TOP)
             GtkLayerShell.set_anchor(self, GtkLayerShell.Edge.TOP, True)
             GtkLayerShell.set_anchor(self, GtkLayerShell.Edge.RIGHT, True)
@@ -710,14 +710,13 @@ class SerenaControlCenter(Gtk.Window):
         vbox_audio.pack_start(self.lbl_vol_val, False, False, 0)
 
         self.vol_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0, 100, 1)
-        self.vol_scale.set_name("serena-vol-scale")
+        self.vol_scale.set_name("vol-scale")
         self.vol_scale.set_draw_value(False)
         self.vol_scale.set_value(self.status['vol'])
         self.vol_scale.connect("value-changed", self.on_vol_changed)
 
         self.card_audio.add(vbox_audio)
         quick_grid.pack_start(self.card_audio, True, True, 0)
-        card.pack_start(quick_grid, False, False, 0)
         card.pack_start(quick_grid, False, False, 0)
 
         # Update initial icon
@@ -1050,7 +1049,7 @@ def main():
     except Exception:
         pass
 
-    app = SerenaControlCenter()
+    app = ControlCenter()
 
     def cleanup(*args):
         if os.path.exists(PID_FILE):
