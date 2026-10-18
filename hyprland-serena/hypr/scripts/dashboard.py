@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 # ==============================================================================
-# 🌸 SERENA & SYLVEON CENTERPIECE DESKTOP DASHBOARD
+# 🌸 SERENA & SYLVEON PROFILE DASHBOARD
 # ==============================================================================
-# - Toggle được: Bấm Super + S hoặc click vào Đồng hồ để Bật/Tắt
-# - Bấm phím Escape hoặc nút ✕ góc trên để đóng
-# - Tự động thoát nếu đang có 1 bản chạy nền (Toggle switch)
+# - Profile-centric design featuring lockscreen avatar and user info
+# - Giant centerpiece clock & full calendar
+# - Real-time weather & dynamic uptime (CPU/RAM meters removed for minimalism)
+# - Toggleable: Super + S or Waybar Clock click
 # ==============================================================================
 
 import os
 import sys
 import time
-import calendar
 import datetime
 import threading
 import urllib.request
@@ -18,7 +18,8 @@ import json
 import gi
 
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk, GLib
+gi.require_version('GdkPixbuf', '2.0')
+from gi.repository import Gtk, Gdk, GdkPixbuf, GLib
 
 CSS_DATA = b"""
 * {
@@ -30,106 +31,139 @@ window#dashboard-window {
 }
 
 #main-card {
-    background-color: rgba(22, 23, 38, 0.96);
-    border: 1px solid #2E3048;
+    background-color: rgba(32, 16, 18, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 16px;
-    padding: 20px 24px;
+    padding: 16px 20px;
     box-shadow: none;
 }
 
-.title-serena {
-    color: #C82A2B;
-    font-size: 12.5px;
+.profile-card {
+    background-color: rgba(42, 26, 31, 0.95);
+    border: none;
+    border-radius: 14px;
+    padding: 16px 16px 14px 16px;
+}
+
+.profile-name {
+    color: #FFF0F5;
+    font-size: 15px;
     font-weight: 800;
-    letter-spacing: 2px;
+}
+
+.profile-user {
+    color: #FF2A55;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.profile-status {
+    background-color: rgba(58, 34, 42, 0.90);
+    color: #7FA873;
+    font-size: 9.5px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.info-item {
+    color: #E8C2D0;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.info-icon {
+    color: #FF2A55;
+    font-size: 11.5px;
+}
+
+.title-serena {
+    color: #FF2A55;
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
 }
 
 .btn-close {
-    color: #B4A5D0;
+    color: #A68595;
     background: transparent;
-    border: 1px solid transparent;
+    border: none;
     font-size: 13px;
     padding: 2px 7px;
     border-radius: 6px;
-    transition: all 0.15s ease;
+    transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .btn-close:hover {
-    background: #2E3048;
-    color: #C82A2B;
-    border-color: #C82A2B;
+    background: rgba(58, 34, 42, 0.98);
+    color: #FF2A55;
 }
 
 .clock-digits {
-    color: #FFF1D4;
-    font-size: 46px;
+    color: #FFF0F5;
+    font-size: 40px;
     font-weight: 800;
 }
 
 .clock-seconds {
-    color: #E59A44;
-    font-size: 20px;
+    color: #FF2A55;
+    font-size: 18px;
     font-weight: 700;
 }
 
 .date-text {
-    color: #B4A5D0;
-    font-size: 13px;
+    color: #E8C2D0;
+    font-size: 12px;
     font-weight: 600;
 }
 
+.card-tile {
+    background-color: rgba(42, 26, 31, 0.95);
+    border: none;
+    border-radius: 14px;
+    padding: 12px 14px;
+}
+
+.card-title {
+    color: #FF2A55;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
 .temp-text {
-    color: #E59A44;
-    font-size: 32px;
+    color: #FFF0F5;
+    font-size: 28px;
     font-weight: 800;
 }
 
 .weather-desc {
-    color: #FFF1D4;
-    font-size: 12.5px;
+    color: #E8C2D0;
+    font-size: 12px;
     font-weight: 600;
 }
 
-.stat-label {
-    color: #B4A5D0;
-    font-size: 11.5px;
-    font-weight: 600;
-}
-
-.stat-value {
-    color: #FFF1D4;
-    font-size: 11.5px;
-    font-weight: 700;
+.weather-sub {
+    color: #A68595;
+    font-size: 10px;
 }
 
 calendar {
-    color: #FFF1D4;
+    color: #FFF0F5;
     background-color: transparent;
     border: none;
-    font-size: 11px;
+    font-size: 10.5px;
 }
 
 calendar:selected {
-    background-color: #C82A2B;
+    background-color: #FF2A55;
     color: #FFFFFF;
     border-radius: 6px;
 }
 
 calendar.header {
-    color: #7772C2;
+    color: #E8C2D0;
     font-weight: bold;
-}
-
-progressbar progress {
-    background-color: #C82A2B;
-    border-radius: 4px;
-}
-
-progressbar trough {
-    background-color: #202135;
-    border: 1px solid #2E3048;
-    border-radius: 4px;
-    min-height: 8px;
 }
 """
 
@@ -143,19 +177,19 @@ class Dashboard(Gtk.Window):
         self.set_decorated(False)
         self.set_resizable(False)
 
-        # Định vị trí mở rộng ngay dưới đồng hồ Waybar (top-center dropdown)
+        # Định vị trí dropdown ngay dưới đồng hồ Waybar
         self.set_position(Gtk.WindowPosition.NONE)
         display = Gdk.Display.get_default()
         if display:
             monitor = display.get_primary_monitor() or display.get_monitor(0)
             if monitor:
                 geom = monitor.get_geometry()
-                dash_w = 760
+                dash_w = 720
                 x = geom.x + (geom.width - dash_w) // 2
                 y = geom.y + 46
                 self.move(x, y)
 
-        # Hỗ trợ nền trong suốt RGBA
+        # Nền trong suốt RGBA
         screen = self.get_screen()
         visual = screen.get_rgba_visual()
         if visual and screen.is_composited():
@@ -167,11 +201,10 @@ class Dashboard(Gtk.Window):
         # Bấm Escape để tắt
         self.connect("key-press-event", self.on_key_press)
 
-        # Cập nhật thời gian mỗi giây
+        # Cập nhật thời gian & Uptime mỗi giây
         GLib.timeout_add(1000, self.update_clock)
-        # Cập nhật thông số hệ thống mỗi 3 giây
-        GLib.timeout_add(3000, self.update_system_stats)
-        # Cập nhật thời tiết
+        
+        # Cập nhật thời tiết bất đồng bộ
         threading.Thread(target=self.fetch_weather_async, daemon=True).start()
 
     def on_key_press(self, widget, event):
@@ -187,13 +220,157 @@ class Dashboard(Gtk.Window):
         screen = Gdk.Screen.get_default()
         context.add_provider_for_screen(screen, css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
+    def load_avatar(self, size=86):
+        paths = [
+            os.path.expanduser("~/.config/hypr/serena_lock_avatar.png"),
+            "/home/meobanh/custom/ricing/hyprland-serena/hypr/serena_lock_avatar.png",
+            "/home/meobanh/custom/ricing/assets/serena_lock_avatar.png",
+        ]
+        avatar_path = None
+        for p in paths:
+            if os.path.exists(p):
+                avatar_path = p
+                break
+
+        if not avatar_path:
+            lbl = Gtk.Label()
+            lbl.set_markup("<span font='42'>🌸</span>")
+            return lbl
+
+        try:
+            import cairo
+            src = GdkPixbuf.Pixbuf.new_from_file_at_scale(avatar_path, size, size, True)
+            surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, size, size)
+            cr = cairo.Context(surface)
+            cr.set_antialias(cairo.ANTIALIAS_BEST)
+
+            # Khung tròn bo viền
+            cr.arc(size / 2.0, size / 2.0, size / 2.0 - 2.0, 0, 2 * 3.1415926535)
+            cr.clip()
+
+            w = src.get_width()
+            h = src.get_height()
+            Gdk.cairo_set_source_pixbuf(cr, src, (size - w) / 2.0, (size - h) / 2.0)
+            cr.paint()
+
+            # Viền đỏ ruy-băng mảnh sang trọng
+            cr.reset_clip()
+            cr.arc(size / 2.0, size / 2.0, size / 2.0 - 2.0, 0, 2 * 3.1415926535)
+            cr.set_source_rgba(1.0, 0.165, 0.333, 0.95) # #FF2A55
+            cr.set_line_width(2.0)
+            cr.stroke()
+
+            pixbuf = Gdk.pixbuf_get_from_surface(surface, 0, 0, size, size)
+            return Gtk.Image.new_from_pixbuf(pixbuf)
+        except Exception:
+            try:
+                pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(avatar_path, size, size, True)
+                return Gtk.Image.new_from_pixbuf(pixbuf)
+            except Exception:
+                lbl = Gtk.Label()
+                lbl.set_markup("<span font='42'>🌸</span>")
+                return lbl
+
     def build_ui(self):
-        main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14)
+        main_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=14)
         main_box.set_name("main-card")
 
-        # --- HEADER NHÃN SERENA & NÚT ĐÓNG ---
+        # =====================================================================
+        # 1. PROFILE HERO CARD (LEFT)
+        # =====================================================================
+        profile_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        profile_box.get_style_context().add_class("profile-card")
+        profile_box.set_size_request(225, -1)
+        profile_box.set_valign(Gtk.Align.FILL)
+
+        # Avatar container (centered)
+        avatar_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        avatar_box.set_halign(Gtk.Align.CENTER)
+        avatar_img = self.load_avatar(86)
+        avatar_box.pack_start(avatar_img, False, False, 0)
+        profile_box.pack_start(avatar_box, False, False, 2)
+
+        # Tên & Username
+        user_info_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+        user_info_box.set_halign(Gtk.Align.CENTER)
+
+        lbl_name = Gtk.Label(label="Serena")
+        lbl_name.get_style_context().add_class("profile-name")
+        user_info_box.pack_start(lbl_name, False, False, 0)
+
+        username = os.getenv("USER") or "meobanh"
+        lbl_username = Gtk.Label(label=f"@{username} · Kalos")
+        lbl_username.get_style_context().add_class("profile-user")
+        user_info_box.pack_start(lbl_username, False, False, 0)
+
+        # Status badge (Online / Active)
+        status_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        status_box.set_halign(Gtk.Align.CENTER)
+        lbl_status = Gtk.Label(label="● Active")
+        lbl_status.get_style_context().add_class("profile-status")
+        status_box.pack_start(lbl_status, False, False, 0)
+        user_info_box.pack_start(status_box, False, False, 4)
+
+        profile_box.pack_start(user_info_box, False, False, 0)
+
+        # Slogan / Bio
+        lbl_bio = Gtk.Label()
+        lbl_bio.set_line_wrap(True)
+        lbl_bio.set_justify(Gtk.Justification.CENTER)
+        lbl_bio.set_markup("<span font='9.5' color='#E8C2D0'><i>\"Bloom like a Ribbon,\nShine like a Rose\"</i></span>")
+        profile_box.pack_start(lbl_bio, False, False, 2)
+
+        # Đường phân cách nhẹ trong Profile
+        sep_profile = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+        profile_box.pack_start(sep_profile, False, False, 4)
+
+        # Thông tin hệ thống & Thời gian hoạt động (Uptime)
+        info_list_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        info_list_box.set_halign(Gtk.Align.START)
+        info_list_box.set_margin_start(8)
+        info_list_box.set_margin_end(8)
+
+        # Uptime
+        row_uptime = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        lbl_up_ic = Gtk.Label(label="󱑂")
+        lbl_up_ic.get_style_context().add_class("info-icon")
+        self.lbl_uptime = Gtk.Label(label="Uptime: --")
+        self.lbl_uptime.get_style_context().add_class("info-item")
+        row_uptime.pack_start(lbl_up_ic, False, False, 0)
+        row_uptime.pack_start(self.lbl_uptime, False, False, 0)
+        info_list_box.pack_start(row_uptime, False, False, 0)
+
+        # Desktop Environment / Window Manager
+        row_os = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        lbl_os_ic = Gtk.Label(label="󰌌")
+        lbl_os_ic.get_style_context().add_class("info-icon")
+        lbl_os = Gtk.Label(label="Hyprland Wayland")
+        lbl_os.get_style_context().add_class("info-item")
+        row_os.pack_start(lbl_os_ic, False, False, 0)
+        row_os.pack_start(lbl_os, False, False, 0)
+        info_list_box.pack_start(row_os, False, False, 0)
+
+        # Edition
+        row_ed = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        lbl_ed_ic = Gtk.Label(label="🌸")
+        lbl_ed_ic.get_style_context().add_class("info-icon")
+        lbl_ed = Gtk.Label(label="Serena Anime Rice")
+        lbl_ed.get_style_context().add_class("info-item")
+        row_ed.pack_start(lbl_ed_ic, False, False, 0)
+        row_ed.pack_start(lbl_ed, False, False, 0)
+        info_list_box.pack_start(row_ed, False, False, 0)
+
+        profile_box.pack_start(info_list_box, False, False, 2)
+        main_box.pack_start(profile_box, False, False, 0)
+
+        # =====================================================================
+        # 2. DASHBOARD TILES (RIGHT: CLOCK | CALENDAR | WEATHER)
+        # =====================================================================
+        right_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+
+        # Top Header (Title + Close Button)
         header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        lbl_brand = Gtk.Label(label="🌸 SERENA & SYLVEON DESKTOP 🌸")
+        lbl_brand = Gtk.Label(label="🌸 SERENA PROFILE DASHBOARD 🌸")
         lbl_brand.get_style_context().add_class("title-serena")
         header_box.pack_start(lbl_brand, True, True, 0)
 
@@ -201,157 +378,100 @@ class Dashboard(Gtk.Window):
         btn_close.get_style_context().add_class("btn-close")
         btn_close.connect("clicked", lambda x: Gtk.main_quit())
         header_box.pack_end(btn_close, False, False, 0)
+        right_box.pack_start(header_box, False, False, 0)
 
-        main_box.pack_start(header_box, False, False, 0)
+        # Big Center Clock & Date Card
+        clock_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+        clock_card.get_style_context().add_class("card-tile")
+        clock_card.set_halign(Gtk.Align.FILL)
 
-        # --- NỘI DUNG 3 CỘT (LỊCH | ĐỒNG HỒ | THỜI TIẾT) ---
-        content_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=26)
-
-        # Cột 1: Lịch
-        cal_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
-        lbl_cal_title = Gtk.Label(label="📅 CALENDAR")
-        lbl_cal_title.get_style_context().add_class("stat-label")
-        self.calendar = Gtk.Calendar()
-        self.calendar.set_display_options(
-            Gtk.CalendarDisplayOptions.SHOW_HEADING | 
-            Gtk.CalendarDisplayOptions.SHOW_DAY_NAMES
-        )
-        cal_box.pack_start(lbl_cal_title, False, False, 0)
-        cal_box.pack_start(self.calendar, True, True, 0)
-        content_box.pack_start(cal_box, False, False, 0)
-
-        # Cột 2: Đồng hồ khổng lồ (Trung tâm)
-        center_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
-        center_box.set_valign(Gtk.Align.CENTER)
-
-        clock_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
-        clock_box.set_halign(Gtk.Align.CENTER)
+        clock_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
+        clock_row.set_halign(Gtk.Align.CENTER)
         self.lbl_clock_hm = Gtk.Label(label="00:00")
         self.lbl_clock_hm.get_style_context().add_class("clock-digits")
         self.lbl_clock_sec = Gtk.Label(label=":00")
         self.lbl_clock_sec.get_style_context().add_class("clock-seconds")
         self.lbl_clock_sec.set_valign(Gtk.Align.END)
-        self.lbl_clock_sec.set_margin_bottom(8)
-        clock_box.pack_start(self.lbl_clock_hm, False, False, 0)
-        clock_box.pack_start(self.lbl_clock_sec, False, False, 0)
+        self.lbl_clock_sec.set_margin_bottom(6)
+        clock_row.pack_start(self.lbl_clock_hm, False, False, 0)
+        clock_row.pack_start(self.lbl_clock_sec, False, False, 0)
 
         self.lbl_date = Gtk.Label(label="Monday, 01 January 2026")
         self.lbl_date.get_style_context().add_class("date-text")
+        self.lbl_date.set_halign(Gtk.Align.CENTER)
 
-        self.lbl_slogan = Gtk.Label(label="✨ Bloom like a Ribbon, Shine like a Rose ✨")
-        self.lbl_slogan.get_style_context().add_class("stat-label")
+        clock_card.pack_start(clock_row, False, False, 0)
+        clock_card.pack_start(self.lbl_date, False, False, 2)
+        right_box.pack_start(clock_card, False, False, 0)
 
-        center_box.pack_start(clock_box, False, False, 0)
-        center_box.pack_start(self.lbl_date, False, False, 0)
-        center_box.pack_start(self.lbl_slogan, False, False, 4)
-        content_box.pack_start(center_box, True, True, 10)
+        # Bottom Grid (Calendar + Weather)
+        bottom_grid = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
 
-        # Cột 3: Thời tiết & Khí hậu
-        weather_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
-        weather_box.set_valign(Gtk.Align.CENTER)
+        # Calendar Card
+        cal_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+        cal_card.get_style_context().add_class("card-tile")
+        lbl_cal_title = Gtk.Label(label="📅 CALENDAR")
+        lbl_cal_title.get_style_context().add_class("card-title")
+        lbl_cal_title.set_halign(Gtk.Align.START)
+
+        self.calendar = Gtk.Calendar()
+        self.calendar.set_display_options(
+            Gtk.CalendarDisplayOptions.SHOW_HEADING | 
+            Gtk.CalendarDisplayOptions.SHOW_DAY_NAMES
+        )
+        cal_card.pack_start(lbl_cal_title, False, False, 0)
+        cal_card.pack_start(self.calendar, True, True, 0)
+        bottom_grid.pack_start(cal_card, True, True, 0)
+
+        # Weather Card
+        weather_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        weather_card.get_style_context().add_class("card-tile")
+        weather_card.set_valign(Gtk.Align.FILL)
+
         lbl_wt_title = Gtk.Label(label="🌤️ WEATHER")
-        lbl_wt_title.get_style_context().add_class("stat-label")
+        lbl_wt_title.get_style_context().add_class("card-title")
+        lbl_wt_title.set_halign(Gtk.Align.START)
+        weather_card.pack_start(lbl_wt_title, False, False, 0)
 
-        self.lbl_temp = Gtk.Label(label="28°C")
+        self.lbl_temp = Gtk.Label(label="--°C")
         self.lbl_temp.get_style_context().add_class("temp-text")
+        self.lbl_temp.set_halign(Gtk.Align.START)
+        weather_card.pack_start(self.lbl_temp, False, False, 2)
 
-        self.lbl_weather_desc = Gtk.Label(label="Partly Cloudy / Fair")
+        self.lbl_weather_desc = Gtk.Label(label="Loading weather...")
         self.lbl_weather_desc.get_style_context().add_class("weather-desc")
+        self.lbl_weather_desc.set_halign(Gtk.Align.START)
+        weather_card.pack_start(self.lbl_weather_desc, False, False, 0)
 
-        self.lbl_humidity = Gtk.Label(label="💧 Humidity: 65%  |  💨 12 km/h")
-        self.lbl_humidity.get_style_context().add_class("stat-label")
+        self.lbl_humidity = Gtk.Label(label="💧 Humidity: --%  |  💨 -- km/h")
+        self.lbl_humidity.get_style_context().add_class("weather-sub")
+        self.lbl_humidity.set_halign(Gtk.Align.START)
+        weather_card.pack_start(self.lbl_humidity, False, False, 2)
 
-        weather_box.pack_start(lbl_wt_title, False, False, 0)
-        weather_box.pack_start(self.lbl_temp, False, False, 0)
-        weather_box.pack_start(self.lbl_weather_desc, False, False, 0)
-        weather_box.pack_start(self.lbl_humidity, False, False, 2)
-        content_box.pack_start(weather_box, False, False, 0)
+        bottom_grid.pack_start(weather_card, True, True, 0)
+        right_box.pack_start(bottom_grid, True, True, 0)
 
-        main_box.pack_start(content_box, True, True, 0)
-
-        # --- THANH TIỆN ÍCH DƯỚI (STATS: CPU | RAM | UPTIME) ---
-        sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-        main_box.pack_start(sep, False, False, 2)
-
-        stats_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=20)
-        stats_box.set_halign(Gtk.Align.CENTER)
-
-        # CPU
-        self.cpu_bar = Gtk.ProgressBar()
-        self.cpu_bar.set_size_request(70, 6)
-        self.lbl_cpu = Gtk.Label(label=" CPU: 0%")
-        self.lbl_cpu.get_style_context().add_class("stat-value")
-        cpu_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=3)
-        cpu_box.pack_start(self.lbl_cpu, False, False, 0)
-        cpu_box.pack_start(self.cpu_bar, False, False, 0)
-        stats_box.pack_start(cpu_box, False, False, 0)
-
-        # RAM
-        self.ram_bar = Gtk.ProgressBar()
-        self.ram_bar.set_size_request(70, 6)
-        self.lbl_ram = Gtk.Label(label="󰍛 RAM: 0%")
-        self.lbl_ram.get_style_context().add_class("stat-value")
-        ram_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=3)
-        ram_box.pack_start(self.lbl_ram, False, False, 0)
-        ram_box.pack_start(self.ram_bar, False, False, 0)
-        stats_box.pack_start(ram_box, False, False, 0)
-
-        # Uptime
-        self.lbl_uptime = Gtk.Label(label="󱑂 Uptime: --")
-        self.lbl_uptime.get_style_context().add_class("stat-value")
-        self.lbl_uptime.set_valign(Gtk.Align.CENTER)
-        stats_box.pack_start(self.lbl_uptime, False, False, 8)
-
-        main_box.pack_start(stats_box, False, False, 0)
+        main_box.pack_start(right_box, True, True, 0)
 
         self.add(main_box)
         self.update_clock()
-        self.update_system_stats()
 
     def update_clock(self):
         now = datetime.datetime.now()
         self.lbl_clock_hm.set_text(now.strftime("%H:%M"))
         self.lbl_clock_sec.set_text(now.strftime(":%S"))
         self.lbl_date.set_text(now.strftime("%A, %d %B %Y"))
-        return True
 
-    def update_system_stats(self):
+        # Cập nhật Uptime trong profile card
         try:
-            with open('/proc/stat', 'r') as f:
-                fields = [float(x) for x in f.readline().strip().split()[1:5]]
-            idle = fields[3]
-            total = sum(fields)
-            if hasattr(self, '_prev_idle'):
-                idle_delta = idle - self._prev_idle
-                total_delta = total - self._prev_total
-                cpu_pct = 100.0 * (1.0 - idle_delta / max(1, total_delta))
-            else:
-                cpu_pct = 5.0
-            self._prev_idle = idle
-            self._prev_total = total
-
-            self.lbl_cpu.set_text(f" CPU: {int(cpu_pct)}%")
-            self.cpu_bar.set_fraction(min(1.0, max(0.0, cpu_pct / 100.0)))
-
-            with open('/proc/meminfo', 'r') as f:
-                mem = {}
-                for line in f:
-                    parts = line.split(':')
-                    if len(parts) == 2:
-                        mem[parts[0].strip()] = int(parts[1].strip().split()[0])
-            total_ram = mem.get('MemTotal', 1)
-            avail_ram = mem.get('MemAvailable', 0)
-            used_pct = ((total_ram - avail_ram) / total_ram) * 100.0
-            self.lbl_ram.set_text(f"󰍛 RAM: {int(used_pct)}%")
-            self.ram_bar.set_fraction(min(1.0, max(0.0, used_pct / 100.0)))
-
             with open('/proc/uptime', 'r') as f:
                 uptime_sec = float(f.readline().split()[0])
                 hours = int(uptime_sec // 3600)
                 minutes = int((uptime_sec % 3600) // 60)
-                self.lbl_uptime.set_text(f"󱑂 Uptime: {hours}h {minutes}m")
+                self.lbl_uptime.set_text(f"Uptime: {hours}h {minutes}m")
         except Exception:
             pass
+
         return True
 
     def fetch_weather_async(self):
