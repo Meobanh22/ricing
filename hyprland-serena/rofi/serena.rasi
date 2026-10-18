@@ -67,7 +67,7 @@ prompt {
 entry {
     padding: 6px;
     text-color: @fg-col;
-    placeholder: "Tìm kiếm ứng dụng...";
+    placeholder: "Search applications...";
     placeholder-color: @fg-muted;
 }
 

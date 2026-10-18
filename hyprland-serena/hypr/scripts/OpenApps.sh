@@ -25,7 +25,7 @@ fi
 
 # Fallback sang Wofi nếu không có Rofi
 if command -v wofi &> /dev/null; then
-    wofi --show drun --prompt "🌸 Tìm ứng dụng..."
+    wofi --show drun --prompt "🌸 Search apps..."
     exit 0
 fi
 
