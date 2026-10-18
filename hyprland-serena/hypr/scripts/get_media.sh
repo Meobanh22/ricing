@@ -19,3 +19,4 @@ else
     # Khi không có nhạc bật -> luôn hiển thị icon nốt nhạc 
     echo "{\"text\": \"\", \"tooltip\": \"No music playing\", \"class\": \"stopped\"}"
 fi
+

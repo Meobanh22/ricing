@@ -57,14 +57,24 @@ eventbox {
     border: none;
 }
 
-/* Main Outer Card - Deep Red-Black Container with Clean Ribbon Border */
+/* Main Outer Card - Deep Wine Container with Clean Neutral Border */
 #cc-main-card {
-    background-color: rgba(24, 8, 16, 0.97);
-    border: 1.5px solid rgba(255, 42, 85, 0.40);
+    background-color: rgba(22, 8, 15, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 24px;
     padding: 18px 18px 16px 18px;
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.80);
     min-width: 380px;
+}
+
+/* Header Flower Box */
+.header-flower-box {
+    background-color: rgba(45, 16, 30, 0.85);
+    border-radius: 10px;
+    min-width: 34px;
+    min-height: 34px;
+    padding: 0;
+    margin: 0;
 }
 
 /* Close Button */
@@ -80,24 +90,24 @@ eventbox {
 
 .btn-close:hover {
     color: #FF2A55;
-    background-color: rgba(255, 42, 85, 0.20);
+    background-color: rgba(255, 42, 85, 0.15);
 }
 
-/* Quick Action Cards (Top 3 Cards) - Minimalist Vibe */
+/* Quick Action Cards (Top 3 Cards) - Borderless Minimalist */
 .quick-card {
-    background-color: rgba(40, 14, 26, 0.94);
-    border: 1px solid rgba(255, 42, 85, 0.35);
+    background-color: rgba(40, 14, 26, 0.85);
+    border: none;
     border-radius: 16px;
     padding: 12px 6px 10px 6px;
-    transition: background-color 0.15s ease, border-color 0.15s ease;
+    transition: background-color 0.15s ease;
     box-shadow: none;
 }
 
-/* Card Hover Effect: Color change only, minimalist without shadows or glows */
+/* Card Hover Effect: Subtle background shift only, zero borders */
 .quick-card.card-hover,
 .quick-card:hover {
-    background-color: rgba(64, 20, 40, 0.96);
-    border-color: #FF2A55;
+    background-color: rgba(62, 22, 40, 0.95);
+    border: none;
     box-shadow: none;
 }
 
@@ -140,7 +150,7 @@ scale.horizontal trough,
 scale#serena-vol-scale trough {
     background-image: none;
     background-color: rgba(60, 24, 38, 0.85);
-    border: 1px solid rgba(255, 42, 85, 0.40);
+    border: none;
     border-radius: 3px;
     min-height: 5px;
     box-shadow: none;
@@ -161,7 +171,7 @@ scale.horizontal#serena-vol-scale trough highlight,
 #serena-vol-scale highlight:active {
     background-image: none;
     background-color: #FF2A55;
-    border: 1px solid #FF2A55;
+    border: none;
     border-radius: 3px;
     box-shadow: none;
 }
@@ -190,20 +200,20 @@ scale#serena-vol-scale slider:hover {
     box-shadow: none;
 }
 
-/* Notification Items - Minimalist */
+/* Notification Items - Borderless Minimalist */
 .notif-item {
-    background-color: rgba(36, 12, 24, 0.82);
-    border: 1px solid rgba(255, 42, 85, 0.25);
+    background-color: rgba(36, 12, 24, 0.70);
+    border: none;
     border-radius: 14px;
     padding: 10px 12px;
     margin: 3px 0;
-    transition: background-color 0.15s ease, border-color 0.15s ease;
+    transition: background-color 0.15s ease;
     box-shadow: none;
 }
 
 .notif-item:hover {
-    background-color: rgba(56, 18, 36, 0.95);
-    border-color: rgba(255, 42, 85, 0.60);
+    background-color: rgba(56, 18, 36, 0.90);
+    border: none;
     box-shadow: none;
 }
 
@@ -275,49 +285,49 @@ scale#serena-vol-scale slider:hover {
     background-color: rgba(255, 42, 85, 0.18);
 }
 
-/* Bottom Power Menu Card - Minimalist */
+/* Bottom Power Menu Card - Borderless Minimalist */
 .btn-power-card {
-    background-color: rgba(40, 14, 26, 0.94);
-    border: 1px solid rgba(255, 42, 85, 0.35);
+    background-color: rgba(40, 14, 26, 0.85);
+    border: none;
     border-radius: 16px;
     padding: 10px 16px;
-    transition: background-color 0.15s ease, border-color 0.15s ease;
+    transition: background-color 0.15s ease;
     box-shadow: none;
 }
 
 .btn-power-card.card-hover,
 .btn-power-card:hover {
-    background-color: rgba(64, 20, 40, 0.96);
-    border-color: #FF2A55;
+    background-color: rgba(62, 22, 40, 0.95);
+    border: none;
     box-shadow: none;
 }
 
-/* Subtle Power Ring: Soft muted in normal state, vibrant #FF2A55 on hover */
+/* Subtle Power Icon */
 .power-icon-circle {
-    border: 1.5px solid rgba(255, 42, 85, 0.40);
+    border: none;
     border-radius: 14px;
     min-width: 28px;
     min-height: 28px;
     padding: 0;
     margin: 0;
-    background-color: rgba(255, 42, 85, 0.12);
-    transition: background-color 0.15s ease, border-color 0.15s ease;
+    background-color: transparent;
+    transition: background-color 0.15s ease;
     box-shadow: none;
 }
 
 .power-icon {
-    color: #E8C2D0;
+    color: #FF2A55;
     transition: color 0.15s ease;
 }
 
 .btn-power-card.card-hover .power-icon-circle {
-    border-color: #FF2A55;
-    background-color: rgba(255, 42, 85, 0.25);
+    border: none;
+    background-color: transparent;
     box-shadow: none;
 }
 
 .btn-power-card.card-hover .power-icon {
-    color: #FF2A55;
+    color: #FF597B;
 }
 
 .power-label {
@@ -549,11 +559,22 @@ class SerenaControlCenter(Gtk.Window):
         # =====================================================
         # 1. HEADER (🌸 Control Center | Quick settings & notifications)
         # =====================================================
-        header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+
+        flower_box = Gtk.Box()
+        flower_box.get_style_context().add_class("header-flower-box")
+        flower_box.set_size_request(34, 34)
+        flower_box.set_valign(Gtk.Align.CENTER)
+        flower_box.set_halign(Gtk.Align.CENTER)
 
         lbl_flower = Gtk.Label()
-        lbl_flower.set_markup("<span font='22' color='#FF2A55'>🌸</span>")
-        header_box.pack_start(lbl_flower, False, False, 0)
+        lbl_flower.set_markup("<span font='16' color='#FF2A55'>🌸</span>")
+        lbl_flower.set_valign(Gtk.Align.CENTER)
+        lbl_flower.set_halign(Gtk.Align.CENTER)
+        lbl_flower.set_xalign(0.5)
+        lbl_flower.set_yalign(0.5)
+        flower_box.pack_start(lbl_flower, True, True, 0)
+        header_box.pack_start(flower_box, False, False, 0)
 
         title_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=1)
         lbl_title = Gtk.Label()

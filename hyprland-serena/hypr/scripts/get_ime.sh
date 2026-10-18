@@ -20,3 +20,4 @@ if [ "$CURR" = "Unikey" ]; then
 else
     echo "🇬🇧 ENG"
 fi
+
