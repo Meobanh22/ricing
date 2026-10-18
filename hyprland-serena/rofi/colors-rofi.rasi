@@ -1,31 +1,32 @@
 /* ==============================================================================
-   🌸 SERENA ROFI COLOR PALETTE (PHONG CÁCH 1: RED RIBBON)
-   Extracted from Serena Red Ribbon Theme (#FF2A55)
+   🌸 SERENA ROFI COLOR PALETTE (RED RIBBON OFFICIAL)
+   Locked Serena Palette: Warm Obsidian-Wine & Ribbon Red (#FF2A55)
    ============================================================================== */
 
 * {
     /* Deep Wine & Ruby Containers */
-    bg-col:             #180810f4;
-    bg-col-light:       #280e1a;
-    bg-surface-hover:   #401428;
-    border-col:         #ff2a5555;
-    border-focus:       #ff2a55;
+    bg-col:             #201011f5;
+    bg-col-light:       #2A1A1E;
+    bg-surface-hover:   #3A222A;
+    border-col:         rgba(255, 255, 255, 0.08);
+    border-subtle:      rgba(255, 42, 85, 0.25);
+    border-focus:       #FF2A55;
 
     /* Internal Component Accents */
-    crimson-accent:     #ff2a55;
-    crimson-hover:      #ff597b;
-    pink-accent:        #ff2a55;
-    amber-accent:       #e59a44;
-    lavender-accent:    #e8c2d0;
-    dusk-blue-accent:   #7772c2;
+    crimson-accent:     #FF2A55;
+    crimson-hover:      #FF597B;
+    pink-accent:        #FF2A55;
+    amber-accent:       #E59A44;
+    lavender-accent:    #E8C2D0;
+    dusk-blue-accent:   #7772C2;
 
     /* Text & Foreground */
-    fg-col:             #fff0f5;
-    fg-secondary:       #e8c2d0;
-    fg-muted:           #a68595;
-    fg-white:           #ffffff;
+    fg-col:             #FFF0F5;
+    fg-secondary:       #E8C2D0;
+    fg-muted:           #A68595;
+    fg-white:           #FFFFFF;
 
     /* Selection & Urgency */
-    selected-col:       #ff2a55;
-    urgent-col:         #e65e34;
+    selected-col:       #FF2A55;
+    urgent-col:         #E65E34;
 }

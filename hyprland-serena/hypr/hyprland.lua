@@ -233,6 +233,7 @@ local mainMod = "SUPER"
 -- Ứng dụng thường dùng
 hl.bind(mainMod .. " + RETURN", hl.dsp.exec_cmd("kitty || gnome-terminal"))
 hl.bind(mainMod .. " + SPACE",  hl.dsp.exec_cmd("~/.config/hypr/scripts/OpenApps.sh"))
+hl.bind(mainMod .. " + D",      hl.dsp.exec_cmd("~/.config/hypr/scripts/OpenApps.sh"))
 hl.bind(mainMod .. " + E",      hl.dsp.exec_cmd("thunar || nautilus"))
 hl.bind(mainMod .. " + B",      hl.dsp.exec_cmd("microsoft-edge-stable || microsoft-edge || firefox || google-chrome"))
 

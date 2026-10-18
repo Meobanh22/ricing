@@ -1,7 +1,6 @@
 /* ==============================================================================
-   🌸 SERENA & FENNEKIN ROFI FLAT LAUNCHER THEME
-   Clean Flat UI: Thin borders, flat surfaces, zero harsh shadows, unified palette.
-   Colors: Serena Crimson (#C82A2B), Midnight Dusk (#161726), Warm Ivory (#FFF1D4)
+   🌸 SERENA ROFI MINIMALIST APP LAUNCHER
+   Clean Flat UI: Neutral outer border, obsidian-wine background, ribbon red accents.
    ============================================================================== */
 
 configuration {
@@ -16,22 +15,25 @@ configuration {
 }
 
 * {
-    bg-col:             #161726f4;
-    bg-col-light:       #1c1d30;
-    border-col:         #2e3048;
-    selected-col:       #c82a2b;
-    crimson-hover:      #db3b32;
-    fg-col:             #fff1d4;
-    fg-secondary:       #b4a5d0;
-    fg-muted:           #757091;
-    fg-white:           #ffffff;
+    bg-col:             #201011f5;
+    bg-col-light:       #2A1A1E;
+    bg-hover:           #3A222A;
+    border-col:         rgba(255, 255, 255, 0.08);
+    border-subtle:      rgba(255, 42, 85, 0.25);
+    selected-col:       #FF2A55;
+    crimson-hover:      #FF597B;
+    urgent-col:         #E65E34;
+    fg-col:             #FFF0F5;
+    fg-secondary:       #E8C2D0;
+    fg-muted:           #A68595;
+    fg-white:           #FFFFFF;
 
     background-color: transparent;
     width: 640px;
 }
 
 window {
-    height: 460px;
+    height: 470px;
     border: 1px;
     border-color: @border-col;
     border-radius: 16px;
@@ -48,14 +50,14 @@ inputbar {
     children: [prompt, entry];
     background-color: @bg-col-light;
     border: 1px;
-    border-color: @border-col;
+    border-color: @border-subtle;
     border-radius: 12px;
     padding: 8px 12px;
 }
 
 prompt {
     background-color: @selected-col;
-    padding: 6px 12px;
+    padding: 6px 14px;
     text-color: @fg-white;
     border-radius: 8px;
     margin: 0px 8px 0px 0px;
@@ -89,15 +91,28 @@ element {
 element-icon {
     size: 26px;
     margin: 0 10px 0 0;
+    background-color: inherit;
+    text-color: inherit;
 }
 
 element-text {
     vertical-align: 0.5;
+    background-color: inherit;
     text-color: inherit;
     font-weight: 600;
 }
 
-element selected {
+element selected.normal, element selected {
     background-color: @selected-col;
+    text-color: @fg-white;
+}
+
+element selected.urgent {
+    background-color: @urgent-col;
+    text-color: @fg-white;
+}
+
+element selected.active {
+    background-color: @crimson-hover;
     text-color: @fg-white;
 }

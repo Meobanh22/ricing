@@ -13,9 +13,13 @@ if pgrep -x "rofi" > /dev/null; then
     exit 0
 fi
 
-# Chạy Rofi với theme chuẩn
+# Chạy Rofi với theme chuẩn Serena
 if command -v rofi &> /dev/null; then
-    rofi -show drun -modi drun,run,filebrowser
+    THEME_FILE="$HOME/.config/rofi/serena.rasi"
+    if [ ! -f "$THEME_FILE" ]; then
+        THEME_FILE="/home/meobanh/custom/ricing/hyprland-serena/rofi/serena.rasi"
+    fi
+    rofi -show drun -modi drun,run,filebrowser -theme "$THEME_FILE"
     exit 0
 fi
 
