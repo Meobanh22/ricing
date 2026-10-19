@@ -263,6 +263,42 @@ button.chip-btn-del:hover,
     border-style: none;
 }
 
+/* Dedicated Pin Button - Serena Red (#FF2A55) */
+button.chip-btn-pin,
+.chip-btn-pin {
+    background-image: none;
+    background-color: transparent;
+    border-width: 0;
+    border-style: none;
+    border-color: transparent;
+    box-shadow: none;
+    outline: none;
+    padding: 1px 4px;
+    margin: 0;
+    min-height: 0;
+    min-width: 0;
+    border-radius: 4px;
+    color: #FF2A55;
+    transition: background-color 150ms ease, color 150ms ease;
+}
+
+button.chip-btn-pin:hover,
+.chip-btn-pin:hover {
+    background-color: rgba(255, 42, 85, 0.20);
+    color: #FF597B;
+}
+
+button.chip-btn-pin.pinned,
+.chip-btn-pin.pinned {
+    background-color: rgba(255, 42, 85, 0.28);
+    color: #FF2A55;
+}
+
+button.chip-btn-pin.pinned:hover {
+    background-color: rgba(255, 42, 85, 0.45);
+    color: #FFFFFF;
+}
+
 /* Card Action Button (Zoom / Copy) */
 button.chip-btn-action,
 .chip-btn-action {
@@ -367,17 +403,28 @@ button.chip-btn-action:hover,
 
 scrollbar {
     background-color: transparent;
+    border: none;
 }
 
-scrollbar slider {
-    background-color: rgba(255, 42, 85, 0.35);
+scrollbar.vertical {
+    background-color: transparent;
+    border: none;
+    margin-left: 8px;
+    margin-right: -4px;
+    padding: 0;
+}
+
+scrollbar.vertical slider {
+    background-color: rgba(255, 42, 85, 0.40);
     border-radius: 3px;
     min-width: 4px;
-    min-height: 4px;
+    min-height: 28px;
+    margin-left: 6px;
 }
 
-scrollbar slider:hover {
+scrollbar.vertical slider:hover {
     background-color: #FF2A55;
+    min-width: 5px;
 }
 """
 
@@ -701,7 +748,7 @@ class SerenaAndroidShelf(Gtk.Window):
         vbox.set_margin_end(4)
 
         self.clip_search = Gtk.SearchEntry()
-        self.clip_search.set_placeholder_text("󰍉  Search clips...")
+        self.clip_search.set_placeholder_text("Search clips...")
         self.clip_search.get_style_context().add_class("search-entry")
         self.clip_search.set_margin_bottom(6)
         self.clip_search.connect("search-changed", lambda e: self.refresh_clipboard())
@@ -724,6 +771,8 @@ class SerenaAndroidShelf(Gtk.Window):
         self.clip_flow.set_row_spacing(10)
         self.clip_flow.set_column_spacing(10)
         self.clip_flow.set_homogeneous(True)
+        self.clip_flow.set_margin_end(12)
+        self.clip_flow.set_margin_start(2)
 
         self.clip_scroll.add(self.clip_flow)
         vbox.pack_start(self.clip_scroll, True, True, 0)
@@ -842,17 +891,18 @@ class SerenaAndroidShelf(Gtk.Window):
         # Right actions in header: Pin + Zoom (if image) + Delete
         right_hdr = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=3)
 
-        # Pin button (Ghim copy - Request 2)
+        # Pin button (Ghim copy - Always Serena Red #FF2A55)
         btn_pin = Gtk.Button()
         btn_pin.set_relief(Gtk.ReliefStyle.NONE)
         btn_pin.get_style_context().add_class("flat")
-        btn_pin.get_style_context().add_class("chip-btn-del")
+        btn_pin.get_style_context().add_class("chip-btn-pin")
         lbl_p = Gtk.Label()
         if item.get("is_pinned"):
-            lbl_p.set_markup("<span font='10' color='#FF2A55'>󰤲</span>")
+            btn_pin.get_style_context().add_class("pinned")
+            lbl_p.set_markup("<span font='10.5' color='#FF2A55'>󰤲</span>")
             btn_pin.set_tooltip_text("Unpin clip")
         else:
-            lbl_p.set_markup("<span font='10' color='#A68595'>󰤱</span>")
+            lbl_p.set_markup("<span font='10.5' color='#FF2A55'>󰤱</span>")
             btn_pin.set_tooltip_text("Pin clip to top")
         btn_pin.add(lbl_p)
         btn_pin.connect("clicked", lambda b: self.toggle_pin_clip(item))
@@ -1012,6 +1062,8 @@ class SerenaAndroidShelf(Gtk.Window):
         self.shelf_flow.set_row_spacing(10)
         self.shelf_flow.set_column_spacing(10)
         self.shelf_flow.set_homogeneous(True)
+        self.shelf_flow.set_margin_end(12)
+        self.shelf_flow.set_margin_start(2)
 
         self.shelf_scroll.add(self.shelf_flow)
         self.content_shelf_box.pack_start(self.shelf_scroll, True, True, 0)
