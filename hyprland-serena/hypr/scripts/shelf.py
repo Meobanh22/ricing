@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 # ==============================================================================
-# 🌸 SERENA COMPACT QUICK SHELF & CLIPBOARD MANAGER
+# 🌸 SERENA ANDROID-STYLE QUICK SHELF & CLIPBOARD MANAGER
 # ==============================================================================
-# Compact slide-down top-centered overlay (320x310px):
-#   1. Real-time Clipboard History (Text & Images via cliphist)
-#   2. File & Image Drop Shelf (Temporary staging area for drag & drop)
-# Follows Serena Anime Minimalist UI/UX Guidelines (AGENTS.md)
+# Android Gboard / Material You inspired dynamic chip grid (FlowBox):
+#   - Variable-sized squircle chips fitting seamlessly into columns
+#   - Dynamic window sizing adapting naturally to content
+#   - No duplicate entries, no annoying numbering/IDs
+#   - Zero grey: 100% Serena Warm Obsidian-Wine & Ribbon Red tokens
+#   - Drag-and-drop shelf with full thumbnail previews & drag-out
 # ==============================================================================
 
 import os
@@ -27,7 +29,6 @@ PID_FILE = "/tmp/serena_shelf.pid"
 MODE_FILE = "/tmp/serena_shelf.mode"
 os.makedirs(SHELF_DIR, exist_ok=True)
 
-# Drag & Drop Target Types
 TARGET_URI_LIST = 80
 TARGET_TEXT = 81
 
@@ -40,9 +41,8 @@ DRAG_SOURCE_TARGETS = [
     Gtk.TargetEntry.new("text/uri-list", 0, TARGET_URI_LIST),
 ]
 
-# Strict Serena Theme CSS — Zero Ugly Grey!
+# Pure Serena Anime Minimalist CSS — ZERO GREY!
 CSS = b"""
-/* 1. Global Reset - Remove all default GTK grey backgrounds & borders */
 * {
     font-family: "JetBrains Mono", "Inter", sans-serif;
     outline: none;
@@ -56,16 +56,15 @@ window {
     background-color: transparent;
 }
 
-/* 2. Main Window Shell */
+/* Main Container: Dynamic width & smooth rounded bottom */
 .shelf-window {
     background-color: rgba(32, 16, 18, 0.98);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-top: none;
-    border-radius: 0 0 14px 14px;
+    border-radius: 0 0 16px 16px;
     padding: 10px 12px;
 }
 
-/* 3. Button Universal Reset */
 button {
     background-image: none;
     background-color: transparent;
@@ -74,7 +73,7 @@ button {
     padding: 0;
 }
 
-/* 4. Tab Switcher (Segmented Pill) */
+/* Header Switcher */
 .tab-switcher {
     background-color: rgba(48, 31, 32, 0.95);
     border-radius: 8px;
@@ -89,7 +88,7 @@ button {
     font-weight: 600;
     border: none;
     border-radius: 6px;
-    padding: 4px 10px;
+    padding: 4px 12px;
     transition: background-color 150ms ease, color 150ms ease;
 }
 
@@ -102,7 +101,6 @@ button {
     color: #FFFFFF;
 }
 
-/* 5. Header Action Buttons */
 .action-btn {
     background-image: none;
     background-color: rgba(42, 26, 31, 0.95);
@@ -124,7 +122,7 @@ button {
     background-image: none;
     background-color: transparent;
     color: #A68595;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
     border: none;
     border-radius: 6px;
@@ -137,7 +135,7 @@ button {
     background-color: rgba(42, 26, 31, 0.50);
 }
 
-/* 6. Search Entry */
+/* Search Entry */
 entry,
 searchentry {
     background-image: none;
@@ -146,7 +144,7 @@ searchentry {
     font-size: 11.5px;
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 8px;
-    padding: 4px 8px;
+    padding: 5px 10px;
     margin-bottom: 8px;
     caret-color: #FF2A55;
     box-shadow: none;
@@ -163,66 +161,66 @@ searchentry image {
     color: #A68595;
 }
 
-/* 7. Compact Cards & Items */
-.item-card {
-    background-color: rgba(42, 26, 31, 0.95);
-    border-radius: 8px;
+/* Android Gboard Style Flowbox & Chips */
+flowbox {
+    background-color: transparent;
+}
+
+flowboxchild {
+    background-color: transparent;
+    padding: 0;
+    margin: 0;
+    outline: none;
     border: none;
-    padding: 6px 8px;
-    margin-bottom: 4px;
+}
+
+flowboxchild:selected {
+    background-color: transparent;
+}
+
+.chip-card {
+    background-color: rgba(42, 26, 31, 0.95);
+    border-radius: 10px;
+    border: none;
+    padding: 8px 10px;
     transition: background-color 150ms ease;
 }
 
-.item-card:hover {
+.chip-card:hover {
     background-color: rgba(58, 34, 42, 0.98);
 }
 
-.item-title {
+.chip-text {
     color: #FFF0F5;
-    font-size: 11.5px;
-    font-weight: 500;
+    font-size: 11px;
+    line-height: 1.35;
 }
 
-.item-meta {
+.chip-meta {
+    color: #A68595;
+    font-size: 9.5px;
+    margin-top: 4px;
+}
+
+.chip-btn-del {
     color: #A68595;
     font-size: 10px;
-}
-
-.item-icon-box {
-    background-color: rgba(48, 31, 32, 0.95);
-    border-radius: 6px;
-    min-width: 26px;
-    min-height: 26px;
-}
-
-.item-btn {
-    background-image: none;
-    background-color: transparent;
-    color: #A68595;
-    font-size: 10.5px;
-    font-weight: 600;
-    border: none;
+    padding: 2px 4px;
     border-radius: 4px;
-    padding: 2px 6px;
-    transition: color 150ms ease, background-color 150ms ease;
+    transition: color 150ms ease;
 }
 
-.item-btn:hover {
-    color: #FFF0F5;
-    background-color: rgba(48, 31, 32, 0.95);
-}
-
-.item-btn.btn-delete:hover {
+.chip-btn-del:hover {
     color: #FF2A55;
 }
 
-/* 8. Compact Drop Zone */
+/* Drop Zone */
 .drop-zone {
     border: 1.5px dashed rgba(255, 42, 85, 0.4);
-    border-radius: 10px;
+    border-radius: 12px;
     background-color: rgba(42, 26, 31, 0.4);
-    padding: 22px 14px;
-    margin: 8px 0;
+    padding: 24px 16px;
+    margin: 6px 0;
 }
 
 .drop-zone:hover {
@@ -232,7 +230,7 @@ searchentry image {
 
 .drop-icon {
     color: #FF2A55;
-    font-size: 26px;
+    font-size: 28px;
 }
 
 .drop-title {
@@ -248,7 +246,6 @@ searchentry image {
     margin-top: 2px;
 }
 
-/* 9. Status Bar & Scrollbar */
 .status-bar {
     color: #A68595;
     font-size: 10px;
@@ -272,7 +269,7 @@ scrollbar slider:hover {
 """
 
 
-class SerenaCompactShelf(Gtk.Window):
+class SerenaAndroidShelf(Gtk.Window):
     def __init__(self, initial_tab="clip"):
         super().__init__(type=Gtk.WindowType.TOPLEVEL)
 
@@ -287,9 +284,9 @@ class SerenaCompactShelf(Gtk.Window):
         GtkLayerShell.set_margin(self, GtkLayerShell.Edge.TOP, 0)
         GtkLayerShell.set_keyboard_mode(self, GtkLayerShell.KeyboardMode.ON_DEMAND)
 
-        # 2. Compact Dimensions (~half the previous size: 320x310px)
+        # Dynamic comfortable width (360px: perfect for 2 columns of Android chips)
         self.set_title("Serena Shelf")
-        self.set_default_size(320, 310)
+        self.set_default_size(360, -1)
         self.set_resizable(False)
 
         # Apply CSS
@@ -301,37 +298,28 @@ class SerenaCompactShelf(Gtk.Window):
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
         )
 
-        # State Variables
         self.active_tab = initial_tab
         self.last_mode_mtime = 0
         self.last_clip_mtime = 0
 
-        # Ensure cliphist daemon is alive & capture current clipboard immediately
+        # Ensure daemon is running
         self.ensure_cliphist_daemon()
-        self.store_current_clipboard()
 
         # Build UI
         self.build_ui()
 
-        # Event connections
+        # Events
         self.connect("key-press-event", self.on_key_press)
         self.connect("destroy", self.on_destroy)
 
-        # Drag-and-drop destination
+        # Drag-and-drop target for whole window
         self.drag_dest_set(Gtk.DestDefaults.ALL, DROP_TARGETS, Gdk.DragAction.COPY | Gdk.DragAction.MOVE)
         self.connect("drag-data-received", self.on_window_drag_data_received)
-
-        # Listen to Gtk Clipboard changes
-        try:
-            self.gtk_clip = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
-            self.gtk_clip.connect("owner-change", self.on_clipboard_owner_change)
-        except Exception:
-            pass
 
         # Switch to initial tab
         self.switch_tab(initial_tab)
 
-        # Periodic updates: mode file (hotkey switch) & cliphist db watcher
+        # Timers: hotkey mode check & cliphist db watcher
         GLib.timeout_add(150, self.check_mode_change)
         GLib.timeout_add(300, self.check_cliphist_update)
 
@@ -344,27 +332,17 @@ class SerenaCompactShelf(Gtk.Window):
         except Exception:
             pass
 
-    def store_current_clipboard(self):
-        try:
-            res = subprocess.run(["wl-paste"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-            if res.returncode == 0 and res.stdout:
-                p = subprocess.Popen(["cliphist", "store"], stdin=subprocess.PIPE, stderr=subprocess.DEVNULL)
-                p.communicate(input=res.stdout)
-        except Exception:
-            pass
-
     def build_ui(self):
         main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         main_box.get_style_context().add_class("shelf-window")
 
-        # --- COMPACT HEADER ---
+        # --- HEADER ---
         header_hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
 
-        # Tab Switcher
         tab_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
         tab_box.get_style_context().add_class("tab-switcher")
 
-        self.btn_tab_clip = Gtk.Button(label="📋 Clip")
+        self.btn_tab_clip = Gtk.Button(label="📋 Clipboard")
         self.btn_tab_clip.get_style_context().add_class("tab-btn")
         self.btn_tab_clip.connect("clicked", lambda w: self.switch_tab("clip"))
         tab_box.pack_start(self.btn_tab_clip, False, False, 0)
@@ -376,24 +354,21 @@ class SerenaCompactShelf(Gtk.Window):
 
         header_hbox.pack_start(tab_box, False, False, 0)
 
-        # Right Header Actions
+        # Right actions
         self.header_actions_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
 
-        # Button: Stash Clipboard
         self.btn_stash_clip = Gtk.Button(label="📋 Stash")
         self.btn_stash_clip.get_style_context().add_class("action-btn")
-        self.btn_stash_clip.set_tooltip_text("Save current clipboard image/file into shelf")
+        self.btn_stash_clip.set_tooltip_text("Save current clipboard into shelf")
         self.btn_stash_clip.connect("clicked", self.on_stash_clipboard_clicked)
         self.header_actions_box.pack_start(self.btn_stash_clip, False, False, 0)
 
-        # Button: Clear
         self.btn_clear_all = Gtk.Button(label="🗑️")
         self.btn_clear_all.get_style_context().add_class("action-btn")
-        self.btn_clear_all.set_tooltip_text("Clear all items")
+        self.btn_clear_all.set_tooltip_text("Clear all")
         self.btn_clear_all.connect("clicked", self.on_clear_clicked)
         self.header_actions_box.pack_start(self.btn_clear_all, False, False, 0)
 
-        # Button: Close
         btn_close = Gtk.Button(label="✕")
         btn_close.get_style_context().add_class("btn-close")
         btn_close.set_tooltip_text("Close (Esc)")
@@ -408,17 +383,15 @@ class SerenaCompactShelf(Gtk.Window):
         self.stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
         self.stack.set_transition_duration(120)
 
-        # Page 1: Clipboard
         self.clip_page = self.build_clipboard_page()
         self.stack.add_named(self.clip_page, "clip")
 
-        # Page 2: File Shelf
         self.shelf_page = self.build_shelf_page()
         self.stack.add_named(self.shelf_page, "shelf")
 
         main_box.pack_start(self.stack, True, True, 4)
 
-        # --- COMPACT FOOTER ---
+        # --- FOOTER ---
         self.lbl_status = Gtk.Label(label="Tip: Drag items out to upload · Esc to close")
         self.lbl_status.get_style_context().add_class("status-bar")
         self.lbl_status.set_halign(Gtk.Align.START)
@@ -427,33 +400,47 @@ class SerenaCompactShelf(Gtk.Window):
         self.add(main_box)
 
     # =========================================================================
-    # TAB 1: CLIPBOARD
+    # TAB 1: CLIPBOARD (ANDROID GBOARD CHIP GRID)
     # =========================================================================
     def build_clipboard_page(self):
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
 
         self.clip_search = Gtk.SearchEntry()
-        self.clip_search.set_placeholder_text("🔍 Filter clips...")
+        self.clip_search.set_placeholder_text("🔍 Search clips...")
         self.clip_search.get_style_context().add_class("search-entry")
         self.clip_search.connect("search-changed", lambda e: self.refresh_clipboard())
         vbox.pack_start(self.clip_search, False, False, 0)
 
+        # Dynamic Natural Height ScrolledWindow (Expands with items up to 380px)
         self.clip_scroll = Gtk.ScrolledWindow()
         self.clip_scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
-        self.clip_scroll.set_min_content_height(210)
+        self.clip_scroll.set_propagate_natural_height(True)
+        self.clip_scroll.set_min_content_height(80)
+        self.clip_scroll.set_max_content_height(380)
 
-        self.clip_list_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=3)
-        self.clip_scroll.add(self.clip_list_box)
+        # Android-Style FlowBox (2 columns of dynamic cards)
+        self.clip_flow = Gtk.FlowBox()
+        self.clip_flow.set_valign(Gtk.Align.START)
+        self.clip_flow.set_max_children_per_line(2)
+        self.clip_flow.set_min_children_per_line(1)
+        self.clip_flow.set_selection_mode(Gtk.SelectionMode.NONE)
+        self.clip_flow.set_row_spacing(6)
+        self.clip_flow.set_column_spacing(6)
+        self.clip_flow.set_homogeneous(False)
+
+        self.clip_scroll.add(self.clip_flow)
         vbox.pack_start(self.clip_scroll, True, True, 0)
 
         return vbox
 
     def refresh_clipboard(self):
-        for child in self.clip_list_box.get_children():
-            self.clip_list_box.remove(child)
+        for child in self.clip_flow.get_children():
+            self.clip_flow.remove(child)
 
         query = self.clip_search.get_text().strip().lower()
         clips = []
+        seen_previews = set()
+
         try:
             res = subprocess.run(["cliphist", "list"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
             if res.returncode == 0 and res.stdout:
@@ -463,6 +450,13 @@ class SerenaCompactShelf(Gtk.Window):
                     parts = line.split("\t", 1)
                     clip_id = parts[0]
                     preview = parts[1] if len(parts) > 1 else ""
+
+                    # Deduplicate exact same text/preview
+                    norm_preview = preview.strip()
+                    if norm_preview in seen_previews:
+                        continue
+                    seen_previews.add(norm_preview)
+
                     is_image = "[[ binary data" in preview
 
                     if query and query not in preview.lower():
@@ -480,92 +474,88 @@ class SerenaCompactShelf(Gtk.Window):
         if not clips:
             empty_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
             empty_box.set_valign(Gtk.Align.CENTER)
-            empty_box.set_margin_top(45)
+            empty_box.set_halign(Gtk.Align.CENTER)
+            empty_box.set_margin_top(30)
+            empty_box.set_margin_bottom(30)
 
             lbl_icon = Gtk.Label()
-            lbl_icon.set_markup("<span font='24' color='#A68595'>📋</span>")
+            lbl_icon.set_markup("<span font='22' color='#A68595'>📋</span>")
             empty_box.pack_start(lbl_icon, False, False, 0)
 
             lbl_msg = Gtk.Label()
             lbl_msg.set_markup("<span font='11' color='#A68595'>No clipboard items found</span>")
             empty_box.pack_start(lbl_msg, False, False, 0)
 
-            self.clip_list_box.pack_start(empty_box, True, True, 0)
-            self.clip_list_box.show_all()
+            self.clip_flow.add(empty_box)
+            self.clip_flow.show_all()
             return
 
-        for item in clips[:30]:
-            card = self.create_clip_card(item)
-            self.clip_list_box.pack_start(card, False, False, 0)
+        # Render first 24 items in Android-style FlowBox
+        for item in clips[:24]:
+            chip = self.create_android_clip_chip(item)
+            self.clip_flow.add(chip)
 
-        self.clip_list_box.show_all()
+        self.clip_flow.show_all()
 
-    def create_clip_card(self, item):
+    def create_android_clip_chip(self, item):
         event_box = Gtk.EventBox()
-        event_box.get_style_context().add_class("item-card")
+        event_box.get_style_context().add_class("chip-card")
+        event_box.set_size_request(162, -1)
 
-        card_hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=3)
 
-        # Icon
-        icon_box = Gtk.Box()
-        icon_box.get_style_context().add_class("item-icon-box")
-        icon_box.set_size_request(26, 26)
-        icon_box.set_valign(Gtk.Align.CENTER)
-        icon_box.set_halign(Gtk.Align.CENTER)
+        # Top row: Type indicator + Quick Delete button
+        top_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
 
         lbl_icon = Gtk.Label()
-        lbl_icon.set_markup("<span font='11' color='#FF2A55'>󰋩</span>" if item["is_image"] else "<span font='11' color='#FF2A55'>󰈙</span>")
-        lbl_icon.set_valign(Gtk.Align.CENTER)
-        lbl_icon.set_halign(Gtk.Align.CENTER)
-        icon_box.pack_start(lbl_icon, True, True, 0)
-        card_hbox.pack_start(icon_box, False, False, 0)
+        lbl_icon.set_markup("<span font='10' color='#FF2A55'>󰋩 Image</span>" if item["is_image"] else "<span font='10' color='#A68595'>󰈙 Text</span>")
+        top_row.pack_start(lbl_icon, False, False, 0)
 
-        # Details
-        vbox_info = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=1)
-        vbox_info.set_valign(Gtk.Align.CENTER)
-
-        if item["is_image"]:
-            lbl_title = Gtk.Label(label="Image Clip")
-            lbl_title.get_style_context().add_class("item-title")
-            lbl_title.set_halign(Gtk.Align.START)
-            vbox_info.pack_start(lbl_title, False, False, 0)
-
-            sub_txt = item["preview"].replace("[[ binary data", "").replace("]]", "").strip()
-            lbl_sub = Gtk.Label(label=sub_txt)
-            lbl_sub.get_style_context().add_class("item-meta")
-            lbl_sub.set_halign(Gtk.Align.START)
-            vbox_info.pack_start(lbl_sub, False, False, 0)
-        else:
-            clean_txt = item["preview"].replace("\n", " ").strip()
-            if len(clean_txt) > 36:
-                clean_txt = clean_txt[:34] + "..."
-            lbl_title = Gtk.Label(label=clean_txt)
-            lbl_title.get_style_context().add_class("item-title")
-            lbl_title.set_halign(Gtk.Align.START)
-            lbl_title.set_ellipsize(Pango.EllipsizeMode.END)
-            vbox_info.pack_start(lbl_title, False, False, 0)
-
-            lbl_sub = Gtk.Label(label=f"Clip #{item['id']}")
-            lbl_sub.get_style_context().add_class("item-meta")
-            lbl_sub.set_halign(Gtk.Align.START)
-            vbox_info.pack_start(lbl_sub, False, False, 0)
-
-        card_hbox.pack_start(vbox_info, True, True, 0)
-
-        # Quick Delete
         btn_del = Gtk.Button(label="✕")
-        btn_del.get_style_context().add_class("item-btn")
-        btn_del.get_style_context().add_class("btn-delete")
+        btn_del.get_style_context().add_class("chip-btn-del")
         btn_del.set_tooltip_text("Delete")
-        btn_del.set_valign(Gtk.Align.CENTER)
         btn_del.connect("clicked", lambda b: self.delete_clip(item))
-        card_hbox.pack_end(btn_del, False, False, 0)
+        top_row.pack_end(btn_del, False, False, 0)
 
-        event_box.add(card_hbox)
-        event_box.connect("button-press-event", lambda w, e: self.on_clip_clicked(item, e))
+        vbox.pack_start(top_row, False, False, 0)
+
+        # Content: Image thumbnail or Text snippet
+        if item["is_image"]:
+            # Image chip
+            try:
+                p = subprocess.Popen(["cliphist", "decode"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+                img_data, _ = p.communicate(input=item["raw"].encode("utf-8"))
+                loader = GdkPixbuf.PixbufLoader()
+                loader.write(img_data)
+                loader.close()
+                pixbuf = loader.get_pixbuf()
+                # Scale nicely into chip (max 150x80)
+                scaled = pixbuf.scale_simple(145, 75, GdkPixbuf.InterpType.BILINEAR)
+                img = Gtk.Image.new_from_pixbuf(scaled)
+                vbox.pack_start(img, False, False, 2)
+            except Exception:
+                lbl_fallback = Gtk.Label(label="[Image Preview]")
+                lbl_fallback.get_style_context().add_class("chip-text")
+                vbox.pack_start(lbl_fallback, False, False, 0)
+        else:
+            # Text chip with wrap
+            clean_txt = item["preview"].strip()
+            lbl_txt = Gtk.Label()
+            lbl_txt.get_style_context().add_class("chip-text")
+            lbl_txt.set_text(clean_txt)
+            lbl_txt.set_line_wrap(True)
+            lbl_txt.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR)
+            lbl_txt.set_max_width_chars(18)
+            lbl_txt.set_lines(4)
+            lbl_txt.set_ellipsize(Pango.EllipsizeMode.END)
+            lbl_txt.set_halign(Gtk.Align.START)
+            vbox.pack_start(lbl_txt, False, False, 2)
+
+        event_box.add(vbox)
+        event_box.connect("button-press-event", lambda w, e: self.on_clip_chip_clicked(item, e))
         return event_box
 
-    def on_clip_clicked(self, item, event):
+    def on_clip_chip_clicked(self, item, event):
         if event.button == 1:
             try:
                 p = subprocess.Popen(["cliphist", "decode"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
@@ -576,8 +566,8 @@ class SerenaCompactShelf(Gtk.Window):
                 else:
                     p2 = subprocess.Popen(["wl-copy"], stdin=subprocess.PIPE)
                     p2.communicate(input=out)
-                self.show_toast("✨ Copied to clipboard!")
-                GLib.timeout_add(300, self.close_window)
+                self.show_toast("✨ Copied!")
+                GLib.timeout_add(250, self.close_window)
             except Exception as e:
                 print("Error copying clip:", e)
 
@@ -590,24 +580,34 @@ class SerenaCompactShelf(Gtk.Window):
             pass
 
     # =========================================================================
-    # TAB 2: FILE SHELF
+    # TAB 2: FILE SHELF (ANDROID GRID CHIPS)
     # =========================================================================
     def build_shelf_page(self):
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
 
         self.shelf_scroll = Gtk.ScrolledWindow()
         self.shelf_scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
-        self.shelf_scroll.set_min_content_height(235)
+        self.shelf_scroll.set_propagate_natural_height(True)
+        self.shelf_scroll.set_min_content_height(80)
+        self.shelf_scroll.set_max_content_height(380)
 
-        self.shelf_list_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
-        self.shelf_scroll.add(self.shelf_list_box)
+        self.shelf_flow = Gtk.FlowBox()
+        self.shelf_flow.set_valign(Gtk.Align.START)
+        self.shelf_flow.set_max_children_per_line(2)
+        self.shelf_flow.set_min_children_per_line(1)
+        self.shelf_flow.set_selection_mode(Gtk.SelectionMode.NONE)
+        self.shelf_flow.set_row_spacing(6)
+        self.shelf_flow.set_column_spacing(6)
+        self.shelf_flow.set_homogeneous(False)
+
+        self.shelf_scroll.add(self.shelf_flow)
         vbox.pack_start(self.shelf_scroll, True, True, 0)
 
         return vbox
 
     def refresh_shelf(self):
-        for child in self.shelf_list_box.get_children():
-            self.shelf_list_box.remove(child)
+        for child in self.shelf_flow.get_children():
+            self.shelf_flow.remove(child)
 
         files = []
         try:
@@ -624,10 +624,11 @@ class SerenaCompactShelf(Gtk.Window):
         if not files:
             drop_box = Gtk.EventBox()
             drop_box.get_style_context().add_class("drop-zone")
+            drop_box.set_size_request(335, -1)
             drop_box.drag_dest_set(Gtk.DestDefaults.ALL, DROP_TARGETS, Gdk.DragAction.COPY | Gdk.DragAction.MOVE)
             drop_box.connect("drag-data-received", self.on_drop_zone_received)
 
-            v_content = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+            v_content = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=3)
             v_content.set_valign(Gtk.Align.CENTER)
             v_content.set_halign(Gtk.Align.CENTER)
 
@@ -645,87 +646,81 @@ class SerenaCompactShelf(Gtk.Window):
             v_content.pack_start(lbl_sub, False, False, 0)
 
             drop_box.add(v_content)
-            self.shelf_list_box.pack_start(drop_box, True, True, 10)
-            self.shelf_list_box.show_all()
+            self.shelf_flow.add(drop_box)
+            self.shelf_flow.show_all()
             return
 
         for fpath, mtime in files:
-            card = self.create_shelf_card(fpath, mtime)
-            self.shelf_list_box.pack_start(card, False, False, 0)
+            chip = self.create_android_shelf_chip(fpath, mtime)
+            self.shelf_flow.add(chip)
 
-        self.shelf_list_box.show_all()
+        self.shelf_flow.show_all()
 
-    def create_shelf_card(self, fpath, mtime):
+    def create_android_shelf_chip(self, fpath, mtime):
         event_box = Gtk.EventBox()
-        event_box.get_style_context().add_class("item-card")
+        event_box.get_style_context().add_class("chip-card")
+        event_box.set_size_request(162, -1)
 
-        # Drag-and-drop source (drag OUT!)
+        # Drag-out source
         event_box.drag_source_set(Gdk.ModifierType.BUTTON1_MASK, DRAG_SOURCE_TARGETS, Gdk.DragAction.COPY)
         event_box.connect("drag-data-get", self.on_shelf_drag_data_get, fpath)
 
-        card_hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=3)
 
         fname = os.path.basename(fpath)
         fsize = os.path.getsize(fpath)
+        size_str = self.format_file_size(fsize)
         is_image = fname.lower().endswith((".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp", ".svg"))
 
-        if is_image:
-            try:
-                pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(fpath, 28, 28, True)
-                img = Gtk.Image.new_from_pixbuf(pixbuf)
-                img.set_size_request(28, 28)
-                card_hbox.pack_start(img, False, False, 0)
-            except Exception:
-                icon_box = Gtk.Box()
-                icon_box.get_style_context().add_class("item-icon-box")
-                icon_box.set_size_request(26, 26)
-                lbl = Gtk.Label()
-                lbl.set_markup("<span font='11' color='#FF2A55'>󰋩</span>")
-                icon_box.pack_start(lbl, True, True, 0)
-                card_hbox.pack_start(icon_box, False, False, 0)
-        else:
-            icon_box = Gtk.Box()
-            icon_box.get_style_context().add_class("item-icon-box")
-            icon_box.set_size_request(26, 26)
-            lbl = Gtk.Label()
-            lbl.set_markup("<span font='11' color='#FF2A55'>󰈙</span>")
-            icon_box.pack_start(lbl, True, True, 0)
-            card_hbox.pack_start(icon_box, False, False, 0)
-
-        # File Info
-        vbox_info = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=1)
-        vbox_info.set_valign(Gtk.Align.CENTER)
-
-        short_name = fname if len(fname) < 26 else fname[:23] + "..."
-        lbl_title = Gtk.Label(label=short_name)
-        lbl_title.get_style_context().add_class("item-title")
-        lbl_title.set_halign(Gtk.Align.START)
-        vbox_info.pack_start(lbl_title, False, False, 0)
-
-        size_str = self.format_file_size(fsize)
-        lbl_sub = Gtk.Label(label=f"{size_str} · Drag out")
-        lbl_sub.get_style_context().add_class("item-meta")
-        lbl_sub.set_halign(Gtk.Align.START)
-        vbox_info.pack_start(lbl_sub, False, False, 0)
-
-        card_hbox.pack_start(vbox_info, True, True, 0)
-
-        # Copy & Delete Buttons
-        btn_copy = Gtk.Button(label="Copy")
-        btn_copy.get_style_context().add_class("item-btn")
-        btn_copy.set_valign(Gtk.Align.CENTER)
-        btn_copy.connect("clicked", lambda b: self.copy_shelf_file(fpath, is_image))
-        card_hbox.pack_end(btn_copy, False, False, 0)
+        # Top row: Icon / Format + Delete button
+        top_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
+        lbl_type = Gtk.Label()
+        lbl_type.set_markup("<span font='9.5' color='#FF2A55'>󰋩 Image</span>" if is_image else "<span font='9.5' color='#A68595'>󰈙 File</span>")
+        top_row.pack_start(lbl_type, False, False, 0)
 
         btn_del = Gtk.Button(label="✕")
-        btn_del.get_style_context().add_class("item-btn")
-        btn_del.get_style_context().add_class("btn-delete")
-        btn_del.set_valign(Gtk.Align.CENTER)
+        btn_del.get_style_context().add_class("chip-btn-del")
+        btn_del.set_tooltip_text("Remove")
         btn_del.connect("clicked", lambda b: self.remove_shelf_file(fpath))
-        card_hbox.pack_end(btn_del, False, False, 0)
+        top_row.pack_end(btn_del, False, False, 0)
+        vbox.pack_start(top_row, False, False, 0)
 
-        event_box.add(card_hbox)
+        # Preview thumbnail
+        if is_image:
+            try:
+                pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(fpath, 145, 75, True)
+                img = Gtk.Image.new_from_pixbuf(pixbuf)
+                vbox.pack_start(img, False, False, 2)
+            except Exception:
+                pass
+
+        # Filename
+        short_name = fname if len(fname) < 22 else fname[:19] + "..."
+        lbl_name = Gtk.Label(label=short_name)
+        lbl_name.get_style_context().add_class("chip-text")
+        lbl_name.set_halign(Gtk.Align.START)
+        vbox.pack_start(lbl_name, False, False, 0)
+
+        # Bottom info row
+        bottom_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
+        lbl_size = Gtk.Label(label=size_str)
+        lbl_size.get_style_context().add_class("chip-meta")
+        bottom_row.pack_start(lbl_size, False, False, 0)
+
+        btn_copy = Gtk.Button(label="Copy")
+        btn_copy.get_style_context().add_class("chip-btn-del")
+        btn_copy.connect("clicked", lambda b: self.copy_shelf_file(fpath, is_image))
+        bottom_row.pack_end(btn_copy, False, False, 0)
+        vbox.pack_start(bottom_row, False, False, 0)
+
+        event_box.add(vbox)
+        event_box.connect("button-press-event", lambda w, e: self.on_shelf_chip_clicked(fpath, e))
         return event_box
+
+    def on_shelf_chip_clicked(self, fpath, event):
+        if event.button == 1:
+            # Single click open
+            subprocess.Popen(["xdg-open", fpath])
 
     def on_shelf_drag_data_get(self, widget, context, data, info, time_val, fpath):
         uri = GLib.filename_to_uri(fpath)
@@ -741,7 +736,7 @@ class SerenaCompactShelf(Gtk.Window):
                 uri = GLib.filename_to_uri(fpath)
                 p = subprocess.Popen(["wl-copy", "--type", "text/uri-list"], stdin=subprocess.PIPE)
                 p.communicate(input=uri.encode("utf-8"))
-            self.show_toast("✨ File copied to clipboard!")
+            self.show_toast("✨ Copied!")
         except Exception as e:
             print("Error copying file:", e)
 
@@ -779,24 +774,22 @@ class SerenaCompactShelf(Gtk.Window):
         if count > 0:
             self.switch_tab("shelf")
             self.refresh_shelf()
-            self.show_toast(f"📦 Stashed {count} file(s)!")
+            self.show_toast(f"📦 Stashed {count} item(s)!")
 
     def on_stash_clipboard_clicked(self, btn):
-        # 1. Grab image from clipboard
         try:
             res = subprocess.run(["wl-paste", "--type", "image/png"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             if res.returncode == 0 and res.stdout:
-                filename = f"screenshot_{int(time.time())}.png"
+                filename = f"image_{int(time.time())}.png"
                 filepath = os.path.join(SHELF_DIR, filename)
                 with open(filepath, "wb") as f:
                     f.write(res.stdout)
                 self.refresh_shelf()
-                self.show_toast(f"📸 Saved image: {filename}")
+                self.show_toast(f"📸 Saved image!")
                 return
         except Exception:
             pass
 
-        # 2. Grab file URI from clipboard
         try:
             res = subprocess.run(["wl-paste", "--type", "text/uri-list"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
             if res.returncode == 0 and res.stdout:
@@ -815,7 +808,6 @@ class SerenaCompactShelf(Gtk.Window):
         except Exception:
             pass
 
-        # 3. Grab text snippet
         try:
             res = subprocess.run(["wl-paste"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
             if res.returncode == 0 and res.stdout.strip():
@@ -824,7 +816,7 @@ class SerenaCompactShelf(Gtk.Window):
                 with open(filepath, "w", encoding="utf-8") as f:
                     f.write(res.stdout)
                 self.refresh_shelf()
-                self.show_toast(f"📝 Stashed text: {filename}")
+                self.show_toast("📝 Stashed text!")
                 return
         except Exception:
             pass
@@ -835,7 +827,7 @@ class SerenaCompactShelf(Gtk.Window):
         if self.active_tab == "clip":
             subprocess.run(["cliphist", "wipe"], stderr=subprocess.DEVNULL)
             self.refresh_clipboard()
-            self.show_toast("🗑️ Clipboard cleared")
+            self.show_toast("🗑️ Cleared")
         else:
             try:
                 for fname in os.listdir(SHELF_DIR):
@@ -847,9 +839,6 @@ class SerenaCompactShelf(Gtk.Window):
             except Exception:
                 pass
 
-    # =========================================================================
-    # TAB SWITCHING & REAL-TIME LISTENERS
-    # =========================================================================
     def switch_tab(self, tab_name):
         self.active_tab = tab_name
         if tab_name == "clip":
@@ -876,16 +865,7 @@ class SerenaCompactShelf(Gtk.Window):
 
     def show_toast(self, message):
         self.lbl_status.set_text(message)
-        GLib.timeout_add(2500, lambda: self.lbl_status.set_text("Tip: Drag items out to upload · Esc to close"))
-
-    def on_clipboard_owner_change(self, clip, event):
-        GLib.timeout_add(150, self.on_clipboard_updated)
-
-    def on_clipboard_updated(self):
-        self.store_current_clipboard()
-        if self.active_tab == "clip":
-            self.refresh_clipboard()
-        return False
+        GLib.timeout_add(2200, lambda: self.lbl_status.set_text("Tip: Drag items out to upload · Esc to close"))
 
     def check_cliphist_update(self):
         if os.path.exists(CLIPHIST_DB):
@@ -953,7 +933,7 @@ def main():
     with open(MODE_FILE, "w") as f:
         f.write(mode)
 
-    win = SerenaCompactShelf(initial_tab=mode)
+    win = SerenaAndroidShelf(initial_tab=mode)
     win.show_all()
     if mode == "clip":
         win.btn_stash_clip.hide()

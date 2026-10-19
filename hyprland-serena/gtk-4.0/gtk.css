@@ -1,7 +1,7 @@
 /* ==============================================================================
    🌸 SERENA ANIME MINIMALIST GTK-4.0 THEME
    Strict adherence to Serena Design Guidelines (AGENTS.md)
-   Warm Obsidian-Wine & Ribbon Red (#FF2A55)
+   Warm Obsidian-Wine & Ribbon Red (#FF2A55) — Zero Grey!
    ============================================================================== */
 
 @define-color bg_window #201011;
@@ -17,7 +17,7 @@
 @define-color text_secondary #E8C2D0;
 @define-color text_muted #A68595;
 
-/* GTK4 Theme Colors */
+/* Libadwaita / GTK4 Variables */
 @define-color window_bg_color #201011;
 @define-color window_fg_color #FFF0F5;
 @define-color view_bg_color #201011;
@@ -31,9 +31,15 @@
 @define-color accent_color #FF2A55;
 @define-color accent_bg_color #FF2A55;
 @define-color accent_fg_color #FFFFFF;
+@define-color popover_bg_color #2A1A1E;
+@define-color popover_fg_color #FFF0F5;
+@define-color dialog_bg_color #201011;
+@define-color dialog_fg_color #FFF0F5;
 
 * {
     font-family: "JetBrains Mono", "Inter", sans-serif;
+    outline: none;
+    box-shadow: none;
 }
 
 window,
@@ -42,28 +48,25 @@ window,
     color: @text_primary;
 }
 
+/* Image Viewer (Loupe) */
+window.loupe,
+.loupe-image-view,
+picture-view,
+canvas {
+    background-color: @bg_window;
+}
+
 headerbar {
     background-color: @bg_window;
     border-bottom: 1px solid @border_window;
     color: @text_primary;
 }
 
-.navigation-sidebar,
-listview.navigation-sidebar {
-    background-color: @bg_card;
-    color: @text_secondary;
-    border-right: 1px solid @border_window;
-}
-
-.navigation-sidebar row:selected {
-    background-color: @accent;
-    color: #FFFFFF;
-}
-
 button {
+    background-image: none;
     background-color: @bg_card;
     color: @text_secondary;
-    border: none;
+    border: 1px solid @border_window;
     border-radius: 8px;
     padding: 6px 12px;
     transition: background-color 150ms ease, color 150ms ease;
@@ -83,7 +86,20 @@ button.suggested-action:hover {
     background-color: @accent_hover;
 }
 
+.navigation-sidebar,
+listview.navigation-sidebar {
+    background-color: @bg_card;
+    color: @text_secondary;
+    border-right: 1px solid @border_window;
+}
+
+.navigation-sidebar row:selected {
+    background-color: @accent;
+    color: #FFFFFF;
+}
+
 entry {
+    background-image: none;
     background-color: @bg_card;
     color: @text_primary;
     border: 1px solid @border_window;
@@ -112,4 +128,3 @@ scrollbar slider {
 scrollbar slider:hover {
     background-color: @accent;
 }
-
