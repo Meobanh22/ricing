@@ -20,6 +20,8 @@ import shutil
 import json
 import subprocess
 import cairo
+import socket
+import glob
 
 import gi
 gi.require_version('Gtk', '3.0')
@@ -409,22 +411,39 @@ scrollbar {
 scrollbar.vertical {
     background-color: transparent;
     border: none;
-    margin-left: 8px;
-    margin-right: -4px;
+    margin-left: 6px;
+    margin-right: -2px;
     padding: 0;
 }
 
 scrollbar.vertical slider {
-    background-color: rgba(255, 42, 85, 0.40);
-    border-radius: 3px;
-    min-width: 4px;
-    min-height: 28px;
-    margin-left: 6px;
+    background-color: rgba(255, 42, 85, 0.48);
+    border-radius: 4px;
+    min-width: 7px;
+    min-height: 38px;
+    margin-left: 4px;
+    transition: background-color 150ms ease, min-width 150ms ease;
 }
 
 scrollbar.vertical slider:hover {
     background-color: #FF2A55;
-    min-width: 5px;
+    min-width: 9px;
+}
+
+/* Header Drag Handle Zone */
+.drag-grip-zone {
+    cursor: grab;
+    padding: 2px 8px;
+    border-radius: 6px;
+    transition: background-color 150ms ease;
+}
+
+.drag-grip-zone:hover {
+    background-color: rgba(255, 42, 85, 0.12);
+}
+
+.drag-grip-zone:active {
+    cursor: grabbing;
 }
 """
 
@@ -433,15 +452,37 @@ class SerenaAndroidShelf(Gtk.Window):
     def __init__(self, initial_tab="clip"):
         super().__init__(type=Gtk.WindowType.TOPLEVEL)
 
-        # 1. Main Layer Shell Setup (Anchor Top, Centered)
+        # 1. Main Layer Shell Setup (Anchor Top-Left with dynamic draggable margins)
+        screen_w, screen_h = self.get_monitor_geometry()
+        init_x = int((screen_w - 440) / 2)
+        init_y = 44
+
+        # Restore saved position from temporary session cache if available
+        POS_CACHE = "/tmp/serena_shelf_pos.json"
+        if os.path.exists(POS_CACHE):
+            try:
+                with open(POS_CACHE, "r") as f:
+                    saved_pos = json.load(f)
+                    init_x = max(10, min(screen_w - 450, saved_pos.get("x", init_x)))
+                    init_y = max(10, min(screen_h - 100, saved_pos.get("y", init_y)))
+            except Exception:
+                pass
+
+        self.current_win_x = init_x
+        self.current_win_y = init_y
+        self.is_dragging = False
+        self.drag_offset_x = 0
+        self.drag_offset_y = 0
+
         GtkLayerShell.init_for_window(self)
         GtkLayerShell.set_namespace(self, "shelf")
         GtkLayerShell.set_layer(self, GtkLayerShell.Layer.TOP)
         GtkLayerShell.set_anchor(self, GtkLayerShell.Edge.TOP, True)
         GtkLayerShell.set_anchor(self, GtkLayerShell.Edge.BOTTOM, False)
-        GtkLayerShell.set_anchor(self, GtkLayerShell.Edge.LEFT, False)
+        GtkLayerShell.set_anchor(self, GtkLayerShell.Edge.LEFT, True)
         GtkLayerShell.set_anchor(self, GtkLayerShell.Edge.RIGHT, False)
-        GtkLayerShell.set_margin(self, GtkLayerShell.Edge.TOP, 44)
+        GtkLayerShell.set_margin(self, GtkLayerShell.Edge.TOP, self.current_win_y)
+        GtkLayerShell.set_margin(self, GtkLayerShell.Edge.LEFT, self.current_win_x)
         GtkLayerShell.set_keyboard_mode(self, GtkLayerShell.KeyboardMode.ON_DEMAND)
 
         # Dynamic comfortable width (440px: spacious 2-column cards & drop frame)
@@ -507,6 +548,86 @@ class SerenaAndroidShelf(Gtk.Window):
         cr.paint()
         cr.set_operator(cairo.OPERATOR_OVER)
         return False
+
+    # =========================================================================
+    # DRAGGABLE WINDOW LOGIC (Hyprland IPC Cursor Querying)
+    # =========================================================================
+    def get_cursor_pos(self):
+        try:
+            xdg = os.environ.get('XDG_RUNTIME_DIR', f'/run/user/{os.getuid()}')
+            sig = os.environ.get('HYPRLAND_INSTANCE_SIGNATURE', '')
+            sock_path = f"{xdg}/hypr/{sig}/.socket.sock" if sig else ""
+            if not sock_path or not os.path.exists(sock_path):
+                socks = glob.glob(f"{xdg}/hypr/*/.socket.sock")
+                sock_path = socks[0] if socks else None
+            if sock_path:
+                s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+                s.settimeout(0.05)
+                s.connect(sock_path)
+                s.sendall(b"cursorpos")
+                res = s.recv(256).decode('utf-8', errors='ignore').strip()
+                s.close()
+                parts = res.split(',')
+                return int(parts[0].strip()), int(parts[1].strip())
+        except Exception:
+            pass
+        return None
+
+    def on_header_button_press(self, widget, event):
+        if event.button == 1:
+            if event.type == Gdk.EventType._2BUTTON_PRESS:
+                # Double click: reset back to top-center
+                mon_w, mon_h = self.get_monitor_geometry()
+                self.current_win_x = int((mon_w - 440) / 2)
+                self.current_win_y = 44
+                GtkLayerShell.set_margin(self, GtkLayerShell.Edge.LEFT, self.current_win_x)
+                GtkLayerShell.set_margin(self, GtkLayerShell.Edge.TOP, self.current_win_y)
+                self.save_window_pos()
+                self.show_toast("🎯 Reset position to center")
+                self.is_dragging = False
+                return True
+
+            cur = self.get_cursor_pos()
+            if cur:
+                cx, cy = cur
+                self.is_dragging = True
+                self.drag_offset_x = cx - self.current_win_x
+                self.drag_offset_y = cy - self.current_win_y
+                self.hide_popout()
+                return True
+        return False
+
+    def on_header_button_release(self, widget, event):
+        if event.button == 1 and self.is_dragging:
+            self.is_dragging = False
+            self.save_window_pos()
+            return True
+        return False
+
+    def on_header_motion_notify(self, widget, event):
+        if self.is_dragging:
+            cur = self.get_cursor_pos()
+            if cur:
+                cx, cy = cur
+                new_x = cx - self.drag_offset_x
+                new_y = cy - self.drag_offset_y
+                mon_w, mon_h = self.get_monitor_geometry()
+                # Constrain to visible desktop
+                new_x = max(10, min(mon_w - 450, new_x))
+                new_y = max(10, min(mon_h - 100, new_y))
+                self.current_win_x = new_x
+                self.current_win_y = new_y
+                GtkLayerShell.set_margin(self, GtkLayerShell.Edge.LEFT, int(new_x))
+                GtkLayerShell.set_margin(self, GtkLayerShell.Edge.TOP, int(new_y))
+                return True
+        return False
+
+    def save_window_pos(self):
+        try:
+            with open("/tmp/serena_shelf_pos.json", "w") as f:
+                json.dump({"x": self.current_win_x, "y": self.current_win_y}, f)
+        except Exception:
+            pass
 
     # =========================================================================
     # PINNED CLIPS PERSISTENCE & LOGIC (Request 2)
@@ -651,6 +772,18 @@ class SerenaAndroidShelf(Gtk.Window):
 
         header_hbox.pack_start(tab_box, False, False, 0)
 
+        # Drag Handle Grip Zone (Draggable Window Feature)
+        self.drag_handle_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        self.drag_handle_box.set_hexpand(True)
+        self.drag_handle_box.get_style_context().add_class("drag-grip-zone")
+        lbl_handle = Gtk.Label()
+        lbl_handle.set_markup("<span font='9.5' color='rgba(255, 42, 85, 0.40)'>󰇘󰇘󰇘</span>")
+        lbl_handle.set_halign(Gtk.Align.CENTER)
+        lbl_handle.set_valign(Gtk.Align.CENTER)
+        self.drag_handle_box.pack_start(lbl_handle, True, True, 0)
+        self.drag_handle_box.set_tooltip_text("Drag header to move · Double-click to center")
+        header_hbox.pack_start(self.drag_handle_box, True, True, 4)
+
         # Right actions
         self.header_actions_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
 
@@ -685,7 +818,20 @@ class SerenaAndroidShelf(Gtk.Window):
         self.header_actions_box.pack_end(btn_close, False, False, 0)
 
         header_hbox.pack_end(self.header_actions_box, False, False, 0)
-        main_box.pack_start(header_hbox, False, False, 0)
+
+        # Wrap header in EventBox for smooth window dragging
+        self.header_event_box = Gtk.EventBox()
+        self.header_event_box.set_visible_window(False)
+        self.header_event_box.add_events(
+            Gdk.EventMask.BUTTON_PRESS_MASK |
+            Gdk.EventMask.BUTTON_RELEASE_MASK |
+            Gdk.EventMask.POINTER_MOTION_MASK
+        )
+        self.header_event_box.connect("button-press-event", self.on_header_button_press)
+        self.header_event_box.connect("button-release-event", self.on_header_button_release)
+        self.header_event_box.connect("motion-notify-event", self.on_header_motion_notify)
+        self.header_event_box.add(header_hbox)
+        main_box.pack_start(self.header_event_box, False, False, 0)
 
         # --- BODY (STACK) ---
         self.stack = Gtk.Stack()
@@ -1237,7 +1383,8 @@ class SerenaAndroidShelf(Gtk.Window):
 
         mon_w, mon_h = self.get_monitor_geometry()
         win_w = 440
-        main_win_screen_x = (mon_w - win_w) // 2
+        main_win_screen_x = getattr(self, 'current_win_x', (mon_w - win_w) // 2)
+        main_win_screen_y = getattr(self, 'current_win_y', 44)
 
         card_x, card_y = coords
 
@@ -1260,7 +1407,7 @@ class SerenaAndroidShelf(Gtk.Window):
             if pop_screen_x + popout_w > mon_w - 10:
                 pop_screen_x = main_win_screen_x - popout_w - 12
 
-        pop_screen_y = max(10, min(card_y, mon_h - 260))
+        pop_screen_y = max(10, min(main_win_screen_y + card_y, mon_h - 260))
 
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
 
