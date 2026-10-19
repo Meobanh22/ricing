@@ -4,10 +4,11 @@
 # ==============================================================================
 # Android Gboard / Material You inspired dynamic chip grid (FlowBox):
 #   - Variable-sized squircle chips fitting seamlessly into 2 dynamic columns
-#   - Dynamic window sizing adapting naturally to content
+#   - Deduplication preserving all distinct images (no more 1-image bug!)
 #   - Clean minimalist Nerd Font icons matching Serena aesthetic (NO emoji)
-#   - Elevated floating popout zoom ("cái ô đó nổi lên rồi phóng to ra")
-#   - Spacious full-width shelf frame & compact drop-banner
+#   - External floating popout zoom extending OUTSIDE the clipboard window
+#   - Lightbox modal for full-size image inspection ("phóng to hơn nữa")
+#   - Borderless ultra-compact delete button & inset card icons
 #   - Zero grey: 100% Serena Warm Obsidian-Wine & Ribbon Red tokens
 #   - Drag-and-drop shelf with full thumbnail previews & drag-out support
 # ==============================================================================
@@ -44,7 +45,7 @@ DRAG_SOURCE_TARGETS = [
 ]
 
 # Pure Serena Anime Minimalist CSS — ZERO GREY & CLEAN MINIMALIST GLYPHS!
-CSS = b"""
+CSS = """
 * {
     font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", "FiraCode Nerd Font", "FontAwesome", sans-serif;
     outline: none;
@@ -89,7 +90,7 @@ button.tab-btn {
     font-weight: 600;
     border: none;
     border-radius: 6px;
-    padding: 4px 12px;
+    padding: 4px 14px;
     transition: background-color 150ms ease, color 150ms ease;
 }
 
@@ -150,7 +151,7 @@ searchentry {
     font-size: 11.5px;
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 8px;
-    padding: 6px 12px;
+    padding: 6px 14px;
     margin-bottom: 8px;
     caret-color: #FF2A55;
     box-shadow: none;
@@ -165,6 +166,8 @@ searchentry:focus {
 entry image,
 searchentry image {
     color: #FF2A55;
+    margin-left: 6px;
+    margin-right: 6px;
 }
 
 /* Android Gboard Style Flowbox & Chips */
@@ -208,34 +211,78 @@ flowboxchild:selected {
     margin-top: 4px;
 }
 
+/* Borderless Ultra-Compact Delete Button (Point 5) */
+button.chip-btn-del,
 .chip-btn-del {
-    color: #A68595;
-    font-size: 10px;
-    padding: 2px 4px;
+    background-image: none;
+    background-color: transparent;
+    border-width: 0;
+    border-style: none;
+    border-color: transparent;
+    box-shadow: none;
+    outline: none;
+    padding: 1px 4px;
+    margin: 0;
+    min-height: 0;
+    min-width: 0;
     border-radius: 4px;
-    transition: color 150ms ease;
+    transition: background-color 150ms ease, color 150ms ease;
 }
 
+button.chip-btn-del:hover,
 .chip-btn-del:hover {
-    color: #FF2A55;
+    background-color: rgba(255, 42, 85, 0.20);
+    border-width: 0;
+    border-style: none;
 }
 
-/* Floating Enlarged Popout Card */
+/* Card Action Button (Zoom / Copy) */
+button.chip-btn-action,
+.chip-btn-action {
+    background-image: none;
+    background-color: rgba(48, 28, 35, 0.90);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: none;
+    padding: 2px 7px;
+    margin: 0;
+    min-height: 0;
+    min-width: 0;
+    border-radius: 4px;
+    transition: background-color 150ms ease;
+}
+
+button.chip-btn-action:hover,
+.chip-btn-action:hover {
+    background-color: rgba(68, 36, 46, 0.98);
+    border-color: rgba(255, 42, 85, 0.4);
+}
+
+/* External Floating Popout Card (Extends outside clipboard window) */
 .popout-card {
-    background-color: rgba(45, 26, 32, 0.99);
+    background-color: rgba(36, 18, 22, 0.99);
     border: 1.5px solid #FF2A55;
-    border-radius: 12px;
-    padding: 10px 12px;
+    border-radius: 14px;
+    padding: 12px 14px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.85);
 }
 
 .popout-text {
     color: #FFF0F5;
-    font-size: 11px;
+    font-size: 11.5px;
 }
 
 .popout-meta {
     color: #A68595;
-    font-size: 9px;
+    font-size: 9.5px;
+}
+
+/* Centered Lightbox Modal ("Phóng to hơn nữa") */
+.lightbox-card {
+    background-color: rgba(32, 16, 18, 0.99);
+    border: 1.5px solid rgba(255, 42, 85, 0.85);
+    border-radius: 16px;
+    padding: 16px 20px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.90);
 }
 
 /* Drop Zone & Drop Banner */
@@ -312,7 +359,7 @@ class SerenaAndroidShelf(Gtk.Window):
     def __init__(self, initial_tab="clip"):
         super().__init__(type=Gtk.WindowType.TOPLEVEL)
 
-        # 1. Layer Shell Setup (Anchor Top, Centered)
+        # 1. Main Layer Shell Setup (Anchor Top, Centered)
         GtkLayerShell.init_for_window(self)
         GtkLayerShell.set_namespace(self, "shelf")
         GtkLayerShell.set_layer(self, GtkLayerShell.Layer.TOP)
@@ -331,7 +378,7 @@ class SerenaAndroidShelf(Gtk.Window):
         # Apply CSS
         css_provider = Gtk.CssProvider()
         try:
-            css_provider.load_from_data(CSS)
+            css_provider.load_from_data(CSS.encode('utf-8'))
             Gtk.StyleContext.add_provider_for_screen(
                 Gdk.Screen.get_default(),
                 css_provider,
@@ -345,12 +392,16 @@ class SerenaAndroidShelf(Gtk.Window):
         self.last_clip_mtime = 0
         self.popout_timer = None
         self.current_popout_target = None
+        self.lightbox_win = None
 
         # Ensure daemon is running
         self.ensure_cliphist_daemon()
 
         # Build UI
         self.build_ui()
+
+        # Build External Floating Popout Window (Can extend OUTSIDE clipboard window)
+        self.build_external_popout_window()
 
         # Events
         self.connect("key-press-event", self.on_key_press)
@@ -376,10 +427,16 @@ class SerenaAndroidShelf(Gtk.Window):
         except Exception:
             pass
 
-    def build_ui(self):
-        # Master Overlay Container (Supports floating popout card over the grid)
-        self.main_overlay = Gtk.Overlay()
+    def get_monitor_geometry(self):
+        try:
+            display = Gdk.Display.get_default()
+            monitor = display.get_primary_monitor() or display.get_monitor(0)
+            geom = monitor.get_geometry()
+            return geom.width, geom.height
+        except Exception:
+            return 1600, 900
 
+    def build_ui(self):
         main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         main_box.get_style_context().add_class("shelf-window")
 
@@ -392,7 +449,7 @@ class SerenaAndroidShelf(Gtk.Window):
         # Tab: Clipboard
         self.btn_tab_clip = Gtk.Button()
         self.lbl_tab_clip = Gtk.Label()
-        self.lbl_tab_clip.set_markup("<span color='#FFFFFF'>󰅌</span> <span color='#FFFFFF'><b>Clipboard</b></span>")
+        self.lbl_tab_clip.set_markup("<span font='12' color='#FFFFFF'>󰅌</span>   <span color='#FFFFFF'><b>Clipboard</b></span>")
         self.btn_tab_clip.add(self.lbl_tab_clip)
         self.btn_tab_clip.get_style_context().add_class("tab-btn")
         self.btn_tab_clip.connect("clicked", lambda w: self.switch_tab("clip"))
@@ -401,7 +458,7 @@ class SerenaAndroidShelf(Gtk.Window):
         # Tab: Shelf
         self.btn_tab_shelf = Gtk.Button()
         self.lbl_tab_shelf = Gtk.Label()
-        self.lbl_tab_shelf.set_markup("<span color='#FF2A55'>󰏖</span> <span color='#E8C2D0'>Shelf</span>")
+        self.lbl_tab_shelf.set_markup("<span font='12' color='#FF2A55'>󰏖</span>   <span color='#E8C2D0'>Shelf</span>")
         self.btn_tab_shelf.add(self.lbl_tab_shelf)
         self.btn_tab_shelf.get_style_context().add_class("tab-btn")
         self.btn_tab_shelf.connect("clicked", lambda w: self.switch_tab("shelf"))
@@ -415,7 +472,7 @@ class SerenaAndroidShelf(Gtk.Window):
         # Stash Button
         self.btn_stash_clip = Gtk.Button()
         self.lbl_stash = Gtk.Label()
-        self.lbl_stash.set_markup("<span color='#FF2A55'>󰅍</span> <span color='#E8C2D0'>Stash</span>")
+        self.lbl_stash.set_markup("<span font='11' color='#FF2A55'>󰅍</span>  <span color='#E8C2D0'>Stash</span>")
         self.btn_stash_clip.add(self.lbl_stash)
         self.btn_stash_clip.get_style_context().add_class("action-btn")
         self.btn_stash_clip.set_tooltip_text("Save current clipboard content into shelf")
@@ -459,36 +516,44 @@ class SerenaAndroidShelf(Gtk.Window):
         main_box.pack_start(self.stack, True, True, 4)
 
         # --- FOOTER ---
-        self.lbl_status = Gtk.Label(label="Tip: Hover card to expand · Click to copy · Esc to close")
+        self.lbl_status = Gtk.Label(label="Tip: Hover card to expand · Click to copy · 󰍉 Zoom for full image")
         self.lbl_status.get_style_context().add_class("status-bar")
         self.lbl_status.set_halign(Gtk.Align.START)
         main_box.pack_end(self.lbl_status, False, False, 0)
 
-        self.main_overlay.add(main_box)
-
-        # --- FLOATING POPOUT OVERLAY ("Cái ô đó nổi lên rồi phóng to ra") ---
-        self.popout_container = Gtk.EventBox()
-        self.popout_container.set_halign(Gtk.Align.START)
-        self.popout_container.set_valign(Gtk.Align.START)
-        self.popout_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        self.popout_box.get_style_context().add_class("popout-card")
-        self.popout_container.add(self.popout_box)
-        self.popout_container.connect("leave-notify-event", self.on_popout_leave)
-        self.popout_container.connect("button-press-event", self.on_popout_clicked)
-
-        self.main_overlay.add_overlay(self.popout_container)
-        self.popout_container.hide()
-
-        self.add(self.main_overlay)
+        self.add(main_box)
 
     # =========================================================================
-    # TAB 1: CLIPBOARD (ANDROID GBOARD CHIP GRID WITH FLOATING ZOOM)
+    # EXTERNAL FLOATING POPOUT WINDOW (Can extend OUTSIDE clipboard window)
+    # =========================================================================
+    def build_external_popout_window(self):
+        self.popout_win = Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
+        GtkLayerShell.init_for_window(self.popout_win)
+        GtkLayerShell.set_namespace(self.popout_win, "shelf-popout")
+        GtkLayerShell.set_layer(self.popout_win, GtkLayerShell.Layer.OVERLAY)
+        GtkLayerShell.set_anchor(self.popout_win, GtkLayerShell.Edge.TOP, True)
+        GtkLayerShell.set_anchor(self.popout_win, GtkLayerShell.Edge.LEFT, True)
+        GtkLayerShell.set_anchor(self.popout_win, GtkLayerShell.Edge.RIGHT, False)
+        GtkLayerShell.set_anchor(self.popout_win, GtkLayerShell.Edge.BOTTOM, False)
+        GtkLayerShell.set_keyboard_mode(self.popout_win, GtkLayerShell.KeyboardMode.NONE)
+
+        self.popout_event_box = Gtk.EventBox()
+        self.popout_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.popout_box.get_style_context().add_class("popout-card")
+        self.popout_event_box.add(self.popout_box)
+        self.popout_event_box.connect("leave-notify-event", self.on_popout_leave)
+        self.popout_event_box.connect("button-press-event", self.on_popout_clicked)
+
+        self.popout_win.add(self.popout_event_box)
+
+    # =========================================================================
+    # TAB 1: CLIPBOARD (ANDROID GBOARD CHIP GRID WITH DEDUPLICATION FIX)
     # =========================================================================
     def build_clipboard_page(self):
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
 
         self.clip_search = Gtk.SearchEntry()
-        self.clip_search.set_placeholder_text("󰍉 Search clips...")
+        self.clip_search.set_placeholder_text("󰍉  Search clips...")
         self.clip_search.get_style_context().add_class("search-entry")
         self.clip_search.connect("search-changed", lambda e: self.refresh_clipboard())
         vbox.pack_start(self.clip_search, False, False, 0)
@@ -523,7 +588,7 @@ class SerenaAndroidShelf(Gtk.Window):
 
         query = self.clip_search.get_text().strip().lower()
         clips = []
-        seen_previews = set()
+        seen_text_previews = set()
 
         try:
             res = subprocess.run(["cliphist", "list"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
@@ -535,13 +600,14 @@ class SerenaAndroidShelf(Gtk.Window):
                     clip_id = parts[0]
                     preview = parts[1] if len(parts) > 1 else ""
 
-                    # Deduplicate exact same text/preview
-                    norm_preview = preview.strip()
-                    if norm_preview in seen_previews:
-                        continue
-                    seen_previews.add(norm_preview)
-
                     is_image = "binary data" in preview.lower() or "[[ binary data" in preview.lower()
+
+                    # Deduplication Fix: ONLY deduplicate exact text! Never filter out images by "binary data" string!
+                    if not is_image:
+                        norm_preview = preview.strip()
+                        if norm_preview in seen_text_previews:
+                            continue
+                        seen_text_previews.add(norm_preview)
 
                     if query and query not in preview.lower():
                         continue
@@ -587,24 +653,47 @@ class SerenaAndroidShelf(Gtk.Window):
         event_box.set_size_request(185, -1)
         event_box.set_hexpand(True)
 
-        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=3)
+        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
 
-        # Top row: Type indicator (Accent Icon + Muted Label) + Quick Delete button
+        # Top row: Type indicator (Inset with 8px margin) + Borderless small delete button
         top_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
 
         lbl_icon = Gtk.Label()
+        lbl_icon.set_margin_start(8)
         if item["is_image"]:
-            lbl_icon.set_markup("<span font='10' color='#FF2A55'>󰋩</span> <span font='10' color='#A68595'>Image</span>")
+            lbl_icon.set_markup("<span font='10.5' color='#FF2A55'>󰋩</span>  <span font='10' color='#A68595'>Image</span>")
         else:
-            lbl_icon.set_markup("<span font='10' color='#FF2A55'>󰈙</span> <span font='10' color='#A68595'>Text</span>")
+            lbl_icon.set_markup("<span font='10.5' color='#FF2A55'>󰈙</span>  <span font='10' color='#A68595'>Text</span>")
         top_row.pack_start(lbl_icon, False, False, 0)
 
-        btn_del = Gtk.Button(label="✕")
+        # Right actions in header: Zoom (if image) + Delete
+        right_hdr = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
+
+        if item["is_image"]:
+            btn_zoom = Gtk.Button()
+            btn_zoom.set_relief(Gtk.ReliefStyle.NONE)
+            btn_zoom.get_style_context().add_class("flat")
+            btn_zoom.get_style_context().add_class("chip-btn-del")
+            lbl_z = Gtk.Label()
+            lbl_z.set_markup("<span font='9.5' color='#FF2A55'>󰍉</span>")
+            btn_zoom.add(lbl_z)
+            btn_zoom.set_tooltip_text("Zoom image full-size")
+            btn_zoom.connect("clicked", lambda b: self.open_image_lightbox(item, is_shelf=False))
+            right_hdr.pack_start(btn_zoom, False, False, 0)
+
+        # Borderless, compact delete button (Point 5)
+        btn_del = Gtk.Button()
+        btn_del.set_relief(Gtk.ReliefStyle.NONE)
+        btn_del.get_style_context().add_class("flat")
         btn_del.get_style_context().add_class("chip-btn-del")
+        lbl_x = Gtk.Label()
+        lbl_x.set_markup("<span font='8.5' color='#A68595'>✕</span>")
+        btn_del.add(lbl_x)
         btn_del.set_tooltip_text("Delete")
         btn_del.connect("clicked", lambda b: self.delete_clip(item))
-        top_row.pack_end(btn_del, False, False, 0)
+        right_hdr.pack_end(btn_del, False, False, 2)
 
+        top_row.pack_end(right_hdr, False, False, 0)
         vbox.pack_start(top_row, False, False, 0)
 
         # Content: Image thumbnail or Text snippet
@@ -619,11 +708,12 @@ class SerenaAndroidShelf(Gtk.Window):
 
                 orig_w = pixbuf.get_width()
                 orig_h = pixbuf.get_height()
-                ratio = min(180 / orig_w, 90 / orig_h)
+                ratio = min(175 / orig_w, 90 / orig_h)
                 scaled_w = max(1, int(orig_w * ratio))
                 scaled_h = max(1, int(orig_h * ratio))
                 card_pixbuf = pixbuf.scale_simple(scaled_w, scaled_h, GdkPixbuf.InterpType.BILINEAR)
                 img = Gtk.Image.new_from_pixbuf(card_pixbuf)
+                img.set_halign(Gtk.Align.CENTER)
                 vbox.pack_start(img, False, False, 2)
             except Exception:
                 lbl_fallback = Gtk.Label(label="[Image Preview]")
@@ -640,12 +730,13 @@ class SerenaAndroidShelf(Gtk.Window):
             lbl_txt.set_lines(4)
             lbl_txt.set_ellipsize(Pango.EllipsizeMode.END)
             lbl_txt.set_halign(Gtk.Align.START)
+            lbl_txt.set_margin_start(4)
             vbox.pack_start(lbl_txt, False, False, 2)
 
         event_box.add(vbox)
         event_box.connect("button-press-event", lambda w, e: self.on_clip_chip_clicked(item, e))
 
-        # Hover popout trigger ("nổi lên rồi phóng to ra")
+        # External hover popout trigger ("nổi lên rồi phóng to ra ngoài cửa sổ")
         event_box.connect("enter-notify-event", lambda w, e: self.schedule_popout(w, item, is_shelf=False))
         event_box.connect("leave-notify-event", lambda w, e: self.cancel_popout(w))
 
@@ -704,7 +795,7 @@ class SerenaAndroidShelf(Gtk.Window):
         banner_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
         banner_box.set_halign(Gtk.Align.CENTER)
         lbl_b_icon = Gtk.Label()
-        lbl_b_icon.set_markup("<span font='11' color='#FF2A55'>󰉍</span> <span font='10.5' color='#E8C2D0'>Drop files/images here to add</span>")
+        lbl_b_icon.set_markup("<span font='11.5' color='#FF2A55'>󰉍</span>  <span font='10.5' color='#E8C2D0'>Drop files/images here to add</span>")
         banner_box.pack_start(lbl_b_icon, False, False, 0)
         self.drop_banner.add(banner_box)
         self.content_shelf_box.pack_start(self.drop_banner, False, False, 0)
@@ -772,27 +863,48 @@ class SerenaAndroidShelf(Gtk.Window):
         event_box.drag_source_set(Gdk.ModifierType.BUTTON1_MASK, DRAG_SOURCE_TARGETS, Gdk.DragAction.COPY)
         event_box.connect("drag-data-get", self.on_shelf_drag_data_get, fpath)
 
-        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=3)
+        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
 
         fname = os.path.basename(fpath)
         fsize = os.path.getsize(fpath) if os.path.exists(fpath) else 0
         size_str = self.format_file_size(fsize)
         is_image = fname.lower().endswith((".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp", ".svg"))
 
-        # Top row: Icon / Format + Delete button
+        # Top row: Icon / Format (Inset with 8px margin) + Delete button
         top_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
         lbl_type = Gtk.Label()
+        lbl_type.set_margin_start(8)
         if is_image:
-            lbl_type.set_markup("<span font='9.5' color='#FF2A55'>󰋩</span> <span font='9.5' color='#A68595'>Image</span>")
+            lbl_type.set_markup("<span font='9.5' color='#FF2A55'>󰋩</span>  <span font='9.5' color='#A68595'>Image</span>")
         else:
-            lbl_type.set_markup("<span font='9.5' color='#FF2A55'>󰈙</span> <span font='9.5' color='#A68595'>File</span>")
+            lbl_type.set_markup("<span font='9.5' color='#FF2A55'>󰈙</span>  <span font='9.5' color='#A68595'>File</span>")
         top_row.pack_start(lbl_type, False, False, 0)
 
-        btn_del = Gtk.Button(label="✕")
+        right_hdr = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
+        if is_image:
+            btn_zoom = Gtk.Button()
+            btn_zoom.set_relief(Gtk.ReliefStyle.NONE)
+            btn_zoom.get_style_context().add_class("flat")
+            btn_zoom.get_style_context().add_class("chip-btn-del")
+            lbl_z = Gtk.Label()
+            lbl_z.set_markup("<span font='9.5' color='#FF2A55'>󰍉</span>")
+            btn_zoom.add(lbl_z)
+            btn_zoom.set_tooltip_text("Zoom image full-size")
+            btn_zoom.connect("clicked", lambda b: self.open_image_lightbox(fpath, is_shelf=True))
+            right_hdr.pack_start(btn_zoom, False, False, 0)
+
+        btn_del = Gtk.Button()
+        btn_del.set_relief(Gtk.ReliefStyle.NONE)
+        btn_del.get_style_context().add_class("flat")
         btn_del.get_style_context().add_class("chip-btn-del")
+        lbl_x = Gtk.Label()
+        lbl_x.set_markup("<span font='8.5' color='#A68595'>✕</span>")
+        btn_del.add(lbl_x)
         btn_del.set_tooltip_text("Remove")
         btn_del.connect("clicked", lambda b: self.remove_shelf_file(fpath))
-        top_row.pack_end(btn_del, False, False, 0)
+        right_hdr.pack_end(btn_del, False, False, 2)
+
+        top_row.pack_end(right_hdr, False, False, 0)
         vbox.pack_start(top_row, False, False, 0)
 
         if is_image:
@@ -800,11 +912,12 @@ class SerenaAndroidShelf(Gtk.Window):
                 pixbuf = GdkPixbuf.Pixbuf.new_from_file(fpath)
                 orig_w = pixbuf.get_width()
                 orig_h = pixbuf.get_height()
-                ratio = min(180 / orig_w, 90 / orig_h)
+                ratio = min(175 / orig_w, 90 / orig_h)
                 scaled_w = max(1, int(orig_w * ratio))
                 scaled_h = max(1, int(orig_h * ratio))
                 card_pixbuf = pixbuf.scale_simple(scaled_w, scaled_h, GdkPixbuf.InterpType.BILINEAR)
                 img = Gtk.Image.new_from_pixbuf(card_pixbuf)
+                img.set_halign(Gtk.Align.CENTER)
                 vbox.pack_start(img, False, False, 2)
             except Exception:
                 pass
@@ -814,16 +927,21 @@ class SerenaAndroidShelf(Gtk.Window):
         lbl_name = Gtk.Label(label=short_name)
         lbl_name.get_style_context().add_class("chip-text")
         lbl_name.set_halign(Gtk.Align.START)
+        lbl_name.set_margin_start(4)
         vbox.pack_start(lbl_name, False, False, 0)
 
         # Bottom info row
         bottom_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
         lbl_size = Gtk.Label(label=size_str)
         lbl_size.get_style_context().add_class("chip-meta")
+        lbl_size.set_margin_start(4)
         bottom_row.pack_start(lbl_size, False, False, 0)
 
-        btn_copy = Gtk.Button(label="Copy")
-        btn_copy.get_style_context().add_class("chip-btn-del")
+        btn_copy = Gtk.Button()
+        lbl_cp = Gtk.Label()
+        lbl_cp.set_markup("<span font='9' color='#E8C2D0'>Copy</span>")
+        btn_copy.add(lbl_cp)
+        btn_copy.get_style_context().add_class("chip-btn-action")
         btn_copy.connect("clicked", lambda b: self.copy_shelf_file(fpath, is_image))
         bottom_row.pack_end(btn_copy, False, False, 0)
         vbox.pack_start(bottom_row, False, False, 0)
@@ -831,14 +949,14 @@ class SerenaAndroidShelf(Gtk.Window):
         event_box.add(vbox)
         event_box.connect("button-press-event", lambda w, e: self.on_shelf_chip_clicked(fpath, e))
 
-        # Hover popout trigger ("nổi lên rồi phóng to ra")
+        # External hover popout trigger
         event_box.connect("enter-notify-event", lambda w, e: self.schedule_popout(w, None, is_shelf=True, fpath=fpath))
         event_box.connect("leave-notify-event", lambda w, e: self.cancel_popout(w))
 
         return event_box
 
     # =========================================================================
-    # FLOATING ENLARGED POPOUT ENGINE ("Nổi lên rồi phóng to ra")
+    # EXTERNAL FLOATING POPOUT ENGINE ("Nổi hẳn ra ngoài cửa sổ clipboard")
     # =========================================================================
     def schedule_popout(self, card_widget, item, is_shelf=False, fpath=None):
         if self.popout_timer:
@@ -862,13 +980,16 @@ class SerenaAndroidShelf(Gtk.Window):
         if not card_widget.get_realized():
             return
 
-        coords = card_widget.translate_coordinates(self.main_overlay, 0, 0)
+        coords = card_widget.translate_coordinates(self, 0, 0)
         if not coords:
             return
 
-        card_alloc = card_widget.get_allocation()
+        mon_w, mon_h = self.get_monitor_geometry()
+        win_w = 430
+        main_win_screen_x = (mon_w - win_w) // 2
+
         card_x, card_y = coords
-        card_w, card_h = card_alloc.width, card_alloc.height
+        card_alloc = card_widget.get_allocation()
 
         # Clear existing popout content
         for child in self.popout_box.get_children():
@@ -876,24 +997,45 @@ class SerenaAndroidShelf(Gtk.Window):
 
         self.current_popout_target = (item, is_shelf, fpath)
 
-        popout_w = 270
-        win_w = 430
-        pop_x = max(12, min(card_x - 18, win_w - popout_w - 12))
-        pop_y = max(42, card_y - 10)
+        # Spacious 340px popout card that can extend outside the 430px window
+        popout_w = 340
+        if card_x < win_w / 2:
+            # Left column: Float outwards towards the left (outside the clipboard window)
+            pop_screen_x = max(20, main_win_screen_x + card_x - 120)
+        else:
+            # Right column: Float outwards towards the right (outside the clipboard window)
+            pop_screen_x = min(mon_w - popout_w - 20, main_win_screen_x + card_x - 30)
 
-        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        pop_screen_y = max(40, min(card_y - 12, mon_h - 360))
+
+        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
 
         # Header Row
-        top_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
+        top_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
         lbl_type = Gtk.Label()
 
+        right_actions = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+
+        is_img_target = (item and item.get("is_image")) or (is_shelf and fpath and fpath.lower().endswith((".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp", ".svg")))
+
+        if is_img_target:
+            btn_zoom_pop = Gtk.Button()
+            btn_zoom_pop.get_style_context().add_class("action-btn")
+            lbl_zp = Gtk.Label()
+            lbl_zp.set_markup("<span font='9.5' color='#FF2A55'>󰍉 Zoom Full</span>")
+            btn_zoom_pop.add(lbl_zp)
+            target_ref = item if not is_shelf else fpath
+            btn_zoom_pop.connect("clicked", lambda b: self.open_image_lightbox(target_ref, is_shelf))
+            right_actions.pack_start(btn_zoom_pop, False, False, 0)
+
         lbl_hint = Gtk.Label()
-        lbl_hint.set_markup("<span font='9' color='#FF2A55'>󰆏 Click to Copy</span>" if not is_shelf else "<span font='9' color='#FF2A55'>󰅍 Click to Open</span>")
-        top_row.pack_end(lbl_hint, False, False, 0)
+        lbl_hint.set_markup("<span font='9.5' color='#FF2A55'>󰆏 Click to Copy</span>" if not is_shelf else "<span font='9.5' color='#FF2A55'>󰅍 Click to Open</span>")
+        right_actions.pack_end(lbl_hint, False, False, 0)
+        top_row.pack_end(right_actions, False, False, 0)
 
         if not is_shelf and item:
             if item["is_image"]:
-                lbl_type.set_markup("<span font='10' color='#FF2A55'>󰋩</span> <span font='10' color='#FFF0F5'><b>Image Preview</b></span>")
+                lbl_type.set_markup("<span font='11' color='#FF2A55'>󰋩</span>  <span font='10.5' color='#FFF0F5'><b>Image Preview</b></span>")
                 top_row.pack_start(lbl_type, False, False, 0)
                 vbox.pack_start(top_row, False, False, 0)
 
@@ -908,22 +1050,23 @@ class SerenaAndroidShelf(Gtk.Window):
 
                     orig_w = pixbuf.get_width()
                     orig_h = pixbuf.get_height()
-                    ratio = min(245 / orig_w, 160 / orig_h)
+                    ratio = min(310 / orig_w, 200 / orig_h)
                     scaled_w = max(1, int(orig_w * ratio))
                     scaled_h = max(1, int(orig_h * ratio))
                     card_pixbuf = pixbuf.scale_simple(scaled_w, scaled_h, GdkPixbuf.InterpType.BILINEAR)
                     img = Gtk.Image.new_from_pixbuf(card_pixbuf)
+                    img.set_halign(Gtk.Align.CENTER)
                     vbox.pack_start(img, False, False, 2)
 
                     lbl_meta = Gtk.Label()
-                    lbl_meta.set_markup(f"<span font='9' color='#A68595'>{orig_w}×{orig_h} · PNG Image</span>")
+                    lbl_meta.set_markup(f"<span font='9.5' color='#A68595'>{orig_w}×{orig_h} · PNG Image</span>")
                     lbl_meta.set_halign(Gtk.Align.START)
                     vbox.pack_start(lbl_meta, False, False, 0)
                 except Exception:
                     lbl_err = Gtk.Label(label="[Image Preview]")
                     vbox.pack_start(lbl_err, False, False, 0)
             else:
-                lbl_type.set_markup("<span font='10' color='#FF2A55'>󰈙</span> <span font='10' color='#FFF0F5'><b>Full Text Preview</b></span>")
+                lbl_type.set_markup("<span font='11' color='#FF2A55'>󰈙</span>  <span font='10.5' color='#FFF0F5'><b>Full Text Preview</b></span>")
                 top_row.pack_start(lbl_type, False, False, 0)
                 vbox.pack_start(top_row, False, False, 0)
 
@@ -940,19 +1083,19 @@ class SerenaAndroidShelf(Gtk.Window):
                 line_count = len(lines)
                 char_count = len(full_text)
 
-                display_text = "\n".join(lines[:14]) + f"\n... (+{line_count - 14} lines)" if len(lines) > 14 else full_text
+                display_text = "\n".join(lines[:16]) + f"\n... (+{line_count - 16} lines)" if len(lines) > 16 else full_text
 
                 lbl_text = Gtk.Label()
                 lbl_text.set_text(display_text)
                 lbl_text.set_line_wrap(True)
                 lbl_text.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR)
-                lbl_text.set_max_width_chars(32)
+                lbl_text.set_max_width_chars(42)
                 lbl_text.set_halign(Gtk.Align.START)
                 lbl_text.get_style_context().add_class("popout-text")
                 vbox.pack_start(lbl_text, False, False, 2)
 
                 lbl_meta = Gtk.Label()
-                lbl_meta.set_markup(f"<span font='9' color='#A68595'>{line_count} line{'s' if line_count > 1 else ''} · {char_count} chars</span>")
+                lbl_meta.set_markup(f"<span font='9.5' color='#A68595'>{line_count} line{'s' if line_count > 1 else ''} · {char_count} chars</span>")
                 lbl_meta.set_halign(Gtk.Align.START)
                 vbox.pack_start(lbl_meta, False, False, 0)
 
@@ -962,7 +1105,7 @@ class SerenaAndroidShelf(Gtk.Window):
             size_str = self.format_file_size(fsize)
             is_image = fname.lower().endswith((".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp", ".svg"))
 
-            lbl_type.set_markup(f"<span font='10' color='#FF2A55'>󰋩</span> <span font='10' color='#FFF0F5'><b>{GLib.markup_escape_text(fname[:20])}</b></span>" if is_image else f"<span font='10' color='#FF2A55'>󰈙</span> <span font='10' color='#FFF0F5'><b>{GLib.markup_escape_text(fname[:20])}</b></span>")
+            lbl_type.set_markup(f"<span font='11' color='#FF2A55'>󰋩</span>  <span font='10.5' color='#FFF0F5'><b>{GLib.markup_escape_text(fname[:25])}</b></span>" if is_image else f"<span font='11' color='#FF2A55'>󰈙</span>  <span font='10.5' color='#FFF0F5'><b>{GLib.markup_escape_text(fname[:25])}</b></span>")
             top_row.pack_start(lbl_type, False, False, 0)
             vbox.pack_start(top_row, False, False, 0)
 
@@ -971,15 +1114,16 @@ class SerenaAndroidShelf(Gtk.Window):
                     pixbuf = GdkPixbuf.Pixbuf.new_from_file(fpath)
                     orig_w = pixbuf.get_width()
                     orig_h = pixbuf.get_height()
-                    ratio = min(245 / orig_w, 160 / orig_h)
+                    ratio = min(310 / orig_w, 200 / orig_h)
                     scaled_w = max(1, int(orig_w * ratio))
                     scaled_h = max(1, int(orig_h * ratio))
                     card_pixbuf = pixbuf.scale_simple(scaled_w, scaled_h, GdkPixbuf.InterpType.BILINEAR)
                     img = Gtk.Image.new_from_pixbuf(card_pixbuf)
+                    img.set_halign(Gtk.Align.CENTER)
                     vbox.pack_start(img, False, False, 2)
 
                     lbl_meta = Gtk.Label()
-                    lbl_meta.set_markup(f"<span font='9' color='#A68595'>{orig_w}×{orig_h} · {size_str}</span>")
+                    lbl_meta.set_markup(f"<span font='9.5' color='#A68595'>{orig_w}×{orig_h} · {size_str}</span>")
                     lbl_meta.set_halign(Gtk.Align.START)
                     vbox.pack_start(lbl_meta, False, False, 0)
                 except Exception:
@@ -990,37 +1134,40 @@ class SerenaAndroidShelf(Gtk.Window):
                 if is_text and fsize < 100 * 1024:
                     try:
                         with open(fpath, "r", encoding="utf-8", errors="replace") as f:
-                            lines = [f.readline() for _ in range(14)]
+                            lines = [f.readline() for _ in range(16)]
                             preview_content = "".join([l for l in lines if l]).strip()
                     except Exception:
                         pass
 
                 if preview_content:
                     lbl_text = Gtk.Label()
-                    lbl_text.set_text(preview_content[:800])
+                    lbl_text.set_text(preview_content[:1000])
                     lbl_text.set_line_wrap(True)
                     lbl_text.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR)
-                    lbl_text.set_max_width_chars(32)
+                    lbl_text.set_max_width_chars(42)
                     lbl_text.set_halign(Gtk.Align.START)
                     lbl_text.get_style_context().add_class("popout-text")
                     vbox.pack_start(lbl_text, False, False, 2)
 
                 lbl_meta = Gtk.Label()
-                lbl_meta.set_markup(f"<span font='9' color='#A68595'>{size_str} · {GLib.markup_escape_text(fname)}</span>")
+                lbl_meta.set_markup(f"<span font='9.5' color='#A68595'>{size_str} · {GLib.markup_escape_text(fname)}</span>")
                 lbl_meta.set_halign(Gtk.Align.START)
                 vbox.pack_start(lbl_meta, False, False, 0)
 
         self.popout_box.add(vbox)
-        self.popout_container.set_size_request(popout_w, -1)
-        self.popout_container.set_margin_start(pop_x)
-        self.popout_container.set_margin_top(pop_y)
-        self.popout_container.show_all()
+        self.popout_event_box.set_size_request(popout_w, -1)
+
+        GtkLayerShell.set_margin(self.popout_win, GtkLayerShell.Edge.LEFT, int(pop_screen_x))
+        GtkLayerShell.set_margin(self.popout_win, GtkLayerShell.Edge.TOP, int(pop_screen_y))
+
+        self.popout_win.show_all()
 
     def hide_popout(self):
         if self.popout_timer:
             GLib.source_remove(self.popout_timer)
             self.popout_timer = None
-        self.popout_container.hide()
+        if hasattr(self, 'popout_win') and self.popout_win:
+            self.popout_win.hide()
         self.current_popout_target = None
 
     def on_popout_leave(self, widget, event):
@@ -1037,6 +1184,131 @@ class SerenaAndroidShelf(Gtk.Window):
             self.hide_popout()
             return True
         return False
+
+    # =========================================================================
+    # LIGHTBOX MODAL ("Phóng to hơn nữa" - Request 3)
+    # =========================================================================
+    def open_image_lightbox(self, item_or_fpath, is_shelf=False):
+        self.hide_popout()
+
+        if self.lightbox_win is not None:
+            self.lightbox_win.destroy()
+            self.lightbox_win = None
+
+        win = Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
+        GtkLayerShell.init_for_window(win)
+        GtkLayerShell.set_namespace(win, "shelf-lightbox")
+        GtkLayerShell.set_layer(win, GtkLayerShell.Layer.OVERLAY)
+        GtkLayerShell.set_anchor(win, GtkLayerShell.Edge.TOP, False)
+        GtkLayerShell.set_anchor(win, GtkLayerShell.Edge.BOTTOM, False)
+        GtkLayerShell.set_anchor(win, GtkLayerShell.Edge.LEFT, False)
+        GtkLayerShell.set_anchor(win, GtkLayerShell.Edge.RIGHT, False)
+        GtkLayerShell.set_keyboard_mode(win, GtkLayerShell.KeyboardMode.ON_DEMAND)
+
+        pixbuf = None
+        orig_w, orig_h = 0, 0
+        raw_bytes = None
+        title_str = "Image Preview"
+
+        if not is_shelf:
+            try:
+                p = subprocess.Popen(["cliphist", "decode"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+                raw_bytes, _ = p.communicate(input=item_or_fpath["raw"].encode("utf-8"), timeout=1.5)
+                loader = GdkPixbuf.PixbufLoader()
+                loader.write(raw_bytes)
+                loader.close()
+                pixbuf = loader.get_pixbuf()
+            except Exception:
+                pass
+        else:
+            try:
+                raw_bytes = open(item_or_fpath, "rb").read()
+                pixbuf = GdkPixbuf.Pixbuf.new_from_file(item_or_fpath)
+                title_str = os.path.basename(item_or_fpath)
+            except Exception:
+                pass
+
+        if not pixbuf:
+            self.show_toast("Could not load image")
+            return
+
+        orig_w = pixbuf.get_width()
+        orig_h = pixbuf.get_height()
+
+        frame = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        frame.get_style_context().add_class("lightbox-card")
+        frame.set_size_request(min(720, orig_w + 40), min(540, orig_h + 80))
+
+        # Header
+        hdr = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        lbl_t = Gtk.Label()
+        lbl_t.set_markup(f"<span font='11' color='#FF2A55'>󰋩</span>  <span font='11' color='#FFF0F5'><b>{GLib.markup_escape_text(title_str[:30])}</b></span>  <span font='9.5' color='#A68595'>({orig_w}×{orig_h})</span>")
+        hdr.pack_start(lbl_t, False, False, 0)
+
+        actions = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+
+        btn_open = Gtk.Button()
+        lbl_o = Gtk.Label()
+        lbl_o.set_markup("<span font='9.5' color='#E8C2D0'>󰅍 Open in App</span>")
+        btn_open.add(lbl_o)
+        btn_open.get_style_context().add_class("action-btn")
+        def do_open(b):
+            tmp_path = "/tmp/serena_zoom_preview.png"
+            if raw_bytes:
+                with open(tmp_path, "wb") as f:
+                    f.write(raw_bytes)
+                subprocess.Popen(["xdg-open", tmp_path])
+            win.destroy()
+        btn_open.connect("clicked", do_open)
+        actions.pack_start(btn_open, False, False, 0)
+
+        btn_copy = Gtk.Button()
+        lbl_c = Gtk.Label()
+        lbl_c.set_markup("<span font='9.5' color='#E8C2D0'>󰆏 Copy</span>")
+        btn_copy.add(lbl_c)
+        btn_copy.get_style_context().add_class("action-btn")
+        def do_copy(b):
+            if raw_bytes:
+                p = subprocess.Popen(["wl-copy", "--type", "image/png"], stdin=subprocess.PIPE)
+                p.communicate(input=raw_bytes)
+                self.show_toast("✨ Copied full image!")
+            win.destroy()
+        btn_copy.connect("clicked", do_copy)
+        actions.pack_start(btn_copy, False, False, 0)
+
+        btn_cl = Gtk.Button()
+        lbl_x = Gtk.Label()
+        lbl_x.set_markup("<span font='12' color='#A68595'>✕</span>")
+        btn_cl.add(lbl_x)
+        btn_cl.get_style_context().add_class("btn-close")
+        btn_cl.connect("clicked", lambda b: win.destroy())
+        actions.pack_end(btn_cl, False, False, 0)
+
+        hdr.pack_end(actions, False, False, 0)
+        frame.pack_start(hdr, False, False, 0)
+
+        # Scale image to max 680x440
+        ratio = min(680 / orig_w, 440 / orig_h)
+        if ratio < 1.0:
+            sw = max(1, int(orig_w * ratio))
+            sh = max(1, int(orig_h * ratio))
+            scaled_pixbuf = pixbuf.scale_simple(sw, sh, GdkPixbuf.InterpType.BILINEAR)
+        else:
+            scaled_pixbuf = pixbuf
+
+        img_widget = Gtk.Image.new_from_pixbuf(scaled_pixbuf)
+        img_widget.set_halign(Gtk.Align.CENTER)
+        img_widget.set_valign(Gtk.Align.CENTER)
+        frame.pack_start(img_widget, True, True, 4)
+
+        lbl_foot = Gtk.Label()
+        lbl_foot.set_markup("<span font='9' color='#A68595'>Esc to close · Click Open in App to inspect in Loupe</span>")
+        frame.pack_end(lbl_foot, False, False, 0)
+
+        win.add(frame)
+        win.connect("key-press-event", lambda w, e: win.destroy() if e.keyval == Gdk.KEY_Escape else False)
+        win.show_all()
+        self.lightbox_win = win
 
     def on_clip_chip_clicked(self, item, event):
         if event.button == 1:
@@ -1202,7 +1474,7 @@ class SerenaAndroidShelf(Gtk.Window):
         if tab_name == "clip":
             self.btn_tab_clip.get_style_context().add_class("active")
             self.btn_tab_shelf.get_style_context().remove_class("active")
-            self.lbl_tab_clip.set_markup("<span color='#FFFFFF'>󰅌</span> <span color='#FFFFFF'><b>Clipboard</b></span>")
+            self.lbl_tab_clip.set_markup("<span font='12' color='#FFFFFF'>󰅌</span>   <span color='#FFFFFF'><b>Clipboard</b></span>")
             self.update_shelf_badge()
             self.btn_stash_clip.hide()
             self.stack.set_visible_child_name("clip")
@@ -1211,7 +1483,7 @@ class SerenaAndroidShelf(Gtk.Window):
         else:
             self.btn_tab_shelf.get_style_context().add_class("active")
             self.btn_tab_clip.get_style_context().remove_class("active")
-            self.lbl_tab_clip.set_markup("<span color='#FF2A55'>󰅌</span> <span color='#E8C2D0'>Clipboard</span>")
+            self.lbl_tab_clip.set_markup("<span font='12' color='#FF2A55'>󰅌</span>   <span color='#E8C2D0'>Clipboard</span>")
             self.update_shelf_badge()
             self.btn_stash_clip.show()
             self.stack.set_visible_child_name("shelf")
@@ -1224,14 +1496,14 @@ class SerenaAndroidShelf(Gtk.Window):
             except Exception:
                 count = 0
         if self.active_tab == "shelf":
-            txt = f"<span color='#FFFFFF'>󰏖</span> <span color='#FFFFFF'><b>Shelf ({count})</b></span>" if count > 0 else "<span color='#FFFFFF'>󰏖</span> <span color='#FFFFFF'><b>Shelf</b></span>"
+            txt = f"<span font='12' color='#FFFFFF'>󰏖</span>   <span color='#FFFFFF'><b>Shelf ({count})</b></span>" if count > 0 else "<span font='12' color='#FFFFFF'>󰏖</span>   <span color='#FFFFFF'><b>Shelf</b></span>"
         else:
-            txt = f"<span color='#FF2A55'>󰏖</span> <span color='#E8C2D0'>Shelf ({count})</span>" if count > 0 else "<span color='#FF2A55'>󰏖</span> <span color='#E8C2D0'>Shelf</span>"
+            txt = f"<span font='12' color='#FF2A55'>󰏖</span>   <span color='#E8C2D0'>Shelf ({count})</span>" if count > 0 else "<span font='12' color='#FF2A55'>󰏖</span>   <span color='#E8C2D0'>Shelf</span>"
         self.lbl_tab_shelf.set_markup(txt)
 
     def show_toast(self, message):
         self.lbl_status.set_text(message)
-        GLib.timeout_add(2200, lambda: self.lbl_status.set_text("Tip: Hover card to expand · Click to copy · Esc to close"))
+        GLib.timeout_add(2200, lambda: self.lbl_status.set_text("Tip: Hover card to expand · Click to copy · 󰍉 Zoom for full image"))
 
     def check_cliphist_update(self):
         if os.path.exists(CLIPHIST_DB):
@@ -1261,14 +1533,33 @@ class SerenaAndroidShelf(Gtk.Window):
 
     def on_key_press(self, widget, event):
         if event.keyval == Gdk.KEY_Escape:
+            if self.lightbox_win:
+                self.lightbox_win.destroy()
+                self.lightbox_win = None
+                return True
             self.close_window()
             return True
         return False
 
     def close_window(self):
+        self.hide_popout()
+        if self.lightbox_win:
+            self.lightbox_win.destroy()
+            self.lightbox_win = None
         self.destroy()
 
     def on_destroy(self, widget):
+        self.hide_popout()
+        if hasattr(self, 'popout_win') and self.popout_win:
+            try:
+                self.popout_win.destroy()
+            except Exception:
+                pass
+        if self.lightbox_win:
+            try:
+                self.lightbox_win.destroy()
+            except Exception:
+                pass
         if os.path.exists(PID_FILE):
             try:
                 os.remove(PID_FILE)
