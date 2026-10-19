@@ -67,8 +67,8 @@ eventbox {
 
 /* Main Outer Card - Exact Warm Obsidian-Wine (#201011) */
 #cc-main-card {
-    background-color: rgba(32, 16, 18, 0.98);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background-color: transparent;
+    border: none;
     border-radius: 16px;
     padding: 16px 14px 14px 14px;
     box-shadow: none;
@@ -471,10 +471,37 @@ class ControlCenter(Gtk.Window):
         GLib.timeout_add(3000, self.trigger_async_refresh)
 
     def on_window_draw(self, widget, cr):
+        # 1. Clear surface to 100% transparent (eliminates sharp rectangle leak)
         cr.set_source_rgba(0, 0, 0, 0)
         cr.set_operator(cairo.OPERATOR_CLEAR)
         cr.paint()
         cr.set_operator(cairo.OPERATOR_OVER)
+
+        # 2. Draw perfectly rounded 16px background squircle
+        alloc = widget.get_allocation()
+        pad = 0.5
+        w = float(alloc.width) - pad * 2.0
+        h = float(alloc.height) - pad * 2.0
+        x = pad
+        y = pad
+        r = 16.0
+
+        cr.new_sub_path()
+        cr.arc(x + w - r, y + r, r, -1.57079632679, 0)
+        cr.arc(x + w - r, y + h - r, r, 0, 1.57079632679)
+        cr.arc(x + r, y + h - r, r, 1.57079632679, 3.14159265359)
+        cr.arc(x + r, y + r, r, 3.14159265359, 4.71238898038)
+        cr.close_path()
+
+        # Fill with Serena Warm Obsidian-Wine (--bg-window: rgba(32, 16, 18, 0.98))
+        cr.set_source_rgba(32.0 / 255.0, 16.0 / 255.0, 18.0 / 255.0, 0.98)
+        cr.fill_preserve()
+
+        # Stroke with 1px Serena outer border (--border-window: rgba(255, 255, 255, 0.08))
+        cr.set_source_rgba(1.0, 1.0, 1.0, 0.08)
+        cr.set_line_width(1.0)
+        cr.stroke()
+
         return False
 
     def load_status_cache(self):

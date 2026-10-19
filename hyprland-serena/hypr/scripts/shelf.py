@@ -80,8 +80,8 @@ window#shelf-lightbox-root.background,
 
 /* Main Container: Dynamic width & smooth rounded squircle frame (All 4 corners rounded) */
 .shelf-window {
-    background-color: rgba(32, 16, 18, 0.98);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background-color: transparent;
+    border: none;
     border-radius: 16px;
     padding: 14px 18px 14px 18px;
 }
@@ -543,10 +543,38 @@ class SerenaAndroidShelf(Gtk.Window):
         GLib.timeout_add(300, self.check_cliphist_update)
 
     def on_window_draw(self, widget, cr):
+        # 1. Clear surface to 100% transparent (eliminates sharp rectangle leak)
         cr.set_source_rgba(0, 0, 0, 0)
         cr.set_operator(cairo.OPERATOR_CLEAR)
         cr.paint()
         cr.set_operator(cairo.OPERATOR_OVER)
+
+        # 2. Draw perfectly rounded 16px background squircle for the main shelf window
+        if widget == self:
+            alloc = widget.get_allocation()
+            pad = 0.5
+            w = float(alloc.width) - pad * 2.0
+            h = float(alloc.height) - pad * 2.0
+            x = pad
+            y = pad
+            r = 16.0
+
+            cr.new_sub_path()
+            cr.arc(x + w - r, y + r, r, -1.57079632679, 0)
+            cr.arc(x + w - r, y + h - r, r, 0, 1.57079632679)
+            cr.arc(x + r, y + h - r, r, 1.57079632679, 3.14159265359)
+            cr.arc(x + r, y + r, r, 3.14159265359, 4.71238898038)
+            cr.close_path()
+
+            # Fill with Serena Warm Obsidian-Wine (--bg-window: rgba(32, 16, 18, 0.98))
+            cr.set_source_rgba(32.0 / 255.0, 16.0 / 255.0, 18.0 / 255.0, 0.98)
+            cr.fill_preserve()
+
+            # Stroke with 1px Serena outer border (--border-window: rgba(255, 255, 255, 0.08))
+            cr.set_source_rgba(1.0, 1.0, 1.0, 0.08)
+            cr.set_line_width(1.0)
+            cr.stroke()
+
         return False
 
     # =========================================================================
@@ -776,11 +804,12 @@ class SerenaAndroidShelf(Gtk.Window):
         self.drag_handle_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         self.drag_handle_box.set_hexpand(True)
         self.drag_handle_box.get_style_context().add_class("drag-grip-zone")
-        lbl_handle = Gtk.Label()
-        lbl_handle.set_markup("<span font='9.5' color='rgba(255, 42, 85, 0.40)'>󰇘󰇘󰇘</span>")
-        lbl_handle.set_halign(Gtk.Align.CENTER)
-        lbl_handle.set_valign(Gtk.Align.CENTER)
-        self.drag_handle_box.pack_start(lbl_handle, True, True, 0)
+        pill = Gtk.Box()
+        pill.get_style_context().add_class("drag-handle-pill")
+        pill.set_valign(Gtk.Align.CENTER)
+        pill.set_halign(Gtk.Align.CENTER)
+        pill.set_size_request(38, 4)
+        self.drag_handle_box.pack_start(pill, True, True, 0)
         self.drag_handle_box.set_tooltip_text("Drag header to move · Double-click to center")
         header_hbox.pack_start(self.drag_handle_box, True, True, 4)
 
