@@ -20,7 +20,15 @@ Bộ công cụ tùy biến giao diện desktop phong cách tối giản hiện 
    ```
    *Script tự động cài đặt và cấu hình Waybar, Control Center, Profile Dashboard, Hyprlock, Wlogout, Rofi, Kitty, Btop, Fcitx5-Unikey và Con trỏ chuột Sylveon Custom.*
 
-3. **Hoặc chỉ cài Fastfetch & Wallpapers:**
+3. **Đồng bộ tự động & Nạp lại ngay (khi đang chỉnh sửa / phát triển):**
+   ```bash
+   chmod +x ./sync_config.sh
+   ./sync_config.sh           # Đẩy thay đổi từ Repo ➔ ~/.config & Reload
+   ./sync_config.sh --pull    # Kéo thay đổi từ ~/.config ➔ Repo
+   ./sync_config.sh --diff    # So sánh khác biệt giữa Repo và máy
+   ```
+
+4. **Hoặc chỉ cài Fastfetch & Wallpapers:**
    ```bash
    chmod +x ./setup_linux.sh
    ./setup_linux.sh
