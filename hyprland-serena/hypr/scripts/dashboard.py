@@ -22,6 +22,13 @@ gi.require_version('Gtk', '3.0')
 gi.require_version('GdkPixbuf', '2.0')
 from gi.repository import Gtk, Gdk, GdkPixbuf, GLib
 
+try:
+    gi.require_version('GtkLayerShell', '0.1')
+    from gi.repository import GtkLayerShell
+    HAS_LAYER_SHELL = True
+except (ValueError, ImportError):
+    HAS_LAYER_SHELL = False
+
 CSS_DATA = b"""
 * {
     font-family: 'JetBrainsMono Nerd Font', 'FiraCode Nerd Font', 'Segoe UI', sans-serif;
@@ -29,6 +36,8 @@ CSS_DATA = b"""
 
 window#dashboard-window {
     background: transparent;
+    border: none;
+    box-shadow: none;
 }
 
 #main-card {
@@ -178,17 +187,28 @@ class Dashboard(Gtk.Window):
         self.set_decorated(False)
         self.set_resizable(False)
 
-        # Định vị trí dropdown ngay dưới đồng hồ Waybar
-        self.set_position(Gtk.WindowPosition.NONE)
-        display = Gdk.Display.get_default()
-        if display:
-            monitor = display.get_primary_monitor() or display.get_monitor(0)
-            if monitor:
-                geom = monitor.get_geometry()
-                dash_w = 720
-                x = geom.x + (geom.width - dash_w) // 2
-                y = geom.y + 46
-                self.move(x, y)
+        if HAS_LAYER_SHELL:
+            GtkLayerShell.init_for_window(self)
+            GtkLayerShell.set_namespace(self, "dashboard")
+            GtkLayerShell.set_layer(self, GtkLayerShell.Layer.TOP)
+            GtkLayerShell.set_anchor(self, GtkLayerShell.Edge.TOP, True)
+            GtkLayerShell.set_anchor(self, GtkLayerShell.Edge.BOTTOM, False)
+            GtkLayerShell.set_anchor(self, GtkLayerShell.Edge.LEFT, False)
+            GtkLayerShell.set_anchor(self, GtkLayerShell.Edge.RIGHT, False)
+            GtkLayerShell.set_margin(self, GtkLayerShell.Edge.TOP, 44)
+            GtkLayerShell.set_keyboard_mode(self, GtkLayerShell.KeyboardMode.ON_DEMAND)
+        else:
+            # Định vị trí dropdown ngay dưới đồng hồ Waybar (fallback)
+            self.set_position(Gtk.WindowPosition.NONE)
+            display = Gdk.Display.get_default()
+            if display:
+                monitor = display.get_primary_monitor() or display.get_monitor(0)
+                if monitor:
+                    geom = monitor.get_geometry()
+                    dash_w = 720
+                    x = geom.x + (geom.width - dash_w) // 2
+                    y = geom.y + 44
+                    self.move(x, y)
 
         # Nền trong suốt RGBA
         screen = self.get_screen()
