@@ -181,8 +181,8 @@ hl.window_rule({
 })
 
 hl.window_rule({
-    name = "btop-serena-rule",
-    match = { class = "^(btop-serena)$" },
+    name = "task-manager-rule",
+    match = { class = "^(task-manager|btop)$" },
     float = true,
     size = "960 620",
     center = true,
@@ -190,7 +190,7 @@ hl.window_rule({
 
 hl.window_rule({
     name = "dashboard-rule",
-    match = { class = "^(dashboard|serena-dashboard)$" },
+    match = { class = "^(dashboard)$" },
     float = true,
     animation = "slide top",
 })
@@ -203,7 +203,7 @@ hl.window_rule({
 
 hl.window_rule({
     name = "control-center-rule",
-    match = { class = "^(control-center|serena-control-center)$" },
+    match = { class = "^(control-center)$" },
     float = true,
     animation = "slide top",
 })
@@ -218,14 +218,8 @@ hl.layer_rule({
 })
 
 hl.layer_rule({
-    name = "serena-cc-blur",
-    match = { namespace = "serena-control-center" },
-    blur = true,
-})
-
-hl.layer_rule({
     name = "cc-anim",
-    match = { namespace = "^(control-center|serena-control-center)$" },
+    match = { namespace = "^(control-center)$" },
     animation = "slide top",
 })
 
@@ -250,7 +244,7 @@ hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())
 hl.bind(mainMod .. " + ESCAPE",         hl.dsp.exec_cmd("~/.config/hypr/scripts/Wlogout.sh"))
 hl.bind(mainMod .. " + S",              hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle_dashboard.sh"))
 hl.bind(mainMod .. " + N",              hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle_control_center.sh"))
-hl.bind("CTRL + SHIFT + ESCAPE",        hl.dsp.exec_cmd("kitty --class btop-serena -T 'Task Manager' btop"))
+hl.bind("CTRL + SHIFT + ESCAPE",        hl.dsp.exec_cmd("kitty --class task-manager -T 'Task Manager' btop"))
 
 -- Tiện ích hệ thống
 hl.bind(mainMod .. " + L",         hl.dsp.exec_cmd("hyprlock"))

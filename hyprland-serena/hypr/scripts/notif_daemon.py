@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # ==============================================================================
-# 🌸 SERENA REAL NOTIFICATION RECORDER DAEMON
+# 🌸 REAL NOTIFICATION RECORDER DAEMON
 # ==============================================================================
 # Eavesdrops on DBus org.freedesktop.Notifications to capture live notifications
-# and maintains ~/.cache/serena_notifications.json for Serena Control Center.
+# and maintains ~/.cache/notifications.json for Control Center.
 # ==============================================================================
 
 import os

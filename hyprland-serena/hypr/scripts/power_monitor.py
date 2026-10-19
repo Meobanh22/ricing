@@ -106,7 +106,7 @@ def render_banner(info, power_w, est_str, is_charging):
     sign = "+" if is_charging else "-"
     power_display = f"{sign}{abs(power_w):.2f} W" if power_w is not None else "Calculating..."
     
-    print(f"\n{BOLD}{RED}🌸 SERENA POWER & BATTERY MONITOR 🌸{RESET}")
+    print(f"\n{BOLD}{RED}🌸 POWER & BATTERY MONITOR 🌸{RESET}")
     print(f"{MUTED}──────────────────────────────────────────────────────────{RESET}")
     print(f" {BOLD}{WHITE}Trạng thái:{RESET}        {color_status}{BOLD}{icon_status}{RESET} ({info['status']})")
     print(f" {BOLD}{WHITE}Mức pin hiện tại:{RESET}  {BOLD}{WHITE}{info['capacity']}%{RESET} {MUTED}[{info['charge_now']:.2f} / {info['charge_full']:.2f} Ah]{RESET}")
@@ -232,7 +232,7 @@ def run_watch(interval=2.0):
         print("\033[?25h", end="")
 
 def main():
-    parser = argparse.ArgumentParser(description="Serena Real-time Power Monitor")
+    parser = argparse.ArgumentParser(description="Real-time Power Monitor")
     parser.add_argument("-w", "--watch", action="store_true", help="Chạy chế độ live monitor liên tục")
     parser.add_argument("-i", "--interval", type=float, default=2.0, help="Tần số cập nhật (giây, mặc định 2.0s)")
     args = parser.parse_args()

@@ -78,7 +78,7 @@ window#dashboard-window {
     font-size: 11.5px;
 }
 
-.title-serena {
+.title-header {
     color: #FF2A55;
     font-size: 11.5px;
     font-weight: 800;
@@ -370,7 +370,7 @@ class Dashboard(Gtk.Window):
         # Top Header (Title + Close Button)
         header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         lbl_brand = Gtk.Label(label="🌸 PROFILE DASHBOARD 🌸")
-        lbl_brand.get_style_context().add_class("title-serena")
+        lbl_brand.get_style_context().add_class("title-header")
         header_box.pack_start(lbl_brand, True, True, 0)
 
         btn_close = Gtk.Button(label="✕")
