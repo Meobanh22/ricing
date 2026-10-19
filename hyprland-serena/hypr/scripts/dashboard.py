@@ -42,7 +42,7 @@ window#dashboard-window {
 .profile-card {
     background-color: rgba(42, 26, 31, 0.95);
     border: none;
-    border-radius: 14px;
+    border-radius: 10px;
     padding: 16px 16px 14px 16px;
 }
 
@@ -61,10 +61,10 @@ window#dashboard-window {
 .profile-status {
     background-color: rgba(58, 34, 42, 0.90);
     color: #7FA873;
-    font-size: 9.5px;
+    font-size: 11px;
     font-weight: 700;
     padding: 2px 8px;
-    border-radius: 10px;
+    border-radius: 6px;
 }
 
 .info-item {
@@ -91,12 +91,12 @@ window#dashboard-window {
     border: none;
     font-size: 13px;
     padding: 2px 7px;
-    border-radius: 6px;
+    border-radius: 8px;
     transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .btn-close:hover {
-    background: rgba(58, 34, 42, 0.98);
+    background: rgba(42, 26, 31, 0.50);
     color: #FF2A55;
 }
 
@@ -121,7 +121,7 @@ window#dashboard-window {
 .card-tile {
     background-color: rgba(42, 26, 31, 0.95);
     border: none;
-    border-radius: 14px;
+    border-radius: 10px;
     padding: 12px 14px;
 }
 
@@ -146,14 +146,14 @@ window#dashboard-window {
 
 .weather-sub {
     color: #A68595;
-    font-size: 10px;
+    font-size: 11px;
 }
 
 calendar {
     color: #FFF0F5;
     background-color: transparent;
     border: none;
-    font-size: 10.5px;
+    font-size: 11px;
 }
 
 calendar:selected {

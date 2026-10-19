@@ -59,11 +59,11 @@ eventbox {
     border: none;
 }
 
-/* Main Outer Card - Exact Warm Obsidian-Wine from Image (#201011) */
+/* Main Outer Card - Exact Warm Obsidian-Wine (#201011) */
 #cc-main-card {
     background-color: rgba(32, 16, 18, 0.98);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 20px;
+    border-radius: 16px;
     padding: 16px 14px 14px 14px;
     box-shadow: none;
     min-width: 315px;
@@ -99,7 +99,7 @@ eventbox {
 .quick-card {
     background-color: rgba(42, 26, 31, 0.95);
     border: none;
-    border-radius: 14px;
+    border-radius: 10px;
     padding: 11px 4px 9px 4px;
     transition: background-color 0.15s ease;
     box-shadow: none;
@@ -206,7 +206,7 @@ scale#vol-scale slider:hover {
 .notif-item {
     background-color: transparent;
     border: none;
-    border-radius: 12px;
+    border-radius: 8px;
     padding: 8px 10px;
     margin: 2px 0;
     transition: background-color 0.15s ease;
@@ -214,7 +214,7 @@ scale#vol-scale slider:hover {
 }
 
 .notif-item:hover {
-    background-color: rgba(56, 18, 36, 0.45);
+    background-color: rgba(42, 26, 31, 0.50);
     border: none;
     box-shadow: none;
 }
@@ -291,7 +291,7 @@ scale#vol-scale slider:hover {
 .btn-power-card {
     background-color: transparent;
     border: none;
-    border-radius: 14px;
+    border-radius: 8px;
     padding: 10px 14px;
     transition: background-color 0.15s ease;
     box-shadow: none;
@@ -299,7 +299,7 @@ scale#vol-scale slider:hover {
 
 .btn-power-card.card-hover,
 .btn-power-card:hover {
-    background-color: rgba(56, 18, 36, 0.45);
+    background-color: rgba(42, 26, 31, 0.50);
     border: none;
     box-shadow: none;
 }
