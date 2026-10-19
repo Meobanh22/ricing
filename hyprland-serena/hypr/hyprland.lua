@@ -77,6 +77,10 @@ hl.on("hyprland.start", function ()
     -- 7. Khởi động Dịch vụ lưu trữ mật khẩu & mã hóa (GNOME Keyring)
     hl.exec_cmd("gnome-keyring-daemon --start --components=secrets,pkcs11,ssh")
     hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP GNOME_KEYRING_CONTROL SSH_AUTH_SOCK")
+
+    -- 8. Trình theo dõi Clipboard (cliphist cho văn bản & hình ảnh)
+    hl.exec_cmd("wl-paste --type text --watch cliphist store &")
+    hl.exec_cmd("wl-paste --type image --watch cliphist store &")
 end)
 
 -----------------------
@@ -236,6 +240,19 @@ hl.layer_rule({
     ignore_alpha = 0.5,
 })
 
+hl.layer_rule({
+    name = "shelf-anim",
+    match = { namespace = "^(shelf)$" },
+    animation = "slide top",
+})
+
+hl.layer_rule({
+    name = "shelf-blur",
+    match = { namespace = "^(shelf)$" },
+    blur = true,
+    ignore_alpha = 0.5,
+})
+
 ---------------------
 ---- KEYBINDINGS ----
 ---------------------
@@ -250,13 +267,15 @@ hl.bind(mainMod .. " + C",      hl.dsp.exec_cmd("code"))
 
 -- Quản lý cửa sổ
 hl.bind(mainMod .. " + Q", hl.dsp.window.close())
-hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
+hl.bind(mainMod .. " + SHIFT + V", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())
 
 -- Bảng điều khiển & Tiện ích mở rộng
 hl.bind(mainMod .. " + ESCAPE",         hl.dsp.exec_cmd("~/.config/hypr/scripts/Wlogout.sh"))
 hl.bind(mainMod .. " + S",              hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle_dashboard.sh"))
 hl.bind(mainMod .. " + N",              hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle_control_center.sh"))
+hl.bind(mainMod .. " + V",              hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle_shelf.sh --clip"))
+hl.bind(mainMod .. " + D",              hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle_shelf.sh --shelf"))
 hl.bind("CTRL + SHIFT + ESCAPE",        hl.dsp.exec_cmd("kitty --class task-manager -T 'Task Manager' btop"))
 
 -- Tiện ích hệ thống
