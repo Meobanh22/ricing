@@ -235,10 +235,11 @@ window#waybar {
 #custom-power {
     color: @role_crimson;
     background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 8px;
     font-size: 13px;
-    padding: 0px 7px 0px 6px;
-    margin: 0px;
-    border: none;
+    padding: 2px 8px;
+    margin: 0 1px;
     box-shadow: none;
     text-shadow: none;
     transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;

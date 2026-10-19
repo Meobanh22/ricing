@@ -115,7 +115,7 @@
   },
 
   "custom/power": {
-    "format": "<span color='#ff2a55'></span>",
+    "format": "󰐥",
     "tooltip": "Power Menu (Click to open)",
     "on-click": "~/.config/hypr/scripts/Wlogout.sh"
   }
