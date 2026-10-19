@@ -31,7 +31,7 @@ hl.env("XDG_SESSION_TYPE", "wayland")
 hl.env("XDG_SESSION_DESKTOP", "Hyprland")
 hl.env("GDK_BACKEND", "wayland,x11,*")
 hl.env("QT_QPA_PLATFORM", "wayland;xcb")
-hl.env("BROWSER", "microsoft-edge-stable")
+hl.env("BROWSER", "firefox")
 
 -- Tối ưu phần cứng & tiết kiệm pin (Intel Iris Xe + Firefox Wayland VA-API)
 hl.env("MOZ_ENABLE_WAYLAND", "1")
@@ -238,7 +238,7 @@ local mainMod = "SUPER"
 hl.bind(mainMod .. " + RETURN", hl.dsp.exec_cmd("kitty || gnome-terminal"))
 hl.bind(mainMod .. " + SPACE",  hl.dsp.exec_cmd("~/.config/hypr/scripts/OpenApps.sh"))
 hl.bind(mainMod .. " + E",      hl.dsp.exec_cmd("thunar || nautilus"))
-hl.bind(mainMod .. " + B",      hl.dsp.exec_cmd("microsoft-edge-stable || microsoft-edge || firefox || google-chrome"))
+hl.bind(mainMod .. " + B",      hl.dsp.exec_cmd("firefox"))
 hl.bind(mainMod .. " + C",      hl.dsp.exec_cmd("code"))
 
 -- Quản lý cửa sổ
