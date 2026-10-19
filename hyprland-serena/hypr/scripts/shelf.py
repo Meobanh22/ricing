@@ -80,8 +80,8 @@ window#shelf-lightbox-root.background,
 
 /* Main Container: Dynamic width & smooth rounded squircle frame (All 4 corners rounded) */
 .shelf-window {
-    background-color: transparent;
-    border: none;
+    background-color: rgba(32, 16, 18, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 16px;
     padding: 0;
 }
@@ -209,18 +209,18 @@ flowboxchild:selected {
 .chip-card {
     background-color: rgba(42, 26, 31, 0.95);
     border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     padding: 8px 10px;
     transition: background-color 150ms ease, border-color 150ms ease;
 }
 
 .chip-card:hover {
     background-color: rgba(58, 34, 42, 0.98);
-    border: 1px solid rgba(255, 42, 85, 0.55);
+    border: 1px solid rgba(255, 42, 85, 0.65);
 }
 
 .chip-card.pinned {
-    border: 1px solid rgba(255, 42, 85, 0.45);
+    border: 1px solid rgba(255, 42, 85, 0.50);
     background-color: rgba(48, 25, 32, 0.98);
 }
 
@@ -568,8 +568,8 @@ class SerenaAndroidShelf(Gtk.Window):
             cr.set_source_rgba(32.0 / 255.0, 16.0 / 255.0, 18.0 / 255.0, 0.98)
             cr.fill_preserve()
 
-            # Stroke with 1px Serena outer border (--border-window: rgba(255, 255, 255, 0.08))
-            cr.set_source_rgba(1.0, 1.0, 1.0, 0.08)
+            # Stroke with 1px Serena outer border (--border-window: rgba(255, 255, 255, 0.12))
+            cr.set_source_rgba(1.0, 1.0, 1.0, 0.12)
             cr.set_line_width(1.0)
             cr.stroke()
 
@@ -836,16 +836,13 @@ class SerenaAndroidShelf(Gtk.Window):
     def build_ui(self):
         main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         main_box.get_style_context().add_class("shelf-window")
-        main_box.set_margin_start(16)
-        main_box.set_margin_end(16)
-        main_box.set_margin_top(14)
-        main_box.set_margin_bottom(14)
 
         # --- HEADER ---
         header_hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-        header_hbox.set_margin_start(0)
-        header_hbox.set_margin_end(0)
-        header_hbox.set_margin_bottom(10)
+        header_hbox.set_margin_start(14)
+        header_hbox.set_margin_end(14)
+        header_hbox.set_margin_top(14)
+        header_hbox.set_margin_bottom(8)
 
         tab_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
         tab_box.get_style_context().add_class("tab-switcher")
@@ -949,6 +946,8 @@ class SerenaAndroidShelf(Gtk.Window):
         self.lbl_status = Gtk.Label(label="")
         self.lbl_status.get_style_context().add_class("status-bar")
         self.lbl_status.set_halign(Gtk.Align.START)
+        self.lbl_status.set_margin_start(14)
+        self.lbl_status.set_margin_bottom(10)
         main_box.pack_end(self.lbl_status, False, False, 0)
 
         self.add(main_box)
@@ -994,8 +993,8 @@ class SerenaAndroidShelf(Gtk.Window):
     # =========================================================================
     def build_clipboard_page(self):
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
-        vbox.set_margin_start(0)
-        vbox.set_margin_end(0)
+        vbox.set_margin_start(14)
+        vbox.set_margin_end(14)
 
         self.clip_search = Gtk.SearchEntry()
         self.clip_search.set_placeholder_text("Search clips...")
@@ -1021,7 +1020,7 @@ class SerenaAndroidShelf(Gtk.Window):
         self.clip_flow.set_row_spacing(10)
         self.clip_flow.set_column_spacing(10)
         self.clip_flow.set_homogeneous(True)
-        self.clip_flow.set_margin_end(10)
+        self.clip_flow.set_margin_end(8)
         self.clip_flow.set_margin_start(0)
 
         self.clip_scroll.add(self.clip_flow)
@@ -1242,8 +1241,8 @@ class SerenaAndroidShelf(Gtk.Window):
     # =========================================================================
     def build_shelf_page(self):
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
-        vbox.set_margin_start(0)
-        vbox.set_margin_end(0)
+        vbox.set_margin_start(14)
+        vbox.set_margin_end(14)
 
         self.shelf_stack = Gtk.Stack()
         self.shelf_stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
@@ -1312,7 +1311,7 @@ class SerenaAndroidShelf(Gtk.Window):
         self.shelf_flow.set_row_spacing(10)
         self.shelf_flow.set_column_spacing(10)
         self.shelf_flow.set_homogeneous(True)
-        self.shelf_flow.set_margin_end(10)
+        self.shelf_flow.set_margin_end(8)
         self.shelf_flow.set_margin_start(0)
 
         self.shelf_scroll.add(self.shelf_flow)
