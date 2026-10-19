@@ -229,6 +229,13 @@ hl.layer_rule({
     ignore_alpha = 0.5,
 })
 
+hl.layer_rule({
+    name = "wlogout-blur",
+    match = { namespace = "^(wlogout)$" },
+    blur = true,
+    ignore_alpha = 0.5,
+})
+
 ---------------------
 ---- KEYBINDINGS ----
 ---------------------

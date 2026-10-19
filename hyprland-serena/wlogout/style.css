@@ -1,103 +1,115 @@
 /* ==============================================================================
-   🌸 WLOGOUT FLAT UI THEME
-   Subdued neutral containers with role-coded internal action elements.
+   🌸 SERENA ANIME MINIMALIST WLOGOUT THEME
+   Strict adherence to Serena Design Guidelines (AGENTS.md)
+   Obsidian-Wine warm cards with Ribbon Red (#FF2A55) & Coral Hover (#FF597B)
    ============================================================================== */
 
 * {
-    font-family: "JetBrainsMono Nerd Font", "FiraCode Nerd Font", "Segoe UI", sans-serif;
+    font-family: "JetBrains Mono", "JetBrainsMono Nerd Font", "Inter", sans-serif;
     background-image: none;
     box-shadow: none;
 }
 
+/* Frosted Warm Wine Backdrop (Layer-shell with Hyprland Blur) */
 window {
-    background-color: rgba(18, 19, 31, 0.88);
+    background-color: rgba(32, 16, 18, 0.82);
 }
 
-/* Subdued Neutral Tiles */
+/* Card Button: 10px radius, borderless, warm obsidian-wine */
 button {
-    color: #B4A5D0;
+    color: #E8C2D0;
     font-size: 13px;
-    font-weight: 700;
-    background-color: rgba(28, 29, 48, 0.95);
-    border: 1px solid #2E3048;
-    border-radius: 14px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    background-color: rgba(42, 26, 31, 0.95);
+    border: none;
+    border-radius: 10px;
     margin: 8px;
     background-repeat: no-repeat;
     background-position: center 32%;
-    background-size: 28%;
+    background-size: 44px 44px;
     box-shadow: none;
-    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    transition: background-color 150ms ease, color 150ms ease;
     outline-style: none;
 }
 
-button span {
+button span,
+button label {
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 600;
+    color: #E8C2D0;
+    margin-top: 56px;
+    transition: color 150ms ease;
 }
 
-/* --- ROLE-BASED HOVER STATES FOR INTERNAL BUTTONS --- */
-/* 1. Lock Screen: Twilight Sky / Dusk Blue */
-#lock:focus,
-#lock:active,
-#lock:hover {
-    color: #FFF1D4;
-    background-color: #262945;
-    border: 1px solid #7772C2;
+/* Hover: Color transition only — No shadows, no glow, no harsh borders */
+button:focus,
+button:active,
+button:hover {
+    background-color: rgba(58, 34, 42, 0.98);
+    color: #FFF0F5;
+    border: none;
+    outline-style: none;
+    box-shadow: none;
 }
 
-/* 2. Suspend: Fennekin Amber */
-#suspend:focus,
-#suspend:active,
-#suspend:hover {
-    color: #FFF1D4;
-    background-color: #352B28;
-    border: 1px solid #E59A44;
+button:focus span,
+button:focus label,
+button:active span,
+button:active label,
+button:hover span,
+button:hover label {
+    color: #FFF0F5;
 }
 
-/* 3. Logout: Shaded Violet-Crimson */
-#logout:focus,
-#logout:active,
-#logout:hover {
-    color: #FFF1D4;
-    background-color: #2F2134;
-    border: 1px solid #88293F;
-}
+/* --- ICONS: NORMAL (#FF2A55) & HOVER (#FF597B) --- */
 
-/* 4. Reboot: Soft Vermilion Orange */
-#reboot:focus,
-#reboot:active,
-#reboot:hover {
-    color: #FFF1D4;
-    background-color: #382324;
-    border: 1px solid #E65E34;
-}
-
-/* 5. Shutdown: Crimson */
-#shutdown:focus,
-#shutdown:active,
-#shutdown:hover {
-    color: #FFFFFF;
-    background-color: #C82A2B;
-    border: 1px solid #DB3B32;
-}
-
-/* --- ICONS (MINIMALIST WHITE VECTORS) --- */
+/* 1. Lock Screen */
 #lock {
     background-image: image(url("./icons/lock.svg"), url("./icons/lock.png"));
 }
+#lock:focus,
+#lock:active,
+#lock:hover {
+    background-image: image(url("./icons/lock-hover.svg"), url("./icons/lock-hover.png"));
+}
 
+/* 2. Suspend */
 #suspend {
     background-image: image(url("./icons/suspend.svg"), url("./icons/suspend.png"));
 }
+#suspend:focus,
+#suspend:active,
+#suspend:hover {
+    background-image: image(url("./icons/suspend-hover.svg"), url("./icons/suspend-hover.png"));
+}
 
+/* 3. Logout */
 #logout {
     background-image: image(url("./icons/logout.svg"), url("./icons/logout.png"));
 }
+#logout:focus,
+#logout:active,
+#logout:hover {
+    background-image: image(url("./icons/logout-hover.svg"), url("./icons/logout-hover.png"));
+}
 
+/* 4. Reboot */
 #reboot {
     background-image: image(url("./icons/reboot.svg"), url("./icons/reboot.png"));
 }
+#reboot:focus,
+#reboot:active,
+#reboot:hover {
+    background-image: image(url("./icons/reboot-hover.svg"), url("./icons/reboot-hover.png"));
+}
 
+/* 5. Shutdown */
 #shutdown {
     background-image: image(url("./icons/shutdown.svg"), url("./icons/shutdown.png"));
+}
+#shutdown:focus,
+#shutdown:active,
+#shutdown:hover {
+    background-image: image(url("./icons/shutdown-hover.svg"), url("./icons/shutdown-hover.png"));
 }
