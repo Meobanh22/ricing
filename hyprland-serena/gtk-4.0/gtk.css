@@ -1,0 +1,114 @@
+/* ==============================================================================
+   🌸 SERENA ANIME MINIMALIST GTK-4.0 THEME
+   Strict adherence to Serena Design Guidelines (AGENTS.md)
+   Warm Obsidian-Wine & Ribbon Red (#FF2A55)
+   ============================================================================== */
+
+@define-color bg_window #201011;
+@define-color bg_card #2A1A1E;
+@define-color bg_card_hover #3A222A;
+@define-color bg_subtle #301F20;
+@define-color border_window rgba(255, 255, 255, 0.08);
+
+@define-color accent #FF2A55;
+@define-color accent_hover #FF597B;
+
+@define-color text_primary #FFF0F5;
+@define-color text_secondary #E8C2D0;
+@define-color text_muted #A68595;
+
+/* GTK4 Theme Colors */
+@define-color window_bg_color #201011;
+@define-color window_fg_color #FFF0F5;
+@define-color view_bg_color #201011;
+@define-color view_fg_color #FFF0F5;
+@define-color headerbar_bg_color #201011;
+@define-color headerbar_fg_color #FFF0F5;
+@define-color headerbar_border_color rgba(255, 255, 255, 0.08);
+@define-color card_bg_color #2A1A1E;
+@define-color card_fg_color #FFF0F5;
+@define-color card_border_color rgba(255, 255, 255, 0.08);
+@define-color accent_color #FF2A55;
+@define-color accent_bg_color #FF2A55;
+@define-color accent_fg_color #FFFFFF;
+
+* {
+    font-family: "JetBrains Mono", "Inter", sans-serif;
+}
+
+window,
+.background {
+    background-color: @bg_window;
+    color: @text_primary;
+}
+
+headerbar {
+    background-color: @bg_window;
+    border-bottom: 1px solid @border_window;
+    color: @text_primary;
+}
+
+.navigation-sidebar,
+listview.navigation-sidebar {
+    background-color: @bg_card;
+    color: @text_secondary;
+    border-right: 1px solid @border_window;
+}
+
+.navigation-sidebar row:selected {
+    background-color: @accent;
+    color: #FFFFFF;
+}
+
+button {
+    background-color: @bg_card;
+    color: @text_secondary;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 12px;
+    transition: background-color 150ms ease, color 150ms ease;
+}
+
+button:hover {
+    background-color: @bg_card_hover;
+    color: @text_primary;
+}
+
+button.suggested-action {
+    background-color: @accent;
+    color: #FFFFFF;
+}
+
+button.suggested-action:hover {
+    background-color: @accent_hover;
+}
+
+entry {
+    background-color: @bg_card;
+    color: @text_primary;
+    border: 1px solid @border_window;
+    border-radius: 8px;
+    caret-color: @accent;
+}
+
+entry:focus {
+    border: 1px solid @accent;
+}
+
+popover contents {
+    background-color: @bg_card;
+    border: 1px solid @border_window;
+    border-radius: 10px;
+    color: @text_secondary;
+}
+
+scrollbar slider {
+    background-color: rgba(255, 42, 85, 0.35);
+    border-radius: 4px;
+    min-width: 6px;
+    min-height: 6px;
+}
+
+scrollbar slider:hover {
+    background-color: @accent;
+}

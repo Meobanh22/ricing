@@ -90,6 +90,24 @@ sync_push() {
         echo -e "  ${GREEN}✔ Fastfetch (config.jsonc, sylveon_chibi.txt)${NC}"
     fi
 
+    # GTK-3.0 & GTK-4.0
+    mkdir -p "$HOME/.config/gtk-3.0" "$HOME/.config/gtk-4.0"
+    if [ -d "$DOTFILES_DIR/gtk-3.0" ]; then
+        cp -rf "$DOTFILES_DIR/gtk-3.0/"* "$HOME/.config/gtk-3.0/"
+        echo -e "  ${GREEN}✔ GTK-3.0 (gtk.css, settings.ini, bookmarks)${NC}"
+    fi
+    if [ -d "$DOTFILES_DIR/gtk-4.0" ]; then
+        cp -rf "$DOTFILES_DIR/gtk-4.0/"* "$HOME/.config/gtk-4.0/"
+        echo -e "  ${GREEN}✔ GTK-4.0 (gtk.css, settings.ini)${NC}"
+    fi
+
+    # Thunar Custom Actions
+    mkdir -p "$HOME/.config/Thunar"
+    if [ -d "$DOTFILES_DIR/Thunar" ]; then
+        cp -rf "$DOTFILES_DIR/Thunar/"* "$HOME/.config/Thunar/"
+        echo -e "  ${GREEN}✔ Thunar File Manager (uca.xml)${NC}"
+    fi
+
     # 3. Đồng bộ Cursors & Wallpapers
     echo -e "\n${YELLOW}🖱️  [2/4] Kiểm tra Con trỏ chuột & Hình nền...${NC}"
     if [ -d "$SCRIPT_DIR/cursors/sylveon-custom" ]; then
@@ -118,6 +136,13 @@ sync_push() {
 
         # Cập nhật cursor live
         hyprctl setcursor sylveon-custom 24 &>/dev/null || true
+
+        # Cập nhật theme GTK / GNOME sang Dark Mode & Serena
+        gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' 2>/dev/null || true
+        gsettings set org.gnome.desktop.interface gtk-theme 'Yaru-red-dark' 2>/dev/null || true
+        gsettings set org.gnome.desktop.interface icon-theme 'Yaru-red-dark' 2>/dev/null || true
+        gsettings set org.gnome.desktop.interface font-name 'JetBrains Mono 11' 2>/dev/null || true
+        echo -e "  ${GREEN}✔ Đã cập nhật GTK Theme & Dark Mode (gsettings)${NC}"
     fi
 
     echo -e "\n${PINK}================================================================${NC}"
@@ -182,6 +207,25 @@ sync_pull() {
         echo -e "  ${GREEN}✔ Đã kéo ~/.config/fastfetch/ ➔ repo${NC}"
     fi
 
+    # GTK-3.0 & GTK-4.0
+    if [ -d "$HOME/.config/gtk-3.0" ]; then
+        mkdir -p "$DOTFILES_DIR/gtk-3.0"
+        cp -rf "$HOME/.config/gtk-3.0/"* "$DOTFILES_DIR/gtk-3.0/"
+        echo -e "  ${GREEN}✔ Đã kéo ~/.config/gtk-3.0/ ➔ repo${NC}"
+    fi
+    if [ -d "$HOME/.config/gtk-4.0" ]; then
+        mkdir -p "$DOTFILES_DIR/gtk-4.0"
+        cp -rf "$HOME/.config/gtk-4.0/"* "$DOTFILES_DIR/gtk-4.0/"
+        echo -e "  ${GREEN}✔ Đã kéo ~/.config/gtk-4.0/ ➔ repo${NC}"
+    fi
+
+    # Thunar
+    if [ -d "$HOME/.config/Thunar" ]; then
+        mkdir -p "$DOTFILES_DIR/Thunar"
+        cp -rf "$HOME/.config/Thunar/"* "$DOTFILES_DIR/Thunar/"
+        echo -e "  ${GREEN}✔ Đã kéo ~/.config/Thunar/ ➔ repo${NC}"
+    fi
+
     echo -e "\n${CYAN}================================================================${NC}"
     echo -e "${GREEN}✨ ĐÃ KÉO THAY ĐỔI VỀ REPO! Dùng 'git status' để xem diff. ✨${NC}"
     echo -e "${CYAN}================================================================${NC}\n"
@@ -199,6 +243,9 @@ sync_diff() {
     diff -rq "$DOTFILES_DIR/wlogout" "$HOME/.config/wlogout" 2>/dev/null || true
     diff -rq "$DOTFILES_DIR/swaync" "$HOME/.config/swaync" 2>/dev/null || true
     diff -rq "$DOTFILES_DIR/btop" "$HOME/.config/btop" 2>/dev/null || true
+    diff -rq "$DOTFILES_DIR/gtk-3.0" "$HOME/.config/gtk-3.0" 2>/dev/null || true
+    diff -rq "$DOTFILES_DIR/gtk-4.0" "$HOME/.config/gtk-4.0" 2>/dev/null || true
+    diff -rq "$DOTFILES_DIR/Thunar" "$HOME/.config/Thunar" 2>/dev/null || true
     echo -e "\n${GREEN}✔ Đã quét xong khác biệt!${NC}"
 }
 

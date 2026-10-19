@@ -1,0 +1,245 @@
+/* ==============================================================================
+   🌸 SERENA ANIME MINIMALIST GTK-3.0 THEME
+   Strict adherence to Serena Design Guidelines (AGENTS.md)
+   Warm Obsidian-Wine & Ribbon Red (#FF2A55)
+   ============================================================================== */
+
+@define-color bg_window #201011;
+@define-color bg_card #2A1A1E;
+@define-color bg_card_hover #3A222A;
+@define-color bg_subtle #301F20;
+@define-color border_window rgba(255, 255, 255, 0.08);
+@define-color border_subtle rgba(255, 255, 255, 0.05);
+
+@define-color accent #FF2A55;
+@define-color accent_hover #FF597B;
+
+@define-color text_primary #FFF0F5;
+@define-color text_secondary #E8C2D0;
+@define-color text_muted #A68595;
+
+/* Standard GTK theme variables */
+@define-color theme_bg_color #201011;
+@define-color theme_fg_color #FFF0F5;
+@define-color theme_base_color #201011;
+@define-color theme_text_color #FFF0F5;
+@define-color theme_selected_bg_color #FF2A55;
+@define-color theme_selected_fg_color #FFFFFF;
+@define-color insensitive_bg_color #251417;
+@define-color insensitive_fg_color #A68595;
+@define-color borders rgba(255, 255, 255, 0.08);
+
+* {
+    font-family: "JetBrains Mono", "Inter", sans-serif;
+    outline: none;
+    -GtkWidget-focus-line-width: 0;
+}
+
+/* 1. Main Windows & Views */
+window,
+window.background,
+.background {
+    background-color: @bg_window;
+    color: @text_primary;
+}
+
+/* 2. Headerbars & Titlebars */
+headerbar,
+.titlebar {
+    background-color: @bg_window;
+    border-bottom: 1px solid @border_window;
+    color: @text_primary;
+    box-shadow: none;
+}
+
+headerbar label.title {
+    font-weight: 600;
+    color: @text_primary;
+}
+
+headerbar label.subtitle {
+    color: @text_muted;
+    font-size: 11px;
+}
+
+/* 3. Thunar Sidebar / Treeview / Places */
+.sidebar,
+.sidebar treeview,
+.sidebar .view,
+ThunarWindow .sidebar,
+ThunarWindow .sidebar .view,
+scrolledwindow.sidebar {
+    background-color: @bg_card;
+    color: @text_secondary;
+    border-right: 1px solid @border_window;
+}
+
+/* Sidebar Row Hover & Selected */
+.sidebar treeview:hover,
+ThunarWindow .sidebar treeview:hover {
+    background-color: @bg_card;
+}
+
+.sidebar row:selected,
+.sidebar treeview:selected,
+ThunarWindow .sidebar row:selected {
+    background-color: @accent;
+    color: #FFFFFF;
+    border-radius: 6px;
+}
+
+/* 4. Thunar Main File Grid / Icon View & Details View */
+exo-icon-view,
+ThunarIconView,
+.view,
+treeview.view,
+iconview {
+    background-color: @bg_window;
+    color: @text_primary;
+}
+
+/* Selection in file view */
+iconview:selected,
+iconview:selected:focus,
+treeview.view:selected,
+treeview.view:selected:focus,
+.view:selected {
+    background-color: @accent;
+    color: #FFFFFF;
+    border-radius: 8px;
+}
+
+/* Hover in file view */
+iconview:hover,
+treeview.view:hover,
+.view:hover {
+    background-color: @bg_card_hover;
+    color: @text_primary;
+}
+
+/* 5. Toolbars & Pathbar Navigation */
+toolbar,
+.toolbar,
+.path-bar-box,
+ThunarLocationButtons {
+    background-color: @bg_window;
+    border-bottom: 1px solid @border_window;
+    color: @text_primary;
+    padding: 4px;
+}
+
+/* Navigation buttons (Path buttons, forward, back) */
+toolbar button,
+.path-bar-box button,
+headerbar button {
+    background-color: @bg_card;
+    color: @text_secondary;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 10px;
+    margin: 2px;
+    transition: background-color 150ms ease, color 150ms ease;
+}
+
+toolbar button:hover,
+.path-bar-box button:hover,
+headerbar button:hover {
+    background-color: @bg_card_hover;
+    color: @text_primary;
+}
+
+toolbar button:checked,
+toolbar button:active,
+.path-bar-box button:checked,
+.path-bar-box button:active {
+    background-color: @accent;
+    color: #FFFFFF;
+}
+
+/* 6. Text Entries & Search Inputs */
+entry,
+searchentry {
+    background-color: @bg_card;
+    color: @text_primary;
+    border: 1px solid @border_window;
+    border-radius: 8px;
+    padding: 6px 10px;
+    caret-color: @accent;
+    transition: border-color 150ms ease;
+}
+
+entry:focus,
+searchentry:focus {
+    border: 1px solid @accent;
+    background-color: @bg_card;
+}
+
+/* 7. Menus & Popovers */
+menu,
+.menu,
+popover {
+    background-color: @bg_card;
+    border: 1px solid @border_window;
+    border-radius: 10px;
+    padding: 6px;
+    box-shadow: none;
+}
+
+menuitem,
+.menuitem {
+    color: @text_secondary;
+    border-radius: 6px;
+    padding: 6px 12px;
+    margin: 1px 0;
+    transition: background-color 150ms ease, color 150ms ease;
+}
+
+menuitem:hover,
+.menuitem:hover {
+    background-color: @accent;
+    color: #FFFFFF;
+}
+
+menuitem:disabled,
+.menuitem:disabled {
+    color: @text_muted;
+}
+
+separator {
+    background-color: @border_window;
+    min-height: 1px;
+    margin: 4px 0;
+}
+
+/* 8. Statusbar */
+statusbar,
+.statusbar {
+    background-color: @bg_window;
+    color: @text_muted;
+    font-size: 11px;
+    border-top: 1px solid @border_subtle;
+    padding: 2px 8px;
+}
+
+/* 9. Sleek Scrollbars */
+scrollbar {
+    background-color: transparent;
+}
+
+scrollbar slider {
+    background-color: rgba(255, 42, 85, 0.35);
+    border-radius: 4px;
+    min-width: 6px;
+    min-height: 6px;
+    border: none;
+    transition: background-color 150ms ease;
+}
+
+scrollbar slider:hover {
+    background-color: @accent;
+}
+
+scrollbar.fine-tune slider {
+    min-width: 8px;
+    min-height: 8px;
+}

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+<action>
+	<icon>kitty</icon>
+	<name>Open in Kitty</name>
+	<submenu></submenu>
+	<unique-id>serena-open-kitty</unique-id>
+	<command>kitty --directory %f</command>
+	<description>Open terminal in this directory</description>
+	<range></range>
+	<patterns>*</patterns>
+	<startup-notify/>
+	<directories/>
+</action>
+<action>
+	<icon>code</icon>
+	<name>Open in VS Code</name>
+	<submenu></submenu>
+	<unique-id>serena-open-vscode</unique-id>
+	<command>code %f</command>
+	<description>Open in Visual Studio Code</description>
+	<range></range>
+	<patterns>*</patterns>
+	<startup-notify/>
+	<directories/>
+	<other-files/>
+	<text-files/>
+</action>
+<action>
+	<icon>preferences-desktop-wallpaper</icon>
+	<name>Set as Desktop Wallpaper</name>
+	<submenu></submenu>
+	<unique-id>serena-set-wallpaper</unique-id>
+	<command>swww img %f --transition-type wipe --transition-fps 60 --transition-duration 1.0</command>
+	<description>Set selected image as current desktop wallpaper</description>
+	<range></range>
+	<patterns>*.jpg;*.jpeg;*.png;*.webp;*.bmp;*.gif</patterns>
+	<image-files/>
+</action>
+<action>
+	<icon>audacious</icon>
+	<name>Add to audacious playlist</name>
+	<submenu></submenu>
+	<unique-id>1681893052016505-1</unique-id>
+	<command>audacious -e %U</command>
+	<description></description>
+	<range>*</range>
+	<patterns>*</patterns>
+	<audio-files/>
+</action>
+<action>
+	<icon>checkbox</icon>
+	<name>Check sha256sum</name>
+	<submenu></submenu>
+	<unique-id>1577688162350307-1</unique-id>
+	<command>yad --info --title=&quot;Check sha256 for %n&quot; --text=&quot;$(sha256sum %f)&quot;</command>
+	<description>Check sha256sum</description>
+	<range></range>
+	<patterns>*.iso;*.ISO;*.tar.gz;*.TAR.GZ;*.zip;*.ZIP</patterns>
+	<other-files/>
+</action>
+</actions>
