@@ -83,7 +83,7 @@ window#shelf-lightbox-root.background,
     background-color: transparent;
     border: none;
     border-radius: 16px;
-    padding: 14px 18px 14px 18px;
+    padding: 0;
 }
 
 button {
@@ -324,11 +324,10 @@ button.chip-btn-action:hover,
 
 /* External Floating Popout Card (Extends outside clipboard window) */
 .popout-card {
-    background-color: rgba(36, 18, 22, 0.99);
-    border: 1.5px solid #FF2A55;
-    border-radius: 12px;
-    padding: 10px 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.85);
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
 }
 
 .popout-text {
@@ -343,11 +342,10 @@ button.chip-btn-action:hover,
 
 /* Centered Lightbox Modal ("Phóng to hơn nữa") */
 .lightbox-card {
-    background-color: rgba(32, 16, 18, 0.99);
-    border: 1.5px solid rgba(255, 42, 85, 0.85);
-    border-radius: 16px;
-    padding: 16px 20px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.90);
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
 }
 
 /* Drop Zone & Drop Banner */
@@ -454,7 +452,7 @@ class SerenaAndroidShelf(Gtk.Window):
 
         # 1. Main Layer Shell Setup (Anchor Top-Left with dynamic draggable margins)
         screen_w, screen_h = self.get_monitor_geometry()
-        init_x = int((screen_w - 440) / 2)
+        init_x = int((screen_w - 464) / 2)
         init_y = 44
 
         # Restore saved position from temporary session cache if available
@@ -463,7 +461,7 @@ class SerenaAndroidShelf(Gtk.Window):
             try:
                 with open(POS_CACHE, "r") as f:
                     saved_pos = json.load(f)
-                    init_x = max(10, min(screen_w - 450, saved_pos.get("x", init_x)))
+                    init_x = max(10, min(screen_w - 475, saved_pos.get("x", init_x)))
                     init_y = max(10, min(screen_h - 100, saved_pos.get("y", init_y)))
             except Exception:
                 pass
@@ -485,10 +483,10 @@ class SerenaAndroidShelf(Gtk.Window):
         GtkLayerShell.set_margin(self, GtkLayerShell.Edge.LEFT, self.current_win_x)
         GtkLayerShell.set_keyboard_mode(self, GtkLayerShell.KeyboardMode.ON_DEMAND)
 
-        # Dynamic comfortable width (440px: spacious 2-column cards & drop frame)
+        # Dynamic comfortable width (464px: spacious 2-column cards & drop frame)
         self.set_title("Serena Shelf")
         self.set_name("shelf-window-root")
-        self.set_default_size(440, -1)
+        self.set_default_size(464, -1)
         self.set_resizable(False)
 
         # Set transparent RGBA visual and app_paintable to eliminate sharp corner leakage
@@ -577,6 +575,74 @@ class SerenaAndroidShelf(Gtk.Window):
 
         return False
 
+    def on_popout_draw(self, widget, cr):
+        # 1. Clear surface to 100% transparent
+        cr.set_source_rgba(0, 0, 0, 0)
+        cr.set_operator(cairo.OPERATOR_CLEAR)
+        cr.paint()
+        cr.set_operator(cairo.OPERATOR_OVER)
+
+        # 2. Draw perfectly rounded 12px squircle for external floating popout card
+        alloc = widget.get_allocation()
+        pad = 1.0
+        w = float(alloc.width) - pad * 2.0
+        h = float(alloc.height) - pad * 2.0
+        x = pad
+        y = pad
+        r = 12.0
+
+        cr.new_sub_path()
+        cr.arc(x + w - r, y + r, r, -1.57079632679, 0)
+        cr.arc(x + w - r, y + h - r, r, 0, 1.57079632679)
+        cr.arc(x + r, y + h - r, r, 1.57079632679, 3.14159265359)
+        cr.arc(x + r, y + r, r, 3.14159265359, 4.71238898038)
+        cr.close_path()
+
+        # Fill with Serena Warm Card Obsidian (--bg-card: rgba(36, 18, 22, 0.99))
+        cr.set_source_rgba(36.0 / 255.0, 18.0 / 255.0, 22.0 / 255.0, 0.99)
+        cr.fill_preserve()
+
+        # Stroke with 1.5px Serena ruby red border (--accent: #FF2A55)
+        cr.set_source_rgba(255.0 / 255.0, 42.0 / 255.0, 85.0 / 255.0, 1.0)
+        cr.set_line_width(1.5)
+        cr.stroke()
+
+        return False
+
+    def on_lightbox_draw(self, widget, cr):
+        # 1. Clear surface to 100% transparent
+        cr.set_source_rgba(0, 0, 0, 0)
+        cr.set_operator(cairo.OPERATOR_CLEAR)
+        cr.paint()
+        cr.set_operator(cairo.OPERATOR_OVER)
+
+        # 2. Draw perfectly rounded 16px squircle for lightbox modal
+        alloc = widget.get_allocation()
+        pad = 1.0
+        w = float(alloc.width) - pad * 2.0
+        h = float(alloc.height) - pad * 2.0
+        x = pad
+        y = pad
+        r = 16.0
+
+        cr.new_sub_path()
+        cr.arc(x + w - r, y + r, r, -1.57079632679, 0)
+        cr.arc(x + w - r, y + h - r, r, 0, 1.57079632679)
+        cr.arc(x + r, y + h - r, r, 1.57079632679, 3.14159265359)
+        cr.arc(x + r, y + r, r, 3.14159265359, 4.71238898038)
+        cr.close_path()
+
+        # Fill with Serena Warm Obsidian-Wine (--bg-window: rgba(32, 16, 18, 0.99))
+        cr.set_source_rgba(32.0 / 255.0, 16.0 / 255.0, 18.0 / 255.0, 0.99)
+        cr.fill_preserve()
+
+        # Stroke with 1.5px Serena ruby red border (--accent: #FF2A55)
+        cr.set_source_rgba(255.0 / 255.0, 42.0 / 255.0, 85.0 / 255.0, 0.90)
+        cr.set_line_width(1.5)
+        cr.stroke()
+
+        return False
+
     # =========================================================================
     # DRAGGABLE WINDOW LOGIC (Hyprland IPC Cursor Querying)
     # =========================================================================
@@ -606,7 +672,7 @@ class SerenaAndroidShelf(Gtk.Window):
             if event.type == Gdk.EventType._2BUTTON_PRESS:
                 # Double click: reset back to top-center
                 mon_w, mon_h = self.get_monitor_geometry()
-                self.current_win_x = int((mon_w - 440) / 2)
+                self.current_win_x = int((mon_w - 464) / 2)
                 self.current_win_y = 44
                 GtkLayerShell.set_margin(self, GtkLayerShell.Edge.LEFT, self.current_win_x)
                 GtkLayerShell.set_margin(self, GtkLayerShell.Edge.TOP, self.current_win_y)
@@ -641,7 +707,7 @@ class SerenaAndroidShelf(Gtk.Window):
                 new_y = cy - self.drag_offset_y
                 mon_w, mon_h = self.get_monitor_geometry()
                 # Constrain to visible desktop
-                new_x = max(10, min(mon_w - 450, new_x))
+                new_x = max(10, min(mon_w - 475, new_x))
                 new_y = max(10, min(mon_h - 100, new_y))
                 self.current_win_x = new_x
                 self.current_win_y = new_y
@@ -770,12 +836,16 @@ class SerenaAndroidShelf(Gtk.Window):
     def build_ui(self):
         main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         main_box.get_style_context().add_class("shelf-window")
+        main_box.set_margin_start(16)
+        main_box.set_margin_end(16)
+        main_box.set_margin_top(14)
+        main_box.set_margin_bottom(14)
 
         # --- HEADER ---
         header_hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-        header_hbox.set_margin_start(4)
-        header_hbox.set_margin_end(4)
-        header_hbox.set_margin_bottom(8)
+        header_hbox.set_margin_start(0)
+        header_hbox.set_margin_end(0)
+        header_hbox.set_margin_bottom(10)
 
         tab_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
         tab_box.get_style_context().add_class("tab-switcher")
@@ -903,12 +973,17 @@ class SerenaAndroidShelf(Gtk.Window):
         if visual:
             self.popout_win.set_visual(visual)
         self.popout_win.set_app_paintable(True)
-        self.popout_win.connect("draw", self.on_window_draw)
+        self.popout_win.connect("draw", self.on_popout_draw)
 
         self.popout_event_box = Gtk.EventBox()
         self.popout_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.popout_box.get_style_context().add_class("popout-card")
+        self.popout_box.set_margin_start(12)
+        self.popout_box.set_margin_end(12)
+        self.popout_box.set_margin_top(10)
+        self.popout_box.set_margin_bottom(12)
         self.popout_event_box.add(self.popout_box)
+        self.popout_event_box.connect("enter-notify-event", lambda w, e: self.cancel_popout(w))
         self.popout_event_box.connect("leave-notify-event", self.on_popout_leave)
         self.popout_event_box.connect("button-press-event", self.on_popout_clicked)
 
@@ -919,8 +994,8 @@ class SerenaAndroidShelf(Gtk.Window):
     # =========================================================================
     def build_clipboard_page(self):
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
-        vbox.set_margin_start(4)
-        vbox.set_margin_end(4)
+        vbox.set_margin_start(0)
+        vbox.set_margin_end(0)
 
         self.clip_search = Gtk.SearchEntry()
         self.clip_search.set_placeholder_text("Search clips...")
@@ -946,8 +1021,8 @@ class SerenaAndroidShelf(Gtk.Window):
         self.clip_flow.set_row_spacing(10)
         self.clip_flow.set_column_spacing(10)
         self.clip_flow.set_homogeneous(True)
-        self.clip_flow.set_margin_end(12)
-        self.clip_flow.set_margin_start(2)
+        self.clip_flow.set_margin_end(10)
+        self.clip_flow.set_margin_start(0)
 
         self.clip_scroll.add(self.clip_flow)
         vbox.pack_start(self.clip_scroll, True, True, 0)
@@ -1047,7 +1122,7 @@ class SerenaAndroidShelf(Gtk.Window):
         event_box.get_style_context().add_class("chip-card")
         if item.get("is_pinned"):
             event_box.get_style_context().add_class("pinned")
-        event_box.set_size_request(185, -1)
+        event_box.set_size_request(190, -1)
         event_box.set_hexpand(True)
 
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
@@ -1167,8 +1242,8 @@ class SerenaAndroidShelf(Gtk.Window):
     # =========================================================================
     def build_shelf_page(self):
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
-        vbox.set_margin_start(4)
-        vbox.set_margin_end(4)
+        vbox.set_margin_start(0)
+        vbox.set_margin_end(0)
 
         self.shelf_stack = Gtk.Stack()
         self.shelf_stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
@@ -1237,8 +1312,8 @@ class SerenaAndroidShelf(Gtk.Window):
         self.shelf_flow.set_row_spacing(10)
         self.shelf_flow.set_column_spacing(10)
         self.shelf_flow.set_homogeneous(True)
-        self.shelf_flow.set_margin_end(12)
-        self.shelf_flow.set_margin_start(2)
+        self.shelf_flow.set_margin_end(10)
+        self.shelf_flow.set_margin_start(0)
 
         self.shelf_scroll.add(self.shelf_flow)
         self.content_shelf_box.pack_start(self.shelf_scroll, True, True, 0)
@@ -1280,7 +1355,7 @@ class SerenaAndroidShelf(Gtk.Window):
     def create_android_shelf_chip(self, fpath, mtime):
         event_box = Gtk.EventBox()
         event_box.get_style_context().add_class("chip-card")
-        event_box.set_size_request(185, -1)
+        event_box.set_size_request(190, -1)
         event_box.set_hexpand(True)
 
         # Drag-out source
@@ -1411,7 +1486,7 @@ class SerenaAndroidShelf(Gtk.Window):
             return
 
         mon_w, mon_h = self.get_monitor_geometry()
-        win_w = 440
+        win_w = 464
         main_win_screen_x = getattr(self, 'current_win_x', (mon_w - win_w) // 2)
         main_win_screen_y = getattr(self, 'current_win_y', 44)
 
@@ -1427,14 +1502,14 @@ class SerenaAndroidShelf(Gtk.Window):
         popout_w = 260
         if card_x < win_w / 2:
             # Left column: Float to the LEFT side of the main window
-            pop_screen_x = main_win_screen_x - popout_w - 12
+            pop_screen_x = main_win_screen_x - popout_w - 14
             if pop_screen_x < 10:
-                pop_screen_x = main_win_screen_x + win_w + 12
+                pop_screen_x = main_win_screen_x + win_w + 14
         else:
             # Right column: Float to the RIGHT side of the main window
-            pop_screen_x = main_win_screen_x + win_w + 12
+            pop_screen_x = main_win_screen_x + win_w + 14
             if pop_screen_x + popout_w > mon_w - 10:
-                pop_screen_x = main_win_screen_x - popout_w - 12
+                pop_screen_x = main_win_screen_x - popout_w - 14
 
         pop_screen_y = max(10, min(main_win_screen_y + card_y, mon_h - 260))
 
@@ -1653,7 +1728,7 @@ class SerenaAndroidShelf(Gtk.Window):
         if visual:
             win.set_visual(visual)
         win.set_app_paintable(True)
-        win.connect("draw", self.on_window_draw)
+        win.connect("draw", self.on_lightbox_draw)
 
         pixbuf = None
         orig_w, orig_h = 0, 0
@@ -1691,6 +1766,10 @@ class SerenaAndroidShelf(Gtk.Window):
 
         frame = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
         frame.get_style_context().add_class("lightbox-card")
+        frame.set_margin_start(18)
+        frame.set_margin_end(18)
+        frame.set_margin_top(16)
+        frame.set_margin_bottom(16)
         frame.set_size_request(min(720, orig_w + 40), min(540, orig_h + 80))
 
         # Header
