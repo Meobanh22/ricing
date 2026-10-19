@@ -192,9 +192,6 @@ hl.window_rule({
     match = { class = "^(dashboard)$" },
     float = true,
     animation = "slide top",
-    opacity = "1.0 override 1.0 override",
-    noblur = true,
-    border_size = 0,
 })
 
 hl.window_rule({
@@ -208,9 +205,6 @@ hl.window_rule({
     match = { class = "^(control-center)$" },
     float = true,
     animation = "slide top",
-    opacity = "1.0 override 1.0 override",
-    noblur = true,
-    border_size = 0,
 })
 
 ---------------------
@@ -229,9 +223,10 @@ hl.layer_rule({
 })
 
 hl.layer_rule({
-    name = "dashboard-anim",
-    match = { namespace = "^(dashboard)$" },
-    animation = "slide top",
+    name = "cc-blur",
+    match = { namespace = "^(control-center)$" },
+    blur = true,
+    ignore_alpha = 0.5,
 })
 
 ---------------------
