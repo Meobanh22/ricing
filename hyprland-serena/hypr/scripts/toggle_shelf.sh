@@ -45,7 +45,14 @@ if pgrep -f "shelf.py" > /dev/null 2>&1; then
     exit 0
 fi
 
+# Đảm bảo daemon cliphist theo dõi clipboard
+pgrep -f "cliphist store" > /dev/null 2>&1 || {
+    wl-paste --type text --watch cliphist store >/dev/null 2>&1 &
+    wl-paste --type image --watch cliphist store >/dev/null 2>&1 &
+}
+
 # 2. Khởi chạy ngầm với tab được chọn
 echo "$TARGET_MODE" > "$MODE_FILE"
 python3 "$SCRIPT_PATH" "$TARGET_MODE" &
 exit 0
+
