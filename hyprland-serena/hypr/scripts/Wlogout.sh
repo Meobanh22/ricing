@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# 🌹 SERENA & SYLVEON MINIMALIST WLOGOUT LAUNCHER (1-ROW FLOATING DOCK)
+# 🌹 MINIMALIST WLOGOUT LAUNCHER (1-ROW FLOATING DOCK)
 # ==============================================================================
 
 if pgrep -x "wlogout" > /dev/null; then

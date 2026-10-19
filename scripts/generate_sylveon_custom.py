@@ -4,8 +4,9 @@ import struct
 from PIL import Image, ImageDraw, ImageEnhance
 import colorsys
 
-OUTPUT_DIR = r"C:\Users\DManh\Documents\Custom\cursors\sylveon_custom"
-ASSETS_DIR = r"C:\Users\DManh\Documents\Custom\assets"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUTPUT_DIR = os.path.join(BASE_DIR, "cursors", "sylveon-custom")
+ASSETS_DIR = os.path.join(BASE_DIR, "assets")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 def create_cur_binary(images_with_hotspots):

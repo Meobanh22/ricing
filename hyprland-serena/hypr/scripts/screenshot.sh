@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# 🌸 SERENA SCREENSHOT TOOL (Grim + Slurp + Swappy)
+# 🌸 SCREENSHOT TOOL (Grim + Slurp + Swappy)
 # ==============================================================================
 # - area: Chụp vùng chọn -> Tự lưu vào Clipboard & ~/Pictures/Screenshots/
 # - edit: Chụp vùng chọn -> Mở Swappy để vẽ nơ, mũi tên, thêm chữ

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # ==============================================================================
-# 🌸 SERENA & FENNEKIN CENTRAL PALETTE (WINE & CRIMSON SYSTEM)
-# Extracted directly from Serena & Fennekin Desktop Artwork
+# 🌸 CENTRAL PALETTE (WINE & CRIMSON SYSTEM)
+# Extracted directly from Desktop Artwork
 # ==============================================================================
 
 PALETTE = {

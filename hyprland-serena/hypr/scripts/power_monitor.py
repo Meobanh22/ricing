@@ -90,7 +90,7 @@ def render_banner(info, power_w, est_str, is_charging):
     temp, freq = get_cpu_info()
     b_pct = get_backlight_info()
     
-    # ANSI Color Palette Serena
+    # ANSI Color Palette
     RESET = "\033[0m"
     BOLD = "\033[1m"
     RED = "\033[38;2;255;42;85m"       # #FF2A55

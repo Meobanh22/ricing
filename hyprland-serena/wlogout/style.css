@@ -1,5 +1,5 @@
 /* ==============================================================================
-   🌸 SERENA & FENNEKIN WLOGOUT FLAT UI THEME
+   🌸 WLOGOUT FLAT UI THEME
    Subdued neutral containers with role-coded internal action elements.
    ============================================================================== */
 
@@ -72,7 +72,7 @@ button span {
     border: 1px solid #E65E34;
 }
 
-/* 5. Shutdown: Serena Crimson */
+/* 5. Shutdown: Crimson */
 #shutdown:focus,
 #shutdown:active,
 #shutdown:hover {

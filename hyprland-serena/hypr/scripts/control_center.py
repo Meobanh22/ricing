@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # ==============================================================================
-# 🌸 SERENA & FENNEKIN ELEGANT FLOATING CONTROL CENTER
+# 🌸 ELEGANT FLOATING CONTROL CENTER
 # ==============================================================================
 # - Floating pop-up card anchored right beneath Waybar's top-right corner.
 # - Compact height (does not stretch full screen height).
 # - Quick settings: Vietnamese/English IME toggle, Wi-Fi status, Audio Volume slider.
-# - REAL notifications section backed by serena_notif_daemon.py and SwayNC.
+# - REAL notifications section backed by notif_daemon.py and SwayNC.
 # - Full-width bottom "Power Menu" button triggering Wlogout.
 # - Ultra-fast instantaneous launch (asynchronous status fetching + caching).
 # - Pixel-perfect centered power icon & radiant ruby hover glow on all cards.
@@ -400,7 +400,7 @@ def ensure_notif_daemon():
 
     script = os.path.expanduser("~/.config/hypr/scripts/notif_daemon.py")
     if not os.path.exists(script):
-        script = "/home/meobanh/custom/ricing/hyprland-serena/hypr/scripts/notif_daemon.py"
+        script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "notif_daemon.py")
     try:
         subprocess.Popen(["python3", script], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except Exception:

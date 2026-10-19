@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # ==============================================================================
-# 🌸 SERENA WALLPAPER SWITCHER (DÙNG CHÍNH XÁC KHO ẢNH TRONG REPO)
+# 🌸 WALLPAPER SWITCHER
 # ==============================================================================
 # Chuyển đổi qua lại mượt mà các hình nền trong thư mục wallpapers
 # Thiết kế tối giản: KHÔNG popup thông báo

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# 🌹 SERENA & SYLVEON HYPRLAND RICE INSTALLER FOR UBUNTU 24.04 (ILYAMIRO STYLE)
+# 🌸 HYPRLAND RICE INSTALLER FOR UBUNTU 24.04
 # ==============================================================================
 
 set -e
@@ -13,7 +13,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m'
 
 echo -e "${PINK}================================================================${NC}"
-echo -e "${RED}   🌹 SERENA & SYLVEON HYPRLAND DESKTOP SETUP (UBUNTU 24.04)   ${NC}"
+echo -e "${RED}   🌸 HYPRLAND DESKTOP SETUP (UBUNTU 24.04)   ${NC}"
 echo -e "${PINK}================================================================${NC}\n"
 
 # =====================================================
@@ -78,7 +78,7 @@ echo -e "  ${GREEN}✔ Đã cài đặt Sylveon Dual Theme (Hyprcursor .hlc + Xc
 # =====================================================
 # [3/6] ĐỒNG BỘ CONFIGS (Hyprland, Waybar, Rofi, Kitty, Fastfetch)
 # =====================================================
-echo -e "\n${YELLOW}[3/6] Đồng bộ giao diện Serena & Waybar phong cách ilyamiro...${NC}"
+echo -e "\n${YELLOW}[3/6] Đồng bộ giao diện Waybar, Hyprland & Apps...${NC}"
 
 # Dọn dẹp config cũ
 rm -f "$HOME/.config/waybar/config" "$HOME/.config/waybar/style.css"
@@ -100,10 +100,9 @@ cp "$SCRIPT_DIR/hyprland-serena/waybar/style.css" "$HOME/.config/waybar/style.cs
 # Rofi
 cp "$SCRIPT_DIR/hyprland-serena/rofi/colors-rofi.rasi" "$HOME/.config/rofi/wallust/colors-rofi.rasi" 2>/dev/null || true
 cp "$SCRIPT_DIR/hyprland-serena/rofi/colors-rofi.rasi" "$HOME/.config/rofi/colors-rofi.rasi" 2>/dev/null || true
-cp "$SCRIPT_DIR/hyprland-serena/rofi/serena.rasi" "$HOME/.config/rofi/serena.rasi"
-cp "$SCRIPT_DIR/hyprland-serena/rofi/serena.rasi" "$HOME/.config/rofi/config.rasi"
+cp "$SCRIPT_DIR/hyprland-serena/rofi/config.rasi" "$HOME/.config/rofi/config.rasi"
 mkdir -p "$HOME/.config/rofiSearch"
-cp "$SCRIPT_DIR/hyprland-serena/rofi/serena.rasi" "$HOME/.config/rofiSearch/config.rasi" 2>/dev/null || true
+cp "$SCRIPT_DIR/hyprland-serena/rofi/config.rasi" "$HOME/.config/rofiSearch/config.rasi" 2>/dev/null || true
 
 # Fastfetch gọn gàng
 cp "$SCRIPT_DIR/fastfetch/sylveon_chibi.txt" "$HOME/.config/fastfetch/"
@@ -113,7 +112,7 @@ cp "$SCRIPT_DIR/fastfetch/config.jsonc" "$HOME/.config/fastfetch/config-v2.jsonc
 cp "$SCRIPT_DIR/fastfetch/config.jsonc" "$HOME/.config/fastfetch/config-pokemon.jsonc"
 rm -f "$HOME/.config/fastfetch/ubuntu.png" 2>/dev/null || true
 
-# Wlogout (Power Menu Tối giản 1 hàng 5 nút chuẩn Serena)
+# Wlogout (Power Menu Tối giản 1 hàng 5 nút)
 mkdir -p "$HOME/.config/wlogout/icons"
 rm -f "$HOME/.config/wlogout/icons/"*
 cp "$SCRIPT_DIR/hyprland-serena/wlogout/layout" "$HOME/.config/wlogout/layout"
@@ -129,17 +128,17 @@ nohup swaync >/dev/null 2>&1 &
 
 # Btop Task Manager Theme
 mkdir -p "$HOME/.config/btop/themes"
-cp "$SCRIPT_DIR/hyprland-serena/btop/themes/serena.theme" "$HOME/.config/btop/themes/serena.theme" 2>/dev/null || true
+cp "$SCRIPT_DIR/hyprland-serena/btop/themes/obsidian-wine.theme" "$HOME/.config/btop/themes/obsidian-wine.theme" 2>/dev/null || true
 cp "$SCRIPT_DIR/hyprland-serena/btop/btop.conf" "$HOME/.config/btop/btop.conf" 2>/dev/null || true
 
 echo -e "  ${GREEN}✔ Đã đồng bộ Hyprland, Waybar, Rofi, Fastfetch, Wlogout, SwayNC & Btop!${NC}"
 
 # =====================================================
-# [4/6] HÌNH NỀN SERENA
+# [4/6] HÌNH NỀN DESKTOP
 # =====================================================
-echo -e "\n${YELLOW}[4/6] Đồng bộ hình nền Serena...${NC}"
+echo -e "\n${YELLOW}[4/6] Đồng bộ hình nền...${NC}"
 cp -r "$SCRIPT_DIR/wallpapers/"* "$HOME/Pictures/wallpapers/" 2>/dev/null || true
-echo -e "  ${GREEN}✔ Đã đồng bộ hình nền Serena vào ~/Pictures/wallpapers${NC}"
+echo -e "  ${GREEN}✔ Đã đồng bộ hình nền vào ~/Pictures/wallpapers${NC}"
 
 # =====================================================
 # [5/6] THIẾT LẬP BỘ GÕ TIẾNG VIỆT (FCITX5 / IBUS)
@@ -225,9 +224,8 @@ if [ "$XDG_CURRENT_DESKTOP" = "Hyprland" ] || pgrep -x "Hyprland" &>/dev/null; t
     fi
 
     pkill -f dashboard.py 2>/dev/null || true
-    pkill -f serena_dashboard.py 2>/dev/null || true
 fi
 
 echo -e "\n${PINK}================================================================${NC}"
-echo -e "${GREEN}✨ HOÀN TẤT CẬP NHẬT THEME SERENA & SYLVEON! ✨${NC}"
+echo -e "${GREEN}✨ HOÀN TẤT CẬP NHẬT THEME DESKTOP! ✨${NC}"
 echo -e "${PINK}================================================================${NC}\n"

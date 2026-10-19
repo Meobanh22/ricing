@@ -166,10 +166,13 @@ def build_all():
                     shutil.rmtree(dest_hc)
                 shutil.copytree(hyprcursors_src, dest_hc)
             print("  ✔ Đã biên dịch xong thành phần Hyprcursor (.hlc)!")
-    else:
-        print("  ⚠️ hyprcursor-util warning:", res.stderr)
+    # Dọn dẹp thư mục tạm
+    for tmp_d in [TMP_FRAMES_DIR, TMP_HC_DIR, hc_compile_out]:
+        if os.path.exists(tmp_d):
+            shutil.rmtree(tmp_d)
 
     print(f"✔ HOÀN TẤT! Bộ cursor Sylveon đa nền tảng (Hyprcursor + Xcursor) sẵn sàng tại:\n  {OUTPUT_THEME_DIR}")
 
 if __name__ == "__main__":
     build_all()
+

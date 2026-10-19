@@ -1,8 +1,7 @@
 -- ==============================================================================
--- 🌹 SERENA & SYLVEON HYPRLAND CONFIGURATION (v0.56+ / v0.57+ LUA NATIVE)
+-- 🌹 HYPRLAND CONFIGURATION (v0.56+ / v0.57+ LUA NATIVE)
 -- ==============================================================================
--- Chủ đề: Pokémon Serena & Sylveon
--- Tông màu: Serena Crimson (#E53935), Ribbon Rose (#FF6B8B), Midnight Charcoal (#181825)
+-- Tông màu: Crimson (#E53935), Ribbon Rose (#FF6B8B), Midnight Charcoal (#181825)
 -- Hiển thị: Scale 1.2 (120%) chuẩn tỷ lệ điểm ảnh 1600x900 sắc nét
 -- ==============================================================================
 

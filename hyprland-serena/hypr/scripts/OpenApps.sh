@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# 🌸 SERENA APP LAUNCHER (ROCK SOLID & FAILPROOF)
+# 🌸 APP LAUNCHER (ROCK SOLID & FAILPROOF)
 # ==============================================================================
 # Hỗ trợ mở menu ứng dụng siêu mượt:
 # 1. Nếu menu đang mở thì bấm sẽ đóng lại (Toggle)
@@ -17,7 +17,7 @@ fi
 if command -v rofi &> /dev/null; then
     THEME_FILE="$HOME/.config/rofi/config.rasi"
     if [ ! -f "$THEME_FILE" ]; then
-        THEME_FILE="/home/meobanh/custom/ricing/hyprland-serena/rofi/config.rasi"
+        THEME_FILE="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../rofi" 2>/dev/null && pwd)/config.rasi"
     fi
     rofi -show drun -modi drun,run,filebrowser -theme "$THEME_FILE"
     exit 0

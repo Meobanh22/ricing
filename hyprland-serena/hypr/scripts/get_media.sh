@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# 🎵 SERENA MPRIS / MUSIC MODULE FOR WAYBAR
-# Luôn hiển thị nốt nhạc  khi không có nhạc đang phát
+# 🎵 MPRIS / MUSIC MODULE FOR WAYBAR
 # ==============================================================================
 
 STATUS=$(playerctl status 2>/dev/null || echo "None")

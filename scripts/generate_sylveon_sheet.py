@@ -2,9 +2,10 @@ import os
 from PIL import Image, ImageDraw, ImageFont
 import colorsys
 
-ASSETS_DIR = r"C:\Users\DManh\Documents\Custom\assets"
-OUTPUT_DIR = r"C:\Users\DManh\Documents\Custom\cursors\sylveon_custom"
-ART_DIR = r"C:\Users\DManh\.gemini\antigravity\brain\8cd645f9-89dc-4864-bb28-c90e9cd298c2"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ASSETS_DIR = os.path.join(BASE_DIR, "assets")
+OUTPUT_DIR = os.path.join(BASE_DIR, "cursors", "sylveon-custom")
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 def recolor_ribbon_pixel(r, g, b, a):
     if a < 25:
@@ -209,11 +210,9 @@ draw.text((W // 2, 1010), "• 100% Native Win32 Custom Scheme • Pixel-Perfect
 # Save outputs
 out_asset = os.path.join(ASSETS_DIR, "sylveon_concept_sheet_complete.png")
 out_cursor = os.path.join(OUTPUT_DIR, "sylveon_concept_sheet_complete.png")
-out_art = os.path.join(ART_DIR, "sylveon_concept_sheet_complete.png")
 
 sheet.save(out_asset)
 sheet.save(out_cursor)
-sheet.save(out_art)
 
-print(f"Master Concept Sheet exported successfully to:\n  - {out_asset}\n  - {out_cursor}\n  - {out_art}")
+print(f"Master Concept Sheet exported successfully to:\n  - {out_asset}\n  - {out_cursor}")
 

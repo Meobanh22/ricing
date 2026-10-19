@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# 🌸 SERENA DASHBOARD TOGGLE (ULTRA-FAST & RELIABLE TOGGLE DISPATCHER)
+# 🌸 DASHBOARD TOGGLE (ULTRA-FAST & RELIABLE TOGGLE DISPATCHER)
 # ==============================================================================
 
 SCRIPT_PATH="$HOME/.config/hypr/scripts/dashboard.py"

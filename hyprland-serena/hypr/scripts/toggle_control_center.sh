@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# 🌸 SERENA CONTROL CENTER TOGGLE (ULTRA-FAST & RELIABLE TOGGLE DISPATCHER)
+# 🌸 CONTROL CENTER TOGGLE (ULTRA-FAST & RELIABLE TOGGLE DISPATCHER)
 # ==============================================================================
 
 SCRIPT_PATH="$HOME/.config/hypr/scripts/control_center.py"

@@ -11,7 +11,22 @@ CELL_W, CELL_H = 6, 10
 COLS = WIDTH // CELL_W   # 320 cols
 ROWS = HEIGHT // CELL_H  # 108 rows
 
-font = ImageFont.truetype(r"C:\Windows\Fonts\consolab.ttf", 10)
+font_candidates = [
+    "/usr/share/fonts/truetype/noto/NotoMono-Regular.ttf",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",
+    "/usr/share/fonts/truetype/ubuntu/UbuntuSansMono-Regular.ttf",
+    r"C:\Windows\Fonts\consolab.ttf",
+]
+font = None
+for p in font_candidates:
+    if os.path.exists(p):
+        try:
+            font = ImageFont.truetype(p, 10)
+            break
+        except Exception:
+            pass
+if font is None:
+    font = ImageFont.load_default()
 DETAILED_RAMP = " .':;!+*?%S#@&8B"
 
 img = Image.open(SRC).convert("RGB")
