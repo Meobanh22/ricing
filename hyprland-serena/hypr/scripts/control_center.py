@@ -18,6 +18,7 @@ import json
 import signal
 import subprocess
 import threading
+import cairo
 import gi
 
 gi.require_version('Gtk', '3.0')
@@ -39,8 +40,13 @@ CSS_DATA = b"""
     font-family: 'JetBrainsMono Nerd Font', 'FiraCode Nerd Font', 'Segoe UI', sans-serif;
 }
 
-window#control-center-window {
-    background: transparent;
+window,
+window.background,
+window#control-center-window,
+window#control-center-window.background,
+#control-center-window {
+    background-color: transparent;
+    background-image: none;
     border: none;
     box-shadow: none;
 }
@@ -448,8 +454,11 @@ class ControlCenter(Gtk.Window):
 
         screen = self.get_screen()
         visual = screen.get_rgba_visual()
-        if visual and screen.is_composited():
+        if visual:
             self.set_visual(visual)
+
+        self.set_app_paintable(True)
+        self.connect("draw", self.on_window_draw)
 
         self.apply_css()
         self.build_ui()
@@ -460,6 +469,13 @@ class ControlCenter(Gtk.Window):
         # Trigger async status refresh immediately after showing
         threading.Thread(target=self.refresh_all_status_async, daemon=True).start()
         GLib.timeout_add(3000, self.trigger_async_refresh)
+
+    def on_window_draw(self, widget, cr):
+        cr.set_source_rgba(0, 0, 0, 0)
+        cr.set_operator(cairo.OPERATOR_CLEAR)
+        cr.paint()
+        cr.set_operator(cairo.OPERATOR_OVER)
+        return False
 
     def load_status_cache(self):
         defaults = {

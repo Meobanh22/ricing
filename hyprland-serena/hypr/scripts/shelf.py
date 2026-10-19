@@ -17,7 +17,9 @@ import os
 import sys
 import time
 import shutil
+import json
 import subprocess
+import cairo
 
 import gi
 gi.require_version('Gtk', '3.0')
@@ -30,7 +32,10 @@ SHELF_DIR = os.path.expanduser("~/.cache/serena/shelf")
 CLIPHIST_DB = os.path.expanduser("~/.cache/cliphist/db")
 PID_FILE = "/tmp/serena_shelf.pid"
 MODE_FILE = "/tmp/serena_shelf.mode"
+PINNED_FILE = os.path.expanduser("~/.cache/serena_pinned_clips.json")
+PINS_DIR = os.path.expanduser("~/.cache/serena_pins")
 os.makedirs(SHELF_DIR, exist_ok=True)
+os.makedirs(PINS_DIR, exist_ok=True)
 
 TARGET_URI_LIST = 80
 TARGET_TEXT = 81
@@ -54,17 +59,29 @@ CSS = """
     -gtk-icon-shadow: none;
 }
 
-window {
+window,
+window.background,
+window#shelf-window-root,
+window#shelf-window-root.background,
+window#shelf-popout-root,
+window#shelf-popout-root.background,
+window#shelf-lightbox-root,
+window#shelf-lightbox-root.background,
+#shelf-window-root,
+#shelf-popout-root,
+#shelf-lightbox-root {
     background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
 }
 
-/* Main Container: Dynamic width & smooth rounded bottom */
+/* Main Container: Dynamic width & smooth rounded squircle frame (All 4 corners rounded) */
 .shelf-window {
     background-color: rgba(32, 16, 18, 0.98);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-top: none;
-    border-radius: 0 0 16px 16px;
-    padding: 14px 18px 12px 18px;
+    border-radius: 16px;
+    padding: 14px 18px 14px 18px;
 }
 
 button {
@@ -198,6 +215,16 @@ flowboxchild:selected {
 .chip-card:hover {
     background-color: rgba(58, 34, 42, 0.98);
     border: 1px solid rgba(255, 42, 85, 0.55);
+}
+
+.chip-card.pinned {
+    border: 1px solid rgba(255, 42, 85, 0.45);
+    background-color: rgba(48, 25, 32, 0.98);
+}
+
+.chip-card.pinned:hover {
+    border: 1px solid #FF2A55;
+    background-color: rgba(64, 32, 42, 0.99);
 }
 
 .chip-text {
@@ -367,13 +394,22 @@ class SerenaAndroidShelf(Gtk.Window):
         GtkLayerShell.set_anchor(self, GtkLayerShell.Edge.BOTTOM, False)
         GtkLayerShell.set_anchor(self, GtkLayerShell.Edge.LEFT, False)
         GtkLayerShell.set_anchor(self, GtkLayerShell.Edge.RIGHT, False)
-        GtkLayerShell.set_margin(self, GtkLayerShell.Edge.TOP, 0)
+        GtkLayerShell.set_margin(self, GtkLayerShell.Edge.TOP, 44)
         GtkLayerShell.set_keyboard_mode(self, GtkLayerShell.KeyboardMode.ON_DEMAND)
 
         # Dynamic comfortable width (440px: spacious 2-column cards & drop frame)
         self.set_title("Serena Shelf")
+        self.set_name("shelf-window-root")
         self.set_default_size(440, -1)
         self.set_resizable(False)
+
+        # Set transparent RGBA visual and app_paintable to eliminate sharp corner leakage
+        screen = self.get_screen()
+        visual = screen.get_rgba_visual()
+        if visual:
+            self.set_visual(visual)
+        self.set_app_paintable(True)
+        self.connect("draw", self.on_window_draw)
 
         # Apply CSS
         css_provider = Gtk.CssProvider()
@@ -417,6 +453,105 @@ class SerenaAndroidShelf(Gtk.Window):
         # Timers: hotkey mode check & cliphist db watcher
         GLib.timeout_add(150, self.check_mode_change)
         GLib.timeout_add(300, self.check_cliphist_update)
+
+    def on_window_draw(self, widget, cr):
+        cr.set_source_rgba(0, 0, 0, 0)
+        cr.set_operator(cairo.OPERATOR_CLEAR)
+        cr.paint()
+        cr.set_operator(cairo.OPERATOR_OVER)
+        return False
+
+    # =========================================================================
+    # PINNED CLIPS PERSISTENCE & LOGIC (Request 2)
+    # =========================================================================
+    def load_pinned_clips(self):
+        if os.path.exists(PINNED_FILE):
+            try:
+                with open(PINNED_FILE, "r", encoding="utf-8") as f:
+                    return json.load(f)
+            except Exception:
+                pass
+        return []
+
+    def save_pinned_clips(self, pins):
+        try:
+            with open(PINNED_FILE, "w", encoding="utf-8") as f:
+                json.dump(pins, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            print("Error saving pinned clips:", e)
+
+    def is_item_pinned(self, item, pins=None):
+        if pins is None:
+            pins = self.load_pinned_clips()
+        if item.get("is_pinned"):
+            return True
+        for p in pins:
+            if item.get("is_image") and p.get("is_image"):
+                if p.get("id") == item.get("id") or (p.get("raw") and p.get("raw") == item.get("raw")):
+                    return True
+            elif not item.get("is_image") and not p.get("is_image"):
+                t1 = (item.get("full_text") or item.get("preview", "")).strip()
+                t2 = (p.get("full_text") or p.get("preview", "")).strip()
+                if t1 and t1 == t2:
+                    return True
+        return False
+
+    def toggle_pin_clip(self, item):
+        self.hide_popout()
+        pins = self.load_pinned_clips()
+        found_idx = -1
+        for idx, p in enumerate(pins):
+            if item.get("is_image") and p.get("is_image"):
+                if p.get("id") == item.get("id") or (p.get("raw") and p.get("raw") == item.get("raw")):
+                    found_idx = idx
+                    break
+            elif not item.get("is_image") and not p.get("is_image"):
+                t1 = (item.get("full_text") or item.get("preview", "")).strip()
+                t2 = (p.get("full_text") or p.get("preview", "")).strip()
+                if t1 and t1 == t2:
+                    found_idx = idx
+                    break
+
+        if found_idx >= 0:
+            removed = pins.pop(found_idx)
+            if removed.get("img_path") and os.path.exists(removed["img_path"]):
+                try:
+                    os.remove(removed["img_path"])
+                except Exception:
+                    pass
+            self.save_pinned_clips(pins)
+            self.show_toast("📌 Unpinned")
+        else:
+            pin_id = f"pin_{int(time.time() * 1000)}"
+            new_pin = {
+                "id": pin_id,
+                "is_image": item.get("is_image", False),
+                "preview": item.get("preview", ""),
+                "is_pinned": True,
+                "pinned_at": time.time(),
+                "raw": item.get("raw", "")
+            }
+            if item.get("is_image"):
+                pin_img_path = os.path.join(PINS_DIR, f"{pin_id}.png")
+                try:
+                    if item.get("img_path") and os.path.exists(item["img_path"]):
+                        shutil.copy2(item["img_path"], pin_img_path)
+                    else:
+                        p = subprocess.Popen(["cliphist", "decode"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+                        img_data, _ = p.communicate(input=item["raw"].encode("utf-8"), timeout=1.5)
+                        with open(pin_img_path, "wb") as f:
+                            f.write(img_data)
+                    new_pin["img_path"] = pin_img_path
+                except Exception:
+                    pass
+            else:
+                new_pin["full_text"] = item.get("full_text") or item.get("preview", "")
+
+            pins.insert(0, new_pin)
+            self.save_pinned_clips(pins)
+            self.show_toast("📌 Pinned to top!")
+
+        self.refresh_clipboard()
 
     def ensure_cliphist_daemon(self):
         try:
@@ -531,6 +666,7 @@ class SerenaAndroidShelf(Gtk.Window):
     # =========================================================================
     def build_external_popout_window(self):
         self.popout_win = Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
+        self.popout_win.set_name("shelf-popout-root")
         GtkLayerShell.init_for_window(self.popout_win)
         GtkLayerShell.set_namespace(self.popout_win, "shelf-popout")
         GtkLayerShell.set_layer(self.popout_win, GtkLayerShell.Layer.OVERLAY)
@@ -539,6 +675,13 @@ class SerenaAndroidShelf(Gtk.Window):
         GtkLayerShell.set_anchor(self.popout_win, GtkLayerShell.Edge.RIGHT, False)
         GtkLayerShell.set_anchor(self.popout_win, GtkLayerShell.Edge.BOTTOM, False)
         GtkLayerShell.set_keyboard_mode(self.popout_win, GtkLayerShell.KeyboardMode.NONE)
+
+        screen = self.popout_win.get_screen()
+        visual = screen.get_rgba_visual()
+        if visual:
+            self.popout_win.set_visual(visual)
+        self.popout_win.set_app_paintable(True)
+        self.popout_win.connect("draw", self.on_window_draw)
 
         self.popout_event_box = Gtk.EventBox()
         self.popout_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
@@ -596,6 +739,21 @@ class SerenaAndroidShelf(Gtk.Window):
         clips = []
         seen_text_previews = set()
 
+        # 1. Load Pinned Clips (VIP cards placed at the very top!)
+        pins = self.load_pinned_clips()
+        filtered_pins = []
+        for p in pins:
+            p_item = dict(p)
+            p_item["is_pinned"] = True
+            if not p_item.get("is_image"):
+                txt = (p_item.get("full_text") or p_item.get("preview") or "").strip()
+                seen_text_previews.add(txt)
+            if query:
+                p_txt = (p_item.get("full_text") or p_item.get("preview") or "").lower()
+                if query not in p_txt:
+                    continue
+            filtered_pins.append(p_item)
+
         try:
             res = subprocess.run(["cliphist", "list"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
             if res.returncode == 0 and res.stdout:
@@ -618,16 +776,23 @@ class SerenaAndroidShelf(Gtk.Window):
                     if query and query not in preview.lower():
                         continue
 
+                    # Skip if already displayed in pinned section
+                    if self.is_item_pinned({"id": clip_id, "is_image": is_image, "raw": line, "preview": preview}, pins):
+                        continue
+
                     clips.append({
                         "id": clip_id,
                         "raw": line,
                         "preview": preview,
-                        "is_image": is_image
+                        "is_image": is_image,
+                        "is_pinned": False
                     })
         except Exception:
             pass
 
-        if not clips:
+        all_clips = filtered_pins + clips
+
+        if not all_clips:
             empty_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
             empty_box.set_valign(Gtk.Align.CENTER)
             empty_box.set_halign(Gtk.Align.CENTER)
@@ -647,7 +812,7 @@ class SerenaAndroidShelf(Gtk.Window):
             return
 
         # Render first 24 items in Android-style FlowBox
-        for item in clips[:24]:
+        for item in all_clips[:24]:
             chip = self.create_android_clip_chip(item)
             self.clip_flow.add(chip)
 
@@ -656,12 +821,14 @@ class SerenaAndroidShelf(Gtk.Window):
     def create_android_clip_chip(self, item):
         event_box = Gtk.EventBox()
         event_box.get_style_context().add_class("chip-card")
+        if item.get("is_pinned"):
+            event_box.get_style_context().add_class("pinned")
         event_box.set_size_request(185, -1)
         event_box.set_hexpand(True)
 
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
 
-        # Top row: Type indicator (Inset with 8px margin) + Borderless small delete button
+        # Top row: Type indicator (Inset with 8px margin) + Right actions (Pin + Zoom + Delete)
         top_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
 
         lbl_icon = Gtk.Label()
@@ -672,8 +839,25 @@ class SerenaAndroidShelf(Gtk.Window):
             lbl_icon.set_markup("<span font='10.5' color='#FF2A55'>󰈙</span>  <span font='10' color='#A68595'>Text</span>")
         top_row.pack_start(lbl_icon, False, False, 0)
 
-        # Right actions in header: Zoom (if image) + Delete
-        right_hdr = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
+        # Right actions in header: Pin + Zoom (if image) + Delete
+        right_hdr = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=3)
+
+        # Pin button (Ghim copy - Request 2)
+        btn_pin = Gtk.Button()
+        btn_pin.set_relief(Gtk.ReliefStyle.NONE)
+        btn_pin.get_style_context().add_class("flat")
+        btn_pin.get_style_context().add_class("chip-btn-del")
+        lbl_p = Gtk.Label()
+        if item.get("is_pinned"):
+            lbl_p.set_markup("<span font='10' color='#FF2A55'>󰤲</span>")
+            btn_pin.set_tooltip_text("Unpin clip")
+        else:
+            lbl_p.set_markup("<span font='10' color='#A68595'>󰤱</span>")
+            btn_pin.set_tooltip_text("Pin clip to top")
+        btn_pin.add(lbl_p)
+        btn_pin.connect("clicked", lambda b: self.toggle_pin_clip(item))
+        btn_pin.connect("enter-notify-event", lambda w, e: self.hide_popout())
+        right_hdr.pack_start(btn_pin, False, False, 0)
 
         if item["is_image"]:
             btn_zoom = Gtk.Button()
@@ -707,12 +891,15 @@ class SerenaAndroidShelf(Gtk.Window):
         # Content: Image thumbnail or Text snippet
         if item["is_image"]:
             try:
-                p = subprocess.Popen(["cliphist", "decode"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-                img_data, _ = p.communicate(input=item["raw"].encode("utf-8"), timeout=1.0)
-                loader = GdkPixbuf.PixbufLoader()
-                loader.write(img_data)
-                loader.close()
-                pixbuf = loader.get_pixbuf()
+                if item.get("img_path") and os.path.exists(item["img_path"]):
+                    pixbuf = GdkPixbuf.Pixbuf.new_from_file(item["img_path"])
+                else:
+                    p = subprocess.Popen(["cliphist", "decode"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+                    img_data, _ = p.communicate(input=item["raw"].encode("utf-8"), timeout=1.0)
+                    loader = GdkPixbuf.PixbufLoader()
+                    loader.write(img_data)
+                    loader.close()
+                    pixbuf = loader.get_pixbuf()
 
                 orig_w = pixbuf.get_width()
                 orig_h = pixbuf.get_height()
@@ -728,7 +915,7 @@ class SerenaAndroidShelf(Gtk.Window):
                 lbl_fallback.get_style_context().add_class("chip-text")
                 vbox.pack_start(lbl_fallback, False, False, 0)
         else:
-            clean_txt = item["preview"].strip()
+            clean_txt = (item.get("full_text") or item.get("preview") or "").strip()
             lbl_txt = Gtk.Label()
             lbl_txt.get_style_context().add_class("chip-text")
             lbl_txt.set_text(clean_txt)
@@ -1059,12 +1246,15 @@ class SerenaAndroidShelf(Gtk.Window):
 
                 # Decode high-res image
                 try:
-                    p = subprocess.Popen(["cliphist", "decode"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-                    img_data, _ = p.communicate(input=item["raw"].encode("utf-8"), timeout=1.0)
-                    loader = GdkPixbuf.PixbufLoader()
-                    loader.write(img_data)
-                    loader.close()
-                    pixbuf = loader.get_pixbuf()
+                    if item.get("img_path") and os.path.exists(item["img_path"]):
+                        pixbuf = GdkPixbuf.Pixbuf.new_from_file(item["img_path"])
+                    else:
+                        p = subprocess.Popen(["cliphist", "decode"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+                        img_data, _ = p.communicate(input=item["raw"].encode("utf-8"), timeout=1.0)
+                        loader = GdkPixbuf.PixbufLoader()
+                        loader.write(img_data)
+                        loader.close()
+                        pixbuf = loader.get_pixbuf()
 
                     orig_w = pixbuf.get_width()
                     orig_h = pixbuf.get_height()
@@ -1220,6 +1410,7 @@ class SerenaAndroidShelf(Gtk.Window):
             self.lightbox_win = None
 
         win = Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
+        win.set_name("shelf-lightbox-root")
         GtkLayerShell.init_for_window(win)
         GtkLayerShell.set_namespace(win, "shelf-lightbox")
         GtkLayerShell.set_layer(win, GtkLayerShell.Layer.OVERLAY)
@@ -1229,6 +1420,13 @@ class SerenaAndroidShelf(Gtk.Window):
         GtkLayerShell.set_anchor(win, GtkLayerShell.Edge.RIGHT, False)
         GtkLayerShell.set_keyboard_mode(win, GtkLayerShell.KeyboardMode.ON_DEMAND)
 
+        screen = win.get_screen()
+        visual = screen.get_rgba_visual()
+        if visual:
+            win.set_visual(visual)
+        win.set_app_paintable(True)
+        win.connect("draw", self.on_window_draw)
+
         pixbuf = None
         orig_w, orig_h = 0, 0
         raw_bytes = None
@@ -1236,12 +1434,16 @@ class SerenaAndroidShelf(Gtk.Window):
 
         if not is_shelf:
             try:
-                p = subprocess.Popen(["cliphist", "decode"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-                raw_bytes, _ = p.communicate(input=item_or_fpath["raw"].encode("utf-8"), timeout=1.5)
-                loader = GdkPixbuf.PixbufLoader()
-                loader.write(raw_bytes)
-                loader.close()
-                pixbuf = loader.get_pixbuf()
+                if isinstance(item_or_fpath, dict) and item_or_fpath.get("img_path") and os.path.exists(item_or_fpath["img_path"]):
+                    raw_bytes = open(item_or_fpath["img_path"], "rb").read()
+                    pixbuf = GdkPixbuf.Pixbuf.new_from_file(item_or_fpath["img_path"])
+                else:
+                    p = subprocess.Popen(["cliphist", "decode"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+                    raw_bytes, _ = p.communicate(input=item_or_fpath["raw"].encode("utf-8"), timeout=1.5)
+                    loader = GdkPixbuf.PixbufLoader()
+                    loader.write(raw_bytes)
+                    loader.close()
+                    pixbuf = loader.get_pixbuf()
             except Exception:
                 pass
         else:
@@ -1337,14 +1539,27 @@ class SerenaAndroidShelf(Gtk.Window):
     def on_clip_chip_clicked(self, item, event):
         if event.button == 1:
             try:
-                p = subprocess.Popen(["cliphist", "decode"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-                out, _ = p.communicate(input=item["raw"].encode("utf-8"))
-                if item["is_image"]:
-                    p2 = subprocess.Popen(["wl-copy", "--type", "image/png"], stdin=subprocess.PIPE)
-                    p2.communicate(input=out)
+                if item.get("is_image"):
+                    if item.get("img_path") and os.path.exists(item["img_path"]):
+                        with open(item["img_path"], "rb") as f:
+                            img_bytes = f.read()
+                        p2 = subprocess.Popen(["wl-copy", "--type", "image/png"], stdin=subprocess.PIPE)
+                        p2.communicate(input=img_bytes)
+                    else:
+                        p = subprocess.Popen(["cliphist", "decode"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+                        out, _ = p.communicate(input=item["raw"].encode("utf-8"))
+                        p2 = subprocess.Popen(["wl-copy", "--type", "image/png"], stdin=subprocess.PIPE)
+                        p2.communicate(input=out)
                 else:
-                    p2 = subprocess.Popen(["wl-copy"], stdin=subprocess.PIPE)
-                    p2.communicate(input=out)
+                    clip_text = item.get("full_text") or item.get("preview", "")
+                    if item.get("is_pinned") and clip_text:
+                        p2 = subprocess.Popen(["wl-copy"], stdin=subprocess.PIPE)
+                        p2.communicate(input=clip_text.encode("utf-8"))
+                    else:
+                        p = subprocess.Popen(["cliphist", "decode"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+                        out, _ = p.communicate(input=item["raw"].encode("utf-8"))
+                        p2 = subprocess.Popen(["wl-copy"], stdin=subprocess.PIPE)
+                        p2.communicate(input=out)
                 self.show_toast("✨ Copied!")
                 GLib.timeout_add(250, self.close_window)
             except Exception as e:
@@ -1353,8 +1568,32 @@ class SerenaAndroidShelf(Gtk.Window):
     def delete_clip(self, item):
         self.hide_popout()
         try:
-            p = subprocess.Popen(["cliphist", "delete"], stdin=subprocess.PIPE, stderr=subprocess.DEVNULL)
-            p.communicate(input=item["raw"].encode("utf-8"))
+            if item.get("is_pinned"):
+                pins = self.load_pinned_clips()
+                new_pins = []
+                for p in pins:
+                    is_match = False
+                    if item.get("id") and p.get("id") == item.get("id"):
+                        is_match = True
+                    elif item.get("is_image") and p.get("is_image") and item.get("raw") and p.get("raw") == item.get("raw"):
+                        is_match = True
+                    elif not item.get("is_image") and not p.get("is_image"):
+                        t1 = (item.get("full_text") or item.get("preview", "")).strip()
+                        t2 = (p.get("full_text") or p.get("preview", "")).strip()
+                        if t1 and t1 == t2:
+                            is_match = True
+                    if not is_match:
+                        new_pins.append(p)
+                    else:
+                        if p.get("img_path") and os.path.exists(p["img_path"]):
+                            try:
+                                os.remove(p["img_path"])
+                            except Exception:
+                                pass
+                self.save_pinned_clips(new_pins)
+            if item.get("raw"):
+                p = subprocess.Popen(["cliphist", "delete"], stdin=subprocess.PIPE, stderr=subprocess.DEVNULL)
+                p.communicate(input=item["raw"].encode("utf-8"))
             self.refresh_clipboard()
         except Exception:
             pass
@@ -1480,7 +1719,11 @@ class SerenaAndroidShelf(Gtk.Window):
         if self.active_tab == "clip":
             subprocess.run(["cliphist", "wipe"], stderr=subprocess.DEVNULL)
             self.refresh_clipboard()
-            self.show_toast("🗑️ Cleared")
+            pins = self.load_pinned_clips()
+            if pins:
+                self.show_toast(f"🗑️ Cleared ({len(pins)} pinned kept)")
+            else:
+                self.show_toast("🗑️ Cleared")
         else:
             try:
                 for fname in os.listdir(SHELF_DIR):
