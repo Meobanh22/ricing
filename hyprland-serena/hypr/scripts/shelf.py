@@ -46,7 +46,6 @@ CSS = b"""
 * {
     font-family: "JetBrains Mono", "Inter", sans-serif;
     outline: none;
-    -GtkWidget-focus-line-width: 0;
     box-shadow: none;
     text-shadow: none;
     -gtk-icon-shadow: none;
@@ -193,7 +192,6 @@ flowboxchild:selected {
 .chip-text {
     color: #FFF0F5;
     font-size: 11px;
-    line-height: 1.35;
 }
 
 .chip-meta {
@@ -291,12 +289,15 @@ class SerenaAndroidShelf(Gtk.Window):
 
         # Apply CSS
         css_provider = Gtk.CssProvider()
-        css_provider.load_from_data(CSS)
-        Gtk.StyleContext.add_provider_for_screen(
-            Gdk.Screen.get_default(),
-            css_provider,
-            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
-        )
+        try:
+            css_provider.load_from_data(CSS)
+            Gtk.StyleContext.add_provider_for_screen(
+                Gdk.Screen.get_default(),
+                css_provider,
+                Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+            )
+        except Exception as e:
+            print(f"Warning: CSS error: {e}", file=sys.stderr)
 
         self.active_tab = initial_tab
         self.last_mode_mtime = 0
@@ -921,23 +922,34 @@ class SerenaAndroidShelf(Gtk.Window):
 
 
 def main():
-    with open(PID_FILE, "w") as f:
-        f.write(str(os.getpid()))
-
     mode = "clip"
     if len(sys.argv) > 1:
         arg = sys.argv[1].lower()
         if "shelf" in arg or "stash" in arg or "drop" in arg:
             mode = "shelf"
 
-    with open(MODE_FILE, "w") as f:
-        f.write(mode)
+    try:
+        with open(MODE_FILE, "w") as f:
+            f.write(mode)
+    except Exception:
+        pass
 
-    win = SerenaAndroidShelf(initial_tab=mode)
-    win.show_all()
-    if mode == "clip":
-        win.btn_stash_clip.hide()
-    Gtk.main()
+    try:
+        win = SerenaAndroidShelf(initial_tab=mode)
+        with open(PID_FILE, "w") as f:
+            f.write(str(os.getpid()))
+        win.show_all()
+        if mode == "clip":
+            win.btn_stash_clip.hide()
+        Gtk.main()
+    except Exception as e:
+        print(f"Error starting shelf: {e}", file=sys.stderr)
+        if os.path.exists(PID_FILE):
+            try:
+                os.remove(PID_FILE)
+            except Exception:
+                pass
+        sys.exit(1)
 
 
 if __name__ == "__main__":
