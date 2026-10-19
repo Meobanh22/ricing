@@ -430,7 +430,6 @@ scrollbar.vertical slider:hover {
 
 /* Header Drag Handle Zone */
 .drag-grip-zone {
-    cursor: grab;
     padding: 2px 8px;
     border-radius: 6px;
     transition: background-color 150ms ease;
@@ -438,10 +437,6 @@ scrollbar.vertical slider:hover {
 
 .drag-grip-zone:hover {
     background-color: rgba(255, 42, 85, 0.12);
-}
-
-.drag-grip-zone:active {
-    cursor: grabbing;
 }
 """
 
@@ -667,6 +662,19 @@ class SerenaAndroidShelf(Gtk.Window):
             pass
         return None
 
+    def on_header_enter(self, widget, event):
+        win = widget.get_window()
+        if win:
+            win.set_cursor(Gdk.Cursor.new_from_name(Gdk.Display.get_default(), "grab"))
+        return False
+
+    def on_header_leave(self, widget, event):
+        if not self.is_dragging:
+            win = widget.get_window()
+            if win:
+                win.set_cursor(None)
+        return False
+
     def on_header_button_press(self, widget, event):
         if event.button == 1:
             if event.type == Gdk.EventType._2BUTTON_PRESS:
@@ -688,6 +696,9 @@ class SerenaAndroidShelf(Gtk.Window):
                 self.drag_offset_x = cx - self.current_win_x
                 self.drag_offset_y = cy - self.current_win_y
                 self.hide_popout()
+                win = widget.get_window()
+                if win:
+                    win.set_cursor(Gdk.Cursor.new_from_name(Gdk.Display.get_default(), "grabbing"))
                 return True
         return False
 
@@ -695,6 +706,9 @@ class SerenaAndroidShelf(Gtk.Window):
         if event.button == 1 and self.is_dragging:
             self.is_dragging = False
             self.save_window_pos()
+            win = widget.get_window()
+            if win:
+                win.set_cursor(Gdk.Cursor.new_from_name(Gdk.Display.get_default(), "grab"))
             return True
         return False
 
@@ -921,8 +935,12 @@ class SerenaAndroidShelf(Gtk.Window):
         self.header_event_box.add_events(
             Gdk.EventMask.BUTTON_PRESS_MASK |
             Gdk.EventMask.BUTTON_RELEASE_MASK |
-            Gdk.EventMask.POINTER_MOTION_MASK
+            Gdk.EventMask.POINTER_MOTION_MASK |
+            Gdk.EventMask.ENTER_NOTIFY_MASK |
+            Gdk.EventMask.LEAVE_NOTIFY_MASK
         )
+        self.header_event_box.connect("enter-notify-event", self.on_header_enter)
+        self.header_event_box.connect("leave-notify-event", self.on_header_leave)
         self.header_event_box.connect("button-press-event", self.on_header_button_press)
         self.header_event_box.connect("button-release-event", self.on_header_button_release)
         self.header_event_box.connect("motion-notify-event", self.on_header_motion_notify)
