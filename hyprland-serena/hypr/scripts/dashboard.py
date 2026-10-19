@@ -35,7 +35,7 @@ window#dashboard-window {
 
 #main-card {
     background-color: rgba(32, 16, 18, 0.98);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 16px;
     padding: 16px 20px;
     box-shadow: none;

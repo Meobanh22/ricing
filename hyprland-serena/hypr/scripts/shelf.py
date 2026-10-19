@@ -108,8 +108,8 @@ button.tab-btn {
     font-size: 11.5px;
     font-weight: 600;
     border: none;
-    border-radius: 6px;
-    padding: 4px 14px;
+    border-radius: 8px;
+    padding: 4px 12px;
     transition: background-color 150ms ease, color 150ms ease;
 }
 
@@ -134,7 +134,7 @@ button.tab-btn.active:hover {
     font-size: 11px;
     font-weight: 600;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     padding: 4px 10px;
     transition: background-color 150ms ease, color 150ms ease;
 }
@@ -151,7 +151,7 @@ button.tab-btn.active:hover {
     font-size: 13px;
     font-weight: 700;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     padding: 4px 8px;
     transition: color 150ms ease, background-color 150ms ease;
 }
@@ -170,7 +170,7 @@ searchentry {
     font-size: 11.5px;
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 8px;
-    padding: 6px 14px;
+    padding: 6px 12px;
     margin-bottom: 8px;
     caret-color: #FF2A55;
     box-shadow: none;
@@ -417,21 +417,21 @@ scrollbar.vertical {
 scrollbar.vertical slider {
     background-color: rgba(255, 42, 85, 0.48);
     border-radius: 4px;
-    min-width: 7px;
-    min-height: 38px;
+    min-width: 6px;
+    min-height: 36px;
     margin-left: 4px;
     transition: background-color 150ms ease, min-width 150ms ease;
 }
 
 scrollbar.vertical slider:hover {
     background-color: #FF2A55;
-    min-width: 9px;
+    min-width: 8px;
 }
 
 /* Header Drag Handle Zone */
 .drag-grip-zone {
     padding: 2px 8px;
-    border-radius: 6px;
+    border-radius: 8px;
     transition: background-color 150ms ease;
 }
 
@@ -853,10 +853,10 @@ class SerenaAndroidShelf(Gtk.Window):
 
         # --- HEADER ---
         header_hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-        header_hbox.set_margin_start(14)
-        header_hbox.set_margin_end(14)
-        header_hbox.set_margin_top(14)
-        header_hbox.set_margin_bottom(8)
+        header_hbox.set_margin_start(16)
+        header_hbox.set_margin_end(16)
+        header_hbox.set_margin_top(16)
+        header_hbox.set_margin_bottom(10)
 
         tab_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
         tab_box.get_style_context().add_class("tab-switcher")
@@ -964,8 +964,8 @@ class SerenaAndroidShelf(Gtk.Window):
         self.lbl_status = Gtk.Label(label="")
         self.lbl_status.get_style_context().add_class("status-bar")
         self.lbl_status.set_halign(Gtk.Align.START)
-        self.lbl_status.set_margin_start(14)
-        self.lbl_status.set_margin_bottom(10)
+        self.lbl_status.set_margin_start(16)
+        self.lbl_status.set_margin_bottom(12)
         main_box.pack_end(self.lbl_status, False, False, 0)
 
         self.add(main_box)
@@ -997,7 +997,7 @@ class SerenaAndroidShelf(Gtk.Window):
         self.popout_box.get_style_context().add_class("popout-card")
         self.popout_box.set_margin_start(12)
         self.popout_box.set_margin_end(12)
-        self.popout_box.set_margin_top(10)
+        self.popout_box.set_margin_top(12)
         self.popout_box.set_margin_bottom(12)
         self.popout_event_box.add(self.popout_box)
         self.popout_event_box.connect("enter-notify-event", lambda w, e: self.cancel_popout(w))
@@ -1011,13 +1011,13 @@ class SerenaAndroidShelf(Gtk.Window):
     # =========================================================================
     def build_clipboard_page(self):
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
-        vbox.set_margin_start(14)
-        vbox.set_margin_end(14)
+        vbox.set_margin_start(16)
+        vbox.set_margin_end(16)
 
         self.clip_search = Gtk.SearchEntry()
         self.clip_search.set_placeholder_text("Search clips...")
         self.clip_search.get_style_context().add_class("search-entry")
-        self.clip_search.set_margin_bottom(6)
+        self.clip_search.set_margin_bottom(8)
         self.clip_search.connect("search-changed", lambda e: self.refresh_clipboard())
         vbox.pack_start(self.clip_search, False, False, 0)
 
@@ -1259,8 +1259,8 @@ class SerenaAndroidShelf(Gtk.Window):
     # =========================================================================
     def build_shelf_page(self):
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
-        vbox.set_margin_start(14)
-        vbox.set_margin_end(14)
+        vbox.set_margin_start(16)
+        vbox.set_margin_end(16)
 
         self.shelf_stack = Gtk.Stack()
         self.shelf_stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
@@ -1783,11 +1783,11 @@ class SerenaAndroidShelf(Gtk.Window):
 
         frame = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
         frame.get_style_context().add_class("lightbox-card")
-        frame.set_margin_start(18)
-        frame.set_margin_end(18)
+        frame.set_margin_start(16)
+        frame.set_margin_end(16)
         frame.set_margin_top(16)
         frame.set_margin_bottom(16)
-        frame.set_size_request(min(720, orig_w + 40), min(540, orig_h + 80))
+        frame.set_size_request(min(720, orig_w + 32), min(540, orig_h + 80))
 
         # Header
         hdr = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)

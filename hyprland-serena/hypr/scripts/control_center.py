@@ -29,7 +29,7 @@ try:
 except Exception:
     HAS_LAYER_SHELL = False
 
-from gi.repository import Gtk, Gdk, GLib
+from gi.repository import Gtk, Gdk, GLib, Pango
 
 PID_FILE = "/tmp/control_center.pid"
 CACHE_FILE = os.path.expanduser("~/.cache/notifications.json")
@@ -70,9 +70,9 @@ eventbox {
     background-color: transparent;
     border: none;
     border-radius: 16px;
-    padding: 16px 14px 14px 14px;
+    padding: 14px;
     box-shadow: none;
-    min-width: 315px;
+    min-width: 287px;
 }
 
 /* Header Flower Box - Exact from Image (#301f20) */
@@ -90,8 +90,8 @@ eventbox {
     color: #E8C2D0;
     background: transparent;
     border: none;
-    font-size: 14px;
-    padding: 2px 8px;
+    font-size: 13px;
+    padding: 4px 8px;
     border-radius: 8px;
     transition: background-color 0.15s ease, color 0.15s ease;
 }
@@ -266,14 +266,14 @@ scale#vol-scale slider:hover {
 #cc-notif-scroll scrollbar slider {
     background-color: rgba(255, 42, 85, 0.40);
     border-radius: 4px;
-    min-width: 4px;
+    min-width: 6px;
     border: none;
     transition: all 0.2s ease;
 }
 
 #cc-notif-scroll scrollbar slider:hover {
     background-color: #FF2A55;
-    min-width: 6px;
+    min-width: 8px;
 }
 
 /* Clear All Button */
@@ -283,8 +283,8 @@ scale#vol-scale slider:hover {
     border: none;
     font-size: 11px;
     font-weight: 600;
-    padding: 2px 6px;
-    border-radius: 6px;
+    padding: 4px 8px;
+    border-radius: 8px;
     transition: all 0.15s ease;
 }
 
@@ -418,6 +418,8 @@ class ControlCenter(Gtk.Window):
         self.set_name("control-center-window")
         self.set_decorated(False)
         self.set_resizable(False)
+        self.set_default_size(315, -1)
+        self.set_size_request(315, -1)
 
         self.launch_time = time.time()
         self.mouse_entered = False
@@ -497,8 +499,8 @@ class ControlCenter(Gtk.Window):
         cr.set_source_rgba(32.0 / 255.0, 16.0 / 255.0, 18.0 / 255.0, 0.98)
         cr.fill_preserve()
 
-        # Stroke with 1px Serena outer border (--border-window: rgba(255, 255, 255, 0.08))
-        cr.set_source_rgba(1.0, 1.0, 1.0, 0.08)
+        # Stroke with 1px Serena outer border (--border-window: rgba(255, 255, 255, 0.12))
+        cr.set_source_rgba(1.0, 1.0, 1.0, 0.12)
         cr.set_line_width(1.0)
         cr.stroke()
 
@@ -623,9 +625,9 @@ class ControlCenter(Gtk.Window):
         card.set_name("cc-main-card")
 
         # =====================================================
-        # 1. HEADER (🌸 Control Center | Quick settings & notifications)
+        # 1. HEADER (🌸 Control Center | Quick Settings & Alerts)
         # =====================================================
-        header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+        header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
 
         flower_box = Gtk.Box()
         flower_box.get_style_context().add_class("header-flower-box")
@@ -649,7 +651,7 @@ class ControlCenter(Gtk.Window):
         title_vbox.pack_start(lbl_title, False, False, 0)
 
         lbl_sub = Gtk.Label()
-        lbl_sub.set_markup("<span font='10.5' color='#A68595'>Quick settings &amp; notifications</span>")
+        lbl_sub.set_markup("<span font='10' color='#A68595'>Quick Settings &amp; Alerts</span>")
         lbl_sub.set_halign(Gtk.Align.START)
         title_vbox.pack_start(lbl_sub, False, False, 0)
 
@@ -657,6 +659,7 @@ class ControlCenter(Gtk.Window):
 
         btn_close = Gtk.Button(label="✕")
         btn_close.get_style_context().add_class("btn-close")
+        btn_close.set_size_request(28, 28)
         btn_close.connect("clicked", lambda x: self.close_and_quit())
         header_box.pack_end(btn_close, False, False, 0)
 
@@ -937,6 +940,8 @@ class ControlCenter(Gtk.Window):
         safe_app = GLib.markup_escape_text(app_title)
         lbl_app.set_markup(f"<span font='12' weight='bold' color='#FFF0F5'>{safe_app}</span>")
         lbl_app.set_halign(Gtk.Align.START)
+        lbl_app.set_ellipsize(Pango.EllipsizeMode.END)
+        lbl_app.set_max_width_chars(18)
         row1.pack_start(lbl_app, True, True, 0)
 
         lbl_time = Gtk.Label()
@@ -950,6 +955,8 @@ class ControlCenter(Gtk.Window):
             safe_head = GLib.markup_escape_text(headline[:45] + ("..." if len(headline) > 45 else ""))
             lbl_head.set_markup(f"<span font='11.5' color='#FFF0F5'>{safe_head}</span>")
             lbl_head.set_halign(Gtk.Align.START)
+            lbl_head.set_ellipsize(Pango.EllipsizeMode.END)
+            lbl_head.set_max_width_chars(24)
             vbox_content.pack_start(lbl_head, False, False, 0)
 
         if detail:
@@ -957,6 +964,8 @@ class ControlCenter(Gtk.Window):
             safe_detail = GLib.markup_escape_text(detail[:60] + ("..." if len(detail) > 60 else ""))
             lbl_detail.set_markup(f"<span font='10.5' color='#A68595'>{safe_detail}</span>")
             lbl_detail.set_halign(Gtk.Align.START)
+            lbl_detail.set_ellipsize(Pango.EllipsizeMode.END)
+            lbl_detail.set_max_width_chars(26)
             vbox_content.pack_start(lbl_detail, False, False, 0)
 
         item_box.pack_start(vbox_content, True, True, 0)
