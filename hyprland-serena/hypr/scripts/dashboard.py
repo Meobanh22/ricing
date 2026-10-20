@@ -16,10 +16,18 @@ import threading
 import urllib.request
 import json
 import signal
+import cairo
 import gi
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('GdkPixbuf', '2.0')
+try:
+    gi.require_version('GtkLayerShell', '0.1')
+    from gi.repository import GtkLayerShell
+    HAS_LAYER_SHELL = True
+except Exception:
+    HAS_LAYER_SHELL = False
+
 from gi.repository import Gtk, Gdk, GdkPixbuf, GLib
 
 CSS_DATA = b"""
@@ -28,14 +36,15 @@ CSS_DATA = b"""
 }
 
 window#dashboard-window {
-    background: transparent;
+    background-color: transparent;
+    background-image: none;
     border: none;
     box-shadow: none;
 }
 
 #main-card {
-    background-color: rgba(32, 16, 18, 0.98);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    background-color: transparent;
+    border: none;
     border-radius: 16px;
     padding: 16px 20px;
     box-shadow: none;
@@ -176,27 +185,40 @@ class Dashboard(Gtk.Window):
     def __init__(self):
         super().__init__(title="Dashboard")
         self.set_name("dashboard-window")
-        self.set_wmclass("dashboard", "dashboard")
         self.set_decorated(False)
         self.set_resizable(False)
 
-        # Định vị trí dropdown ngay dưới đồng hồ Waybar
-        self.set_position(Gtk.WindowPosition.NONE)
-        display = Gdk.Display.get_default()
-        if display:
-            monitor = display.get_primary_monitor() or display.get_monitor(0)
-            if monitor:
-                geom = monitor.get_geometry()
-                dash_w = 720
-                x = geom.x + (geom.width - dash_w) // 2
-                y = geom.y + 44
-                self.move(x, y)
+        if HAS_LAYER_SHELL:
+            GtkLayerShell.init_for_window(self)
+            GtkLayerShell.set_namespace(self, "dashboard")
+            GtkLayerShell.set_layer(self, GtkLayerShell.Layer.TOP)
+            GtkLayerShell.set_anchor(self, GtkLayerShell.Edge.TOP, True)
+            GtkLayerShell.set_anchor(self, GtkLayerShell.Edge.BOTTOM, False)
+            GtkLayerShell.set_anchor(self, GtkLayerShell.Edge.LEFT, False)
+            GtkLayerShell.set_anchor(self, GtkLayerShell.Edge.RIGHT, False)
+            GtkLayerShell.set_margin(self, GtkLayerShell.Edge.TOP, 44)
+            GtkLayerShell.set_keyboard_mode(self, GtkLayerShell.KeyboardMode.ON_DEMAND)
+        else:
+            self.set_wmclass("dashboard", "dashboard")
+            self.set_position(Gtk.WindowPosition.NONE)
+            display = Gdk.Display.get_default()
+            if display:
+                monitor = display.get_primary_monitor() or display.get_monitor(0)
+                if monitor:
+                    geom = monitor.get_geometry()
+                    dash_w = 720
+                    x = geom.x + (geom.width - dash_w) // 2
+                    y = geom.y + 44
+                    self.move(x, y)
 
-        # Nền trong suốt RGBA
+        # Nền trong suốt RGBA & Cairo squircle drawing (loại bỏ hoàn toàn góc nhọn)
         screen = self.get_screen()
         visual = screen.get_rgba_visual()
-        if visual and screen.is_composited():
+        if visual:
             self.set_visual(visual)
+
+        self.set_app_paintable(True)
+        self.connect("draw", self.on_window_draw)
 
         self.apply_css()
         self.build_ui()
@@ -209,6 +231,40 @@ class Dashboard(Gtk.Window):
         
         # Cập nhật thời tiết bất đồng bộ
         threading.Thread(target=self.fetch_weather_async, daemon=True).start()
+
+    def on_window_draw(self, widget, cr):
+        # 1. Xóa trong suốt 100% surface (triệt tiêu góc chữ nhật rò rỉ)
+        cr.set_source_rgba(0, 0, 0, 0)
+        cr.set_operator(cairo.OPERATOR_CLEAR)
+        cr.paint()
+        cr.set_operator(cairo.OPERATOR_OVER)
+
+        # 2. Vẽ hình squircle chuẩn 16px
+        alloc = widget.get_allocation()
+        pad = 0.5
+        w = float(alloc.width) - pad * 2.0
+        h = float(alloc.height) - pad * 2.0
+        x = pad
+        y = pad
+        r = 16.0
+
+        cr.new_sub_path()
+        cr.arc(x + w - r, y + r, r, -1.57079632679, 0)
+        cr.arc(x + w - r, y + h - r, r, 0, 1.57079632679)
+        cr.arc(x + r, y + h - r, r, 1.57079632679, 3.14159265359)
+        cr.arc(x + r, y + r, r, 3.14159265359, 4.71238898038)
+        cr.close_path()
+
+        # Nền ấm Obsidian-Wine (--bg-window: rgba(32, 16, 18, 0.98))
+        cr.set_source_rgba(32.0 / 255.0, 16.0 / 255.0, 18.0 / 255.0, 0.98)
+        cr.fill_preserve()
+
+        # Viền mỏng chuẩn Serena (--border-window: rgba(255, 255, 255, 0.12))
+        cr.set_source_rgba(1.0, 1.0, 1.0, 0.12)
+        cr.set_line_width(1.0)
+        cr.stroke()
+
+        return False
 
     def close_and_quit(self):
         if os.path.exists(PID_FILE):
