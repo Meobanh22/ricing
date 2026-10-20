@@ -1022,7 +1022,30 @@ class SerenaAndroidShelf(Gtk.Window):
         self.clip_search.connect("search-changed", lambda e: self.refresh_clipboard())
         vbox.pack_start(self.clip_search, False, False, 0)
 
-        # Dynamic Natural Height ScrolledWindow (Expands with items up to 400px)
+        # Stack for switching between Empty State and Content State
+        self.clip_stack = Gtk.Stack()
+        self.clip_stack.set_transition_type(Gtk.StackTransitionType.NONE)
+
+        # 1. Empty State View (Perfect center across entire window width)
+        empty_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        empty_box.set_valign(Gtk.Align.CENTER)
+        empty_box.set_halign(Gtk.Align.CENTER)
+        empty_box.set_hexpand(True)
+        empty_box.set_vexpand(True)
+        empty_box.set_margin_top(48)
+        empty_box.set_margin_bottom(48)
+
+        lbl_icon = Gtk.Label()
+        lbl_icon.set_markup("<span font='28' color='#FF2A55'>󰅌</span>")
+        empty_box.pack_start(lbl_icon, False, False, 0)
+
+        lbl_msg = Gtk.Label()
+        lbl_msg.set_markup("<span font='11' color='#A68595'>No clipboard items found</span>")
+        empty_box.pack_start(lbl_msg, False, False, 0)
+
+        self.clip_stack.add_named(empty_box, "empty")
+
+        # 2. Content State View: ScrolledWindow with 2-column FlowBox
         self.clip_scroll = Gtk.ScrolledWindow()
         self.clip_scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         self.clip_scroll.set_propagate_natural_height(True)
@@ -1043,7 +1066,9 @@ class SerenaAndroidShelf(Gtk.Window):
         self.clip_flow.set_margin_start(0)
 
         self.clip_scroll.add(self.clip_flow)
-        vbox.pack_start(self.clip_scroll, True, True, 0)
+        self.clip_stack.add_named(self.clip_scroll, "content")
+
+        vbox.pack_start(self.clip_stack, True, True, 0)
 
         return vbox
 
@@ -1111,30 +1136,17 @@ class SerenaAndroidShelf(Gtk.Window):
         all_clips = filtered_pins + clips
 
         if not all_clips:
-            empty_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
-            empty_box.set_valign(Gtk.Align.CENTER)
-            empty_box.set_halign(Gtk.Align.CENTER)
-            empty_box.set_margin_top(40)
-            empty_box.set_margin_bottom(40)
-
-            lbl_icon = Gtk.Label()
-            lbl_icon.set_markup("<span font='28' color='#FF2A55'>󰅌</span>")
-            empty_box.pack_start(lbl_icon, False, False, 0)
-
-            lbl_msg = Gtk.Label()
-            lbl_msg.set_markup("<span font='11' color='#A68595'>No clipboard items found</span>")
-            empty_box.pack_start(lbl_msg, False, False, 0)
-
-            self.clip_flow.add(empty_box)
-            self.clip_flow.show_all()
+            self.clip_stack.set_visible_child_name("empty")
+            self.clip_stack.show_all()
             return
 
-        # Render first 24 items in Android-style FlowBox
+        self.clip_stack.set_visible_child_name("content")
         for item in all_clips[:24]:
             chip = self.create_android_clip_chip(item)
             self.clip_flow.add(chip)
 
         self.clip_flow.show_all()
+        self.clip_stack.show_all()
 
     def create_android_clip_chip(self, item):
         event_box = Gtk.EventBox()
@@ -2045,11 +2057,6 @@ class SerenaAndroidShelf(Gtk.Window):
         if self.active_tab == "clip":
             subprocess.run(["cliphist", "wipe"], stderr=subprocess.DEVNULL)
             self.refresh_clipboard()
-            pins = self.load_pinned_clips()
-            if pins:
-                self.show_toast(f"🗑️ Cleared ({len(pins)} pinned kept)")
-            else:
-                self.show_toast("🗑️ Cleared")
         else:
             try:
                 for fname in os.listdir(SHELF_DIR):
@@ -2057,7 +2064,6 @@ class SerenaAndroidShelf(Gtk.Window):
                     if os.path.isfile(fpath):
                         os.remove(fpath)
                 self.refresh_shelf()
-                self.show_toast("🗑️ Shelf cleared")
             except Exception:
                 pass
 
