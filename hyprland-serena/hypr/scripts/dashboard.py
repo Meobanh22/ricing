@@ -427,8 +427,8 @@ class Dashboard(Gtk.Window):
 
         # Top Header (Title + Close Button)
         header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        lbl_brand = Gtk.Label(label="🌸 PROFILE DASHBOARD 🌸")
-        lbl_brand.get_style_context().add_class("title-header")
+        lbl_brand = Gtk.Label()
+        lbl_brand.set_markup("<span font='12' color='#FF2A55'>🌸</span>   <span color='#FFF0F5' font='11' weight='bold' letter_spacing='1024'>PROFILE DASHBOARD</span>")
         header_box.pack_start(lbl_brand, True, True, 0)
 
         btn_close = Gtk.Button(label="✕")
@@ -467,8 +467,8 @@ class Dashboard(Gtk.Window):
         # Calendar Card
         cal_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
         cal_card.get_style_context().add_class("card-tile")
-        lbl_cal_title = Gtk.Label(label="📅 CALENDAR")
-        lbl_cal_title.get_style_context().add_class("card-title")
+        lbl_cal_title = Gtk.Label()
+        lbl_cal_title.set_markup("<span font='11.5' color='#FF2A55'>󰸗</span>   <span color='#FF2A55' weight='bold'>CALENDAR</span>")
         lbl_cal_title.set_halign(Gtk.Align.START)
 
         self.calendar = Gtk.Calendar()
@@ -485,8 +485,8 @@ class Dashboard(Gtk.Window):
         weather_card.get_style_context().add_class("card-tile")
         weather_card.set_valign(Gtk.Align.FILL)
 
-        self.lbl_wt_title = Gtk.Label(label="🌤️ WEATHER")
-        self.lbl_wt_title.get_style_context().add_class("card-title")
+        self.lbl_wt_title = Gtk.Label()
+        self.lbl_wt_title.set_markup("<span font='11.5' color='#FF2A55'>󰖙</span>   <span color='#FF2A55' weight='bold'>WEATHER</span>")
         self.lbl_wt_title.set_halign(Gtk.Align.START)
         weather_card.pack_start(self.lbl_wt_title, False, False, 0)
 
@@ -500,8 +500,9 @@ class Dashboard(Gtk.Window):
         self.lbl_weather_desc.set_halign(Gtk.Align.START)
         weather_card.pack_start(self.lbl_weather_desc, False, False, 0)
 
-        self.lbl_humidity = Gtk.Label(label="💧 Humidity: --%  |  💨 -- km/h")
+        self.lbl_humidity = Gtk.Label()
         self.lbl_humidity.get_style_context().add_class("weather-sub")
+        self.lbl_humidity.set_markup("<span font='10.5' color='#FF2A55'>󰖌</span> <span color='#E8C2D0'>--%</span>    <span color='#A68595'>·</span>    <span font='10.5' color='#FF2A55'>󰖝</span> <span color='#E8C2D0'>-- km/h</span>")
         self.lbl_humidity.set_halign(Gtk.Align.START)
         weather_card.pack_start(self.lbl_humidity, False, False, 2)
 
@@ -536,21 +537,21 @@ class Dashboard(Gtk.Window):
             low = desc.lower()
             is_day = 6 <= hour < 18
             if "thunder" in low or "lightning" in low:
-                return "⛈️"
+                return "󰖓"
             elif "snow" in low or "ice" in low or "sleet" in low or "blizzard" in low:
-                return "❄️"
+                return "󰖘"
             elif "rain" in low or "drizzle" in low or "shower" in low:
-                return "🌧️"
+                return "󰖗"
             elif "fog" in low or "mist" in low or "haze" in low:
-                return "🌫️"
+                return "󰖑"
             elif "partly cloudy" in low or "few clouds" in low:
-                return "⛅" if is_day else "☁️"
+                return "󰖕" if is_day else "󰼱"
             elif "cloud" in low or "overcast" in low:
-                return "☁️"
+                return "󰖐"
             elif "clear" in low or "sunny" in low:
-                return "☀️" if is_day else "🌙"
+                return "󰖙" if is_day else "󰖔"
             else:
-                return "🌤️" if is_day else "🌙"
+                return "󰖕" if is_day else "󰖔"
 
         try:
             url = "https://wttr.in/?format=j1"
@@ -566,10 +567,10 @@ class Dashboard(Gtk.Window):
                 def update_labels():
                     current_hour = datetime.datetime.now().hour
                     icon = get_weather_icon(desc, current_hour)
-                    self.lbl_wt_title.set_text(f"{icon} WEATHER")
+                    self.lbl_wt_title.set_markup(f"<span font='11.5' color='#FF2A55'>{icon}</span>   <span color='#FF2A55' weight='bold'>WEATHER</span>")
                     self.lbl_temp.set_text(f"{temp_c}°C")
                     self.lbl_weather_desc.set_text(desc)
-                    self.lbl_humidity.set_text(f"💧 {humidity}%  |  💨 {wind} km/h")
+                    self.lbl_humidity.set_markup(f"<span font='10.5' color='#FF2A55'>󰖌</span> <span color='#E8C2D0'>{humidity}%</span>    <span color='#A68595'>·</span>    <span font='10.5' color='#FF2A55'>󰖝</span> <span color='#E8C2D0'>{wind} km/h</span>")
                     return False
                 GLib.idle_add(update_labels)
         except Exception:
