@@ -84,6 +84,12 @@ window#music-visualizer-window {
     font-weight: 500;
 }
 
+button {
+    background-image: none;
+    box-shadow: none;
+    outline: none;
+}
+
 .btn-ctrl {
     color: #E8C2D0;
     background-color: rgba(42, 26, 31, 0.95);
@@ -101,17 +107,19 @@ window#music-visualizer-window {
 }
 
 .btn-ctrl-accent {
-    color: #FFFFFF;
-    background-color: #FF2A55;
-    border: none;
+    color: #FF2A55;
+    background-color: rgba(42, 26, 31, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 8px;
-    font-size: 14px;
-    padding: 4px 18px;
-    transition: background-color 0.15s ease;
+    font-size: 15px;
+    padding: 4px 16px;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 .btn-ctrl-accent:hover {
-    background-color: #FF597B;
+    background-color: #3A222A;
+    border-color: rgba(255, 42, 85, 0.65);
+    color: #FF597B;
 }
 
 .status-badge {
@@ -346,28 +354,23 @@ class MusicVisualizer(Gtk.Window):
         total_content_w = num * bar_w + total_gaps
         start_x = (w - total_content_w) / 2.0
 
+        r = 2.5
         for i in range(num):
             val = self.bars[i]
             bar_h = max(5.0, (val / 100.0) * (h - 8.0))
             x = start_x + i * (bar_w + gap)
             y = h - 4.0 - bar_h
 
-            r = min(bar_w / 2.0, bar_h / 2.0)
-
-            # Draw capsule / rounded bar with exact radius
+            # Draw flat baseline bar with subtle rounded top
             cr.new_sub_path()
             cr.arc(x + bar_w - r, y + r, r, -1.57079632679, 0)
-            cr.arc(x + bar_w - r, y + bar_h - r, r, 0, 1.57079632679)
-            cr.arc(x + r, y + bar_h - r, r, 1.57079632679, 3.14159265359)
+            cr.line_to(x + bar_w, h - 4.0)
+            cr.line_to(x, h - 4.0)
             cr.arc(x + r, y + r, r, 3.14159265359, 4.71238898038)
             cr.close_path()
 
-            # Vertical Gradient: Ribbon Red (#FF2A55) to Warm Coral (#FF597B)
-            grad = cairo.LinearGradient(x, y, x, y + bar_h)
-            grad.add_color_stop_rgba(0.0, 255.0 / 255.0, 89.0 / 255.0, 123.0 / 255.0, 0.98)
-            grad.add_color_stop_rgba(0.4, 255.0 / 255.0, 42.0 / 255.0, 85.0 / 255.0, 0.95)
-            grad.add_color_stop_rgba(1.0, 180.0 / 255.0, 24.0 / 255.0, 52.0 / 255.0, 0.85)
-            cr.set_source(grad)
+            # Pure Flat Serena Accent (#FF2A55) — Zero gradients, zero drop shadow
+            cr.set_source_rgba(255.0 / 255.0, 42.0 / 255.0, 85.0 / 255.0, 1.0)
             cr.fill()
 
         return False
