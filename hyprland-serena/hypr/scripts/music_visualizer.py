@@ -5,7 +5,7 @@
 # - Fixed Anchor: TOP | LEFT (Symmetric with Control Center at TOP | RIGHT)
 # - Real-time CAVA Audio Visualizer with smooth Cairo capsule bars
 # - Lightweight MPRIS Player Controls & Track Info (playerctl)
-# - Strict adherence to Serena Design Guidelines (AGENTS.md)
+# - Clean, borderless inner layout adhering strictly to AGENTS.md
 # ==============================================================================
 
 import os
@@ -50,13 +50,6 @@ window#music-visualizer-window {
     min-width: 287px;
 }
 
-.card-tile {
-    background-color: rgba(42, 26, 31, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 10px;
-    padding: 8px 10px;
-}
-
 .title-header {
     color: #FF2A55;
     font-size: 11.5px;
@@ -81,7 +74,7 @@ window#music-visualizer-window {
 
 .track-title {
     color: #FFF0F5;
-    font-size: 12.5px;
+    font-size: 13px;
     font-weight: 700;
 }
 
@@ -93,11 +86,11 @@ window#music-visualizer-window {
 
 .btn-ctrl {
     color: #E8C2D0;
-    background-color: rgba(58, 34, 42, 0.70);
+    background-color: rgba(42, 26, 31, 0.95);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 8px;
     font-size: 13px;
-    padding: 3px 12px;
+    padding: 4px 12px;
     transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
@@ -113,7 +106,7 @@ window#music-visualizer-window {
     border: none;
     border-radius: 8px;
     font-size: 14px;
-    padding: 3px 18px;
+    padding: 4px 18px;
     transition: background-color 0.15s ease;
 }
 
@@ -122,12 +115,13 @@ window#music-visualizer-window {
 }
 
 .status-badge {
-    background-color: rgba(48, 31, 32, 0.95);
+    background-color: rgba(42, 26, 31, 0.95);
     color: #E8C2D0;
     font-size: 10px;
     font-weight: 600;
-    padding: 2px 6px;
+    padding: 2px 8px;
     border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .status-badge.playing {
@@ -136,11 +130,6 @@ window#music-visualizer-window {
 
 .status-badge.paused {
     color: #A68595;
-}
-
-.footer-text {
-    color: #A68595;
-    font-size: 10px;
 }
 """
 
@@ -262,7 +251,7 @@ class MusicVisualizer(Gtk.Window):
         context.add_provider_for_screen(screen, css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
     def build_ui(self):
-        main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
         main_box.set_name("main-card")
 
         # -------------------------------------------------------------
@@ -271,7 +260,7 @@ class MusicVisualizer(Gtk.Window):
         header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         
         lbl_header = Gtk.Label()
-        lbl_header.set_markup("<span font='11.5' color='#FF2A55'>󰎆</span>   <span color='#FFF0F5' font='10.5' weight='bold' letter_spacing='1024'>MUSIC VISUALIZER</span>")
+        lbl_header.set_markup("<span font='11.5' color='#FF2A55'>󰎆</span>   <span color='#FFF0F5' font='10.5' weight='bold' letter_spacing='1024'>NOW PLAYING</span>")
         header_box.pack_start(lbl_header, False, False, 0)
 
         btn_close = Gtk.Button(label="✕")
@@ -282,20 +271,18 @@ class MusicVisualizer(Gtk.Window):
         main_box.pack_start(header_box, False, False, 0)
 
         # -------------------------------------------------------------
-        # 2. Track Info & Controls Card
+        # 2. Track Title & Artist (Directly on window, no surrounding box)
         # -------------------------------------------------------------
-        track_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
-        track_card.get_style_context().add_class("card-tile")
-
-        # Track Title & Artist
         info_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
-        self.lbl_title = Gtk.Label(label="No music playing")
+        info_vbox.set_margin_top(2)
+
+        self.lbl_title = Gtk.Label(label="No media playing")
         self.lbl_title.get_style_context().add_class("track-title")
         self.lbl_title.set_halign(Gtk.Align.START)
         self.lbl_title.set_ellipsize(Pango.EllipsizeMode.END)
 
         meta_hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-        self.lbl_artist = Gtk.Label(label="Serena Audio")
+        self.lbl_artist = Gtk.Label(label="")
         self.lbl_artist.get_style_context().add_class("track-artist")
         self.lbl_artist.set_halign(Gtk.Align.START)
         self.lbl_artist.set_ellipsize(Pango.EllipsizeMode.END)
@@ -307,12 +294,15 @@ class MusicVisualizer(Gtk.Window):
 
         info_vbox.pack_start(self.lbl_title, False, False, 0)
         info_vbox.pack_start(meta_hbox, False, False, 0)
-        track_card.pack_start(info_vbox, False, False, 0)
+        main_box.pack_start(info_vbox, False, False, 0)
 
-        # Controls Row (Previous, Play/Pause, Next)
-        ctrl_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        # -------------------------------------------------------------
+        # 3. Controls Row (Previous, Play/Pause, Next)
+        # -------------------------------------------------------------
+        ctrl_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
         ctrl_box.set_halign(Gtk.Align.CENTER)
         ctrl_box.set_margin_top(4)
+        ctrl_box.set_margin_bottom(4)
 
         btn_prev = Gtk.Button(label="󰒮")
         btn_prev.get_style_context().add_class("btn-ctrl")
@@ -329,31 +319,15 @@ class MusicVisualizer(Gtk.Window):
         ctrl_box.pack_start(btn_prev, False, False, 0)
         ctrl_box.pack_start(self.btn_play, False, False, 0)
         ctrl_box.pack_start(btn_next, False, False, 0)
-
-        track_card.pack_start(ctrl_box, False, False, 0)
-        main_box.pack_start(track_card, False, False, 0)
+        main_box.pack_start(ctrl_box, False, False, 0)
 
         # -------------------------------------------------------------
-        # 3. Real-time CAVA Audio Visualizer Card (Highlight)
+        # 4. Real-time CAVA Audio Visualizer (Directly on window surface)
         # -------------------------------------------------------------
-        vis_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
-        vis_card.get_style_context().add_class("card-tile")
-
         self.darea = Gtk.DrawingArea()
-        self.darea.set_size_request(-1, 68)
+        self.darea.set_size_request(-1, 72)
         self.darea.connect("draw", self.on_visualizer_draw)
-        vis_card.pack_start(self.darea, True, True, 2)
-
-        main_box.pack_start(vis_card, True, True, 0)
-
-        # -------------------------------------------------------------
-        # 4. Subtle Footer Info
-        # -------------------------------------------------------------
-        footer_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        lbl_hint = Gtk.Label()
-        lbl_hint.set_markup("<span font='9.5' color='#A68595'>Super + M to toggle  ·  CAVA Equalizer</span>")
-        footer_box.pack_start(lbl_hint, True, True, 0)
-        main_box.pack_start(footer_box, False, False, 0)
+        main_box.pack_start(self.darea, True, True, 2)
 
         self.add(main_box)
 
@@ -365,10 +339,6 @@ class MusicVisualizer(Gtk.Window):
         w = float(alloc.width)
         h = float(alloc.height)
 
-        # Match card background cleanly (--bg-card: rgba(42, 26, 31, 0.95))
-        cr.set_source_rgba(42.0 / 255.0, 26.0 / 255.0, 31.0 / 255.0, 0.95)
-        cr.paint()
-
         num = self.num_bars
         gap = 4.0
         total_gaps = gap * (num - 1)
@@ -378,7 +348,6 @@ class MusicVisualizer(Gtk.Window):
 
         for i in range(num):
             val = self.bars[i]
-            # Bar height proportional to value (max 100), minimum height 5px
             bar_h = max(5.0, (val / 100.0) * (h - 8.0))
             x = start_x + i * (bar_w + gap)
             y = h - 4.0 - bar_h
@@ -508,10 +477,10 @@ ascii_max_range = 100
                 )
                 parts = res_meta.stdout.strip().split("|||")
                 title = parts[0] if len(parts) > 0 and parts[0] else "Unknown Title"
-                artist = parts[1] if len(parts) > 1 and parts[1] else "Unknown Artist"
+                artist = parts[1] if len(parts) > 1 and parts[1] else ""
             except Exception:
                 title = "Playing Media"
-                artist = "Unknown Artist"
+                artist = ""
 
             self.lbl_title.set_text(title)
             self.lbl_artist.set_text(artist)
@@ -527,8 +496,8 @@ ascii_max_range = 100
                 self.lbl_status.get_style_context().remove_class("playing")
                 self.lbl_status.get_style_context().add_class("paused")
         else:
-            self.lbl_title.set_text("No music playing")
-            self.lbl_artist.set_text("Serena Audio")
+            self.lbl_title.set_text("No media playing")
+            self.lbl_artist.set_text("")
             self.btn_play.set_label("󰐊")
             self.lbl_status.set_text("Idle")
             self.lbl_status.get_style_context().remove_class("playing")
