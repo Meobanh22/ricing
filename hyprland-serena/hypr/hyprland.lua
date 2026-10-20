@@ -311,13 +311,9 @@ hl.bind("Print",                   hl.dsp.exec_cmd("~/.config/hypr/scripts/scree
 hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot.sh area"))
 hl.bind(mainMod .. " + W",         hl.dsp.exec_cmd("python3 ~/.config/hypr/scripts/wallpaper_switcher.py next"))
 
--- Bộ gõ tiếng Việt: chuyển đổi ngôn ngữ bằng Ctrl + Shift (hoặc Alt + Z chuẩn Unikey)
-hl.bind("CTRL + Shift_L",   hl.dsp.exec_cmd("fcitx5-remote -t || ~/.config/hypr/scripts/toggle_vietnamese.sh"))
-hl.bind("SHIFT + Control_L", hl.dsp.exec_cmd("fcitx5-remote -t || ~/.config/hypr/scripts/toggle_vietnamese.sh"))
-hl.bind("CTRL + Shift_R",   hl.dsp.exec_cmd("fcitx5-remote -t || ~/.config/hypr/scripts/toggle_vietnamese.sh"))
-hl.bind("SHIFT + Control_R", hl.dsp.exec_cmd("fcitx5-remote -t || ~/.config/hypr/scripts/toggle_vietnamese.sh"))
-hl.bind("ALT + Z",          hl.dsp.exec_cmd("fcitx5-remote -t || ~/.config/hypr/scripts/toggle_vietnamese.sh"))
-hl.bind("ALT + z",          hl.dsp.exec_cmd("fcitx5-remote -t || ~/.config/hypr/scripts/toggle_vietnamese.sh"))
+-- Bộ gõ tiếng Việt: Fcitx5 tự xử lý Ctrl+Shift nội bộ khi gõ (tránh nuốt phím tắt Ctrl+Shift+C/V/T/Esc/WordWrap)
+-- Phím tắt toàn cục an toàn không xung đột: Super + Shift + Space
+hl.bind(mainMod .. " + SHIFT + SPACE", hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle_vietnamese.sh"))
 
 -- Phím đa phương tiện (Volume & Brightness)
 hl.bind("XF86AudioRaiseVolume",  hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"),   { locked = true, repeating = true })

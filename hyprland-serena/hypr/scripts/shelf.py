@@ -686,7 +686,6 @@ class SerenaAndroidShelf(Gtk.Window):
                 GtkLayerShell.set_margin(self, GtkLayerShell.Edge.LEFT, self.current_win_x)
                 GtkLayerShell.set_margin(self, GtkLayerShell.Edge.TOP, self.current_win_y)
                 self.save_window_pos()
-                self.show_toast("🎯 Reset position to center")
                 self.is_dragging = False
                 return True
 

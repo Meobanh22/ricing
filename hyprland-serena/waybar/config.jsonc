@@ -65,7 +65,7 @@
     "exec": "~/.config/hypr/scripts/get_ime.sh",
     "interval": 1,
     "format": "{}",
-    "tooltip": "Input Method VIE / ENG (Ctrl + Shift to toggle)",
+    "tooltip": "Input Method VIE / ENG (Ctrl + Shift or Super + Shift + Space)",
     "on-click": "~/.config/hypr/scripts/toggle_vietnamese.sh"
   },
 

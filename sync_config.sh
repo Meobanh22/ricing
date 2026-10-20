@@ -108,6 +108,13 @@ sync_push() {
         echo -e "  ${GREEN}✔ Thunar File Manager (uca.xml)${NC}"
     fi
 
+    # Fcitx5 (Bộ gõ tiếng Việt)
+    mkdir -p "$HOME/.config/fcitx5/conf"
+    if [ -d "$DOTFILES_DIR/fcitx5" ]; then
+        cp -rf "$DOTFILES_DIR/fcitx5/"* "$HOME/.config/fcitx5/"
+        echo -e "  ${GREEN}✔ Fcitx5 (config, profile, conf/)${NC}"
+    fi
+
     # 3. Đồng bộ Cursors & Wallpapers
     echo -e "\n${YELLOW}🖱️  [2/4] Kiểm tra Con trỏ chuột & Hình nền...${NC}"
     if [ -d "$SCRIPT_DIR/cursors/sylveon-custom" ]; then
@@ -132,6 +139,12 @@ sync_push() {
         if pgrep -x "waybar" &>/dev/null; then
             pkill -SIGUSR2 waybar 2>/dev/null || (pkill -x waybar && sleep 0.3 && nohup waybar >/dev/null 2>&1 &)
             echo -e "  ${GREEN}✔ Đã reload Waybar thành công!${NC}"
+        fi
+
+        # Reload Fcitx5
+        if command -v fcitx5-remote &>/dev/null && pgrep -x "fcitx5" &>/dev/null; then
+            fcitx5-remote -r 2>/dev/null || true
+            echo -e "  ${GREEN}✔ Đã reload Fcitx5 thành công!${NC}"
         fi
 
         # Cập nhật cursor live
@@ -226,6 +239,13 @@ sync_pull() {
         echo -e "  ${GREEN}✔ Đã kéo ~/.config/Thunar/ ➔ repo${NC}"
     fi
 
+    # Fcitx5
+    if [ -d "$HOME/.config/fcitx5" ]; then
+        mkdir -p "$DOTFILES_DIR/fcitx5"
+        cp -rf "$HOME/.config/fcitx5/"* "$DOTFILES_DIR/fcitx5/"
+        echo -e "  ${GREEN}✔ Đã kéo ~/.config/fcitx5/ ➔ repo${NC}"
+    fi
+
     echo -e "\n${CYAN}================================================================${NC}"
     echo -e "${GREEN}✨ ĐÃ KÉO THAY ĐỔI VỀ REPO! Dùng 'git status' để xem diff. ✨${NC}"
     echo -e "${CYAN}================================================================${NC}\n"
@@ -246,6 +266,7 @@ sync_diff() {
     diff -rq "$DOTFILES_DIR/gtk-3.0" "$HOME/.config/gtk-3.0" 2>/dev/null || true
     diff -rq "$DOTFILES_DIR/gtk-4.0" "$HOME/.config/gtk-4.0" 2>/dev/null || true
     diff -rq "$DOTFILES_DIR/Thunar" "$HOME/.config/Thunar" 2>/dev/null || true
+    diff -rq "$DOTFILES_DIR/fcitx5" "$HOME/.config/fcitx5" 2>/dev/null || true
     echo -e "\n${GREEN}✔ Đã quét xong khác biệt!${NC}"
 }
 
