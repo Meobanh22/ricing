@@ -46,9 +46,9 @@
     "return-type": "json",
     "exec": "bash ~/.config/hypr/scripts/get_media.sh",
     "interval": 1,
-    "on-click": "playerctl play-pause",
-    "on-click-right": "playerctl next",
-    "on-click-middle": "playerctl previous",
+    "on-click": "bash ~/.config/hypr/scripts/toggle_music.sh",
+    "on-click-right": "playerctl play-pause",
+    "on-click-middle": "playerctl next",
     "escape": true
   },
 
