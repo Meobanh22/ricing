@@ -253,6 +253,32 @@ hl.layer_rule({
     ignore_alpha = 0.5,
 })
 
+hl.layer_rule({
+    name = "dashboard-anim",
+    match = { namespace = "^(dashboard)$" },
+    animation = "slide top",
+})
+
+hl.layer_rule({
+    name = "dashboard-blur",
+    match = { namespace = "^(dashboard)$" },
+    blur = true,
+    ignore_alpha = 0.5,
+})
+
+hl.layer_rule({
+    name = "music-vis-anim",
+    match = { namespace = "^(music-visualizer)$" },
+    animation = "slide top",
+})
+
+hl.layer_rule({
+    name = "music-vis-blur",
+    match = { namespace = "^(music-visualizer)$" },
+    blur = true,
+    ignore_alpha = 0.5,
+})
+
 ---------------------
 ---- KEYBINDINGS ----
 ---------------------
@@ -274,6 +300,7 @@ hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())
 hl.bind(mainMod .. " + ESCAPE",         hl.dsp.exec_cmd("~/.config/hypr/scripts/Wlogout.sh"))
 hl.bind(mainMod .. " + S",              hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle_dashboard.sh"))
 hl.bind(mainMod .. " + N",              hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle_control_center.sh"))
+hl.bind(mainMod .. " + M",              hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle_music.sh"))
 hl.bind(mainMod .. " + V",              hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle_shelf.sh --clip"))
 hl.bind(mainMod .. " + D",              hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle_shelf.sh --shelf"))
 hl.bind("CTRL + SHIFT + ESCAPE",        hl.dsp.exec_cmd("kitty --class task-manager -T 'Task Manager' btop"))

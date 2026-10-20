@@ -22,6 +22,7 @@ import subprocess
 import cairo
 import socket
 import glob
+import signal
 
 import gi
 gi.require_version('Gtk', '3.0')
@@ -1071,9 +1072,10 @@ class SerenaAndroidShelf(Gtk.Window):
             filtered_pins.append(p_item)
 
         try:
-            res = subprocess.run(["cliphist", "list"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
+            res = subprocess.run(["cliphist", "list"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
             if res.returncode == 0 and res.stdout:
-                for line in res.stdout.strip().split("\n"):
+                stdout_text = res.stdout.decode("utf-8", errors="replace")
+                for line in stdout_text.strip().split("\n"):
                     if not line.strip():
                         continue
                     parts = line.split("\t", 1)
@@ -1871,17 +1873,17 @@ class SerenaAndroidShelf(Gtk.Window):
                         p2.communicate(input=img_bytes)
                     else:
                         p = subprocess.Popen(["cliphist", "decode"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-                        out, _ = p.communicate(input=item["raw"].encode("utf-8"))
+                        out, _ = p.communicate(input=item["raw"].encode("utf-8", errors="replace"))
                         p2 = subprocess.Popen(["wl-copy", "--type", "image/png"], stdin=subprocess.PIPE)
                         p2.communicate(input=out)
                 else:
                     clip_text = item.get("full_text") or item.get("preview", "")
                     if item.get("is_pinned") and clip_text:
                         p2 = subprocess.Popen(["wl-copy"], stdin=subprocess.PIPE)
-                        p2.communicate(input=clip_text.encode("utf-8"))
+                        p2.communicate(input=clip_text.encode("utf-8", errors="replace"))
                     else:
                         p = subprocess.Popen(["cliphist", "decode"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-                        out, _ = p.communicate(input=item["raw"].encode("utf-8"))
+                        out, _ = p.communicate(input=item["raw"].encode("utf-8", errors="replace"))
                         p2 = subprocess.Popen(["wl-copy"], stdin=subprocess.PIPE)
                         p2.communicate(input=out)
                 self.show_toast("✨ Copied!")
@@ -2169,6 +2171,12 @@ class SerenaAndroidShelf(Gtk.Window):
 
 
 def main():
+    def sig_handler(signum, frame):
+        GLib.idle_add(Gtk.main_quit)
+
+    signal.signal(signal.SIGTERM, sig_handler)
+    signal.signal(signal.SIGINT, sig_handler)
+
     mode = "clip"
     if len(sys.argv) > 1:
         arg = sys.argv[1].lower()
