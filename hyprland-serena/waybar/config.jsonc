@@ -36,8 +36,6 @@
     "all-outputs": true,
     "active-only": false,
     "format": "{name}",
-    "on-click": "python3 ~/.config/hypr/scripts/workspace_action.py focus {id}",
-    "on-click-right": "python3 ~/.config/hypr/scripts/workspace_action.py move {id}",
     "persistent-workspaces": {
       "*": 5
     }

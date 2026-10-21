@@ -53,6 +53,9 @@ hl.env("XCURSOR_SIZE", "24")
 ---- AUTOSTART ----
 -------------------
 hl.on("hyprland.start", function ()
+    -- 0. Hyprland IPC Bridge (Tương thích Waybar workspaces & legacy hyprctl dispatch)
+    hl.exec_cmd("python3 ~/.config/hypr/scripts/hyprland_ipc_bridge.py &")
+
     -- 1. Quản lý hình nền siêu mượt
     hl.exec_cmd("swww-daemon &")
     hl.exec_cmd("sleep 0.8 && python3 ~/.config/hypr/scripts/wallpaper_switcher.py current")
