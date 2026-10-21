@@ -36,8 +36,8 @@
     "all-outputs": true,
     "active-only": false,
     "format": "{name}",
-    "on-click": "python3 ~/.config/hypr/scripts/workspace_action.py focus",
-    "on-click-right": "python3 ~/.config/hypr/scripts/workspace_action.py move",
+    "on-click": "python3 ~/.config/hypr/scripts/workspace_action.py focus {id}",
+    "on-click-right": "python3 ~/.config/hypr/scripts/workspace_action.py move {id}",
     "persistent-workspaces": {
       "*": 5
     }
@@ -46,7 +46,7 @@
   "custom/media": {
     "format": "{}",
     "return-type": "json",
-    "exec": "bash ~/.config/hypr/scripts/get_media.sh",
+    "exec": "python3 ~/.config/hypr/scripts/get_media.py",
     "interval": 1,
     "on-click": "bash ~/.config/hypr/scripts/toggle_music.sh",
     "on-click-right": "playerctl play-pause",

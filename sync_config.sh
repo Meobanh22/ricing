@@ -135,10 +135,13 @@ sync_push() {
         hyprctl reload &>/dev/null || true
         echo -e "  ${GREEN}✔ Đã reload Hyprland thành công!${NC}"
 
-        # Reload Waybar
+        # Reload hoặc khởi động Waybar
         if pgrep -x "waybar" &>/dev/null; then
-            pkill -SIGUSR2 waybar 2>/dev/null || (pkill -x waybar && sleep 0.3 && nohup waybar >/dev/null 2>&1 &)
+            pkill -SIGUSR2 waybar 2>/dev/null || (pkill -x waybar && sleep 0.3 && nohup waybar >/dev/null 2>&1 & disown)
             echo -e "  ${GREEN}✔ Đã reload Waybar thành công!${NC}"
+        else
+            nohup waybar >/dev/null 2>&1 & disown
+            echo -e "  ${GREEN}✔ Đã khởi động Waybar thành công!${NC}"
         fi
 
         # Reload Fcitx5
