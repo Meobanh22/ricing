@@ -992,13 +992,13 @@ class ControlCenter(Gtk.Window):
 
     def update_vol_icon(self, vol, muted):
         if muted:
-            self.lbl_vol_icon.set_markup("<span font='20' color='#8F7481'>󰖁</span>")
+            self.lbl_vol_icon.set_markup("<span font='21.5' color='#8F7481'>󰖁</span>")
         elif vol <= 30:
-            self.lbl_vol_icon.set_markup("<span font='20'>󰕿</span>")
+            self.lbl_vol_icon.set_markup("<span font='21.5'>󰕿</span>")
         elif vol <= 70:
-            self.lbl_vol_icon.set_markup("<span font='20'>󰖀</span>")
+            self.lbl_vol_icon.set_markup("<span font='21.5'>󰖀</span>")
         else:
-            self.lbl_vol_icon.set_markup("<span font='20'>󰕾</span>")
+            self.lbl_vol_icon.set_markup("<span font='21.5'>󰕾</span>")
 
     def toggle_audio_mute(self, widget=None, event=None):
         def do_toggle():

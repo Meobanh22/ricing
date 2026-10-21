@@ -36,6 +36,7 @@
     "all-outputs": true,
     "active-only": false,
     "format": "{name}",
+    "on-click-right": "python3 ~/.config/hypr/scripts/ws_right_click.py",
     "persistent-workspaces": {
       "*": 5
     }
@@ -70,14 +71,16 @@
   },
 
   "pulseaudio": {
-    "format": "<span color='#ff2a55'>{icon}</span> {volume}%",
-    "format-muted": "<span color='#a68595'>󰖁</span> Muted",
+    "format": "<span font='14.5px' color='#ff2a55'>{icon}</span> {volume}%",
+    "format-muted": "<span font='14.5px' color='#a68595'>󰖁</span> Muted",
     "format-icons": {
       "headphone": "󰋋",
       "hands-free": "󰋋",
       "headset": "󰋋",
       "default": ["󰕿", "󰖀", "󰕾"]
     },
+    "max-volume": 100,
+    "scroll-step": 5,
     "tooltip-format": "Volume: {volume}%\n(Click: Pavucontrol | Right-click: Control Center)",
     "on-click": "pavucontrol",
     "on-click-right": "~/.config/hypr/scripts/toggle_control_center.sh"
