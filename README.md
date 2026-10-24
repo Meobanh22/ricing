@@ -1,4 +1,4 @@
-# 🌸 Desktop Rice (Hyprland • Warm Obsidian-Wine & Ribbon Red)
+# ✿ Desktop Rice (Hyprland • Warm Obsidian-Wine & Ribbon Red)
 
 Bộ công cụ tùy biến giao diện desktop phong cách tối giản hiện đại (Minimalist Anime Ricing) trên **Ubuntu 24.04 + Hyprland (Wayland)**.
 

@@ -1,21 +1,18 @@
-/* ==============================================================================
-   🌸 SERENA & FENNEKIN SWAYNC FLAT NOTIFICATION CENTER THEME
-   Subdued neutral containers with vibrant, role-based internal components.
-   ============================================================================== */
+/* style.css — SwayNC notification center stylesheet. */
 
 * {
-    font-family: "JetBrainsMono Nerd Font", "FiraCode Nerd Font", "Segoe UI", sans-serif;
+    font-family: "JetBrains Mono Nerd Font", "FiraCode Nerd Font", "Segoe UI", sans-serif;
     font-weight: 600;
 }
 
-/* --- TOÀN BỘ KHUNG PANEL ĐIỀU KHIỂN & THÔNG BÁO (SUBDUED NEUTRAL CONTAINER) --- */
+/* === CONTROL CENTER WINDOW === */
 .control-center {
-    background: rgba(22, 23, 38, 0.96);
-    border: 1px solid #2E3048;
+    background: rgba(32, 16, 18, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 16px;
     box-shadow: none;
-    padding: 10px 8px;
-    color: #FFF1D4;
+    padding: 14px;
+    color: #FFF0F5;
 }
 
 .control-center-list {
@@ -24,7 +21,7 @@
 }
 
 .control-center-list-placeholder {
-    color: #757091;
+    color: #A68595;
     font-size: 13px;
     padding: 20px;
 }
@@ -33,10 +30,10 @@
     background: transparent;
 }
 
-/* --- THANH TRẠNG THÁI TRÊN CÙNG (SUBDUED PILL, ROLE-COLORED LABELS) --- */
+/* === STATUS LABEL === */
 .widget-label {
-    background: rgba(28, 29, 48, 0.90);
-    border: 1px solid #2E3048;
+    background: rgba(42, 26, 31, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 10px;
     padding: 6px 12px;
     margin: 4px 8px 6px 8px;
@@ -45,123 +42,123 @@
 .widget-label > label {
     font-size: 12px;
     font-weight: 700;
-    color: #FFF1D4;
-    letter-spacing: 0.5px;
+    color: #FFF0F5;
+    letter-spacing: 0.02em;
 }
 
-/* --- NÚT DND (KHÔNG LÀM PHIỀN - ORANGE / AMBER TOGGLE) --- */
+/* === DO NOT DISTURB === */
 .widget-dnd {
-    background: rgba(28, 29, 48, 0.90);
-    border: 1px solid #2E3048;
-    border-radius: 12px;
+    background: rgba(42, 26, 31, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
     padding: 8px 14px;
     margin: 4px 8px 6px 8px;
-    color: #FFF1D4;
+    color: #FFF0F5;
     font-weight: 700;
     font-size: 13px;
 }
 
 .widget-dnd > switch {
     border-radius: 10px;
-    border: 1px solid #2E3048;
-    background: #202135;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: #301F20;
     min-width: 44px;
     min-height: 22px;
 }
 
 .widget-dnd > switch:checked {
-    background: #E65E34;
-    border-color: #E59A44;
+    background: #FF2A55;
+    border-color: #FF2A55;
 }
 
 .widget-dnd > switch slider {
-    background: #FFF1D4;
+    background: #FFF0F5;
     border-radius: 8px;
     min-width: 16px;
     min-height: 16px;
 }
 
-/* --- THANH GẠT ÂM LƯỢNG (WARM AMBER IDENTITY) --- */
+/* === VOLUME === */
 .widget-volume {
-    background: rgba(28, 29, 48, 0.90);
-    border: 1px solid #2E3048;
-    border-radius: 12px;
+    background: rgba(42, 26, 31, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
     padding: 8px 12px;
     margin: 4px 8px;
-    color: #FFF1D4;
+    color: #FFF0F5;
 }
 
 .widget-volume label {
     font-size: 16px;
-    color: #E59A44;
+    color: #FF2A55;
     margin-right: 8px;
     min-width: 24px;
 }
 
 .widget-volume > box > button {
-    background: #22233A;
-    color: #E59A44;
+    background: #301F20;
+    color: #E8C2D0;
     border-radius: 8px;
-    border: 1px solid #2E3048;
+    border: 1px solid rgba(255, 255, 255, 0.12);
     padding: 4px 8px;
     font-size: 12px;
     transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 .widget-volume > box > button:hover {
-    background: #E59A44;
-    color: #FFFFFF;
-    border-color: #F0A756;
+    background: #3A222A;
+    color: #FFF0F5;
+    border-color: rgba(255, 42, 85, 0.65);
 }
 
 .widget-volume scale trough highlight {
-    background: #E59A44;
+    background: #FF2A55;
     border-radius: 6px;
 }
 
 .widget-volume scale slider {
-    background-color: #FFF1D4;
-    border: 2px solid #E59A44;
+    background-color: #FFF0F5;
+    border: 1px solid #FF2A55;
     border-radius: 100%;
 }
 
-/* --- THANH GẠT ĐỘ SÁNG (DUSK BLUE IDENTITY) --- */
+/* === BACKLIGHT === */
 .widget-backlight {
-    background: rgba(28, 29, 48, 0.90);
-    border: 1px solid #2E3048;
-    border-radius: 12px;
+    background: rgba(42, 26, 31, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
     padding: 8px 12px;
     margin: 4px 8px;
-    color: #FFF1D4;
+    color: #FFF0F5;
 }
 
 .widget-backlight label {
     font-size: 16px;
-    color: #7772C2;
+    color: #FF2A55;
     margin-right: 8px;
     min-width: 24px;
 }
 
 .widget-backlight scale trough highlight {
-    background: #7772C2;
+    background: #FF2A55;
     border-radius: 6px;
 }
 
 .widget-backlight scale slider {
-    background-color: #FFF1D4;
-    border: 2px solid #7772C2;
+    background-color: #FFF0F5;
+    border: 1px solid #FF2A55;
     border-radius: 100%;
 }
 
-/* Common Slider Track */
+/* === SLIDER === */
 scale {
     margin: 4px 6px;
     padding: 0;
 }
 
 scale trough {
-    background-color: #202135;
-    border: 1px solid #2E3048;
+    background-color: #301F20;
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 6px;
     min-height: 8px;
 }
@@ -169,19 +166,19 @@ scale trough {
 scale slider {
     min-width: 14px;
     min-height: 14px;
-    margin: -3px;
+    margin: 0;
     box-shadow: none;
 }
 
 scale slider:hover {
-    background-color: #FFFFFF;
+    background-color: #FF2A55;
 }
 
-/* --- LƯỚI NÚT CHỨC NĂNG (ROLE-CODED INTERIOR ICONS) --- */
+/* === QUICK ACTIONS === */
 .widget-buttons-grid {
-    background: rgba(28, 29, 48, 0.90);
-    border: 1px solid #2E3048;
-    border-radius: 12px;
+    background: rgba(42, 26, 31, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
     padding: 6px 4px;
     margin: 6px 8px;
 }
@@ -197,88 +194,86 @@ scale slider:hover {
 }
 
 .widget-buttons-grid > flowbox > flowboxchild > button {
-    margin: 2px 3px;
-    padding: 9px 0;
+    margin: 2px 4px;
+    padding: 8px 0;
     min-width: 76px;
-    background: rgba(34, 35, 58, 0.85);
-    border: 1px solid #2E3048;
+    background: rgba(42, 26, 31, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 10px;
-    color: #FFF1D4;
+    color: #FFF0F5;
     font-size: 17px;
     box-shadow: none;
     transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
-/* Wi-Fi Action: Dusk Blue */
+/* NOTE: Quick action icons use the shared accent. */
 .widget-buttons-grid > flowbox > flowboxchild:nth-child(1) > button {
-    color: #7772C2;
+    color: #FF2A55;
 }
 .widget-buttons-grid > flowbox > flowboxchild:nth-child(1) > button:hover {
-    background: #2B2C46;
-    border-color: #7772C2;
-    color: #FFF1D4;
+    background: #3A222A;
+    border-color: rgba(255, 42, 85, 0.65);
+    color: #FFF0F5;
 }
 
-/* Bluetooth Action: Twilight Sky */
 .widget-buttons-grid > flowbox > flowboxchild:nth-child(2) > button {
-    color: #8D98D8;
+    color: #FF2A55;
 }
 .widget-buttons-grid > flowbox > flowboxchild:nth-child(2) > button:hover {
-    background: #2B2C46;
-    border-color: #8D98D8;
-    color: #FFF1D4;
+    background: #3A222A;
+    border-color: rgba(255, 42, 85, 0.65);
+    color: #FFF0F5;
 }
 
-/* IME Action: Twilight Lavender */
 .widget-buttons-grid > flowbox > flowboxchild:nth-child(3) > button {
-    color: #B4A5D0;
+    color: #FF2A55;
 }
 .widget-buttons-grid > flowbox > flowboxchild:nth-child(3) > button:hover {
-    background: #2B2C46;
-    border-color: #B4A5D0;
-    color: #FFF1D4;
+    background: #3A222A;
+    border-color: rgba(255, 42, 85, 0.65);
+    color: #FFF0F5;
 }
 
-/* Power Action: Serena Crimson Accent */
+/* === POWER ACTION === */
 .widget-buttons-grid > flowbox > flowboxchild:last-child > button {
-    background: #C82A2B;
-    border-color: #DB3B32;
+    background: #FF2A55;
+    border-color: #FF2A55;
     color: #FFFFFF;
 }
 .widget-buttons-grid > flowbox > flowboxchild:last-child > button:hover {
-    background: #DB3B32;
-    border-color: #E65E34;
+    background: #FF597B;
+    border-color: #FF597B;
 }
 
-/* --- TIÊU ĐỀ THÔNG BÁO & NÚT XÓA HẾT --- */
+/* === NOTIFICATION TITLE === */
 .widget-title {
-    color: #FFF1D4;
+    color: #FFF0F5;
     background: transparent;
     padding: 6px 12px 2px 12px;
     margin: 4px 8px;
-    font-size: 13.5px;
+    font-size: 14px;
     font-weight: 700;
 }
 
 .widget-title > button {
-    font-size: 11.5px;
+    font-size: 12px;
     font-weight: 700;
-    color: #B4A5D0;
+    color: #E8C2D0;
     border-radius: 8px;
-    background: #22233A;
-    border: 1px solid #2E3048;
-    padding: 3px 10px;
+    background: #301F20;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 4px 10px;
     box-shadow: none;
     transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 .widget-title > button:hover {
-    background: #C82A2B;
-    color: #FFFFFF;
-    border-color: #DB3B32;
+    background: #3A222A;
+    color: #FFF0F5;
+    border-color: rgba(255, 42, 85, 0.65);
 }
 
-/* --- TỪNG THẺ THÔNG BÁO (NOTIFICATION CARDS) --- */
+/* === NOTIFICATION CARDS === */
 .notification-row {
     outline: none;
     background: transparent;
@@ -292,23 +287,23 @@ scale slider:hover {
 }
 
 .notification {
-    background: rgba(28, 29, 48, 0.95);
+    background: rgba(42, 26, 31, 0.95);
     padding: 10px 14px;
     margin: 4px 8px;
-    border-radius: 12px;
-    border: 1px solid #2E3048;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
     box-shadow: none;
     transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
 .notification:hover {
-    border-color: #3D4060;
-    background: rgba(34, 35, 58, 0.98);
+    border-color: rgba(255, 42, 85, 0.65);
+    background: rgba(58, 34, 42, 0.98);
 }
 
 .notification.critical {
-    border: 1.5px solid #C82A2B;
-    background: rgba(45, 20, 30, 0.95);
+    border: 1px solid rgba(255, 42, 85, 0.65);
+    background: rgba(32, 16, 18, 0.98);
 }
 
 .notification-default-action {
@@ -320,14 +315,14 @@ scale slider:hover {
 .summary {
     font-size: 13px;
     font-weight: 700;
-    color: #FFF1D4;
+    color: #FFF0F5;
     background: transparent;
 }
 
 .time {
     font-size: 11px;
     font-weight: 600;
-    color: #E59A44;
+    color: #A68595;
     background: transparent;
     margin-right: 12px;
 }
@@ -335,9 +330,9 @@ scale slider:hover {
 .body {
     font-size: 12px;
     font-weight: 500;
-    color: #B4A5D0;
+    color: #E8C2D0;
     background: transparent;
-    margin-top: 3px;
+    margin-top: 4px;
 }
 
 .body-image {
@@ -346,10 +341,10 @@ scale slider:hover {
 }
 
 .close-button {
-    background: #22233A;
-    color: #757091;
-    border-radius: 6px;
-    border: 1px solid #2E3048;
+    background: #301F20;
+    color: #A68595;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
     padding: 2px 6px;
     margin-top: 4px;
     margin-right: 4px;
@@ -358,30 +353,51 @@ scale slider:hover {
 }
 
 .close-button:hover {
-    background: #C82A2B;
-    color: #FFFFFF;
-    border-color: #DB3B32;
+    background: #3A222A;
+    color: #FFF0F5;
+    border-color: rgba(255, 42, 85, 0.65);
 }
 
 .notification-action {
-    border: 1px solid #2E3048;
-    background: #22233A;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: #301F20;
     border-radius: 8px;
-    color: #FFF1D4;
+    color: #FFF0F5;
     margin: 4px 2px;
     padding: 4px 10px;
-    font-size: 11.5px;
+    font-size: 12px;
     font-weight: 600;
     box-shadow: none;
     transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
 .notification-action:hover {
-    background: #2B2C46;
-    border-color: #B4A5D0;
-    color: #FFFFFF;
+    background: #3A222A;
+    border-color: rgba(255, 42, 85, 0.65);
+    color: #FFF0F5;
 }
 
 .floating-notifications {
     background: transparent;
 }
+
+/* === SCROLLBAR === */
+scrollbar {
+    background: transparent;
+    margin-right: 8px;
+}
+
+scrollbar slider {
+    background: rgba(255, 42, 85, 0.48);
+    border-radius: 4px;
+    min-width: 6px;
+    min-height: 36px;
+    border: none;
+    transition: all 150ms ease;
+}
+
+scrollbar slider:hover {
+    background: #FF2A55;
+    min-width: 8px;
+}
+

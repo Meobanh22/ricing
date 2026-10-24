@@ -1,12 +1,5 @@
 #!/usr/bin/env bash
-# ==============================================================================
-# 🌸 SCREENSHOT TOOL (Grim + Slurp + Swappy)
-# ==============================================================================
-# - area: Chụp vùng chọn -> Tự lưu vào Clipboard & ~/Pictures/Screenshots/
-# - edit: Chụp vùng chọn -> Mở Swappy để vẽ nơ, mũi tên, thêm chữ
-# - full: Chụp toàn bộ màn hình
-# Thiết kế tối giản: KHÔNG popup thông báo
-# ==============================================================================
+# screenshot.sh — Screenshot capture tool using grim and slurp.
 
 DIR="$HOME/Pictures/Screenshots"
 mkdir -p "$DIR"

@@ -1,11 +1,5 @@
 #!/usr/bin/env python3
-# ==============================================================================
-# 🌸 SERENA POWER & BATTERY MONITOR
-# ==============================================================================
-# - Đo chính xác công suất tiêu thụ điện (Watts) trên cả sạc (AC) và pin (Battery)
-# - Tự động khắc phục lỗi 0W trên các dòng laptop HP (Pavilion x360) bằng thuật toán Delta-Energy
-# - Hiển thị trạng thái CPU, nhiệt độ, điện áp và thời gian sử dụng ước tính
-# ==============================================================================
+# Battery, CPU, and estimated power monitor.
 
 import os
 import sys
@@ -93,31 +87,31 @@ def render_banner(info, power_w, est_str, is_charging):
     # ANSI Color Palette
     RESET = "\033[0m"
     BOLD = "\033[1m"
-    RED = "\033[38;2;255;42;85m"       # #FF2A55
-    ROSE = "\033[38;2;255;107;139m"    # #FF6B8B
-    PINK = "\033[38;2;232;194;208m"    # #E8C2D0
-    WHITE = "\033[38;2;255;240;245m"   # #FFF0F5
-    GREEN = "\033[38;2;127;217;120m"   # #7FD978
-    MUTED = "\033[38;2;166;133;149m"   # #A68595
+    RED = "\033[38;2;255;42;85m"        # #FF2A55 (--accent)
+    ROSE = "\033[38;2;255;89;123m"      # #FF597B (--accent-hover)
+    PINK = "\033[38;2;232;194;208m"     # #E8C2D0 (--text-secondary)
+    WHITE = "\033[38;2;255;240;245m"    # #FFF0F5 (--text-primary)
+    GREEN = "\033[38;2;143;188;143m"    # #8FBC8F (--status-success)
+    MUTED = "\033[38;2;166;133;149m"    # #A68595 (--text-muted)
 
-    icon_status = "⚡ CHARGING" if is_charging else "🔋 DISCHARGING"
+    icon_status = "CHARGING" if is_charging else "DISCHARGING"
     color_status = GREEN if is_charging else (RED if info['capacity'] < 20 else ROSE)
     
     sign = "+" if is_charging else "-"
     power_display = f"{sign}{abs(power_w):.2f} W" if power_w is not None else "Calculating..."
     
-    print(f"\n{BOLD}{RED}🌸 POWER & BATTERY MONITOR 🌸{RESET}")
+    print(f"\n{BOLD}{RED}POWER & BATTERY MONITOR{RESET}")
     print(f"{MUTED}──────────────────────────────────────────────────────────{RESET}")
-    print(f" {BOLD}{WHITE}Trạng thái:{RESET}        {color_status}{BOLD}{icon_status}{RESET} ({info['status']})")
-    print(f" {BOLD}{WHITE}Mức pin hiện tại:{RESET}  {BOLD}{WHITE}{info['capacity']}%{RESET} {MUTED}[{info['charge_now']:.2f} / {info['charge_full']:.2f} Ah]{RESET}")
-    print(f" {BOLD}{WHITE}Công suất điện:{RESET}    {BOLD}{color_status}{power_display}{RESET}")
-    print(f" {BOLD}{WHITE}Điện áp pin:{RESET}       {PINK}{info['voltage']:.2f} V{RESET}")
+    print(f" {BOLD}{WHITE}Status:{RESET}             {color_status}{BOLD}{icon_status}{RESET} ({info['status']})")
+    print(f" {BOLD}{WHITE}Battery Level:{RESET}      {BOLD}{WHITE}{info['capacity']}%{RESET} {MUTED}[{info['charge_now']:.2f} / {info['charge_full']:.2f} Ah]{RESET}")
+    print(f" {BOLD}{WHITE}Power Draw:{RESET}         {BOLD}{color_status}{power_display}{RESET}")
+    print(f" {BOLD}{WHITE}Voltage:{RESET}            {PINK}{info['voltage']:.2f} V{RESET}")
     if est_str:
-        label_est = "Thời gian sạc đầy:" if is_charging else "Thời lượng còn lại:"
-        print(f" {BOLD}{WHITE}{label_est}{RESET}  {BOLD}{GREEN if is_charging else ROSE}{est_str}{RESET}")
+        label_est = "Time to Full:" if is_charging else "Remaining Time:"
+        print(f" {BOLD}{WHITE}{label_est:<18}{RESET} {BOLD}{GREEN if is_charging else ROSE}{est_str}{RESET}")
     print(f"{MUTED}──────────────────────────────────────────────────────────{RESET}")
-    print(f" {BOLD}{WHITE}CPU Intel i5:{RESET}      {PINK}{freq:.2f} GHz{RESET}  |  {BOLD}{WHITE}Nhiệt độ:{RESET} {PINK}{temp:.1f}°C{RESET}")
-    print(f" {BOLD}{WHITE}Độ sáng màn hình:{RESET} {PINK}{b_pct:.0f}%{RESET}     |  {BOLD}{WHITE}Chu kỳ sạc:{RESET} {MUTED}1840 cycles{RESET}")
+    print(f" {BOLD}{WHITE}CPU Intel i5:{RESET}       {PINK}{freq:.2f} GHz{RESET}  |  {BOLD}{WHITE}Temperature:{RESET} {PINK}{temp:.1f}°C{RESET}")
+    print(f" {BOLD}{WHITE}Brightness:{RESET}         {PINK}{b_pct:.0f}%{RESET}     |  {BOLD}{WHITE}Cycle Count:{RESET} {MUTED}1840 cycles{RESET}")
     print(f"{MUTED}──────────────────────────────────────────────────────────{RESET}\n")
 
 def calculate_estimate(info, power_w, is_charging):
@@ -227,7 +221,7 @@ def run_watch(interval=2.0):
             print("  \033[38;2;166;133;149m[Nhấn Ctrl+C để thoát chế độ Live Monitor]\033[0m\n")
             
     except KeyboardInterrupt:
-        print("\n\033[?25h🌸 Đã dừng theo dõi.")
+        print("\n\033[?25h✿ Đã dừng theo dõi.")
     finally:
         print("\033[?25h", end="")
 

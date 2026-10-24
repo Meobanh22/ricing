@@ -1,18 +1,12 @@
 #!/usr/bin/env bash
-# ==============================================================================
-# 🌸 Sylveon Rice Setup Script for Linux
-# ==============================================================================
-# Hỗ trợ tự động:
-# 1. Cài đặt / đồng bộ Fastfetch config và ASCII art Sylveon Chibi
-# 2. Hướng dẫn và symlink hình nền vào ~/Pictures/wallpapers
-# ==============================================================================
+# setup_linux.sh — Setup script for Linux desktop components.
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo -e "\033[1;35m=========================================="
-echo -e "   🌸 SYLVEON RICE LINUX SETUP 🌸         "
+echo -e "   ✿ SETUP LINUX DESKTOP ✿         "
 echo -e "==========================================\033[0m\n"
 
 # 1. Đồng bộ Fastfetch

@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
-# ==============================================================================
-# 🌸 DASHBOARD TOGGLE (ULTRA-FAST & RELIABLE TOGGLE DISPATCHER)
-# ==============================================================================
+# toggle_dashboard.sh — Toggle dashboard window.
 
 SCRIPT_PATH="$HOME/.config/hypr/scripts/dashboard.py"
 PID_FILE="/tmp/dashboard.pid"

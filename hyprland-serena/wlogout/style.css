@@ -1,28 +1,27 @@
-/* ==============================================================================
-   🌸 SERENA ANIME MINIMALIST WLOGOUT THEME
-   Strict adherence to Serena Design Guidelines (AGENTS.md)
-   Obsidian-Wine warm cards with Ribbon Red (#FF2A55) & Coral Hover (#FF597B)
-   ============================================================================== */
+/* style.css — Wlogout menu stylesheet. */
 
 * {
-    font-family: "JetBrains Mono", "JetBrainsMono Nerd Font", "Inter", sans-serif;
+    font-family: "JetBrains Mono Nerd Font", "FiraCode Nerd Font", "Segoe UI", sans-serif;
     background-image: none;
     box-shadow: none;
 }
 
-/* Frosted Warm Wine Backdrop (Layer-shell with Hyprland Blur) */
+/* === WINDOW === */
 window {
-    background-color: rgba(32, 16, 18, 0.82);
+    background-color: rgba(32, 16, 18, 0.98);
+    border: none;
+    border-radius: 0;
+    padding: 0;
 }
 
-/* Card Button: 10px radius, borderless, warm obsidian-wine */
+/* === ACTION CARDS === */
 button {
-    color: #E8C2D0;
+    color: #FFF0F5;
     font-size: 13px;
     font-weight: 600;
     letter-spacing: 0.02em;
     background-color: rgba(42, 26, 31, 0.95);
-    border: none;
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 10px;
     margin: 8px;
     background-repeat: no-repeat;
@@ -42,13 +41,13 @@ button label {
     transition: color 150ms ease;
 }
 
-/* Hover: Color transition only — No shadows, no glow, no harsh borders */
+/* === HOVER === */
 button:focus,
 button:active,
 button:hover {
     background-color: rgba(58, 34, 42, 0.98);
     color: #FFF0F5;
-    border: none;
+    border-color: rgba(255, 42, 85, 0.65);
     outline-style: none;
     box-shadow: none;
 }
@@ -62,7 +61,7 @@ button:hover label {
     color: #FFF0F5;
 }
 
-/* --- ICONS: NORMAL (#FF2A55) & HOVER (#FF597B) --- */
+/* === ACTION ICONS === */
 
 /* 1. Lock Screen */
 #lock {

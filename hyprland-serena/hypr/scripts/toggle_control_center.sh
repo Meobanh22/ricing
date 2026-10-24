@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
-# ==============================================================================
-# 🌸 CONTROL CENTER TOGGLE (ULTRA-FAST & RELIABLE TOGGLE DISPATCHER)
-# ==============================================================================
+# toggle_control_center.sh — Toggle control center window.
 
 SCRIPT_PATH="$HOME/.config/hypr/scripts/control_center.py"
 PID_FILE="/tmp/control_center.pid"

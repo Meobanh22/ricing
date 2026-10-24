@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# 🌸 SERENA MINIMALIST WLOGOUT LAUNCHER (1-ROW FLOATING DOCK)
+# Launch the centered wlogout menu.
 # ==============================================================================
 
 if pgrep -x "wlogout" > /dev/null; then

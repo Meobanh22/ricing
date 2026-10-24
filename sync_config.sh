@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# 🌸 SERENA RICE CONFIG SYNC & AUTOMATION TOOL
+# Ricing configuration sync tool.
 # ==============================================================================
 # Hỗ trợ tự động hóa đồng bộ 2 chiều và nạp lại môi trường tức thì:
 #   1. ./sync_config.sh          (Mặc định: Đồng bộ Repo -> ~/.config & Reload)
@@ -18,7 +18,15 @@ while [ -h "$SOURCE" ]; do
     [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
 done
 SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
-DOTFILES_DIR="$SCRIPT_DIR/hyprland-serena"
+if [ -d "$SCRIPT_DIR/ricing/hyprland-serena" ]; then
+    DOTFILES_DIR="$SCRIPT_DIR/ricing/hyprland-serena"
+else
+    if [ -d "$SCRIPT_DIR/ricing/hyprland-serena" ]; then
+    DOTFILES_DIR="$SCRIPT_DIR/ricing/hyprland-serena"
+else
+    DOTFILES_DIR="$SCRIPT_DIR/hyprland-serena"
+fi
+fi
 
 # Màu sắc hiển thị
 RED='\033[1;31m'
@@ -34,11 +42,21 @@ NC='\033[0m'
 # =====================================================
 sync_push() {
     echo -e "${PINK}================================================================${NC}"
-    echo -e "${RED}   🌸 ĐỒNG BỘ CONFIG: REPO ➔ HỆ THỐNG (~/.config)   ${NC}"
+    echo -e "${RED}   ✿ ĐỒNG BỘ CONFIG: REPO ➔ HỆ THỐNG (~/.config)   ${NC}"
     echo -e "${PINK}================================================================${NC}\n"
 
+    # 0. Biên dịch Token Single Source of Truth (tokens.json)
+    BUILD_SCRIPT="$SCRIPT_DIR/ricing/scripts/build_theme.py"
+    if [ ! -f "$BUILD_SCRIPT" ]; then
+        BUILD_SCRIPT="$SCRIPT_DIR/scripts/build_theme.py"
+    fi
+    if [ -f "$BUILD_SCRIPT" ]; then
+        python3 "$BUILD_SCRIPT" || true
+    fi
+
     # 1. Tạo thư mục đích nếu chưa có
-    mkdir -p "$HOME/.config/hypr/scripts"
+    mkdir -p "$HOME/.config/hypr/scripts/services"
+    mkdir -p "$HOME/.config/hypr/styles"
     mkdir -p "$HOME/.config/waybar"
     mkdir -p "$HOME/.config/rofi"
     mkdir -p "$HOME/.config/kitty"
@@ -55,7 +73,7 @@ sync_push() {
 
     # Hyprland
     cp -rf "$DOTFILES_DIR/hypr/"* "$HOME/.config/hypr/"
-    chmod +x "$HOME/.config/hypr/scripts/"*.sh "$HOME/.config/hypr/scripts/"*.py 2>/dev/null || true
+    chmod +x "$HOME/.config/hypr/scripts/"*.sh "$HOME/.config/hypr/scripts/"*.py "$HOME/.config/hypr/scripts/services/"*.py 2>/dev/null || true
     echo -e "  ${GREEN}✔ Hyprland (hyprland.lua, hyprland.conf, hyprlock.conf, scripts/)${NC}"
 
     # Waybar
@@ -85,8 +103,14 @@ sync_push() {
     echo -e "  ${GREEN}✔ Btop (btop.conf, obsidian-wine.theme)${NC}"
 
     # Fastfetch
+    FASTFETCH_SRC=""
     if [ -d "$SCRIPT_DIR/fastfetch" ]; then
-        cp -rf "$SCRIPT_DIR/fastfetch/"* "$HOME/.config/fastfetch/"
+        FASTFETCH_SRC="$SCRIPT_DIR/fastfetch"
+    elif [ -d "$SCRIPT_DIR/ricing/fastfetch" ]; then
+        FASTFETCH_SRC="$SCRIPT_DIR/ricing/fastfetch"
+    fi
+    if [ -n "$FASTFETCH_SRC" ]; then
+        cp -rf "$FASTFETCH_SRC/"* "$HOME/.config/fastfetch/"
         echo -e "  ${GREEN}✔ Fastfetch (config.jsonc, sylveon_chibi.txt)${NC}"
     fi
 
@@ -150,10 +174,16 @@ sync_push() {
             echo -e "  ${GREEN}✔ Đã reload Fcitx5 thành công!${NC}"
         fi
 
+        # Reload Kitty Terminal live
+        if pgrep -x "kitty" &>/dev/null; then
+            pkill -USR1 kitty 2>/dev/null || true
+            echo -e "  ${GREEN}✔ Đã reload Kitty Terminal palette!${NC}"
+        fi
+
         # Cập nhật cursor live
         hyprctl setcursor sylveon-custom 24 &>/dev/null || true
 
-        # Cập nhật theme GTK / GNOME sang Dark Mode & Serena
+        # Apply the GTK dark theme and desktop settings.
         gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' 2>/dev/null || true
         gsettings set org.gnome.desktop.interface gtk-theme 'Yaru-red-dark' 2>/dev/null || true
         gsettings set org.gnome.desktop.interface icon-theme 'Yaru-red-dark' 2>/dev/null || true
@@ -217,9 +247,15 @@ sync_pull() {
     fi
 
     # Fastfetch
-    if [ -d "$HOME/.config/fastfetch" ] && [ -d "$SCRIPT_DIR/fastfetch" ]; then
-        cp -f "$HOME/.config/fastfetch/config.jsonc" "$SCRIPT_DIR/fastfetch/" 2>/dev/null || true
-        cp -f "$HOME/.config/fastfetch/sylveon_chibi.txt" "$SCRIPT_DIR/fastfetch/" 2>/dev/null || true
+    FASTFETCH_DEST=""
+    if [ -d "$SCRIPT_DIR/fastfetch" ]; then
+        FASTFETCH_DEST="$SCRIPT_DIR/fastfetch"
+    elif [ -d "$SCRIPT_DIR/ricing/fastfetch" ]; then
+        FASTFETCH_DEST="$SCRIPT_DIR/ricing/fastfetch"
+    fi
+    if [ -d "$HOME/.config/fastfetch" ] && [ -n "$FASTFETCH_DEST" ]; then
+        cp -f "$HOME/.config/fastfetch/config.jsonc" "$FASTFETCH_DEST/" 2>/dev/null || true
+        cp -f "$HOME/.config/fastfetch/sylveon_chibi.txt" "$FASTFETCH_DEST/" 2>/dev/null || true
         echo -e "  ${GREEN}✔ Đã kéo ~/.config/fastfetch/ ➔ repo${NC}"
     fi
 

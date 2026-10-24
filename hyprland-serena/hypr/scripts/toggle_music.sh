@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
-# ==============================================================================
-# 🌸 MUSIC VISUALIZER TOGGLE (ULTRA-FAST & RELIABLE TOGGLE DISPATCHER)
-# ==============================================================================
+# toggle_music.sh — Toggle music visualizer window.
 
 SCRIPT_PATH="$HOME/.config/hypr/scripts/music_visualizer.py"
 PID_FILE="/tmp/music_visualizer.pid"

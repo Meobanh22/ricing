@@ -1,17 +1,5 @@
 #!/usr/bin/env python3
-# ==============================================================================
-# 🌸 SERENA ANDROID-STYLE QUICK SHELF & CLIPBOARD MANAGER
-# ==============================================================================
-# Android Gboard / Material You inspired dynamic chip grid (FlowBox):
-#   - Variable-sized squircle chips fitting seamlessly into 2 dynamic columns
-#   - Deduplication preserving all distinct images (no more 1-image bug!)
-#   - Clean minimalist Nerd Font icons matching Serena aesthetic (NO emoji)
-#   - External floating popout zoom extending OUTSIDE the clipboard window
-#   - Lightbox modal for full-size image inspection ("phóng to hơn nữa")
-#   - Borderless ultra-compact delete button & inset card icons
-#   - Zero grey: 100% Serena Warm Obsidian-Wine & Ribbon Red tokens
-#   - Drag-and-drop shelf with full thumbnail previews & drag-out support
-# ==============================================================================
+# Clipboard history and file shelf window with previews and drag-and-drop.
 
 import os
 import sys
@@ -33,10 +21,11 @@ from gi.repository import Gtk, Gdk, GLib, GtkLayerShell, Pango, GdkPixbuf
 # Paths & Directories
 SHELF_DIR = os.path.expanduser("~/.cache/serena/shelf")
 CLIPHIST_DB = os.path.expanduser("~/.cache/cliphist/db")
-PID_FILE = "/tmp/serena_shelf.pid"
-MODE_FILE = "/tmp/serena_shelf.mode"
+PID_FILE = "/tmp/shelf.pid"
+MODE_FILE = "/tmp/shelf.mode"
 PINNED_FILE = os.path.expanduser("~/.cache/serena_pinned_clips.json")
 PINS_DIR = os.path.expanduser("~/.cache/serena_pins")
+POSITION_CACHE = "/tmp/serena_shelf_pos.json"
 os.makedirs(SHELF_DIR, exist_ok=True)
 os.makedirs(PINS_DIR, exist_ok=True)
 
@@ -52,397 +41,11 @@ DRAG_SOURCE_TARGETS = [
     Gtk.TargetEntry.new("text/uri-list", 0, TARGET_URI_LIST),
 ]
 
-# Pure Serena Anime Minimalist CSS — ZERO GREY & CLEAN MINIMALIST GLYPHS!
-CSS = """
-* {
-    font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", "FiraCode Nerd Font", "FontAwesome", sans-serif;
-    outline: none;
-    box-shadow: none;
-    text-shadow: none;
-    -gtk-icon-shadow: none;
-}
-
-window,
-window.background,
-window#shelf-window-root,
-window#shelf-window-root.background,
-window#shelf-popout-root,
-window#shelf-popout-root.background,
-window#shelf-lightbox-root,
-window#shelf-lightbox-root.background,
-#shelf-window-root,
-#shelf-popout-root,
-#shelf-lightbox-root {
-    background-color: transparent;
-    background-image: none;
-    border: none;
-    box-shadow: none;
-}
-
-/* Main Container: Dynamic width & smooth rounded squircle frame (All 4 corners rounded) */
-.shelf-window {
-    background-color: rgba(32, 16, 18, 0.98);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 16px;
-    padding: 0;
-}
-
-button {
-    background-image: none;
-    background-color: transparent;
-    border: none;
-    box-shadow: none;
-    padding: 0;
-}
-
-/* Header Switcher */
-.tab-switcher {
-    background-color: rgba(48, 31, 32, 0.95);
-    border-radius: 8px;
-    padding: 2px;
-}
-
-button.tab-btn {
-    background-image: none;
-    background-color: transparent;
-    color: #E8C2D0;
-    font-size: 11.5px;
-    font-weight: 600;
-    border: none;
-    border-radius: 8px;
-    padding: 4px 12px;
-    transition: background-color 150ms ease, color 150ms ease;
-}
-
-button.tab-btn:hover {
-    color: #FFF0F5;
-    background-color: rgba(58, 34, 42, 0.6);
-}
-
-button.tab-btn.active {
-    background-color: #FF2A55;
-    color: #FFFFFF;
-}
-
-button.tab-btn.active:hover {
-    background-color: #FF597B;
-}
-
-.action-btn {
-    background-image: none;
-    background-color: rgba(42, 26, 31, 0.95);
-    color: #E8C2D0;
-    font-size: 11px;
-    font-weight: 600;
-    border: none;
-    border-radius: 8px;
-    padding: 4px 10px;
-    transition: background-color 150ms ease, color 150ms ease;
-}
-
-.action-btn:hover {
-    background-color: rgba(58, 34, 42, 0.98);
-    color: #FFF0F5;
-}
-
-.btn-close {
-    background-image: none;
-    background-color: transparent;
-    color: #A68595;
-    font-size: 13px;
-    font-weight: 700;
-    border: none;
-    border-radius: 8px;
-    padding: 4px 8px;
-    transition: color 150ms ease, background-color 150ms ease;
-}
-
-.btn-close:hover {
-    color: #FF2A55;
-    background-color: rgba(42, 26, 31, 0.50);
-}
-
-/* Search Entry */
-entry,
-searchentry {
-    background-image: none;
-    background-color: rgba(42, 26, 31, 0.95);
-    color: #FFF0F5;
-    font-size: 11.5px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 8px;
-    padding: 6px 12px;
-    margin-bottom: 8px;
-    caret-color: #FF2A55;
-    box-shadow: none;
-    transition: border-color 150ms ease;
-}
-
-entry:focus,
-searchentry:focus {
-    border: 1px solid #FF2A55;
-}
-
-entry image,
-searchentry image {
-    color: #FF2A55;
-    margin-left: 6px;
-    margin-right: 6px;
-}
-
-/* Android Gboard Style Flowbox & Chips */
-flowbox {
-    background-color: transparent;
-}
-
-flowboxchild {
-    background-color: transparent;
-    padding: 0;
-    margin: 0;
-    outline: none;
-    border: none;
-}
-
-flowboxchild:selected {
-    background-color: transparent;
-}
-
-.chip-card {
-    background-color: rgba(42, 26, 31, 0.95);
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    padding: 8px 10px;
-    transition: background-color 150ms ease, border-color 150ms ease;
-}
-
-.chip-card:hover {
-    background-color: rgba(58, 34, 42, 0.98);
-    border: 1px solid rgba(255, 42, 85, 0.65);
-}
-
-.chip-card.pinned {
-    border: 1px solid rgba(255, 42, 85, 0.50);
-    background-color: rgba(48, 25, 32, 0.98);
-}
-
-.chip-card.pinned:hover {
-    border: 1px solid #FF2A55;
-    background-color: rgba(64, 32, 42, 0.99);
-}
-
-.chip-text {
-    color: #FFF0F5;
-    font-size: 11px;
-}
-
-.chip-meta {
-    color: #A68595;
-    font-size: 9.5px;
-    margin-top: 4px;
-}
-
-/* Borderless Ultra-Compact Delete Button (Point 5) */
-button.chip-btn-del,
-.chip-btn-del {
-    background-image: none;
-    background-color: transparent;
-    border-width: 0;
-    border-style: none;
-    border-color: transparent;
-    box-shadow: none;
-    outline: none;
-    padding: 1px 4px;
-    margin: 0;
-    min-height: 0;
-    min-width: 0;
-    border-radius: 4px;
-    transition: background-color 150ms ease, color 150ms ease;
-}
-
-button.chip-btn-del:hover,
-.chip-btn-del:hover {
-    background-color: rgba(255, 42, 85, 0.20);
-    border-width: 0;
-    border-style: none;
-}
-
-/* Dedicated Pin Button - Serena Red (#FF2A55) */
-button.chip-btn-pin,
-.chip-btn-pin {
-    background-image: none;
-    background-color: transparent;
-    border-width: 0;
-    border-style: none;
-    border-color: transparent;
-    box-shadow: none;
-    outline: none;
-    padding: 1px 4px;
-    margin: 0;
-    min-height: 0;
-    min-width: 0;
-    border-radius: 4px;
-    color: #FF2A55;
-    transition: background-color 150ms ease, color 150ms ease;
-}
-
-button.chip-btn-pin:hover,
-.chip-btn-pin:hover {
-    background-color: rgba(255, 42, 85, 0.20);
-    color: #FF597B;
-}
-
-button.chip-btn-pin.pinned,
-.chip-btn-pin.pinned {
-    background-color: rgba(255, 42, 85, 0.28);
-    color: #FF2A55;
-}
-
-button.chip-btn-pin.pinned:hover {
-    background-color: rgba(255, 42, 85, 0.45);
-    color: #FFFFFF;
-}
-
-/* Card Action Button (Zoom / Copy) */
-button.chip-btn-action,
-.chip-btn-action {
-    background-image: none;
-    background-color: rgba(48, 28, 35, 0.90);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: none;
-    padding: 2px 7px;
-    margin: 0;
-    min-height: 0;
-    min-width: 0;
-    border-radius: 4px;
-    transition: background-color 150ms ease;
-}
-
-button.chip-btn-action:hover,
-.chip-btn-action:hover {
-    background-color: rgba(68, 36, 46, 0.98);
-    border-color: rgba(255, 42, 85, 0.4);
-}
-
-/* External Floating Popout Card (Extends outside clipboard window) */
-.popout-card {
-    background-color: transparent;
-    border: none;
-    box-shadow: none;
-    padding: 0;
-}
-
-.popout-text {
-    color: #FFF0F5;
-    font-size: 11.5px;
-}
-
-.popout-meta {
-    color: #A68595;
-    font-size: 9.5px;
-}
-
-/* Centered Lightbox Modal ("Phóng to hơn nữa") */
-.lightbox-card {
-    background-color: transparent;
-    border: none;
-    box-shadow: none;
-    padding: 0;
-}
-
-/* Drop Zone & Drop Banner */
-.drop-zone {
-    border: 1.5px dashed rgba(255, 42, 85, 0.45);
-    border-radius: 12px;
-    background-color: rgba(42, 26, 31, 0.4);
-    padding: 32px 16px;
-    margin: 6px 0;
-    transition: background-color 150ms ease, border-color 150ms ease;
-}
-
-.drop-zone:hover {
-    border-color: #FF2A55;
-    background-color: rgba(42, 26, 31, 0.7);
-}
-
-.drop-banner {
-    border: 1.5px dashed rgba(255, 42, 85, 0.35);
-    border-radius: 8px;
-    background-color: rgba(42, 26, 31, 0.4);
-    padding: 6px 12px;
-    margin-bottom: 6px;
-    transition: background-color 150ms ease, border-color 150ms ease;
-}
-
-.drop-banner:hover {
-    border-color: #FF2A55;
-    background-color: rgba(42, 26, 31, 0.7);
-}
-
-.drop-icon {
-    color: #FF2A55;
-    font-size: 30px;
-}
-
-.drop-title {
-    color: #FFF0F5;
-    font-size: 12px;
-    font-weight: 600;
-    margin-top: 4px;
-}
-
-.drop-subtitle {
-    color: #A68595;
-    font-size: 10.5px;
-    margin-top: 2px;
-}
-
-.status-bar {
-    color: #A68595;
-    font-size: 10px;
-    margin-top: 6px;
-}
-
-scrollbar {
-    background-color: transparent;
-    border: none;
-}
-
-scrollbar.vertical {
-    background-color: transparent;
-    border: none;
-    margin-left: 6px;
-    margin-right: -2px;
-    padding: 0;
-}
-
-scrollbar.vertical slider {
-    background-color: rgba(255, 42, 85, 0.48);
-    border-radius: 4px;
-    min-width: 6px;
-    min-height: 36px;
-    margin-left: 4px;
-    transition: background-color 150ms ease, min-width 150ms ease;
-}
-
-scrollbar.vertical slider:hover {
-    background-color: #FF2A55;
-    min-width: 8px;
-}
-
-/* Header Drag Handle Zone */
-.drag-grip-zone {
-    padding: 2px 8px;
-    border-radius: 8px;
-    transition: background-color 150ms ease;
-}
-
-.drag-grip-zone:hover {
-    background-color: rgba(255, 42, 85, 0.12);
-}
-"""
+# Path to external CSS stylesheet
+STYLESHEET_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "styles", "shelf.css")
 
 
-class SerenaAndroidShelf(Gtk.Window):
+class ShelfWindow(Gtk.Window):
     def __init__(self, initial_tab="clip"):
         super().__init__(type=Gtk.WindowType.TOPLEVEL)
 
@@ -452,10 +55,9 @@ class SerenaAndroidShelf(Gtk.Window):
         init_y = 44
 
         # Restore saved position from temporary session cache if available
-        POS_CACHE = "/tmp/serena_shelf_pos.json"
-        if os.path.exists(POS_CACHE):
+        if os.path.exists(POSITION_CACHE):
             try:
-                with open(POS_CACHE, "r") as f:
+                with open(POSITION_CACHE, "r") as f:
                     saved_pos = json.load(f)
                     init_x = max(10, min(screen_w - 475, saved_pos.get("x", init_x)))
                     init_y = max(10, min(screen_h - 100, saved_pos.get("y", init_y)))
@@ -480,7 +82,7 @@ class SerenaAndroidShelf(Gtk.Window):
         GtkLayerShell.set_keyboard_mode(self, GtkLayerShell.KeyboardMode.ON_DEMAND)
 
         # Dynamic comfortable width (464px: spacious 2-column cards & drop frame)
-        self.set_title("Serena Shelf")
+        self.set_title("Shelf")
         self.set_name("shelf-window-root")
         self.set_default_size(464, -1)
         self.set_resizable(False)
@@ -495,15 +97,19 @@ class SerenaAndroidShelf(Gtk.Window):
 
         # Apply CSS
         css_provider = Gtk.CssProvider()
-        try:
-            css_provider.load_from_data(CSS.encode('utf-8'))
-            Gtk.StyleContext.add_provider_for_screen(
-                Gdk.Screen.get_default(),
-                css_provider,
-                Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
-            )
-        except Exception as e:
-            print(f"Warning: CSS error: {e}", file=sys.stderr)
+        css_file = STYLESHEET_PATH
+        if not os.path.exists(css_file):
+            css_file = os.path.expanduser("~/.config/hypr/styles/shelf.css")
+        if os.path.exists(css_file):
+            try:
+                css_provider.load_from_path(css_file)
+                Gtk.StyleContext.add_provider_for_screen(
+                    Gdk.Screen.get_default(),
+                    css_provider,
+                    Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+                )
+            except Exception as e:
+                print(f"Warning: CSS error: {e}", file=sys.stderr)
 
         self.active_tab = initial_tab
         self.last_mode_mtime = 0
@@ -560,11 +166,11 @@ class SerenaAndroidShelf(Gtk.Window):
             cr.arc(x + r, y + r, r, 3.14159265359, 4.71238898038)
             cr.close_path()
 
-            # Fill with Serena Warm Obsidian-Wine (--bg-window: rgba(32, 16, 18, 0.98))
+            # Fill with the shared window background token.
             cr.set_source_rgba(32.0 / 255.0, 16.0 / 255.0, 18.0 / 255.0, 0.98)
             cr.fill_preserve()
 
-            # Stroke with 1px Serena outer border (--border-window: rgba(255, 255, 255, 0.12))
+            # Draw the shared outer window border.
             cr.set_source_rgba(1.0, 1.0, 1.0, 0.12)
             cr.set_line_width(1.0)
             cr.stroke()
@@ -594,11 +200,11 @@ class SerenaAndroidShelf(Gtk.Window):
         cr.arc(x + r, y + r, r, 3.14159265359, 4.71238898038)
         cr.close_path()
 
-        # Fill with Serena Warm Card Obsidian (--bg-card: rgba(36, 18, 22, 0.99))
+        # Fill with the shared card background token.
         cr.set_source_rgba(36.0 / 255.0, 18.0 / 255.0, 22.0 / 255.0, 0.99)
         cr.fill_preserve()
 
-        # Stroke with 1.5px Serena ruby red border (--accent: #FF2A55)
+        # Draw the accent border.
         cr.set_source_rgba(255.0 / 255.0, 42.0 / 255.0, 85.0 / 255.0, 1.0)
         cr.set_line_width(1.5)
         cr.stroke()
@@ -628,11 +234,11 @@ class SerenaAndroidShelf(Gtk.Window):
         cr.arc(x + r, y + r, r, 3.14159265359, 4.71238898038)
         cr.close_path()
 
-        # Fill with Serena Warm Obsidian-Wine (--bg-window: rgba(32, 16, 18, 0.99))
+        # Fill with the shared window background token.
         cr.set_source_rgba(32.0 / 255.0, 16.0 / 255.0, 18.0 / 255.0, 0.99)
         cr.fill_preserve()
 
-        # Stroke with 1.5px Serena ruby red border (--accent: #FF2A55)
+        # Draw the accent border.
         cr.set_source_rgba(255.0 / 255.0, 42.0 / 255.0, 85.0 / 255.0, 0.90)
         cr.set_line_width(1.5)
         cr.stroke()
@@ -732,13 +338,13 @@ class SerenaAndroidShelf(Gtk.Window):
 
     def save_window_pos(self):
         try:
-            with open("/tmp/serena_shelf_pos.json", "w") as f:
+            with open(POSITION_CACHE, "w") as f:
                 json.dump({"x": self.current_win_x, "y": self.current_win_y}, f)
         except Exception:
             pass
 
     # =========================================================================
-    # PINNED CLIPS PERSISTENCE & LOGIC (Request 2)
+    # Pinned clip persistence.
     # =========================================================================
     def load_pinned_clips(self):
         if os.path.exists(PINNED_FILE):
@@ -1007,7 +613,7 @@ class SerenaAndroidShelf(Gtk.Window):
         self.popout_win.add(self.popout_event_box)
 
     # =========================================================================
-    # TAB 1: CLIPBOARD (ANDROID GBOARD CHIP GRID WITH DEDUPLICATION FIX)
+    # Clipboard tab.
     # =========================================================================
     def build_clipboard_page(self):
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
@@ -1052,7 +658,7 @@ class SerenaAndroidShelf(Gtk.Window):
         self.clip_scroll.set_max_content_height(400)
         self.clip_scroll.get_vadjustment().connect("value-changed", lambda a: self.hide_popout())
 
-        # Android-Style FlowBox (Symmetric 2 columns of dynamic cards)
+        # Two-column clipboard card grid.
         self.clip_flow = Gtk.FlowBox()
         self.clip_flow.set_valign(Gtk.Align.START)
         self.clip_flow.set_max_children_per_line(2)
@@ -1141,13 +747,13 @@ class SerenaAndroidShelf(Gtk.Window):
 
         self.clip_stack.set_visible_child_name("content")
         for item in all_clips[:24]:
-            chip = self.create_android_clip_chip(item)
+            chip = self.create_clip_card(item)
             self.clip_flow.add(chip)
 
         self.clip_flow.show_all()
         self.clip_stack.show_all()
 
-    def create_android_clip_chip(self, item):
+    def create_clip_card(self, item):
         event_box = Gtk.EventBox()
         event_box.get_style_context().add_class("chip-card")
         if item.get("is_pinned"):
@@ -1171,7 +777,7 @@ class SerenaAndroidShelf(Gtk.Window):
         # Right actions in header: Pin + Zoom (if image) + Delete
         right_hdr = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=3)
 
-        # Pin button (Ghim copy - Always Serena Red #FF2A55)
+        # Pin button.
         btn_pin = Gtk.Button()
         btn_pin.set_relief(Gtk.ReliefStyle.NONE)
         btn_pin.get_style_context().add_class("flat")
@@ -1202,7 +808,7 @@ class SerenaAndroidShelf(Gtk.Window):
             btn_zoom.connect("enter-notify-event", lambda w, e: self.hide_popout())
             right_hdr.pack_start(btn_zoom, False, False, 0)
 
-        # Borderless, compact delete button (Point 5)
+        # Compact delete button.
         btn_del = Gtk.Button()
         btn_del.set_relief(Gtk.ReliefStyle.NONE)
         btn_del.get_style_context().add_class("flat")
@@ -1268,7 +874,7 @@ class SerenaAndroidShelf(Gtk.Window):
         return event_box
 
     # =========================================================================
-    # TAB 2: FILE SHELF (SPACIOUS DROP FRAME & ANDROID GRID CHIPS)
+    # File shelf tab.
     # =========================================================================
     def build_shelf_page(self):
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
@@ -1376,16 +982,42 @@ class SerenaAndroidShelf(Gtk.Window):
 
         self.shelf_stack.set_visible_child_name("content")
         for fpath, mtime in files:
-            chip = self.create_android_shelf_chip(fpath, mtime)
+            chip = self.create_shelf_card(fpath, mtime)
             self.shelf_flow.add(chip)
 
         self.shelf_flow.show_all()
         self.shelf_stack.show_all()
 
-    def create_android_shelf_chip(self, fpath, mtime):
+    @staticmethod
+    def get_file_info(fpath):
+        fname = os.path.basename(fpath).lower()
+        ext = os.path.splitext(fname)[1]
+        
+        # Images
+        if ext in [".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp", ".svg", ".ico"]:
+            return "󰋩", "Image", "image"
+        # Code & Scripts
+        elif ext in [".py", ".sh", ".bash", ".zsh", ".lua", ".js", ".ts", ".html", ".css", ".json", ".c", ".cpp", ".rs", ".go", ".php", ".java"]:
+            return "󰌠" if ext == ".py" else "󰈙", "Code", "code"
+        # Documents & Text
+        elif ext in [".txt", ".md", ".pdf", ".doc", ".docx", ".odt", ".rtf", ".log", ".csv"]:
+            return "󰈮" if ext == ".pdf" else "󰈙", "Document", "doc"
+        # Archives & Compressed
+        elif ext in [".zip", ".tar", ".gz", ".xz", ".7z", ".rar", ".bz2", ".tgz"]:
+            return "󰗚", "Archive", "archive"
+        # Audio
+        elif ext in [".mp3", ".flac", ".wav", ".ogg", ".m4a", ".aac", ".opus"]:
+            return "󰎆", "Audio", "audio"
+        # Video
+        elif ext in [".mp4", ".mkv", ".webm", ".avi", ".mov", ".flv"]:
+            return "󰈔", "Video", "video"
+        else:
+            return "󰈢", "File", "other"
+
+    def create_shelf_card(self, fpath, mtime):
         event_box = Gtk.EventBox()
         event_box.get_style_context().add_class("chip-card")
-        event_box.set_size_request(190, -1)
+        event_box.set_size_request(190, 160)
         event_box.set_hexpand(True)
 
         # Drag-out source
@@ -1397,16 +1029,14 @@ class SerenaAndroidShelf(Gtk.Window):
         fname = os.path.basename(fpath)
         fsize = os.path.getsize(fpath) if os.path.exists(fpath) else 0
         size_str = self.format_file_size(fsize)
-        is_image = fname.lower().endswith((".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp", ".svg"))
+        icon, type_label, category = self.get_file_info(fpath)
+        is_image = (category == "image")
 
         # Top row: Icon / Format (Inset with 8px margin) + Delete button
         top_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
         lbl_type = Gtk.Label()
         lbl_type.set_margin_start(8)
-        if is_image:
-            lbl_type.set_markup("<span font='9.5' color='#FF2A55'>󰋩</span>  <span font='9.5' color='#A68595'>Image</span>")
-        else:
-            lbl_type.set_markup("<span font='9.5' color='#FF2A55'>󰈙</span>  <span font='9.5' color='#A68595'>File</span>")
+        lbl_type.set_markup(f"<span font='9.5' color='#FF2A55'>{icon}</span>  <span font='9.5' color='#A68595'>{type_label}</span>")
         top_row.pack_start(lbl_type, False, False, 0)
 
         right_hdr = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
@@ -1438,20 +1068,65 @@ class SerenaAndroidShelf(Gtk.Window):
         top_row.pack_end(right_hdr, False, False, 0)
         vbox.pack_start(top_row, False, False, 0)
 
+        # Fixed height preview box (80px) to guarantee identical layout regardless of content
+        preview_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        preview_box.set_size_request(-1, 80)
+        preview_box.set_valign(Gtk.Align.CENTER)
+        preview_box.set_halign(Gtk.Align.FILL)
+
         if is_image:
             try:
                 pixbuf = GdkPixbuf.Pixbuf.new_from_file(fpath)
                 orig_w = pixbuf.get_width()
                 orig_h = pixbuf.get_height()
-                ratio = min(175 / orig_w, 90 / orig_h)
+                ratio = min(175 / orig_w, 80 / orig_h)
                 scaled_w = max(1, int(orig_w * ratio))
                 scaled_h = max(1, int(orig_h * ratio))
                 card_pixbuf = pixbuf.scale_simple(scaled_w, scaled_h, GdkPixbuf.InterpType.BILINEAR)
                 img = Gtk.Image.new_from_pixbuf(card_pixbuf)
                 img.set_halign(Gtk.Align.CENTER)
-                vbox.pack_start(img, False, False, 2)
+                preview_box.pack_start(img, True, True, 0)
+            except Exception:
+                lbl_fb = Gtk.Label(label="[Image]")
+                lbl_fb.get_style_context().add_class("chip-text")
+                preview_box.pack_start(lbl_fb, True, True, 0)
+        elif category in ["code", "doc"]:
+            preview_text = ""
+            try:
+                with open(fpath, "r", encoding="utf-8", errors="replace") as f:
+                    lines = [f.readline().strip() for _ in range(3)]
+                    preview_text = "\n".join([l for l in lines if l][:2])
             except Exception:
                 pass
+
+            if preview_text:
+                lbl_snippet = Gtk.Label()
+                lbl_snippet.get_style_context().add_class("chip-text")
+                lbl_snippet.set_text(preview_text)
+                lbl_snippet.set_line_wrap(True)
+                lbl_snippet.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR)
+                lbl_snippet.set_max_width_chars(22)
+                lbl_snippet.set_ellipsize(Pango.EllipsizeMode.END)
+                lbl_snippet.set_halign(Gtk.Align.START)
+                lbl_snippet.set_margin_start(4)
+                lbl_snippet.set_margin_end(4)
+                preview_box.pack_start(lbl_snippet, True, True, 0)
+            else:
+                icon_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+                icon_box.set_valign(Gtk.Align.CENTER)
+                lbl_big = Gtk.Label()
+                lbl_big.set_markup(f"<span font='28' color='#FF2A55'>{icon}</span>")
+                icon_box.pack_start(lbl_big, False, False, 0)
+                preview_box.pack_start(icon_box, True, True, 0)
+        else:
+            icon_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+            icon_box.set_valign(Gtk.Align.CENTER)
+            lbl_big = Gtk.Label()
+            lbl_big.set_markup(f"<span font='28' color='#FF2A55'>{icon}</span>")
+            icon_box.pack_start(lbl_big, False, False, 0)
+            preview_box.pack_start(icon_box, True, True, 0)
+
+        vbox.pack_start(preview_box, True, True, 2)
 
         # Filename
         short_name = fname if len(fname) < 24 else fname[:21] + "..."
@@ -1461,8 +1136,9 @@ class SerenaAndroidShelf(Gtk.Window):
         lbl_name.set_margin_start(4)
         vbox.pack_start(lbl_name, False, False, 0)
 
-        # Bottom info row
+        # Bottom info row (ALWAYS pinned to bottom of the card)
         bottom_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
+        bottom_row.set_valign(Gtk.Align.END)
         lbl_size = Gtk.Label(label=size_str)
         lbl_size.get_style_context().add_class("chip-meta")
         lbl_size.set_margin_start(4)
@@ -1475,7 +1151,7 @@ class SerenaAndroidShelf(Gtk.Window):
         btn_copy.get_style_context().add_class("chip-btn-action")
         btn_copy.connect("clicked", lambda b: self.copy_shelf_file(fpath, is_image))
         bottom_row.pack_end(btn_copy, False, False, 0)
-        vbox.pack_start(bottom_row, False, False, 0)
+        vbox.pack_end(bottom_row, False, False, 0)
 
         event_box.add(vbox)
         event_box.connect("button-press-event", lambda w, e: self.on_shelf_chip_clicked(fpath, e))
@@ -1528,7 +1204,7 @@ class SerenaAndroidShelf(Gtk.Window):
 
         self.current_popout_target = (item, is_shelf, fpath)
 
-        # Compact 260px popout card (Point 1: Does NOT block cursor or delete button)
+        # Keep the preview clear of the cursor and card actions.
         popout_w = 260
         if card_x < win_w / 2:
             # Left column: Float to the LEFT side of the main window
@@ -1548,7 +1224,7 @@ class SerenaAndroidShelf(Gtk.Window):
         # Header Row
         top_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
         lbl_type = Gtk.Label()
-        lbl_type.set_margin_start(8)  # Point 4: Shift icon rightward in popout
+        lbl_type.set_margin_start(8)
 
         right_actions = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
 
@@ -1647,9 +1323,9 @@ class SerenaAndroidShelf(Gtk.Window):
             fname = os.path.basename(fpath)
             fsize = os.path.getsize(fpath) if os.path.exists(fpath) else 0
             size_str = self.format_file_size(fsize)
-            is_image = fname.lower().endswith((".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp", ".svg"))
-
-            lbl_type.set_markup(f"<span font='10.5' color='#FF2A55'>󰋩</span>  <span font='10' color='#FFF0F5'><b>{GLib.markup_escape_text(fname[:22])}</b></span>" if is_image else f"<span font='10.5' color='#FF2A55'>󰈙</span>  <span font='10' color='#FFF0F5'><b>{GLib.markup_escape_text(fname[:22])}</b></span>")
+            icon, type_label, category = self.get_file_info(fpath)
+            is_image = (category == "image")
+            lbl_type.set_markup(f"<span font='10.5' color='#FF2A55'>{icon}</span>  <span font='10' color='#FFF0F5'><b>{GLib.markup_escape_text(fname[:22])}</b></span>")
             top_row.pack_start(lbl_type, False, False, 0)
             vbox.pack_start(top_row, False, False, 0)
 
@@ -1733,7 +1409,7 @@ class SerenaAndroidShelf(Gtk.Window):
         return False
 
     # =========================================================================
-    # LIGHTBOX MODAL ("Phóng to hơn nữa" - Request 3)
+    # Image lightbox.
     # =========================================================================
     def open_image_lightbox(self, item_or_fpath, is_shelf=False):
         self.hide_popout()
@@ -1816,7 +1492,7 @@ class SerenaAndroidShelf(Gtk.Window):
         btn_open.add(lbl_o)
         btn_open.get_style_context().add_class("action-btn")
         def do_open(b):
-            tmp_path = "/tmp/serena_zoom_preview.png"
+            tmp_path = "/tmp/zoom_preview.png"
             if raw_bytes:
                 with open(tmp_path, "wb") as f:
                     f.write(raw_bytes)
@@ -1950,9 +1626,22 @@ class SerenaAndroidShelf(Gtk.Window):
                 with open(fpath, "rb") as f:
                     p.communicate(input=f.read())
             else:
-                uri = GLib.filename_to_uri(fpath)
-                p = subprocess.Popen(["wl-copy", "--type", "text/uri-list"], stdin=subprocess.PIPE)
-                p.communicate(input=uri.encode("utf-8"))
+                is_text = False
+                text_content = ""
+                try:
+                    with open(fpath, "r", encoding="utf-8") as f:
+                        text_content = f.read(1024 * 512)
+                        is_text = True
+                except Exception:
+                    is_text = False
+
+                if is_text:
+                    p = subprocess.Popen(["wl-copy"], stdin=subprocess.PIPE)
+                    p.communicate(input=text_content.encode("utf-8"))
+                else:
+                    uri = GLib.filename_to_uri(fpath)
+                    p = subprocess.Popen(["wl-copy", "--type", "text/uri-list"], stdin=subprocess.PIPE)
+                    p.communicate(input=uri.encode("utf-8"))
             self.show_toast("✨ Copied!")
         except Exception as e:
             print("Error copying file:", e)
@@ -2195,7 +1884,7 @@ def main():
         pass
 
     try:
-        win = SerenaAndroidShelf(initial_tab=mode)
+        win = ShelfWindow(initial_tab=mode)
         with open(PID_FILE, "w") as f:
             f.write(str(os.getpid()))
         win.show_all()

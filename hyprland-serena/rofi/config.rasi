@@ -1,33 +1,9 @@
-/* ==============================================================================
-   🌸 SERENA ROFI MINIMALIST APP LAUNCHER
-   Clean Flat UI: Neutral outer border, obsidian-wine background, ribbon red accents.
-   ============================================================================== */
+/* config.rasi — Rofi application launcher theme. */
 
-configuration {
-    modi: "drun,run,filebrowser";
-    font: "JetBrainsMono Nerd Font 12";
-    show-icons: true;
-    icon-theme: "Papirus";
-    display-drun: "🌸 Apps";
-    display-run: "⚡ Run";
-    display-filebrowser: "📁 Files";
-    drun-display-format: "{name}";
-}
+@import "colors-rofi.rasi"
 
 * {
-    bg-col:             #201011f5;
-    bg-col-light:       #2A1A1E;
-    bg-hover:           #3A222A;
-    border-col:         rgba(255, 255, 255, 0.08);
-    border-subtle:      rgba(255, 42, 85, 0.25);
-    selected-col:       #FF2A55;
-    crimson-hover:      #FF597B;
-    urgent-col:         #E65E34;
-    fg-col:             #FFF0F5;
-    fg-secondary:       #E8C2D0;
-    fg-muted:           #A68595;
-    fg-white:           #FFFFFF;
-
+    font: "JetBrains Mono Nerd Font 13";
     background-color: transparent;
     width: 640px;
 }
@@ -35,9 +11,9 @@ configuration {
 window {
     height: 470px;
     border: 1px;
-    border-color: @border-col;
+    border-color: @border-window;
     border-radius: 16px;
-    background-color: @bg-col;
+    background-color: @bg-window;
     padding: 16px;
 }
 
@@ -48,17 +24,17 @@ mainbox {
 
 inputbar {
     children: [prompt, entry];
-    background-color: @bg-col-light;
+    background-color: @bg-card;
     border: 1px;
-    border-color: @border-subtle;
-    border-radius: 12px;
-    padding: 8px 12px;
+    border-color: rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 6px 12px;
 }
 
 prompt {
-    background-color: @selected-col;
+    background-color: @accent;
     padding: 6px 14px;
-    text-color: @fg-white;
+    text-color: @text-white;
     border-radius: 8px;
     margin: 0px 8px 0px 0px;
     font-weight: bold;
@@ -66,9 +42,9 @@ prompt {
 
 entry {
     padding: 6px;
-    text-color: @fg-col;
+    text-color: @text-primary;
     placeholder: "Search applications...";
-    placeholder-color: @fg-muted;
+    placeholder-color: @text-muted;
 }
 
 listview {
@@ -84,7 +60,7 @@ listview {
 element {
     padding: 8px 12px;
     background-color: transparent;
-    text-color: @fg-secondary;
+    text-color: @text-secondary;
     border-radius: 10px;
 }
 
@@ -103,16 +79,22 @@ element-text {
 }
 
 element selected.normal, element selected {
-    background-color: @selected-col;
-    text-color: @fg-white;
+    background-color: @bg-card-hover;
+    border: 1px;
+    border-color: @border-card-hover;
+    text-color: @text-primary;
 }
 
 element selected.urgent {
-    background-color: @urgent-col;
-    text-color: @fg-white;
+    background-color: @bg-card-hover;
+    border: 1px;
+    border-color: @status-warning;
+    text-color: @status-warning;
 }
 
 element selected.active {
-    background-color: @crimson-hover;
-    text-color: @fg-white;
+    background-color: @bg-card-hover;
+    border: 1px;
+    border-color: @border-card-hover;
+    text-color: @accent;
 }

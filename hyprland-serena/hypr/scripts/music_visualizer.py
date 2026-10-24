@@ -1,12 +1,5 @@
 #!/usr/bin/env python3
-# ==============================================================================
-# 🌸 SERENA MINIMALIST MUSIC VISUALIZER (STATIC LAYER-SHELL)
-# ==============================================================================
-# - Fixed Anchor: TOP | LEFT (Symmetric with Control Center at TOP | RIGHT)
-# - Real-time CAVA Audio Visualizer with smooth Cairo capsule bars
-# - Lightweight MPRIS Player Controls & Track Info (playerctl)
-# - Clean, borderless inner layout adhering strictly to AGENTS.md
-# ==============================================================================
+# Music visualizer and MPRIS controls.
 
 import os
 import sys
@@ -26,120 +19,13 @@ try:
 except Exception:
     HAS_LAYER_SHELL = False
 
-from gi.repository import Gtk, Gdk, GLib, Pango
+from gi.repository import Gtk, Gdk, GLib, Pango, GdkPixbuf
 
 PID_FILE = "/tmp/music_visualizer.pid"
-CAVA_CONF = "/tmp/serena_cava.conf"
+CAVA_CONF = "/tmp/cava.conf"
 
-CSS_DATA = b"""
-* {
-    font-family: 'JetBrainsMono Nerd Font', 'JetBrains Mono', 'Inter', sans-serif;
-}
-
-window#music-visualizer-window {
-    background-color: transparent;
-    background-image: none;
-    border: none;
-    box-shadow: none;
-}
-
-#main-card {
-    background-color: transparent;
-    border: none;
-    padding: 14px;
-    min-width: 287px;
-}
-
-.title-header {
-    color: #FF2A55;
-    font-size: 11.5px;
-    font-weight: 700;
-    letter-spacing: 1px;
-}
-
-.btn-close {
-    color: #A68595;
-    background: transparent;
-    border: none;
-    font-size: 13px;
-    padding: 2px 7px;
-    border-radius: 8px;
-    transition: background-color 0.15s ease, color 0.15s ease;
-}
-
-.btn-close:hover {
-    background: rgba(42, 26, 31, 0.50);
-    color: #FF2A55;
-}
-
-.track-title {
-    color: #FFF0F5;
-    font-size: 13px;
-    font-weight: 700;
-}
-
-.track-artist {
-    color: #E8C2D0;
-    font-size: 11px;
-    font-weight: 500;
-}
-
-button {
-    background-image: none;
-    box-shadow: none;
-    outline: none;
-}
-
-.btn-ctrl {
-    color: #E8C2D0;
-    background-color: rgba(42, 26, 31, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 8px;
-    font-size: 13px;
-    padding: 4px 12px;
-    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
-}
-
-.btn-ctrl:hover {
-    background-color: #3A222A;
-    border-color: rgba(255, 42, 85, 0.65);
-    color: #FF2A55;
-}
-
-.btn-ctrl-accent {
-    color: #FF2A55;
-    background-color: rgba(42, 26, 31, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 8px;
-    font-size: 15px;
-    padding: 4px 16px;
-    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
-}
-
-.btn-ctrl-accent:hover {
-    background-color: #3A222A;
-    border-color: rgba(255, 42, 85, 0.65);
-    color: #FF597B;
-}
-
-.status-badge {
-    background-color: rgba(42, 26, 31, 0.95);
-    color: #E8C2D0;
-    font-size: 10px;
-    font-weight: 600;
-    padding: 2px 8px;
-    border-radius: 4px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.status-badge.playing {
-    color: #7FA873;
-}
-
-.status-badge.paused {
-    color: #A68595;
-}
-"""
+# Path to external CSS stylesheet
+STYLESHEET_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "styles", "music_visualizer.css")
 
 class MusicVisualizer(Gtk.Window):
     def __init__(self):
@@ -147,6 +33,8 @@ class MusicVisualizer(Gtk.Window):
         self.set_name("music-visualizer-window")
         self.set_decorated(False)
         self.set_resizable(False)
+        self.set_default_size(315, -1)
+        self.set_size_request(315, -1)
 
         # 1. GtkLayerShell setup (Static Layer-Shell: TOP | LEFT)
         if HAS_LAYER_SHELL:
@@ -253,10 +141,44 @@ class MusicVisualizer(Gtk.Window):
 
     def apply_css(self):
         css_provider = Gtk.CssProvider()
-        css_provider.load_from_data(CSS_DATA)
+        css_file = STYLESHEET_PATH
+        if not os.path.exists(css_file):
+            css_file = os.path.expanduser("~/.config/hypr/styles/music_visualizer.css")
+        if os.path.exists(css_file):
+            try:
+                css_provider.load_from_path(css_file)
+            except Exception as e:
+                print(f"Warning: Failed to load CSS from {css_file}: {e}", file=sys.stderr)
         context = Gtk.StyleContext()
         screen = Gdk.Screen.get_default()
         context.add_provider_for_screen(screen, css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+
+    def set_default_art(self):
+        self.art_img.set_from_icon_name("audio-x-generic", Gtk.IconSize.DND)
+
+    def load_art_async(self, art_url):
+        if not art_url:
+            GLib.idle_add(self.set_default_art)
+            return
+
+        path = art_url
+        if path.startswith("file://"):
+            path = path[7:]
+        if os.path.exists(path):
+            try:
+                pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(path, 56, 56, True)
+                GLib.idle_add(lambda: self.art_img.set_from_pixbuf(pixbuf))
+                return
+            except Exception:
+                pass
+        GLib.idle_add(self.set_default_art)
+
+    @staticmethod
+    def format_time(seconds: float) -> str:
+        s = int(max(0, seconds))
+        m = s // 60
+        s = s % 60
+        return f"{m:02d}:{s:02d}"
 
     def build_ui(self):
         main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
@@ -279,49 +201,88 @@ class MusicVisualizer(Gtk.Window):
         main_box.pack_start(header_box, False, False, 0)
 
         # -------------------------------------------------------------
-        # 2. Track Title & Artist (Directly on window, no surrounding box)
+        # 2. Player Card (Album Art + Track Info + Progress)
         # -------------------------------------------------------------
-        info_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
-        info_vbox.set_margin_top(2)
+        player_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        player_card.get_style_context().add_class("player-card")
+
+        top_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+
+        # Album Art
+        self.art_img = Gtk.Image()
+        self.art_box = Gtk.Box()
+        self.art_box.get_style_context().add_class("album-art-box")
+        self.art_box.set_size_request(56, 56)
+        self.art_box.set_valign(Gtk.Align.CENTER)
+        self.art_box.pack_start(self.art_img, True, True, 0)
+        self.set_default_art()
+        top_row.pack_start(self.art_box, False, False, 0)
+
+        # Title, Artist, Status Badge
+        info_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=3)
+        info_vbox.set_valign(Gtk.Align.CENTER)
 
         self.lbl_title = Gtk.Label(label="No media playing")
         self.lbl_title.get_style_context().add_class("track-title")
         self.lbl_title.set_halign(Gtk.Align.START)
         self.lbl_title.set_ellipsize(Pango.EllipsizeMode.END)
 
-        meta_hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
         self.lbl_artist = Gtk.Label(label="")
         self.lbl_artist.get_style_context().add_class("track-artist")
         self.lbl_artist.set_halign(Gtk.Align.START)
         self.lbl_artist.set_ellipsize(Pango.EllipsizeMode.END)
-        meta_hbox.pack_start(self.lbl_artist, True, True, 0)
 
         self.lbl_status = Gtk.Label(label="Idle")
         self.lbl_status.get_style_context().add_class("status-badge")
-        meta_hbox.pack_end(self.lbl_status, False, False, 0)
+        self.lbl_status.set_halign(Gtk.Align.START)
 
         info_vbox.pack_start(self.lbl_title, False, False, 0)
-        info_vbox.pack_start(meta_hbox, False, False, 0)
-        main_box.pack_start(info_vbox, False, False, 0)
+        info_vbox.pack_start(self.lbl_artist, False, False, 0)
+        info_vbox.pack_start(self.lbl_status, False, False, 2)
+        top_row.pack_start(info_vbox, True, True, 0)
+
+        player_card.pack_start(top_row, False, False, 0)
+
+        # Progress bar & Timestamps
+        progress_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+        self.progress_bar = Gtk.ProgressBar()
+        self.progress_bar.set_fraction(0.0)
+        progress_vbox.pack_start(self.progress_bar, False, False, 0)
+
+        time_hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        self.lbl_time_cur = Gtk.Label(label="00:00")
+        self.lbl_time_cur.get_style_context().add_class("time-label")
+        self.lbl_time_cur.set_halign(Gtk.Align.START)
+
+        self.lbl_time_total = Gtk.Label(label="00:00")
+        self.lbl_time_total.get_style_context().add_class("time-label")
+        self.lbl_time_total.set_halign(Gtk.Align.END)
+
+        time_hbox.pack_start(self.lbl_time_cur, True, True, 0)
+        time_hbox.pack_end(self.lbl_time_total, False, False, 0)
+        progress_vbox.pack_start(time_hbox, False, False, 0)
+
+        player_card.pack_start(progress_vbox, False, False, 0)
+        main_box.pack_start(player_card, False, False, 0)
 
         # -------------------------------------------------------------
         # 3. Controls Row (Previous, Play/Pause, Next)
         # -------------------------------------------------------------
-        ctrl_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        ctrl_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=14)
         ctrl_box.set_halign(Gtk.Align.CENTER)
-        ctrl_box.set_margin_top(4)
-        ctrl_box.set_margin_bottom(4)
+        ctrl_box.set_margin_top(2)
+        ctrl_box.set_margin_bottom(2)
 
         btn_prev = Gtk.Button(label="󰒮")
-        btn_prev.get_style_context().add_class("btn-ctrl")
+        btn_prev.get_style_context().add_class("btn-ctrl-nav")
         btn_prev.connect("clicked", self.on_prev_clicked)
 
         self.btn_play = Gtk.Button(label="󰐊")
-        self.btn_play.get_style_context().add_class("btn-ctrl-accent")
+        self.btn_play.get_style_context().add_class("btn-ctrl-play")
         self.btn_play.connect("clicked", self.on_play_clicked)
 
         btn_next = Gtk.Button(label="󰒭")
-        btn_next.get_style_context().add_class("btn-ctrl")
+        btn_next.get_style_context().add_class("btn-ctrl-nav")
         btn_next.connect("clicked", self.on_next_clicked)
 
         ctrl_box.pack_start(btn_prev, False, False, 0)
@@ -333,7 +294,7 @@ class MusicVisualizer(Gtk.Window):
         # 4. Real-time CAVA Audio Visualizer (Directly on window surface)
         # -------------------------------------------------------------
         self.darea = Gtk.DrawingArea()
-        self.darea.set_size_request(-1, 72)
+        self.darea.set_size_request(-1, 64)
         self.darea.connect("draw", self.on_visualizer_draw)
         main_box.pack_start(self.darea, True, True, 2)
 
@@ -369,7 +330,7 @@ class MusicVisualizer(Gtk.Window):
             cr.arc(x + r, y + r, r, 3.14159265359, 4.71238898038)
             cr.close_path()
 
-            # Pure Flat Serena Accent (#FF2A55) — Zero gradients, zero drop shadow
+            # Use a flat accent fill without shadows.
             cr.set_source_rgba(255.0 / 255.0, 42.0 / 255.0, 85.0 / 255.0, 1.0)
             cr.fill()
 
@@ -473,20 +434,44 @@ ascii_max_range = 100
         if status in ["Playing", "Paused"]:
             try:
                 res_meta = subprocess.run(
-                    ["playerctl", "metadata", "--format", "{{title}}|||{{artist}}"],
+                    ["playerctl", "metadata", "--format", "{{title}}|||{{artist}}|||{{mpris:artUrl}}|||{{position}}|||{{mpris:length}}"],
                     capture_output=True,
                     text=True,
                     timeout=0.3
                 )
                 parts = res_meta.stdout.strip().split("|||")
-                title = parts[0] if len(parts) > 0 and parts[0] else "Unknown Title"
+                title = parts[0] if len(parts) > 0 and parts[0] else "Playing Media"
                 artist = parts[1] if len(parts) > 1 and parts[1] else ""
+                art_url = parts[2] if len(parts) > 2 else ""
+                pos_us = int(parts[3]) if len(parts) > 3 and parts[3].isdigit() else 0
+                len_us = int(parts[4]) if len(parts) > 4 and parts[4].isdigit() else 0
             except Exception:
                 title = "Playing Media"
                 artist = ""
+                art_url = ""
+                pos_us = 0
+                len_us = 0
 
             self.lbl_title.set_text(title)
             self.lbl_artist.set_text(artist)
+
+            # Progress calculation
+            pos_sec = pos_us / 1e6
+            len_sec = len_us / 1e6
+            if len_sec > 0:
+                fraction = max(0.0, min(1.0, pos_sec / len_sec))
+                self.progress_bar.set_fraction(fraction)
+                self.lbl_time_cur.set_text(self.format_time(pos_sec))
+                self.lbl_time_total.set_text(self.format_time(len_sec))
+            else:
+                self.progress_bar.set_fraction(0.0)
+                self.lbl_time_cur.set_text("00:00")
+                self.lbl_time_total.set_text("00:00")
+
+            # Check and update album art
+            if getattr(self, "current_art_url", None) != art_url:
+                self.current_art_url = art_url
+                threading.Thread(target=lambda: self.load_art_async(art_url), daemon=True).start()
 
             if status == "Playing":
                 self.btn_play.set_label("󰏤")
@@ -505,6 +490,10 @@ ascii_max_range = 100
             self.lbl_status.set_text("Idle")
             self.lbl_status.get_style_context().remove_class("playing")
             self.lbl_status.get_style_context().remove_class("paused")
+            self.progress_bar.set_fraction(0.0)
+            self.lbl_time_cur.set_text("00:00")
+            self.lbl_time_total.set_text("00:00")
+            self.set_default_art()
             self.target_bars = [0.0] * self.num_bars
 
         return True

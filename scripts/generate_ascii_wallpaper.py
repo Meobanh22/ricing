@@ -45,7 +45,7 @@ def generate_wallpaper(warmth_level=1.0, filename="serena_fennekin_ascii_sakura.
             is_skin = (r_val > 180 and g_val > 140 and b_val > 100 and r_val > g_val and g_val > b_val)
             
             if is_skin:
-                # Giữ nguyên độ ấm hồng hào của da Serena (Peachy Anime Skin Tone)
+                # Preserve the warm peach skin tones in the source image.
                 fg_r = min(255, int(r_val * 1.05))
                 fg_g = min(255, int(g_val * 0.98 * warmth_level))
                 fg_b = min(255, int(b_val * 0.90 * warmth_level))
@@ -75,6 +75,6 @@ def generate_wallpaper(warmth_level=1.0, filename="serena_fennekin_ascii_sakura.
     print("Saved:", out_path)
 
 if __name__ == "__main__":
-    # Bản tạo ra kiệt tác serena_fennekin_ascii_sakura.png hiện tại:
+    # Generate the current ASCII wallpaper.
     generate_wallpaper(warmth_level=1.0, filename="serena_fennekin_ascii_sakura.png")
 

@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-# ==============================================================================
-# 🌸 WALLPAPER SWITCHER
-# ==============================================================================
-# Chuyển đổi qua lại mượt mà các hình nền trong thư mục wallpapers
-# Thiết kế tối giản: KHÔNG popup thông báo
+# wallpaper_switcher.py — Wallpaper switcher tool.
 
 import os
 import sys
@@ -47,7 +43,7 @@ def set_wallpaper(filepath):
         return
 
     filename = os.path.basename(filepath)
-    print(f"🌸 Applying wallpaper: {filename}")
+    print(f"✿ Applying wallpaper: {filename}")
 
     # Ghi nhận trạng thái ảnh hiện tại
     try:

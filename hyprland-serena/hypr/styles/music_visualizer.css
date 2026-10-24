@@ -1,0 +1,157 @@
+/* music_visualizer.css — Stylesheet for Music Visualizer and Media Player. */
+@import "palette.css";
+
+/* === GLOBAL RESETS === */
+* {
+    font-family: 'JetBrains Mono Nerd Font', 'FiraCode Nerd Font', 'Segoe UI', sans-serif;
+}
+
+window#music-visualizer-window {
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+}
+
+#main-card {
+    background-color: transparent;
+    border: none;
+    padding: 14px;
+    min-width: 287px;
+}
+
+/* === HEADER === */
+.title-header {
+    color: @accent;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.btn-close {
+    color: @text_muted;
+    background: transparent;
+    border: none;
+    font-size: 13px;
+    padding: 2px 8px;
+    border-radius: 8px;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.btn-close:hover {
+    background: @bg_ghost_hover;
+    color: @accent;
+}
+
+/* === TRACK & ALBUM CARD === */
+.player-card {
+    background-color: @bg_card;
+    border: 1px solid @border_card;
+    border-radius: 10px;
+    padding: 10px;
+    transition: border-color 0.15s ease;
+}
+
+.album-art-box {
+    background-color: @bg_subtle;
+    border-radius: 8px;
+    min-width: 56px;
+    min-height: 56px;
+}
+
+.track-title {
+    color: @text_primary;
+    font-size: 13.5px;
+    font-weight: 600;
+}
+
+.track-artist {
+    color: @text_secondary;
+    font-size: 11px;
+    font-weight: 400;
+}
+
+.time-label {
+    color: @text_muted;
+    font-size: 10px;
+}
+
+/* === PROGRESS BAR === */
+progressbar {
+    border: none;
+    background-color: transparent;
+    padding: 0;
+    margin: 4px 0;
+}
+
+progressbar trough {
+    background-color: @bg_subtle;
+    border: none;
+    border-radius: 2px;
+    min-height: 4px;
+}
+
+progressbar progress {
+    background-color: @accent;
+    border: none;
+    border-radius: 2px;
+    min-height: 4px;
+}
+
+/* === CONTROLS === */
+button {
+    background-image: none;
+    box-shadow: none;
+    outline: none;
+    border: none;
+}
+
+.btn-ctrl-nav {
+    color: @text_secondary;
+    background-color: @bg_subtle;
+    border-radius: 8px;
+    min-width: 32px;
+    min-height: 32px;
+    font-size: 14px;
+    padding: 4px 8px;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.btn-ctrl-nav:hover {
+    background-color: @bg_card_hover;
+    color: @accent;
+}
+
+.btn-ctrl-play {
+    color: @text_inverse;
+    background-color: @accent;
+    border-radius: 50%;
+    min-width: 38px;
+    min-height: 38px;
+    font-size: 15px;
+    padding: 0;
+    transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.btn-ctrl-play:hover {
+    background-color: @accent_hover;
+}
+
+/* === STATUS BADGE === */
+.status-badge {
+    background-color: @bg_subtle;
+    color: @text_secondary;
+    font-size: 9.5px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 4px;
+}
+
+.status-badge.playing {
+    color: @status_success;
+}
+
+.status-badge.paused {
+    color: @text_muted;
+}
+

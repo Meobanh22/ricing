@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
-# ==============================================================================
-# 🖱️ BUILD COMPLETE HYPRCURSOR + XCURSOR THEME FOR SYLVEON CUSTOM
-# ==============================================================================
-# Hyprland 0.56 yêu cầu chuẩn native Hyprcursor (.hlc + manifest.hl)
-# Đồng thời tạo Xcursor (cursors/ + index.theme) để hỗ trợ toàn bộ GTK/XWayland
-# ==============================================================================
+# Build Xcursor and Hyprcursor themes from the Sylveon cursor assets.
 
 import os
 import shutil
@@ -28,7 +23,7 @@ os.makedirs(os.path.join(TMP_HC_DIR, "hyprcursors"), exist_ok=True)
 # 1. Tạo index.theme cho Xcursor
 INDEX_THEME = """[Icon Theme]
 Name=sylveon-custom
-Comment=🌸 Sylveon & Serena Custom Cursor Theme for Linux Wayland & X11
+Comment=Custom Sylveon cursor theme for Linux Wayland and X11
 Inherits=core
 """
 with open(os.path.join(OUTPUT_THEME_DIR, "index.theme"), "w") as f:
@@ -36,7 +31,7 @@ with open(os.path.join(OUTPUT_THEME_DIR, "index.theme"), "w") as f:
 
 # 2. Tạo manifest.hl cho Hyprcursor
 MANIFEST_HL = """name = sylveon-custom
-description = 🌸 Sylveon & Serena Custom Cursor Theme for Hyprland
+description = Custom Sylveon cursor theme for Hyprland
 version = 0.2
 cursors_directory = hyprcursors
 """
@@ -122,7 +117,7 @@ def make_cursor(sprite_path, base_name, aliases, hot_type="ear"):
         f.write("\n".join(hc_meta_lines) + "\n")
 
 def build_all():
-    print("🌸 Đang biên dịch bộ con trỏ chuột Sylveon Custom (Chuẩn Hyprcursor + Xcursor)...")
+    print("✿ Đang biên dịch bộ con trỏ chuột Sylveon Custom (Chuẩn Hyprcursor + Xcursor)...")
 
     shapes = [
         ("sheet_arrow.png", "left_ptr", ["default", "arrow", "top_left_arrow"], "ear"),

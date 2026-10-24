@@ -1,15 +1,5 @@
 #!/usr/bin/env python3
-# ==============================================================================
-# 🌸 ELEGANT FLOATING CONTROL CENTER
-# ==============================================================================
-# - Floating pop-up card anchored right beneath Waybar's top-right corner.
-# - Compact height (does not stretch full screen height).
-# - Quick settings: Vietnamese/English IME toggle, Wi-Fi status, Audio Volume slider.
-# - REAL notifications section backed by notif_daemon.py and SwayNC.
-# - Full-width bottom "Power Menu" button triggering Wlogout.
-# - Ultra-fast instantaneous launch (asynchronous status fetching + caching).
-# - Pixel-perfect centered power icon & radiant ruby hover glow on all cards.
-# ==============================================================================
+# Floating quick settings and notifications panel.
 
 import os
 import sys
@@ -35,329 +25,18 @@ PID_FILE = "/tmp/control_center.pid"
 CACHE_FILE = os.path.expanduser("~/.cache/notifications.json")
 STATUS_CACHE_FILE = "/tmp/status.json"
 
-CSS_DATA = b"""
-* {
-    font-family: 'JetBrainsMono Nerd Font', 'FiraCode Nerd Font', 'Segoe UI', sans-serif;
-}
+# Path to external CSS stylesheet
+STYLESHEET_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "styles", "control_center.css")
 
-window,
-window.background,
-window#control-center-window,
-window#control-center-window.background,
-#control-center-window {
-    background-color: transparent;
-    background-image: none;
-    border: none;
-    box-shadow: none;
-}
+# Services
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+if SCRIPT_DIR not in sys.path:
+    sys.path.insert(0, SCRIPT_DIR)
 
-/* Reset all button / eventbox styles to eliminate GTK Adwaita white bleed */
-button,
-button:hover,
-button:active,
-button:focus,
-.quick-card,
-.btn-power-card,
-eventbox {
-    background-image: none;
-    box-shadow: none;
-    outline: none;
-    border: none;
-}
-
-/* Main Outer Card - Exact Warm Obsidian-Wine (#201011) */
-#cc-main-card {
-    background-color: transparent;
-    border: none;
-    border-radius: 16px;
-    padding: 14px;
-    box-shadow: none;
-    min-width: 287px;
-}
-
-/* Header Flower Box - Exact from Image (#301f20) */
-.header-flower-box {
-    background-color: rgba(48, 31, 32, 0.95);
-    border-radius: 10px;
-    min-width: 34px;
-    min-height: 34px;
-    padding: 0;
-    margin: 0;
-}
-
-/* Close Button */
-.btn-close {
-    color: #E8C2D0;
-    background: transparent;
-    border: none;
-    font-size: 13px;
-    padding: 4px 8px;
-    border-radius: 8px;
-    transition: background-color 0.15s ease, color 0.15s ease;
-}
-
-.btn-close:hover {
-    color: #FF2A55;
-    background-color: rgba(255, 42, 85, 0.15);
-}
-
-/* Quick Action Cards (Top 3 Cards) - Exact from Image (#2a1a1f) */
-.quick-card {
-    background-color: rgba(42, 26, 31, 0.95);
-    border: none;
-    border-radius: 10px;
-    padding: 11px 4px 9px 4px;
-    transition: background-color 0.15s ease;
-    box-shadow: none;
-}
-
-/* Card Hover Effect: Subtle background shift only, zero borders */
-.quick-card.card-hover,
-.quick-card:hover {
-    background-color: rgba(58, 34, 42, 0.98);
-    border: none;
-    box-shadow: none;
-}
-
-.card-icon {
-    color: #FF2A55;
-    transition: color 0.15s ease;
-}
-
-.card-hover .card-icon,
-.quick-card:hover .card-icon {
-    color: #FF597B;
-    text-shadow: none;
-}
-
-.card-title {
-    color: #FFF0F5;
-    transition: color 0.15s ease;
-}
-
-.card-hover .card-title,
-.quick-card:hover .card-title {
-    color: #FFFFFF;
-    text-shadow: none;
-}
-
-/* Compact Volume Scale Slider */
-scale,
-scale.horizontal,
-#vol-scale,
-scale#vol-scale {
-    margin: 4px 6px 2px 6px;
-    padding: 0;
-    -gtk-outline-radius: 3px;
-    outline: none;
-}
-
-scale trough,
-scale.horizontal trough,
-#vol-scale trough,
-scale#vol-scale trough {
-    background-image: none;
-    background-color: rgba(60, 24, 38, 0.85);
-    border: none;
-    border-radius: 3px;
-    min-height: 5px;
-    box-shadow: none;
-}
-
-scale highlight,
-scale.horizontal highlight,
-scale trough highlight,
-scale.horizontal trough highlight,
-#vol-scale highlight,
-scale#vol-scale highlight,
-scale.horizontal#vol-scale highlight,
-#vol-scale trough highlight,
-scale#vol-scale trough highlight,
-scale.horizontal#vol-scale trough highlight,
-#vol-scale highlight:hover,
-#vol-scale highlight:focus,
-#vol-scale highlight:active {
-    background-image: none;
-    background-color: #FF2A55;
-    border: none;
-    border-radius: 3px;
-    box-shadow: none;
-}
-
-scale slider,
-scale.horizontal slider,
-#vol-scale slider,
-scale#vol-scale slider {
-    background-image: none;
-    background-color: #FFFFFF;
-    border: 2px solid #FF2A55;
-    border-radius: 50%;
-    min-width: 12px;
-    min-height: 12px;
-    margin: -3.5px;
-    box-shadow: none;
-    transition: background-color 0.15s ease, border-color 0.15s ease;
-}
-
-scale slider:hover,
-scale.horizontal slider:hover,
-#vol-scale slider:hover,
-scale#vol-scale slider:hover {
-    background-color: #FFF0F5;
-    border-color: #FF597B;
-    box-shadow: none;
-}
-
-/* Notification Items - Transparent Minimalist */
-.notif-item {
-    background-color: transparent;
-    border: none;
-    border-radius: 8px;
-    padding: 8px 10px;
-    margin: 2px 0;
-    transition: background-color 0.15s ease;
-    box-shadow: none;
-}
-
-.notif-item:hover {
-    background-color: rgba(42, 26, 31, 0.50);
-    border: none;
-    box-shadow: none;
-}
-
-/* Badges */
-.notif-badge-box {
-    border-radius: 10px;
-    min-width: 34px;
-    min-height: 34px;
-    padding: 0;
-    margin: 0;
-}
-
-.notif-badge-vscode { background-color: #007ACC; }
-.notif-badge-discord { background-color: #5865F2; }
-.notif-badge-browser { background-color: #E66000; }
-.notif-badge-spotify { background-color: #1DB954; }
-.notif-badge-terminal { background-color: #4A148C; }
-.notif-badge-system { background-color: #8E24AA; }
-.notif-badge-default { background-color: #FF2A55; }
-
-/* Custom Minimalist Scrollbar */
-#cc-notif-scroll {
-    background: transparent;
-    border: none;
-}
-
-#cc-notif-scroll scrollbar {
-    background: transparent;
-    border: none;
-    padding: 0;
-    margin: 0;
-    min-width: 4px;
-    -GtkScrollbar-has-backward-stepper: false;
-    -GtkScrollbar-has-forward-stepper: false;
-}
-
-#cc-notif-scroll scrollbar trough {
-    background-color: transparent;
-    border: none;
-}
-
-#cc-notif-scroll scrollbar slider {
-    background-color: rgba(255, 42, 85, 0.40);
-    border-radius: 4px;
-    min-width: 6px;
-    border: none;
-    transition: all 0.2s ease;
-}
-
-#cc-notif-scroll scrollbar slider:hover {
-    background-color: #FF2A55;
-    min-width: 8px;
-}
-
-/* Clear All Button */
-.btn-clear-all {
-    color: #E8C2D0;
-    background: transparent;
-    border: none;
-    font-size: 11px;
-    font-weight: 600;
-    padding: 4px 8px;
-    border-radius: 8px;
-    transition: all 0.15s ease;
-}
-
-.btn-clear-all:hover {
-    color: #FF2A55;
-    background-color: rgba(255, 42, 85, 0.18);
-}
-
-/* Bottom Power Menu Card - Transparent Minimalist */
-.btn-power-card {
-    background-color: transparent;
-    border: none;
-    border-radius: 8px;
-    padding: 10px 14px;
-    transition: background-color 0.15s ease;
-    box-shadow: none;
-}
-
-.btn-power-card.card-hover,
-.btn-power-card:hover {
-    background-color: rgba(42, 26, 31, 0.50);
-    border: none;
-    box-shadow: none;
-}
-
-/* Subtle Power Icon */
-.power-icon-circle {
-    border: none;
-    border-radius: 14px;
-    min-width: 28px;
-    min-height: 28px;
-    padding: 0;
-    margin: 0;
-    background-color: transparent;
-    transition: background-color 0.15s ease;
-    box-shadow: none;
-}
-
-.power-icon {
-    color: #FF2A55;
-    transition: color 0.15s ease;
-}
-
-.btn-power-card.card-hover .power-icon-circle {
-    border: none;
-    background-color: transparent;
-    box-shadow: none;
-}
-
-.btn-power-card.card-hover .power-icon {
-    color: #FF597B;
-}
-
-.power-label {
-    color: #FFF0F5;
-    transition: color 0.15s ease;
-}
-
-.btn-power-card.card-hover .power-label {
-    color: #FFFFFF;
-    text-shadow: none;
-}
-
-.power-arrow {
-    color: #A68595;
-    transition: color 0.15s ease;
-}
-
-.btn-power-card.card-hover .power-arrow {
-    color: #FF2A55;
-    text-shadow: none;
-}
-"""
+from services.audio import AudioService
+from services.brightness import BrightnessService
+from services.bluetooth import BluetoothService
+from services.power import PowerService
 
 def format_relative_time(timestamp):
     if not timestamp:
@@ -449,7 +128,7 @@ class ControlCenter(Gtk.Window):
                 monitor = display.get_primary_monitor() or display.get_monitor(0)
                 if monitor:
                     geom = monitor.get_geometry()
-                    dash_w = 320
+                    dash_w = 315
                     x = geom.x + geom.width - dash_w - 14
                     y = geom.y + 44
                     self.move(x, y)
@@ -495,11 +174,11 @@ class ControlCenter(Gtk.Window):
         cr.arc(x + r, y + r, r, 3.14159265359, 4.71238898038)
         cr.close_path()
 
-        # Fill with Serena Warm Obsidian-Wine (--bg-window: rgba(32, 16, 18, 0.98))
+        # Fill with the shared window background token.
         cr.set_source_rgba(32.0 / 255.0, 16.0 / 255.0, 18.0 / 255.0, 0.98)
         cr.fill_preserve()
 
-        # Stroke with 1px Serena outer border (--border-window: rgba(255, 255, 255, 0.12))
+        # Draw the shared outer window border.
         cr.set_source_rgba(1.0, 1.0, 1.0, 0.12)
         cr.set_line_width(1.0)
         cr.stroke()
@@ -510,6 +189,10 @@ class ControlCenter(Gtk.Window):
         defaults = {
             "vol": 35,
             "muted": False,
+            "bright": 60,
+            "bt_on": False,
+            "bt_sub": "Off",
+            "power_mode": "powersave",
             "ime_sub": "Vietnamese",
             "ime_note": "Telex - VIE",
             "wifi_sub": "Connected",
@@ -533,7 +216,14 @@ class ControlCenter(Gtk.Window):
 
     def apply_css(self):
         css_provider = Gtk.CssProvider()
-        css_provider.load_from_data(CSS_DATA)
+        css_file = STYLESHEET_PATH
+        if not os.path.exists(css_file):
+            css_file = os.path.expanduser("~/.config/hypr/styles/control_center.css")
+        if os.path.exists(css_file):
+            try:
+                css_provider.load_from_path(css_file)
+            except Exception as e:
+                print(f"Warning: Failed to load CSS from {css_file}: {e}", file=sys.stderr)
         context = Gtk.StyleContext()
         screen = Gdk.Screen.get_default()
         context.add_provider_for_screen(screen, css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
@@ -592,7 +282,7 @@ class ControlCenter(Gtk.Window):
         self.status['muted'] = False
         self.lbl_vol_val.set_markup(f"<span font='10' color='#E8C2D0'>{vol}%</span>")
         self.update_vol_icon(vol, False)
-        threading.Thread(target=lambda: subprocess.run(['pamixer', '--set-volume', str(val)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL), daemon=True).start()
+        threading.Thread(target=lambda v=vol: subprocess.run(['pamixer', '--set-volume', str(v)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL), daemon=True).start()
         return True
 
     def on_key_press(self, widget, event):
@@ -625,28 +315,18 @@ class ControlCenter(Gtk.Window):
         card.set_name("cc-main-card")
 
         # =====================================================
-        # 1. HEADER (🌸 Control Center | Quick Settings & Alerts)
+        # 1. HEADER (Control Center | Quick Settings & Alerts)
         # =====================================================
         header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
 
-        flower_box = Gtk.Box()
-        flower_box.get_style_context().add_class("header-flower-box")
-        flower_box.set_size_request(34, 34)
-        flower_box.set_valign(Gtk.Align.CENTER)
-        flower_box.set_halign(Gtk.Align.CENTER)
-
         lbl_flower = Gtk.Label()
-        lbl_flower.set_markup("<span font='16' color='#FF2A55'>🌸</span>")
+        lbl_flower.set_markup("<span font='16' color='#FF2A55'>✿</span>")
         lbl_flower.set_valign(Gtk.Align.CENTER)
-        lbl_flower.set_halign(Gtk.Align.CENTER)
-        lbl_flower.set_xalign(0.5)
-        lbl_flower.set_yalign(0.5)
-        flower_box.pack_start(lbl_flower, True, True, 0)
-        header_box.pack_start(flower_box, False, False, 0)
+        header_box.pack_start(lbl_flower, False, False, 0)
 
         title_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=1)
         lbl_title = Gtk.Label()
-        lbl_title.set_markup("<span font='15' weight='bold' color='#FFF0F5'>Control Center</span>")
+        lbl_title.set_markup("<span font='14' weight='bold' color='#FFF0F5'>Control Center</span>")
         lbl_title.set_halign(Gtk.Align.START)
         title_vbox.pack_start(lbl_title, False, False, 0)
 
@@ -657,21 +337,18 @@ class ControlCenter(Gtk.Window):
 
         header_box.pack_start(title_vbox, True, True, 0)
 
-        btn_close = Gtk.Button(label="✕")
-        btn_close.get_style_context().add_class("btn-close")
-        btn_close.set_size_request(28, 28)
-        btn_close.connect("clicked", lambda x: self.close_and_quit())
-        header_box.pack_end(btn_close, False, False, 0)
-
         card.pack_start(header_box, False, False, 0)
 
         # =====================================================
-        # 2. TOP 3 QUICK ACTION CARDS (Input Method | Wi-Fi | Volume)
+        # 2. TOP QUICK ACTION TILES (2x2 Grid)
         # =====================================================
-        quick_grid = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
-        quick_grid.set_homogeneous(True)
+        quick_grid = Gtk.Grid()
+        quick_grid.set_column_spacing(8)
+        quick_grid.set_row_spacing(8)
+        quick_grid.set_column_homogeneous(True)
+        quick_grid.set_row_homogeneous(True)
 
-        # --- Card 1: Input Method ---
+        # --- Card 1: Input Method (Col 0, Row 0) ---
         card_ime = Gtk.EventBox()
         card_ime.get_style_context().add_class("quick-card")
         card_ime.connect("button-press-event", lambda w, e: self.toggle_ime())
@@ -683,24 +360,23 @@ class ControlCenter(Gtk.Window):
 
         lbl_ime_icon = Gtk.Label()
         lbl_ime_icon.get_style_context().add_class("card-icon")
-        lbl_ime_icon.set_markup("<span font='20'>󰌌</span>")
+        lbl_ime_icon.set_markup("<span font='18'>󰌌</span>")
         vbox_ime.pack_start(lbl_ime_icon, False, False, 0)
 
         lbl_ime_title = Gtk.Label()
         lbl_ime_title.get_style_context().add_class("card-title")
-        lbl_ime_title.set_markup("<span font='11' weight='bold'>Input</span>")
-        vbox_ime.pack_start(lbl_ime_title, False, False, 2)
+        lbl_ime_title.set_markup("<span font='10.5' weight='bold'>Input</span>")
+        vbox_ime.pack_start(lbl_ime_title, False, False, 0)
 
         self.lbl_ime_sub = Gtk.Label()
-        self.lbl_ime_sub.set_markup(f"<span font='10' color='#E8C2D0'>{self.status['ime_sub']}</span>")
+        self.lbl_ime_sub.set_markup(f"<span font='9.5' color='#E8C2D0'>{self.status['ime_sub']}</span>")
         vbox_ime.pack_start(self.lbl_ime_sub, False, False, 0)
 
         self.lbl_ime_note = Gtk.Label()
-
         card_ime.add(vbox_ime)
-        quick_grid.pack_start(card_ime, True, True, 0)
+        quick_grid.attach(card_ime, 0, 0, 1, 1)
 
-        # --- Card 2: Wi-Fi ---
+        # --- Card 2: Wi-Fi (Col 1, Row 0) ---
         card_wifi = Gtk.EventBox()
         card_wifi.get_style_context().add_class("quick-card")
         card_wifi.connect("button-press-event", lambda w, e: self.launch_app("nm-connection-editor"))
@@ -712,60 +388,140 @@ class ControlCenter(Gtk.Window):
 
         lbl_wifi_icon = Gtk.Label()
         lbl_wifi_icon.get_style_context().add_class("card-icon")
-        lbl_wifi_icon.set_markup("<span font='20'>󰖩</span>")
+        lbl_wifi_icon.set_markup("<span font='18'>󰖩</span>")
         vbox_wifi.pack_start(lbl_wifi_icon, False, False, 0)
 
         lbl_wifi_title = Gtk.Label()
         lbl_wifi_title.get_style_context().add_class("card-title")
-        lbl_wifi_title.set_markup("<span font='11' weight='bold'>Wi-Fi</span>")
-        vbox_wifi.pack_start(lbl_wifi_title, False, False, 2)
+        lbl_wifi_title.set_markup("<span font='10.5' weight='bold'>Wi-Fi</span>")
+        vbox_wifi.pack_start(lbl_wifi_title, False, False, 0)
 
         self.lbl_wifi_sub = Gtk.Label()
-        self.lbl_wifi_sub.set_markup(f"<span font='10' color='#E8C2D0'>{self.status['wifi_sub']}</span>")
+        self.lbl_wifi_sub.set_markup(f"<span font='9.5' color='#E8C2D0'>{self.status['wifi_sub']}</span>")
         vbox_wifi.pack_start(self.lbl_wifi_sub, False, False, 0)
 
         self.lbl_wifi_ssid = Gtk.Label()
-
         card_wifi.add(vbox_wifi)
-        quick_grid.pack_start(card_wifi, True, True, 0)
+        quick_grid.attach(card_wifi, 1, 0, 1, 1)
 
-        # --- Card 3: Volume ---
-        self.card_audio = Gtk.EventBox()
-        self.card_audio.get_style_context().add_class("quick-card")
-        self.card_audio.add_events(Gdk.EventMask.SCROLL_MASK)
-        self.card_audio.connect("button-press-event", self.on_audio_card_clicked)
-        self.card_audio.connect("scroll-event", self.on_audio_card_scroll)
-        self.card_audio.connect("enter-notify-event", self.on_card_hover_enter)
-        self.card_audio.connect("leave-notify-event", self.on_card_hover_leave)
+        # --- Card 3: Bluetooth (Col 0, Row 1) ---
+        card_bt = Gtk.EventBox()
+        card_bt.get_style_context().add_class("quick-card")
+        card_bt.connect("button-press-event", lambda w, e: self.toggle_bluetooth())
+        card_bt.connect("enter-notify-event", self.on_card_hover_enter)
+        card_bt.connect("leave-notify-event", self.on_card_hover_leave)
 
-        vbox_audio = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
-        vbox_audio.set_halign(Gtk.Align.CENTER)
+        vbox_bt = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+        vbox_bt.set_halign(Gtk.Align.CENTER)
 
+        self.lbl_bt_icon = Gtk.Label()
+        self.lbl_bt_icon.get_style_context().add_class("card-icon")
+        vbox_bt.pack_start(self.lbl_bt_icon, False, False, 0)
+
+        lbl_bt_title = Gtk.Label()
+        lbl_bt_title.get_style_context().add_class("card-title")
+        lbl_bt_title.set_markup("<span font='10.5' weight='bold'>Bluetooth</span>")
+        vbox_bt.pack_start(lbl_bt_title, False, False, 0)
+
+        self.lbl_bt_sub = Gtk.Label()
+        vbox_bt.pack_start(self.lbl_bt_sub, False, False, 0)
+
+        self.update_bluetooth_ui(self.status.get('bt_on', False), self.status.get('bt_sub', 'Off'))
+
+        card_bt.add(vbox_bt)
+        quick_grid.attach(card_bt, 0, 1, 1, 1)
+
+        # --- Card 4: Power Mode (Col 1, Row 1) ---
+        card_pwr = Gtk.EventBox()
+        card_pwr.get_style_context().add_class("quick-card")
+        card_pwr.connect("button-press-event", lambda w, e: self.toggle_power_mode(w, e))
+        card_pwr.connect("enter-notify-event", self.on_card_hover_enter)
+        card_pwr.connect("leave-notify-event", self.on_card_hover_leave)
+
+        vbox_pwr = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+        vbox_pwr.set_halign(Gtk.Align.CENTER)
+
+        self.lbl_pwr_icon = Gtk.Label()
+        self.lbl_pwr_icon.get_style_context().add_class("card-icon")
+        vbox_pwr.pack_start(self.lbl_pwr_icon, False, False, 0)
+
+        lbl_pwr_title = Gtk.Label()
+        lbl_pwr_title.get_style_context().add_class("card-title")
+        lbl_pwr_title.set_markup("<span font='10.5' weight='bold'>Power Mode</span>")
+        vbox_pwr.pack_start(lbl_pwr_title, False, False, 0)
+
+        self.lbl_pwr_sub = Gtk.Label()
+        vbox_pwr.pack_start(self.lbl_pwr_sub, False, False, 0)
+
+        self.update_power_ui(self.status.get('power_mode', 'powersave'))
+
+        card_pwr.add(vbox_pwr)
+        quick_grid.attach(card_pwr, 1, 1, 1, 1)
+
+        card.pack_start(quick_grid, False, False, 0)
+
+        # =====================================================
+        # SLIDERS SECTION (Volume & Brightness)
+        # =====================================================
+        sliders_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+
+        # 1. Volume Row
+        vol_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+        vol_header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        
         self.lbl_vol_icon = Gtk.Label()
         self.lbl_vol_icon.get_style_context().add_class("card-icon")
-        self.lbl_vol_icon.set_markup("<span font='20'>󰕾</span>")
-        vbox_audio.pack_start(self.lbl_vol_icon, False, False, 0)
+        self.lbl_vol_icon.set_markup("<span font='13'>󰕾</span>")
+        self.lbl_vol_icon.set_margin_start(4)
+        vol_header.pack_start(self.lbl_vol_icon, False, False, 0)
 
-        lbl_audio_title = Gtk.Label()
-        lbl_audio_title.get_style_context().add_class("card-title")
-        lbl_audio_title.set_markup("<span font='11' weight='bold'>Volume</span>")
-        vbox_audio.pack_start(lbl_audio_title, False, False, 2)
+        lbl_vol_title = Gtk.Label()
+        lbl_vol_title.set_markup("<span font='11' weight='bold' color='#FFF0F5'> Volume</span>")
+        vol_header.pack_start(lbl_vol_title, False, False, 0)
 
         self.lbl_vol_val = Gtk.Label()
         self.lbl_vol_val.set_markup(f"<span font='10' color='#E8C2D0'>{self.status['vol']}%</span>")
-        vbox_audio.pack_start(self.lbl_vol_val, False, False, 0)
+        vol_header.pack_end(self.lbl_vol_val, False, False, 4)
+        vol_box.pack_start(vol_header, False, False, 0)
 
         self.vol_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0, 100, 1)
         self.vol_scale.set_name("vol-scale")
         self.vol_scale.set_draw_value(False)
         self.vol_scale.set_value(self.status['vol'])
         self.vol_scale.connect("value-changed", self.on_vol_changed)
+        vol_box.pack_start(self.vol_scale, False, False, 0)
+        sliders_box.pack_start(vol_box, False, False, 0)
 
-        self.card_audio.add(vbox_audio)
-        quick_grid.pack_start(self.card_audio, True, True, 0)
-        card.pack_start(quick_grid, False, False, 0)
+        # 2. Brightness Row
+        bright_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+        bright_header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
 
-        # Update initial icon
+        lbl_bright_icon = Gtk.Label()
+        lbl_bright_icon.get_style_context().add_class("card-icon")
+        lbl_bright_icon.set_markup("<span font='13'>󰃠</span>")
+        lbl_bright_icon.set_margin_start(4)
+        bright_header.pack_start(lbl_bright_icon, False, False, 0)
+
+        lbl_bright_title = Gtk.Label()
+        lbl_bright_title.set_markup("<span font='11' weight='bold' color='#FFF0F5'> Brightness</span>")
+        bright_header.pack_start(lbl_bright_title, False, False, 0)
+
+        self.lbl_bright_val = Gtk.Label()
+        self.lbl_bright_val.set_markup(f"<span font='10' color='#E8C2D0'>{self.status.get('bright', 60)}%</span>")
+        bright_header.pack_end(self.lbl_bright_val, False, False, 4)
+        bright_box.pack_start(bright_header, False, False, 0)
+
+        self.bright_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 5, 100, 1)
+        self.bright_scale.set_name("bright-scale")
+        self.bright_scale.set_draw_value(False)
+        self.bright_scale.set_value(self.status.get('bright', 60))
+        self.bright_scale.connect("value-changed", self.on_bright_changed)
+        bright_box.pack_start(self.bright_scale, False, False, 0)
+        sliders_box.pack_start(bright_box, False, False, 0)
+
+        card.pack_start(sliders_box, False, False, 0)
+
+        # Update initial icons
         self.update_vol_icon(self.status['vol'], self.status['muted'])
 
         # =====================================================
@@ -778,15 +534,12 @@ class ControlCenter(Gtk.Window):
         lbl_notif_title.set_halign(Gtk.Align.START)
         notif_header.pack_start(lbl_notif_title, True, True, 0)
 
-        btn_clear = Gtk.Button(label="Clear all")
-        btn_clear.get_style_context().add_class("btn-clear-all")
-        btn_clear.connect("clicked", self.clear_all_notifications)
-        notif_header.pack_end(btn_clear, False, False, 0)
-
-        self.lbl_notif_count = Gtk.Label()
-        self.lbl_notif_count.set_markup("<span font='11' color='#A68595'>0 new</span>")
-        self.lbl_notif_count.set_margin_end(12)
-        notif_header.pack_end(self.lbl_notif_count, False, False, 0)
+        self.btn_clear = Gtk.Button(label="Clear all")
+        self.btn_clear.set_relief(Gtk.ReliefStyle.NONE)
+        self.btn_clear.get_style_context().add_class("btn-clear-all")
+        self.btn_clear.connect("clicked", self.clear_all_notifications)
+        self.btn_clear.set_valign(Gtk.Align.CENTER)
+        notif_header.pack_end(self.btn_clear, False, False, 0)
 
         card.pack_start(notif_header, False, False, 0)
 
@@ -868,8 +621,7 @@ class ControlCenter(Gtk.Window):
             except Exception:
                 notifs = []
 
-        count_display = len(notifs)
-        self.lbl_notif_count.set_markup(f"<span font='11' color='#A88D9B'>{count_display} new</span>" if count_display > 0 else "<span font='11' color='#A88D9B'>0 new</span>")
+        self.btn_clear.set_visible(bool(notifs))
 
         if not notifs:
             empty_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
@@ -1016,11 +768,73 @@ class ControlCenter(Gtk.Window):
         if self.updating_sliders:
             return
         val = int(scale.get_value())
-        self.lbl_vol_val.set_markup(f"<span font='10.5' color='#E8C2D0'>{val}%</span>")
+        self.lbl_vol_val.set_markup(f"<span font='10' color='#E8C2D0'>{val}%</span>")
         self.update_vol_icon(val, False)
         self.status['vol'] = val
         self.status['muted'] = False
-        threading.Thread(target=lambda: subprocess.run(['pamixer', '--set-volume', str(val)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL), daemon=True).start()
+        threading.Thread(target=lambda v=val: AudioService.set_volume(v), daemon=True).start()
+
+    def on_bright_changed(self, scale):
+        if self.updating_sliders:
+            return
+        val = int(scale.get_value())
+        self.lbl_bright_val.set_markup(f"<span font='10' color='#E8C2D0'>{val}%</span>")
+        self.status['bright'] = val
+        threading.Thread(target=lambda v=val: BrightnessService.set_brightness(v), daemon=True).start()
+
+    POWER_ICONS = {
+        "powersave": "",
+        "balanced": "",
+        "performance": ""
+    }
+
+    def update_bluetooth_ui(self, bt_on: bool, sub: str):
+        ctx = self.lbl_bt_icon.get_style_context()
+        if bt_on:
+            ctx.remove_class("card-icon-muted")
+            if not ctx.has_class("card-icon"):
+                ctx.add_class("card-icon")
+            sub_color = "#E8C2D0"
+        else:
+            ctx.remove_class("card-icon")
+            if not ctx.has_class("card-icon-muted"):
+                ctx.add_class("card-icon-muted")
+            sub_color = "#A68595"
+        self.lbl_bt_icon.set_markup("<span font='18'>󰂯</span>")
+        self.lbl_bt_sub.set_markup(f"<span font='9.5' color='{sub_color}'>{sub}</span>")
+
+    def toggle_bluetooth(self):
+        def do_toggle():
+            new_state = BluetoothService.toggle_power()
+            self.status['bt_on'] = new_state
+            dev_name = BluetoothService.get_connected_device_name() if new_state else ""
+            sub = dev_name if dev_name else ("On" if new_state else "Off")
+            self.status['bt_sub'] = sub
+            GLib.idle_add(lambda: self.update_bluetooth_ui(new_state, sub))
+            self.save_status_cache()
+        threading.Thread(target=do_toggle, daemon=True).start()
+
+    def update_power_ui(self, mode: str):
+        icon = self.POWER_ICONS.get(mode, "")
+        name = mode.capitalize()
+        self.lbl_pwr_icon.set_markup(f"<span font='18'>{icon}</span>")
+        self.lbl_pwr_sub.set_markup(f"<span font='9.5' color='#E8C2D0'>{name}</span>")
+
+    def toggle_power_mode(self, widget=None, event=None):
+        def do_toggle():
+            cur = self.status.get('power_mode', 'powersave')
+            order = ["powersave", "balanced", "performance"]
+            try:
+                idx = order.index(cur)
+                next_p = order[(idx + 1) % len(order)]
+            except ValueError:
+                next_p = "powersave"
+            PowerService.set_power_mode(next_p)
+            self.status['power_mode'] = next_p
+            GLib.idle_add(lambda: self.update_power_ui(next_p))
+            self.save_status_cache()
+        threading.Thread(target=do_toggle, daemon=True).start()
+        return True
 
     # Asynchronous Background Refresh (Zero GUI blocking)
     def trigger_async_refresh(self):
@@ -1042,15 +856,15 @@ class ControlCenter(Gtk.Window):
         self.status['ime_note'] = note
 
         GLib.idle_add(lambda: (
-            self.lbl_ime_sub.set_markup(f"<span font='10' color='#E8C2D0'>{sub}</span>"),
+            self.lbl_ime_sub.set_markup(f"<span font='9.5' color='#E8C2D0'>{sub}</span>"),
             self.lbl_ime_note.set_markup(f"<span font='9.5' color='#A68595'>{note}</span>")
         ))
 
     def refresh_all_status_async(self):
         # 1. Volume
         try:
-            vol = int(subprocess.check_output(['pamixer', '--get-volume'], stderr=subprocess.DEVNULL).decode().strip())
-            muted = subprocess.check_output(['pamixer', '--get-mute'], stderr=subprocess.DEVNULL).decode().strip() == 'true'
+            vol = AudioService.get_volume()
+            muted = AudioService.is_muted()
             self.status['vol'] = vol
             self.status['muted'] = muted
             def apply_vol():
@@ -1065,10 +879,44 @@ class ControlCenter(Gtk.Window):
         except Exception:
             pass
 
-        # 2. IME
+        # 2. Brightness
+        try:
+            bright = BrightnessService.get_brightness()
+            self.status['bright'] = bright
+            def apply_bright():
+                self.updating_sliders = True
+                try:
+                    self.bright_scale.set_value(bright)
+                    self.lbl_bright_val.set_markup(f"<span font='10' color='#E8C2D0'>{bright}%</span>")
+                finally:
+                    self.updating_sliders = False
+            GLib.idle_add(apply_bright)
+        except Exception:
+            pass
+
+        # 3. Bluetooth
+        try:
+            bt_on = BluetoothService.is_enabled()
+            dev_name = BluetoothService.get_connected_device_name() if bt_on else ""
+            sub = dev_name if dev_name else ("On" if bt_on else "Off")
+            self.status['bt_on'] = bt_on
+            self.status['bt_sub'] = sub
+            GLib.idle_add(lambda: self.update_bluetooth_ui(bt_on, sub))
+        except Exception:
+            pass
+
+        # 4. Power Mode
+        try:
+            pwr = PowerService.get_power_mode()
+            self.status['power_mode'] = pwr
+            GLib.idle_add(lambda: self.update_power_ui(pwr))
+        except Exception:
+            pass
+
+        # 5. IME
         self.refresh_ime_async()
 
-        # 3. Wi-Fi
+        # 6. Wi-Fi
         try:
             out = subprocess.check_output("nmcli -t -f active,ssid dev wifi 2>/dev/null | grep '^yes' | cut -d: -f2 | head -n1", shell=True).decode().strip()
             if out:
@@ -1078,7 +926,7 @@ class ControlCenter(Gtk.Window):
             self.status['wifi_sub'] = sub
             self.status['wifi_ssid'] = ssid
             GLib.idle_add(lambda: (
-                self.lbl_wifi_sub.set_markup(f"<span font='10' color='#E8C2D0'>{sub}</span>"),
+                self.lbl_wifi_sub.set_markup(f"<span font='9.5' color='#E8C2D0'>{sub}</span>"),
                 self.lbl_wifi_ssid.set_markup(f"<span font='9.5' color='#A68595'>{ssid}</span>")
             ))
         except Exception:

@@ -1,0 +1,337 @@
+/* control_center.css — Stylesheet for Control Center GTK panel. */
+@import "palette.css";
+
+/* === GLOBAL RESETS === */
+* {
+    font-family: 'JetBrains Mono Nerd Font', 'FiraCode Nerd Font', 'Segoe UI', sans-serif;
+}
+
+window,
+window.background,
+window#control-center-window,
+window#control-center-window.background,
+#control-center-window {
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+}
+
+/* Reset buttons and cards to eliminate GTK Adwaita white bleed */
+button,
+button:hover,
+button:active,
+button:focus,
+.quick-card,
+.btn-power-card,
+eventbox {
+    background-image: none;
+    box-shadow: none;
+    outline: none;
+    border: none;
+}
+
+/* === MAIN CONTAINER === */
+#cc-main-card {
+    background-color: transparent;
+    border: none;
+    border-radius: 16px;
+    padding: 14px;
+    box-shadow: none;
+    min-width: 287px;
+}
+
+/* === HEADER === */
+
+/* === QUICK ACTION CARDS === */
+.quick-card {
+    background-color: @bg_card;
+    border: none;
+    border-radius: 10px;
+    padding: 6px 8px;
+    transition: background-color 0.15s ease;
+    box-shadow: none;
+}
+
+.quick-card.card-hover,
+.quick-card:hover {
+    background-color: @bg_card_hover;
+    border: none;
+    box-shadow: none;
+}
+
+.card-icon {
+    color: @accent;
+    transition: color 0.15s ease;
+}
+
+.card-hover .card-icon,
+.quick-card:hover .card-icon {
+    color: @accent_hover;
+    text-shadow: none;
+}
+
+.card-icon-muted {
+    color: @text_muted;
+    transition: color 0.15s ease;
+}
+
+.card-hover .card-icon-muted,
+.quick-card:hover .card-icon-muted {
+    color: @text_secondary;
+    text-shadow: none;
+}
+
+.card-title {
+    color: @text_primary;
+    transition: color 0.15s ease;
+}
+
+.card-hover .card-title,
+.quick-card:hover .card-title {
+    color: @text_inverse;
+    text-shadow: none;
+}
+
+/* === HORIZONTAL SCALE SLIDERS === */
+scale,
+scale.horizontal,
+#vol-scale,
+#bright-scale,
+scale#vol-scale,
+scale#bright-scale {
+    margin: 4px 6px 2px 6px;
+    padding: 0;
+    -gtk-outline-radius: 3px;
+    outline: none;
+}
+
+scale trough,
+scale.horizontal trough,
+#vol-scale trough,
+#bright-scale trough,
+scale#vol-scale trough,
+scale#bright-scale trough {
+    background-image: none;
+    background-color: @bg_subtle;
+    border: none;
+    border-radius: 3px;
+    min-height: 5px;
+    box-shadow: none;
+}
+
+scale highlight,
+scale.horizontal highlight,
+scale trough highlight,
+scale.horizontal trough highlight,
+#vol-scale highlight,
+#bright-scale highlight,
+scale#vol-scale highlight,
+scale#bright-scale highlight,
+scale.horizontal#vol-scale highlight,
+scale.horizontal#bright-scale highlight,
+#vol-scale trough highlight,
+#bright-scale trough highlight,
+scale#vol-scale trough highlight,
+scale#bright-scale trough highlight,
+scale.horizontal#vol-scale trough highlight,
+scale.horizontal#bright-scale trough highlight,
+#vol-scale highlight:hover,
+#bright-scale highlight:hover,
+#vol-scale highlight:focus,
+#bright-scale highlight:focus,
+#vol-scale highlight:active,
+#bright-scale highlight:active {
+    background-image: none;
+    background-color: @accent;
+    border: none;
+    border-radius: 3px;
+    box-shadow: none;
+}
+
+scale slider,
+scale.horizontal slider,
+#vol-scale slider,
+#bright-scale slider,
+scale#vol-scale slider,
+scale#bright-scale slider {
+    background-image: none;
+    background-color: @text_inverse;
+    border: 2px solid @accent;
+    border-radius: 50%;
+    min-width: 12px;
+    min-height: 12px;
+    margin: -3.5px;
+    box-shadow: none;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+scale slider:hover,
+scale.horizontal slider:hover,
+#vol-scale slider:hover,
+#bright-scale slider:hover,
+scale#vol-scale slider:hover,
+scale#bright-scale slider:hover {
+    background-color: @text_primary;
+    border-color: @accent_hover;
+    box-shadow: none;
+}
+
+/* === NOTIFICATIONS === */
+.notif-item {
+    background-color: transparent;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin: 2px 0;
+    transition: background-color 0.15s ease;
+    box-shadow: none;
+}
+
+.notif-item:hover {
+    background-color: @bg_ghost_hover;
+    border: none;
+    box-shadow: none;
+}
+
+.notif-badge-box {
+    border-radius: 10px;
+    min-width: 34px;
+    min-height: 34px;
+    padding: 0;
+    margin: 0;
+}
+
+.notif-badge-vscode { background-color: #007ACC; }
+.notif-badge-discord { background-color: #5865F2; }
+.notif-badge-browser { background-color: #E66000; }
+.notif-badge-spotify { background-color: #1DB954; }
+.notif-badge-terminal { background-color: #4A148C; }
+.notif-badge-system { background-color: #8E24AA; }
+.notif-badge-default { background-color: @accent; }
+
+/* === SCROLLBAR === */
+#cc-notif-scroll {
+    background: transparent;
+    border: none;
+}
+
+#cc-notif-scroll scrollbar {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    min-width: 4px;
+    -GtkScrollbar-has-backward-stepper: false;
+    -GtkScrollbar-has-forward-stepper: false;
+}
+
+#cc-notif-scroll scrollbar trough {
+    background-color: transparent;
+    border: none;
+}
+
+#cc-notif-scroll scrollbar slider {
+    background-color: rgba(255, 42, 85, 0.48);
+    border-radius: 4px;
+    min-width: 6px;
+    min-height: 36px;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+#cc-notif-scroll scrollbar slider:hover {
+    background-color: @accent;
+    min-width: 8px;
+}
+
+button.btn-clear-all,
+.btn-clear-all {
+    color: @text_secondary;
+    background: transparent;
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+    outline: none;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 0;
+    margin: 0;
+    transition: color 0.15s ease;
+}
+
+button.btn-clear-all:hover,
+.btn-clear-all:hover {
+    color: @accent;
+    background: transparent;
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+    outline: none;
+}
+
+/* === POWER MENU === */
+.btn-power-card {
+    background-color: transparent;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 10px;
+    transition: background-color 0.15s ease;
+    box-shadow: none;
+}
+
+.btn-power-card.card-hover,
+.btn-power-card:hover {
+    background-color: @bg_ghost_hover;
+    border: none;
+    box-shadow: none;
+}
+
+.power-icon-circle {
+    border: none;
+    border-radius: 14px;
+    min-width: 28px;
+    min-height: 28px;
+    padding: 0;
+    margin: 0;
+    background-color: transparent;
+    transition: background-color 0.15s ease;
+    box-shadow: none;
+}
+
+.power-icon {
+    color: @accent;
+    transition: color 0.15s ease;
+}
+
+.btn-power-card.card-hover .power-icon-circle {
+    border: none;
+    background-color: transparent;
+    box-shadow: none;
+}
+
+.btn-power-card.card-hover .power-icon {
+    color: @accent_hover;
+}
+
+.power-label {
+    color: @text_primary;
+    transition: color 0.15s ease;
+}
+
+.btn-power-card.card-hover .power-label {
+    color: @text_inverse;
+    text-shadow: none;
+}
+
+.power-arrow {
+    color: @text_muted;
+    transition: color 0.15s ease;
+}
+
+.btn-power-card.card-hover .power-arrow {
+    color: @accent;
+    text-shadow: none;
+}

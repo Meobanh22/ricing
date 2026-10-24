@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
-# ==============================================================================
-# 🌸 REAL NOTIFICATION RECORDER DAEMON
-# ==============================================================================
-# Eavesdrops on DBus org.freedesktop.Notifications to capture live notifications
-# and maintains ~/.cache/notifications.json for Control Center.
-# ==============================================================================
+# notif_daemon.py — Notification recorder daemon.
 
 import os
 import sys

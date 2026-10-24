@@ -1,12 +1,5 @@
 #!/usr/bin/env python3
-# ==============================================================================
-# 🌸 SERENA & SYLVEON PROFILE DASHBOARD
-# ==============================================================================
-# - Profile-centric design featuring lockscreen avatar and user info
-# - Giant centerpiece clock & full calendar
-# - Real-time weather & dynamic uptime (CPU/RAM meters removed for minimalism)
-# - Toggleable: Super + S or Waybar Clock click
-# ==============================================================================
+# Profile dashboard with clock, calendar, weather, and system uptime.
 
 import os
 import sys
@@ -30,154 +23,8 @@ except Exception:
 
 from gi.repository import Gtk, Gdk, GdkPixbuf, GLib
 
-CSS_DATA = b"""
-* {
-    font-family: 'JetBrainsMono Nerd Font', 'FiraCode Nerd Font', 'Segoe UI', sans-serif;
-}
-
-window#dashboard-window {
-    background-color: transparent;
-    background-image: none;
-    border: none;
-    box-shadow: none;
-}
-
-#main-card {
-    background-color: transparent;
-    border: none;
-    border-radius: 16px;
-    padding: 16px 20px;
-    box-shadow: none;
-}
-
-.profile-card {
-    background-color: rgba(42, 26, 31, 0.95);
-    border: none;
-    border-radius: 10px;
-    padding: 16px 16px 14px 16px;
-}
-
-.profile-name {
-    color: #FFF0F5;
-    font-size: 15px;
-    font-weight: 800;
-}
-
-.profile-user {
-    color: #FF2A55;
-    font-size: 11px;
-    font-weight: 700;
-}
-
-.profile-status {
-    background-color: rgba(58, 34, 42, 0.90);
-    color: #7FA873;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 6px;
-}
-
-.info-item {
-    color: #E8C2D0;
-    font-size: 11px;
-    font-weight: 600;
-}
-
-.info-icon {
-    color: #FF2A55;
-    font-size: 11.5px;
-}
-
-.title-header {
-    color: #FF2A55;
-    font-size: 11.5px;
-    font-weight: 800;
-    letter-spacing: 1.5px;
-}
-
-.btn-close {
-    color: #A68595;
-    background: transparent;
-    border: none;
-    font-size: 13px;
-    padding: 2px 7px;
-    border-radius: 8px;
-    transition: background-color 0.15s ease, color 0.15s ease;
-}
-
-.btn-close:hover {
-    background: rgba(42, 26, 31, 0.50);
-    color: #FF2A55;
-}
-
-.clock-digits {
-    color: #FFF0F5;
-    font-size: 40px;
-    font-weight: 800;
-}
-
-.clock-seconds {
-    color: #FF2A55;
-    font-size: 18px;
-    font-weight: 700;
-}
-
-.date-text {
-    color: #E8C2D0;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.card-tile {
-    background-color: rgba(42, 26, 31, 0.95);
-    border: none;
-    border-radius: 10px;
-    padding: 12px 14px;
-}
-
-.card-title {
-    color: #FF2A55;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 1px;
-}
-
-.temp-text {
-    color: #FFF0F5;
-    font-size: 28px;
-    font-weight: 800;
-}
-
-.weather-desc {
-    color: #E8C2D0;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.weather-sub {
-    color: #A68595;
-    font-size: 11px;
-}
-
-calendar {
-    color: #FFF0F5;
-    background-color: transparent;
-    border: none;
-    font-size: 11px;
-}
-
-calendar:selected {
-    background-color: #FF2A55;
-    color: #FFFFFF;
-    border-radius: 6px;
-}
-
-calendar.header {
-    color: #E8C2D0;
-    font-weight: bold;
-}
-"""
+# Path to external CSS stylesheet
+STYLESHEET_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "styles", "dashboard.css")
 
 PID_FILE = "/tmp/dashboard.pid"
 
@@ -187,6 +34,8 @@ class Dashboard(Gtk.Window):
         self.set_name("dashboard-window")
         self.set_decorated(False)
         self.set_resizable(False)
+        self.set_default_size(700, -1)
+        self.set_size_request(700, -1)
 
         if HAS_LAYER_SHELL:
             GtkLayerShell.init_for_window(self)
@@ -259,7 +108,7 @@ class Dashboard(Gtk.Window):
         cr.set_source_rgba(32.0 / 255.0, 16.0 / 255.0, 18.0 / 255.0, 0.98)
         cr.fill_preserve()
 
-        # Viền mỏng chuẩn Serena (--border-window: rgba(255, 255, 255, 0.12))
+        # Draw the shared outer window border.
         cr.set_source_rgba(1.0, 1.0, 1.0, 0.12)
         cr.set_line_width(1.0)
         cr.stroke()
@@ -282,7 +131,14 @@ class Dashboard(Gtk.Window):
 
     def apply_css(self):
         css_provider = Gtk.CssProvider()
-        css_provider.load_from_data(CSS_DATA)
+        css_file = STYLESHEET_PATH
+        if not os.path.exists(css_file):
+            css_file = os.path.expanduser("~/.config/hypr/styles/dashboard.css")
+        if os.path.exists(css_file):
+            try:
+                css_provider.load_from_path(css_file)
+            except Exception as e:
+                print(f"Warning: Failed to load CSS from {css_file}: {e}", file=sys.stderr)
         context = Gtk.StyleContext()
         screen = Gdk.Screen.get_default()
         context.add_provider_for_screen(screen, css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
@@ -301,7 +157,7 @@ class Dashboard(Gtk.Window):
 
         if not avatar_path:
             lbl = Gtk.Label()
-            lbl.set_markup("<span font='42'>🌸</span>")
+            lbl.set_markup("<span font='42' color='#FF2A55'>✿</span>")
             return lbl
 
         try:
@@ -335,7 +191,7 @@ class Dashboard(Gtk.Window):
                 return Gtk.Image.new_from_pixbuf(pixbuf)
             except Exception:
                 lbl = Gtk.Label()
-                lbl.set_markup("<span font='42'>🌸</span>")
+                lbl.set_markup("<span font='42' color='#FF2A55'>✿</span>")
                 return lbl
 
     def build_ui(self):
@@ -373,7 +229,8 @@ class Dashboard(Gtk.Window):
         # Status badge (Online / Active)
         status_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         status_box.set_halign(Gtk.Align.CENTER)
-        lbl_status = Gtk.Label(label="● Active")
+        lbl_status = Gtk.Label()
+        lbl_status.set_markup("<span foreground='#8FBC8F'>●</span> Active")
         lbl_status.get_style_context().add_class("profile-status")
         status_box.pack_start(lbl_status, False, False, 0)
         user_info_box.pack_start(status_box, False, False, 4)
@@ -384,7 +241,7 @@ class Dashboard(Gtk.Window):
         lbl_bio = Gtk.Label()
         lbl_bio.set_line_wrap(True)
         lbl_bio.set_justify(Gtk.Justification.CENTER)
-        lbl_bio.set_markup("<span font='9.5' color='#E8C2D0'><i>\"Bloom like a Ribbon,\nShine like a Rose\"</i></span>")
+        lbl_bio.set_markup("<span font='9.5' color='#FFF0F5'><i>\"Bloom like a Ribbon,\nShine like a Rose\"</i></span>")
         profile_box.pack_start(lbl_bio, False, False, 2)
 
         # Đường phân cách nhẹ trong Profile
@@ -428,7 +285,7 @@ class Dashboard(Gtk.Window):
         # Top Header (Title + Close Button)
         header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         lbl_brand = Gtk.Label()
-        lbl_brand.set_markup("<span font='12' color='#FF2A55'>🌸</span>   <span color='#FFF0F5' font='11' weight='bold' letter_spacing='1024'>PROFILE DASHBOARD</span>")
+        lbl_brand.set_markup("<span font='12' color='#FF2A55'>✿</span>   <span color='#FFF0F5' font='11' weight='bold' letter_spacing='1024'>PROFILE DASHBOARD</span>")
         header_box.pack_start(lbl_brand, True, True, 0)
 
         btn_close = Gtk.Button(label="✕")
@@ -468,7 +325,7 @@ class Dashboard(Gtk.Window):
         cal_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
         cal_card.get_style_context().add_class("card-tile")
         lbl_cal_title = Gtk.Label()
-        lbl_cal_title.set_markup("<span font='11.5' color='#FF2A55'>󰸗</span>   <span color='#FF2A55' weight='bold'>CALENDAR</span>")
+        lbl_cal_title.set_markup("<span font='11.5' color='#FF2A55'>󰸗</span>   <span color='#FFF0F5' weight='bold'>CALENDAR</span>")
         lbl_cal_title.set_halign(Gtk.Align.START)
 
         self.calendar = Gtk.Calendar()
@@ -486,7 +343,7 @@ class Dashboard(Gtk.Window):
         weather_card.set_valign(Gtk.Align.FILL)
 
         self.lbl_wt_title = Gtk.Label()
-        self.lbl_wt_title.set_markup("<span font='11.5' color='#FF2A55'>󰖙</span>   <span color='#FF2A55' weight='bold'>WEATHER</span>")
+        self.lbl_wt_title.set_markup("<span font='11.5' color='#FF2A55'>󰖙</span>   <span color='#FFF0F5' weight='bold'>WEATHER</span>")
         self.lbl_wt_title.set_halign(Gtk.Align.START)
         weather_card.pack_start(self.lbl_wt_title, False, False, 0)
 
@@ -502,7 +359,7 @@ class Dashboard(Gtk.Window):
 
         self.lbl_humidity = Gtk.Label()
         self.lbl_humidity.get_style_context().add_class("weather-sub")
-        self.lbl_humidity.set_markup("<span font='10.5' color='#FF2A55'>󰖌</span> <span color='#E8C2D0'>--%</span>    <span color='#A68595'>·</span>    <span font='10.5' color='#FF2A55'>󰖝</span> <span color='#E8C2D0'>-- km/h</span>")
+        self.lbl_humidity.set_markup("<span font='10.5' color='#FF2A55'>󰖌</span> <span color='#FFF0F5'>--%</span>    <span color='#FFF0F5'>·</span>    <span font='10.5' color='#FF2A55'>󰖝</span> <span color='#FFF0F5'>-- km/h</span>")
         self.lbl_humidity.set_halign(Gtk.Align.START)
         weather_card.pack_start(self.lbl_humidity, False, False, 2)
 
@@ -567,10 +424,10 @@ class Dashboard(Gtk.Window):
                 def update_labels():
                     current_hour = datetime.datetime.now().hour
                     icon = get_weather_icon(desc, current_hour)
-                    self.lbl_wt_title.set_markup(f"<span font='11.5' color='#FF2A55'>{icon}</span>   <span color='#FF2A55' weight='bold'>WEATHER</span>")
+                    self.lbl_wt_title.set_markup(f"<span font='11.5' color='#FF2A55'>{icon}</span>   <span color='#FFF0F5' weight='bold'>WEATHER</span>")
                     self.lbl_temp.set_text(f"{temp_c}°C")
                     self.lbl_weather_desc.set_text(desc)
-                    self.lbl_humidity.set_markup(f"<span font='10.5' color='#FF2A55'>󰖌</span> <span color='#E8C2D0'>{humidity}%</span>    <span color='#A68595'>·</span>    <span font='10.5' color='#FF2A55'>󰖝</span> <span color='#E8C2D0'>{wind} km/h</span>")
+                    self.lbl_humidity.set_markup(f"<span font='10.5' color='#FF2A55'>󰖌</span> <span color='#FFF0F5'>{humidity}%</span>    <span color='#FFF0F5'>·</span>    <span font='10.5' color='#FF2A55'>󰖝</span> <span color='#FFF0F5'>{wind} km/h</span>")
                     return False
                 GLib.idle_add(update_labels)
         except Exception:

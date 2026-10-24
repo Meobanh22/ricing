@@ -1,43 +1,27 @@
-/* ==============================================================================
-   🌸 SERENA RED RIBBON PALETTE (Phong cách 1: Đỏ tươi ruy-băng)
-   Official Serena Ribbon Palette for Waybar (#FF2A55 & #180810 system)
-   ============================================================================== */
+/* palette.css — Color tokens for Waybar. */
+/* NOTE: Generated from tokens.json. Do not edit directly. */
 
-/* Deep Wine & Ruby Neutral Containers */
-@define-color bg_darkest #10050a;
-@define-color bg_primary #180810;
-@define-color bg_surface #280e1a;
-@define-color bg_surface_subtle #341222;
-@define-color bg_surface_hover #401428;
+@define-color bg_window rgba(32, 16, 18, 0.98);
+@define-color bg_card rgba(42, 26, 31, 0.95);
+@define-color bg_card_hover rgba(58, 34, 42, 0.98);
+@define-color bg_subtle rgba(48, 31, 32, 0.95);
+@define-color bg_ghost transparent;
+@define-color bg_ghost_hover rgba(42, 26, 31, 0.50);
 
-@define-color bg_pill rgba(24, 8, 16, 0.96);
-@define-color bg_card rgba(40, 14, 26, 0.95);
-@define-color bg_subtle rgba(52, 18, 34, 0.85);
+@define-color border_window rgba(255, 255, 255, 0.12);
+@define-color border_card rgba(255, 255, 255, 0.12);
+@define-color border_card_hover rgba(255, 42, 85, 0.65);
 
-/* Clean Ribbon Borders - No Glowing Shadows */
-@define-color border_subtle rgba(255, 42, 85, 0.38);
-@define-color border_focus #ff2a55;
-@define-color border_card rgba(255, 42, 85, 0.45);
+@define-color accent #FF2A55;
+@define-color accent_hover #FF597B;
+@define-color text_primary #FFF0F5;
+@define-color text_secondary #E8C2D0;
+@define-color text_muted #A68595;
+@define-color text_inverse #FFFFFF;
+@define-color text_white #FFFFFF;
 
-/* Role & Accent Colors */
-@define-color role_crimson #ff2a55;
-@define-color role_crimson_hover #ff597b;
-@define-color role_crimson_subtle rgba(255, 42, 85, 0.20);
+@define-color status_warning #FFB86C;
+@define-color status_critical #FF2A55;
+@define-color status_success #8FBC8F;
 
-@define-color role_pink #ff2a55;
-@define-color role_pink_hover #ff597b;
-@define-color role_pink_subtle rgba(255, 42, 85, 0.20);
-
-@define-color role_amber #e59a44;
-@define-color role_amber_muted #b7823c;
-@define-color role_orange #e65e34;
-
-@define-color role_lavender #e8c2d0;
-@define-color role_dusk_blue #7772c2;
-@define-color role_sage #7fa873;
-
-/* Text & Foreground */
-@define-color text_primary #fff0f5;      /* Warm Rose-Ivory */
-@define-color text_secondary #e8c2d0;    /* Soft Lavender-Rose */
-@define-color text_muted #a68595;        /* Dusty Mauve */
-@define-color text_white #ffffff;        /* Pure White */
+@define-color ribbon_blue #50A6FF;

@@ -4,7 +4,7 @@
 	<icon>kitty</icon>
 	<name>Open in Kitty</name>
 	<submenu></submenu>
-	<unique-id>serena-open-kitty</unique-id>
+	<unique-id>open-kitty</unique-id>
 	<command>kitty --directory %f</command>
 	<description>Open terminal in this directory</description>
 	<range></range>
@@ -16,7 +16,7 @@
 	<icon>code</icon>
 	<name>Open in VS Code</name>
 	<submenu></submenu>
-	<unique-id>serena-open-vscode</unique-id>
+	<unique-id>open-vscode</unique-id>
 	<command>code %f</command>
 	<description>Open in Visual Studio Code</description>
 	<range></range>
@@ -30,7 +30,7 @@
 	<icon>preferences-desktop-wallpaper</icon>
 	<name>Set as Desktop Wallpaper</name>
 	<submenu></submenu>
-	<unique-id>serena-set-wallpaper</unique-id>
+	<unique-id>set-wallpaper</unique-id>
 	<command>swww img %f --transition-type wipe --transition-fps 60 --transition-duration 1.0</command>
 	<description>Set selected image as current desktop wallpaper</description>
 	<range></range>

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# 🌸 SERENA QUICK SHELF & CLIPBOARD TOGGLE DISPATCHER
+# Toggle or switch the Shelf and Clipboard tabs.
 # ==============================================================================
 # Usage:
 #   toggle_shelf.sh          # Toggle (defaults to Clipboard)
@@ -9,8 +9,8 @@
 # ==============================================================================
 
 SCRIPT_PATH="$HOME/.config/hypr/scripts/shelf.py"
-PID_FILE="/tmp/serena_shelf.pid"
-MODE_FILE="/tmp/serena_shelf.mode"
+PID_FILE="/tmp/shelf.pid"
+MODE_FILE="/tmp/shelf.mode"
 
 TARGET_MODE="clip"
 if [[ "$1" == "--shelf" || "$1" == "-s" || "$1" == "shelf" || "$1" == "stash" ]]; then

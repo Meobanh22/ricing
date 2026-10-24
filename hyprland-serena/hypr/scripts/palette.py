@@ -1,45 +1,34 @@
 #!/usr/bin/env python3
-# ==============================================================================
-# 🌸 CENTRAL PALETTE (WINE & CRIMSON SYSTEM)
-# Extracted directly from Desktop Artwork
-# ==============================================================================
+# palette.py — Python design tokens.
+# NOTE: Generated from tokens.json. Do not edit directly.
 
 PALETTE = {
-    # Deep Wine & Ruby Containers
-    "bg_darkest": "#10050A",
-    "bg_primary": "#160810",
-    "bg_surface": "#1F0C17",
-    "bg_surface_subtle": "#2A101F",
-    "bg_surface_hover": "#38152A",
-    "bg_container_alpha": "rgba(22, 9, 15, 0.96)",
-    "bg_card_alpha": "rgba(36, 16, 26, 0.90)",
-    "bg_subtle_alpha": "rgba(32, 14, 23, 0.70)",
+    "bg_window": "#201011",
+    "bg_window_alpha": "rgba(32, 16, 18, 0.98)",
+    "bg_card": "#2A1A1E",
+    "bg_card_alpha": "rgba(42, 26, 31, 0.95)",
+    "bg_card_hover": "#3A222A",
+    "bg_card_hover_alpha": "rgba(58, 34, 42, 0.98)",
+    "bg_subtle": "#301F20",
+    "bg_subtle_alpha": "rgba(48, 31, 32, 0.95)",
+    "bg_ghost": "transparent",
+    "bg_ghost_hover": "rgba(42, 26, 31, 0.50)",
 
-    # Soft Glowing Ruby / Crimson Borders
-    "border_subtle": "rgba(225, 45, 75, 0.35)",
-    "border_focus": "#E63956",
-    "border_glow": "rgba(255, 107, 139, 0.60)",
+    "border_window": "rgba(255, 255, 255, 0.12)",
+    "border_card": "rgba(255, 255, 255, 0.12)",
+    "border_card_hover": "rgba(255, 42, 85, 0.65)",
 
-    # Internal Component Role Accents
-    "role_crimson": "#C82A2B",
-    "role_crimson_hover": "#DB3B32",
-    "role_crimson_subtle": "rgba(200, 42, 43, 0.20)",
+    "accent": "#FF2A55",
+    "accent_hover": "#FF597B",
 
-    "role_pink": "#FF6B8B",
-    "role_pink_hover": "#FF8DA1",
-    "role_pink_subtle": "rgba(255, 107, 139, 0.20)",
+    "text_primary": "#FFF0F5",
+    "text_secondary": "#E8C2D0",
+    "text_muted": "#A68595",
+    "text_inverse": "#FFFFFF",
 
-    "role_amber": "#E59A44",
-    "role_amber_muted": "#B7823C",
-    "role_orange": "#E65E34",
+    "status_warning": "#FFB86C",
+    "status_critical": "#FF2A55",
+    "status_success": "#8FBC8F",
 
-    "role_lavender": "#CAAAB8",
-    "role_dusk_blue": "#7772C2",
-    "role_sage": "#7FA873",
-
-    # Text & Foreground
-    "text_primary": "#FFF0F3",       # Warm Rose-Ivory
-    "text_secondary": "#CAAAB8",     # Soft Lavender-Rose
-    "text_muted": "#8F7481",         # Dusty Mauve
-    "text_white": "#FFFFFF",         # Pure White
+    "ribbon_blue": "#50A6FF",
 }

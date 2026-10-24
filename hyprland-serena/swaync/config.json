@@ -14,7 +14,7 @@
   "notification-inline-replies": false,
   "notification-icon-size": 24,
   "notification-body-image-height": 100,
-  "notification-body-image-width": 100,
+  "notification-body-image-width": 200,
   "notification-window-width": 320,
   "notification-visibility": {
     "mute-all-popups": {
@@ -26,7 +26,7 @@
   "timeout-low": 0,
   "timeout-critical": 0,
   "fit-to-screen": false,
-  "control-center-width": 400,
+  "control-center-width": 315,
   "control-center-height": 620,
   "keyboard-shortcuts": true,
   "image-visibility": "when-available",
@@ -46,7 +46,7 @@
   "widget-config": {
     "label": {
       "max-lines": 1,
-      "text": "  🌸 Serena & Fennekin Desktop  "
+      "text": "  Desktop  "
     },
     "dnd": {
       "text": "Do Not Disturb"

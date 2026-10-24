@@ -1,9 +1,4 @@
--- ==============================================================================
--- 🌹 HYPRLAND CONFIGURATION (v0.56+ / v0.57+ LUA NATIVE)
--- ==============================================================================
--- Tông màu: Crimson (#E53935), Ribbon Rose (#FF6B8B), Midnight Charcoal (#181825)
--- Hiển thị: Scale 1.2 (120%) chuẩn tỷ lệ điểm ảnh 1600x900 sắc nét
--- ==============================================================================
+-- hyprland.lua — Hyprland configuration (v0.56+ / v0.57+ Lua native).
 
 ------------------
 ---- MONITORS ----
@@ -84,6 +79,9 @@ hl.on("hyprland.start", function ()
     -- 8. Trình theo dõi Clipboard (cliphist cho văn bản & hình ảnh)
     hl.exec_cmd("wl-paste --type text --watch cliphist store &")
     hl.exec_cmd("wl-paste --type image --watch cliphist store &")
+
+    -- 9. Cảnh báo pin yếu (Low battery alert daemon)
+    hl.exec_cmd("python3 ~/.config/hypr/scripts/battery_alert.py &")
 end)
 
 -----------------------
@@ -117,8 +115,8 @@ hl.config({
         border_size = 2,
 
         col = {
-            active_border   = "rgb(c82a2b)",
-            inactive_border = "rgba(2e3048cc)",
+            active_border   = "rgb(ff2a55)",
+            inactive_border = "rgba(ffffff1f)",
         },
 
         layout = "dwindle",
@@ -126,7 +124,7 @@ hl.config({
     },
 
     decoration = {
-        rounding = 12,
+        rounding = 16,
 
         active_opacity     = 0.96,
         inactive_opacity   = 0.88,
