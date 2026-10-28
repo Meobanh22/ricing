@@ -1,83 +1,97 @@
-# ✿ Desktop Rice (Hyprland • Warm Obsidian-Wine & Ribbon Red)
+# Serena Dotfiles — Anime Minimalist Hyprland Rice
 
-Bộ công cụ tùy biến giao diện desktop phong cách tối giản hiện đại (Minimalist Anime Ricing) trên **Ubuntu 24.04 + Hyprland (Wayland)**.
-
----
-
-## ⚡ Hướng Dẫn Cài Đặt (Chỉ 1 Click)
-
-### 🐧 Trên Linux (Ubuntu 24.04 / Hyprland):
-1. **Clone repository về máy:**
-   ```bash
-   git clone git@github.com:Meobanh22/ricing.git
-   cd ricing
-   ```
-
-2. **Cài đặt trọn bộ giao diện (1-Click cho Hyprland):**
-   ```bash
-   chmod +x ./install_hyprland.sh
-   ./install_hyprland.sh
-   ```
-   *Script tự động cài đặt và cấu hình Waybar, Control Center, Profile Dashboard, Hyprlock, Wlogout, Rofi, Kitty, Btop, Fcitx5-Unikey và Con trỏ chuột Sylveon Custom.*
-
-3. **Đồng bộ tự động & Nạp lại ngay (khi đang chỉnh sửa / phát triển):**
-   ```bash
-   chmod +x ./sync_config.sh
-   ./sync_config.sh           # Đẩy thay đổi từ Repo ➔ ~/.config & Reload
-   ./sync_config.sh --pull    # Kéo thay đổi từ ~/.config ➔ Repo
-   ./sync_config.sh --diff    # So sánh khác biệt giữa Repo và máy
-   ```
-
-4. **Hoặc chỉ cài Fastfetch & Wallpapers:**
-   ```bash
-   chmod +x ./setup_linux.sh
-   ./setup_linux.sh
-   ```
+Anime minimalist dotfiles configuration system inspired by Serena, running on **EndeavourOS / Arch Linux** (and Ubuntu 24.04) powered by the **Hyprland Native Lua Engine (v0.56+/v0.57+)**.
 
 ---
 
-## 🎮 Các Phím Tắt Tiêu Biểu (Keybindings)
+## Installation Guide (One-Click)
 
-| Phím tắt | Tác dụng |
-| :--- | :--- |
-| `Super + B` | Mở Trình duyệt Web (Firefox Hardware-Accelerated) |
-| `Super + Return` | Mở Terminal (Kitty) |
-| `Super + Space` / `Super + A` | Mở Menu Ứng dụng (Rofi drun) |
-| `Super + N` | Mở / Đóng Control Center |
-| `Super + D` | Mở / Đóng Profile Dashboard |
-| `Ctrl + Shift + Esc` | Mở Task Manager (Btop - Floating Wine Card) |
-| `Super + L` | Khóa màn hình (Hyprlock) |
-| `Super + Backspace` | Power Menu đăng xuất / tắt máy (Wlogout) |
-| `Ctrl + Alt + W` / `Win + Alt + W` | Đổi hình nền tiếp theo |
-| `Print` / `Super + Shift + S` | Chụp ảnh màn hình (Grim + Slurp + Swappy) |
+### Recommended: EndeavourOS / Arch Linux
+1. **Clone repository:**
+   ```bash
+   git clone https://github.com/Meobanh22/ricing.git ~/custom
+   cd ~/custom
+   ```
+
+2. **Run the automated setup installer:**
+   ```bash
+   chmod +x ./install/setup_endeavouros.sh
+   ./install/setup_endeavouros.sh
+   ```
+   *Installs all required dependencies via Pacman & Yay, deploys dotfiles directly to `~/.config/`, installs the Sylveon Custom dual cursor theme, downloads wallpapers, and activates the default color palette.*
 
 ---
 
-## 🖱️ Bộ Con Trỏ Chuột (Cursors)
+## Synchronization & Theme Manager
 
-Thư mục `cursors/sylveon-custom` hỗ trợ chuẩn kép:
-- **Hyprcursor native (.hlc)**: Tối ưu cho Wayland / Hyprland rendering mượt mà, sắc nét.
-- **Xcursor (cursors/ + index.theme)**: Kế thừa hoàn hảo cho các ứng dụng GTK 3/4 và XWayland.
-
-Để biên dịch lại bộ con trỏ từ assets:
+### 1. Two-way Dotfiles Synchronization (`./sync.sh`)
 ```bash
-python3 ./scripts/build_linux_cursors.py
+./sync.sh           # Push repository configs -> ~/.config & Hot-Reload live
+./sync.sh --pull    # Pull changes from ~/.config -> repository
+./sync.sh --diff    # Compare differences between repository and ~/.config
+```
+
+### 2. System-wide Theme Switching (`./change_theme.sh`)
+Synchronizes and live reloads all 10 component targets (Waybar, Hyprland Lua, GTK 3/4, Popups, Kitty, VS Code, btop, Rofi, Wlogout, SwayNC):
+```bash
+./change_theme.sh --list                    # List available theme presets
+./change_theme.sh midnight-amethyst         # Switch to Midnight Amethyst
+./change_theme.sh matcha-sage               # Switch to Matcha Sage
+./change_theme.sh crimson-velvet            # Switch to Crimson Velvet
+./change_theme.sh sakura-pastel             # Switch to Sakura Pastel
+./change_theme.sh serena-wine               # Switch to default Serena Wine
+./change_theme.sh --rofi                    # Open interactive Rofi palette selector
 ```
 
 ---
 
-## 📁 Cấu Trúc Thư Mục
+## System Keybindings
+
+| Keybinding | Action |
+| :--- | :--- |
+| `Super + Return` | Launch Kitty Terminal |
+| `Super + B` | Launch Browser (Firefox) |
+| `Super + Space` | Open Application Launcher (Rofi) |
+| `Super + E` | Open File Manager (Thunar) |
+| `Super + C` | Launch Visual Studio Code |
+| `Super + N` | Toggle Control Center (Quick Settings & Alerts) |
+| `Super + S` | Toggle Dashboard (Clock, Serena Profile, Calendar, Weather) |
+| `Super + M` | Toggle Music Visualizer |
+| `Super + V` | Toggle Serena Shelf (Clipboard History) |
+| `Super + D` | Toggle Serena Shelf (File Pinning Shelf) |
+| `Super + W` | Switch to Next Wallpaper |
+| `Super + Shift + Space` | Toggle Vietnamese Input Method (Fcitx5) |
+| `Super + L` | Lock Screen (Hyprlock Serena) |
+| `Super + Escape` | Open Power Menu (Wlogout) |
+| `Ctrl + Shift + Esc` | Open System Monitor (btop) |
+| `Print` / `Super + Shift + S` | Capture Screenshot (Grim + Slurp) |
+
+---
+
+## Standardized Directory Structure
 
 ```text
-ricing/
-├── 📂 hyprland-serena/     # Dotfiles nguồn (Hyprland, Waybar, Rofi, Kitty, Wlogout, SwayNC, Btop)
-├── 📂 cursors/             # Bộ con trỏ chuột Sylveon Custom (Hyprcursor & Xcursor)
-├── 📂 wallpapers/          # Kho hình nền anime tuyển chọn
-├── 📂 assets/              # Avatar, icon và sprite ảnh nguồn
-├── 📂 scripts/             # Script Python (build cursor, tạo wallpaper ASCII, tinh chỉnh)
-├── 📂 fastfetch/           # Cấu hình Fastfetch & ASCII logo Sylveon Chibi
-├── 📂 profile/             # Ghi chú cá nhân & Gemini Custom Gems
-├── 🚀 install_hyprland.sh  # Script 1-click cài đặt và đồng bộ toàn bộ hệ thống
-├── 🚀 setup_linux.sh       # Script đồng bộ nhanh Fastfetch & Wallpapers
-└── 📖 README.md
+custom/ (Repository Root)
+├── config/                 # Clean 1:1 mapping to ~/.config/
+│   ├── hypr/               # Hyprland Lua Engine (hyprland.lua, hyprlock, popups)
+│   ├── waybar/             # Main status bar (config.jsonc, style.css, palette.css)
+│   ├── rofi/               # Application launcher & theme switcher
+│   ├── kitty/              # Terminal emulator configuration
+│   ├── swaync/             # Notification center
+│   ├── wlogout/            # Power / session menu
+│   ├── btop/               # Hardware monitor
+│   ├── fastfetch/          # System info & ASCII art
+│   ├── gtk-3.0/ & gtk-4.0/ # GTK themes importing palette.css
+│   ├── fcitx5/             # Input method configuration
+│   └── Thunar/             # Custom file manager actions
+├── assets/                 # Production ready assets
+│   ├── wallpapers/         # Curated HD wallpapers
+│   ├── avatars/            # Serena profile & Sylveon avatars
+│   └── cursors/            # Sylveon Custom dual cursor theme
+├── scripts/                # Administration tools (theme_manager.py, sync.sh, change_theme.sh)
+├── install/                # Automated installer scripts (setup_endeavouros.sh, setup_ubuntu.sh)
+├── dev_tools/              # Asset generators & cursor builders
+├── archive/                # Safely archived legacy configs & drafts
+├── AGENTS.md               # UI/UX design tokens and component specification
+└── README.md               # Project documentation
 ```

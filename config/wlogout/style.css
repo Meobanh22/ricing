@@ -1,0 +1,115 @@
+/* style.css — Wlogout menu stylesheet. */
+@import "palette.css";
+
+* {
+    font-family: "JetBrains Mono Nerd Font", "FiraCode Nerd Font", "Segoe UI", sans-serif;
+    background-image: none;
+    box-shadow: none;
+}
+
+/* === WINDOW === */
+window {
+    background-color: @bg_window;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+}
+
+/* === ACTION CARDS === */
+button {
+    color: @text_primary;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    background-color: @bg_card;
+    border: 1px solid @border_card;
+    border-radius: 10px;
+    margin: 8px;
+    background-repeat: no-repeat;
+    background-position: center 32%;
+    background-size: 44px 44px;
+    box-shadow: none;
+    transition: background-color 150ms ease, color 150ms ease;
+    outline-style: none;
+}
+
+button span,
+button label {
+    font-size: 13px;
+    font-weight: 600;
+    color: @text_secondary;
+    margin-top: 56px;
+    transition: color 150ms ease;
+}
+
+/* === HOVER === */
+button:focus,
+button:active,
+button:hover {
+    background-color: @bg_card_hover;
+    color: @text_primary;
+    border-color: @border_card_hover;
+    outline-style: none;
+    box-shadow: none;
+}
+
+button:focus span,
+button:focus label,
+button:active span,
+button:active label,
+button:hover span,
+button:hover label {
+    color: @text_primary;
+}
+
+/* === ACTION ICONS === */
+
+/* 1. Lock Screen */
+#lock {
+    background-image: image(url("./icons/lock.svg"), url("./icons/lock.png"));
+}
+#lock:focus,
+#lock:active,
+#lock:hover {
+    background-image: image(url("./icons/lock-hover.svg"), url("./icons/lock-hover.png"));
+}
+
+/* 2. Suspend */
+#suspend {
+    background-image: image(url("./icons/suspend.svg"), url("./icons/suspend.png"));
+}
+#suspend:focus,
+#suspend:active,
+#suspend:hover {
+    background-image: image(url("./icons/suspend-hover.svg"), url("./icons/suspend-hover.png"));
+}
+
+/* 3. Logout */
+#logout {
+    background-image: image(url("./icons/logout.svg"), url("./icons/logout.png"));
+}
+#logout:focus,
+#logout:active,
+#logout:hover {
+    background-image: image(url("./icons/logout-hover.svg"), url("./icons/logout-hover.png"));
+}
+
+/* 4. Reboot */
+#reboot {
+    background-image: image(url("./icons/reboot.svg"), url("./icons/reboot.png"));
+}
+#reboot:focus,
+#reboot:active,
+#reboot:hover {
+    background-image: image(url("./icons/reboot-hover.svg"), url("./icons/reboot-hover.png"));
+}
+
+/* 5. Shutdown */
+#shutdown {
+    background-image: image(url("./icons/shutdown.svg"), url("./icons/shutdown.png"));
+}
+#shutdown:focus,
+#shutdown:active,
+#shutdown:hover {
+    background-image: image(url("./icons/shutdown-hover.svg"), url("./icons/shutdown-hover.png"));
+}

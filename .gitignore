@@ -1,9 +1,16 @@
-.venv/
+# Byte-compiled / optimized / DLL files
 __pycache__/
-*.log
-wallpapers/.current_wallpaper
-desktop.ini
-Thumbs.db
+*.py[cod]
+*$py.class
+
+# Temporary & PID files
+*.pid
+/tmp/
+
+# OS generated
 .DS_Store
-.tmp_*
-*.tmp
+Thumbs.db
+
+# Agent skills cache
+.agents/
+

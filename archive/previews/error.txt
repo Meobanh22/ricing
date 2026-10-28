@@ -1,0 +1,6 @@
+1.shelf chưa hoạt động với cái file khác ngoài ảnh
+2.lỗi vị trí nút copy ở shelf phụ thuộc kích thước của ảnh
+3.1 số từ ở dashboard có màu đỏ
+4.Cần sửa lại giao diện ngoài của media player
+5.Cần thêm phần điều chỉnh ánh sáng, bluetooth và nếu có thể thêm mục điều chỉnh perfomance của máy vào control center
+6.Làm thông báo báo hết pin

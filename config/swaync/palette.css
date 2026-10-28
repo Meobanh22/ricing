@@ -1,0 +1,31 @@
+/* palette.css — Color tokens for Hypr GTK styles. */
+/* NOTE: Generated from tokens.json. Do not edit directly. */
+
+@define-color bg_window rgba(32, 16, 17, 0.98);
+@define-color bg_card rgba(42, 26, 30, 0.95);
+@define-color bg_card_hover rgba(58, 34, 42, 0.98);
+@define-color bg_subtle rgba(48, 31, 32, 0.95);
+@define-color bg_ghost transparent;
+@define-color bg_ghost_hover rgba(42, 26, 30, 0.50);
+
+@define-color border_window rgba(255, 255, 255, 0.12);
+@define-color border_card rgba(255, 255, 255, 0.12);
+@define-color border_card_hover rgba(255, 42, 85, 0.65);
+
+@define-color accent #FF2A55;
+@define-color accent_hover #FF597B;
+
+@define-color scrollbar_slider rgba(255, 42, 85, 0.48);
+@define-color scrollbar_slider_hover #FF2A55;
+
+@define-color text_primary #FFF0F5;
+@define-color text_secondary #E8C2D0;
+@define-color text_muted #A68595;
+@define-color text_inverse #FFFFFF;
+@define-color text_white #FFFFFF;
+
+@define-color status_warning #FFB86C;
+@define-color status_critical #FF2A55;
+@define-color status_success #8FBC8F;
+
+@define-color ribbon_blue #50A6FF;

@@ -1,0 +1,391 @@
+/* shelf.css — Stylesheet for Shelf (Clipboard & File Stash). */
+@import "palette.css";
+
+/* === GLOBAL RESETS === */
+* {
+    font-family: "JetBrains Mono Nerd Font", "FiraCode Nerd Font", "Segoe UI", sans-serif;
+    outline: none;
+    box-shadow: none;
+    text-shadow: none;
+    -gtk-icon-shadow: none;
+}
+
+window,
+window.background,
+window#shelf-window-root,
+window#shelf-window-root.background,
+window#shelf-popout-root,
+window#shelf-popout-root.background,
+window#shelf-lightbox-root,
+window#shelf-lightbox-root.background,
+#shelf-window-root,
+#shelf-popout-root,
+#shelf-lightbox-root {
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+}
+
+/* === MAIN WINDOW === */
+.shelf-window {
+    background-color: @bg_window;
+    border: 1px solid @border_window;
+    border-radius: 16px;
+    padding: 0;
+}
+
+button {
+    background-image: none;
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+}
+
+/* === HEADER SWITCHER === */
+.tab-switcher {
+    background-color: @bg_subtle;
+    border-radius: 8px;
+    padding: 2px;
+}
+
+button.tab-btn {
+    background-image: none;
+    background-color: transparent;
+    color: @text_secondary;
+    font-size: 11.5px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    padding: 4px 12px;
+    transition: background-color 150ms ease, color 150ms ease;
+}
+
+button.tab-btn:hover {
+    color: @text_primary;
+    background-color: @bg_ghost_hover;
+}
+
+button.tab-btn.active {
+    background-color: @accent;
+    color: @text_inverse;
+}
+
+button.tab-btn.active:hover {
+    background-color: @accent_hover;
+}
+
+.action-btn {
+    background-image: none;
+    background-color: @bg_card;
+    color: @text_secondary;
+    font-size: 11px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    padding: 4px 10px;
+    transition: background-color 150ms ease, color 150ms ease;
+}
+
+.action-btn:hover {
+    background-color: @bg_card_hover;
+    color: @text_primary;
+}
+
+.btn-close {
+    background-image: none;
+    background-color: transparent;
+    color: @text_muted;
+    font-size: 13px;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    padding: 4px 8px;
+    transition: color 150ms ease, background-color 150ms ease;
+}
+
+.btn-close:hover {
+    color: @accent;
+    background-color: @bg_ghost_hover;
+}
+
+/* === SEARCH ENTRY === */
+entry,
+searchentry {
+    background-image: none;
+    background-color: @bg_card;
+    color: @text_primary;
+    font-size: 11.5px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 6px 12px;
+    margin-bottom: 8px;
+    caret-color: @accent;
+    box-shadow: none;
+    transition: border-color 150ms ease;
+}
+
+entry:focus,
+searchentry:focus {
+    border: 1px solid @accent;
+}
+
+entry image,
+searchentry image {
+    color: @accent;
+    margin-left: 6px;
+    margin-right: 6px;
+}
+
+/* === CLIPBOARD CHIP GRID === */
+flowbox {
+    background-color: transparent;
+}
+
+flowboxchild {
+    background-color: transparent;
+    padding: 0;
+    margin: 0;
+    outline: none;
+    border: none;
+}
+
+flowboxchild:selected {
+    background-color: transparent;
+}
+
+.chip-card {
+    background-color: @bg_card;
+    border-radius: 10px;
+    border: 1px solid @border_card;
+    padding: 8px 10px;
+    transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+.chip-card:hover {
+    background-color: @bg_card_hover;
+    border: 1px solid @border_card_hover;
+}
+
+.chip-card.pinned {
+    border: 1px solid @border_card_hover;
+    background-color: @bg_subtle;
+}
+
+.chip-card.pinned:hover {
+    border: 1px solid @accent;
+    background-color: @bg_card_hover;
+}
+
+.chip-text {
+    color: @text_primary;
+    font-size: 11px;
+}
+
+.chip-meta {
+    color: @text_muted;
+    font-size: 9.5px;
+    margin-top: 4px;
+}
+
+/* Compact delete button */
+button.chip-btn-del,
+.chip-btn-del {
+    background-image: none;
+    background-color: transparent;
+    border-width: 0;
+    border-style: none;
+    border-color: transparent;
+    box-shadow: none;
+    outline: none;
+    padding: 1px 4px;
+    margin: 0;
+    min-height: 0;
+    min-width: 0;
+    border-radius: 4px;
+    transition: background-color 150ms ease, color 150ms ease;
+}
+
+button.chip-btn-del:hover,
+.chip-btn-del:hover {
+    background-color: @accent_subtle;
+    border-width: 0;
+    border-style: none;
+}
+
+/* Pin button */
+button.chip-btn-pin,
+.chip-btn-pin {
+    background-image: none;
+    background-color: transparent;
+    border-width: 0;
+    border-style: none;
+    border-color: transparent;
+    box-shadow: none;
+    outline: none;
+    padding: 1px 4px;
+    margin: 0;
+    min-height: 0;
+    min-width: 0;
+    border-radius: 4px;
+    color: @accent;
+    transition: background-color 150ms ease, color 150ms ease;
+}
+
+button.chip-btn-pin:hover,
+.chip-btn-pin:hover {
+    background-color: @accent_subtle;
+    color: @accent_hover;
+}
+
+button.chip-btn-pin.pinned,
+.chip-btn-pin.pinned {
+    background-color: @accent_border;
+    color: @accent;
+}
+
+button.chip-btn-pin.pinned:hover {
+    background-color: @accent_dash;
+    color: @text_inverse;
+}
+
+/* Card Action Button (Zoom / Copy) */
+button.chip-btn-action,
+.chip-btn-action {
+    background-image: none;
+    background-color: @bg_action;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: none;
+    padding: 2px 6px;
+    margin: 0;
+    min-height: 0;
+    min-width: 0;
+    border-radius: 4px;
+    transition: background-color 150ms ease;
+}
+
+button.chip-btn-action:hover,
+.chip-btn-action:hover {
+    background-color: @bg_action_hover;
+    border-color: @accent_border;
+}
+
+/* External Floating Popout Card */
+.popout-card {
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+}
+
+.popout-text {
+    color: @text_primary;
+    font-size: 11.5px;
+}
+
+.popout-meta {
+    color: @text_muted;
+    font-size: 9.5px;
+}
+
+/* Centered Lightbox Modal */
+.lightbox-card {
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+}
+
+/* === DROP ZONE & FILE STASH === */
+.drop-zone {
+    border: 1.5px dashed @accent_dash;
+    border-radius: 10px;
+    background-color: @bg_card_soft;
+    padding: 32px 16px;
+    margin: 6px 0;
+    transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+.drop-zone:hover {
+    border-color: @accent;
+    background-color: @bg_card_subtle;
+}
+
+.drop-banner {
+    border: 1.5px dashed @accent_border;
+    border-radius: 8px;
+    background-color: @bg_card_soft;
+    padding: 6px 12px;
+    margin-bottom: 6px;
+    transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+.drop-banner:hover {
+    border-color: @accent;
+    background-color: @bg_card_subtle;
+}
+
+.drop-icon {
+    color: @accent;
+    font-size: 30px;
+}
+
+.drop-title {
+    color: @text_primary;
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+.drop-subtitle {
+    color: @text_muted;
+    font-size: 10.5px;
+    margin-top: 2px;
+}
+
+.status-bar {
+    color: @text_muted;
+    font-size: 10px;
+    margin-top: 6px;
+}
+
+/* === SCROLLBAR === */
+scrollbar {
+    background-color: transparent;
+    border: none;
+}
+
+scrollbar.vertical {
+    background-color: transparent;
+    border: none;
+    margin-left: 0;
+    margin-right: 8px;
+    padding: 0;
+}
+
+scrollbar.vertical slider {
+    background-color: @scrollbar_slider;
+    border-radius: 4px;
+    min-width: 6px;
+    min-height: 36px;
+    margin-left: 4px;
+    transition: background-color 150ms ease, min-width 150ms ease;
+}
+
+scrollbar.vertical slider:hover {
+    background-color: @accent;
+    min-width: 8px;
+}
+
+/* Header Drag Handle Zone */
+.drag-grip-zone {
+    padding: 2px 8px;
+    border-radius: 8px;
+    transition: background-color 150ms ease;
+}
+
+.drag-grip-zone:hover {
+    background-color: @accent_soft;
+}
+

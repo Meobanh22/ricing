@@ -1,0 +1,264 @@
+/* style.css — Waybar layout and module stylesheet. */
+
+@import "palette.css";
+
+* {
+    font-family: "JetBrains Mono Nerd Font", "FiraCode Nerd Font", "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    min-height: 0;
+    box-shadow: none;
+    text-shadow: none;
+}
+
+window#waybar {
+    background: transparent;
+    color: @text_primary;
+}
+
+/* === LAYOUT === */
+.modules-left,
+.modules-center {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* === APPLICATION MENU === */
+#custom-menu {
+    background-color: @bg_window;
+    color: @text_primary;
+    border: 1px solid @border_card;
+    border-radius: 16px;
+    padding: 4px 14px;
+    margin: 2px 4px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: none;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+#custom-menu:hover {
+    background-color: @bg_card_hover;
+    border-color: @border_card_hover;
+    box-shadow: none;
+}
+
+/* === WORKSPACES === */
+#workspaces {
+    background-color: @bg_window;
+    border: 1px solid @border_card;
+    border-radius: 16px;
+    padding: 2px 6px;
+    margin: 2px 4px;
+    box-shadow: none;
+}
+
+#workspaces button {
+    padding: 2px 8px;
+    margin: 0 2px;
+    border-radius: 8px;
+    color: @text_secondary;
+    background: transparent;
+    border: 1px solid transparent;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: none;
+    text-shadow: none;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+#workspaces button:hover {
+    background-color: @bg_card_hover;
+    color: @text_primary;
+    border-color: @border_card;
+    box-shadow: none;
+}
+
+#workspaces button.active {
+    background-color: @accent;
+    color: @text_inverse;
+    border: 1px solid @accent;
+    box-shadow: none;
+    text-shadow: none;
+}
+
+#workspaces button.urgent {
+    background-color: @accent;
+    color: @text_inverse;
+    border: 1px solid @accent_hover;
+    box-shadow: none;
+}
+
+/* === MEDIA === */
+#custom-media,
+#mpris {
+    color: @text_primary;
+    background-color: @bg_window;
+    border: 1px solid @border_card;
+    padding: 4px 14px;
+    margin: 2px 4px;
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: none;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+#custom-media:hover,
+#mpris:hover {
+    background-color: @bg_card_hover;
+    border-color: @border_card_hover;
+    box-shadow: none;
+}
+
+#custom-media.playing {
+    color: @accent;
+    border-color: @accent;
+}
+
+#custom-media.paused {
+    color: @text_secondary;
+}
+
+#custom-media.stopped {
+    padding: 4px 12px;
+    color: @accent;
+}
+
+/* === CLOCK === */
+#clock {
+    color: @text_primary;
+    background-color: @bg_window;
+    border: 1px solid @border_card;
+    padding: 4px 16px;
+    margin: 2px 4px;
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: none;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+#clock:hover {
+    background-color: @bg_card_hover;
+    border-color: @border_card_hover;
+    box-shadow: none;
+}
+
+/* === RIGHT MODULES === */
+.modules-right {
+    background-color: @bg_window;
+    border: 1px solid @border_card;
+    border-radius: 16px;
+    padding: 2px 8px 2px 10px;
+    margin: 2px 4px;
+    box-shadow: none;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.modules-right:hover {
+    border-color: @border_card_hover;
+    box-shadow: none;
+}
+
+/* === MODULE BASE === */
+#custom-ime,
+#pulseaudio,
+#network,
+#battery,
+#custom-notification {
+    background: transparent;
+    border: 1px solid transparent;
+    box-shadow: none;
+    padding: 2px 8px;
+    margin: 0 2px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: @text_primary;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+#custom-ime:hover,
+#pulseaudio:hover,
+#network:hover,
+#battery:hover,
+#custom-notification:hover {
+    background-color: @bg_card_hover;
+    color: @accent;
+    border-color: @border_card;
+    box-shadow: none;
+}
+
+/* === INPUT METHOD === */
+#custom-ime {
+    font-weight: 600;
+}
+
+/* === AUDIO === */
+#pulseaudio.muted {
+    color: @text_muted;
+}
+
+/* === NETWORK === */
+#network.disconnected {
+    color: @text_muted;
+}
+
+/* === BATTERY === */
+#battery.charging,
+#battery.plugged {
+    color: @text_secondary;
+}
+
+#battery.warning:not(.charging) {
+    color: @status_warning;
+}
+
+#battery.critical:not(.charging) {
+    color: @status_critical;
+}
+
+/* === NOTIFICATIONS === */
+#custom-notification {
+    font-size: 13px;
+    color: @accent;
+}
+
+/* === POWER ACTION === */
+#custom-power {
+    color: @accent;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-size: 13px;
+    padding: 2px 8px;
+    margin: 0 2px;
+    box-shadow: none;
+    text-shadow: none;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+#custom-power:hover {
+    color: @accent_hover;
+    background-color: @bg_ghost_hover;
+    border-color: transparent;
+    box-shadow: none;
+}
+
+/* === TOOLTIP === */
+tooltip {
+    background: @bg_card;
+    border: 1px solid @border_card;
+    border-radius: 10px;
+    padding: 8px 12px;
+    box-shadow: none;
+}
+
+tooltip label {
+    color: @text_primary;
+    font-size: 12px;
+}

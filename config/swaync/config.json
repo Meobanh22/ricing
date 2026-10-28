@@ -1,0 +1,86 @@
+{
+  "$schema": "/etc/xdg/swaync/configSchema.json",
+  "positionX": "right",
+  "positionY": "top",
+  "layer": "overlay",
+  "control-center-layer": "overlay",
+  "layer-shell": true,
+  "cssPriority": "user",
+  "control-center-margin-top": 44,
+  "control-center-margin-bottom": 12,
+  "control-center-margin-right": 14,
+  "control-center-margin-left": 0,
+  "notification-2fa-action": true,
+  "notification-inline-replies": false,
+  "notification-icon-size": 24,
+  "notification-body-image-height": 100,
+  "notification-body-image-width": 200,
+  "notification-window-width": 315,
+  "notification-visibility": {
+    "mute-all-popups": {
+      "state": "muted",
+      "app-name": ".*"
+    }
+  },
+  "timeout": 0,
+  "timeout-low": 0,
+  "timeout-critical": 0,
+  "fit-to-screen": false,
+  "control-center-width": 315,
+  "control-center-height": 620,
+  "keyboard-shortcuts": true,
+  "image-visibility": "when-available",
+  "transition-time": 200,
+  "hide-on-clear": false,
+  "hide-on-action": true,
+  "script-fail-notify": true,
+  "widgets": [
+    "label",
+    "dnd",
+    "volume",
+    "backlight",
+    "buttons-grid",
+    "title",
+    "notifications"
+  ],
+  "widget-config": {
+    "label": {
+      "max-lines": 1,
+      "text": "  Desktop  "
+    },
+    "dnd": {
+      "text": "Do Not Disturb"
+    },
+    "volume": {
+      "label": "\udb81\udd7e"
+    },
+    "backlight": {
+      "label": "\udb80\udcdf"
+    },
+    "buttons-grid": {
+      "actions": [
+        {
+          "label": "\udb81\udda9",
+          "command": "nm-connection-editor"
+        },
+        {
+          "label": "\udb80\udcaf",
+          "command": "blueman-manager"
+        },
+        {
+          "label": "\udb80\udf0c",
+          "command": "bash -c $HOME/.config/hypr/scripts/toggle_vietnamese.sh"
+        },
+        {
+          "label": "\uf011",
+          "command": "bash -c $HOME/.config/hypr/scripts/Wlogout.sh"
+        }
+      ]
+    },
+    "title": {
+      "text": "Notifications",
+      "clear-all-button": true,
+      "button-text": "Clear All"
+    }
+  }
+}

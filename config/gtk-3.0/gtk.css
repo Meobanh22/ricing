@@ -1,0 +1,331 @@
+/* gtk.css — GTK 3 color and widget stylesheet. */
+@import "palette.css";
+
+@define-color border_subtle @border_card;
+
+/* Standard GTK theme variables override */
+@define-color theme_bg_color @bg_window;
+@define-color theme_fg_color @text_primary;
+@define-color theme_base_color @bg_window;
+@define-color theme_text_color @text_primary;
+@define-color theme_selected_bg_color @accent;
+@define-color theme_selected_fg_color @text_inverse;
+@define-color insensitive_bg_color @bg_subtle;
+@define-color insensitive_fg_color @text_muted;
+@define-color borders @border_window;
+@define-color content_view_bg @bg_window;
+
+* {
+    font-family: "JetBrains Mono Nerd Font", "FiraCode Nerd Font", "Segoe UI", sans-serif;
+    outline: none;
+}
+
+/* 1. Universal Windows, Viewports & Backgrounds */
+window,
+window.background,
+.background,
+viewport,
+scrolledwindow {
+    background-color: @bg_window;
+    color: @text_primary;
+}
+
+/* 2. Global Button Styling (Eliminate default GTK grey backgrounds) */
+button {
+    background-image: none;
+    background-color: @bg_card;
+    color: @text_secondary;
+    border: 1px solid @border_window;
+    border-radius: 8px;
+    box-shadow: none;
+    padding: 4px 10px;
+    transition: background-color 150ms ease, color 150ms ease;
+}
+
+button:hover {
+    background-color: @bg_card_hover;
+    color: @text_primary;
+}
+
+button:checked,
+button:active {
+    background-color: @accent;
+    color: @text_inverse;
+}
+
+button.flat {
+    background-color: transparent;
+    border: none;
+}
+
+button.flat:hover {
+    background-color: @bg_card_hover;
+}
+
+/* 3. Headerbars & Titlebars */
+headerbar,
+.titlebar {
+    background-color: @bg_window;
+    border-bottom: 1px solid @border_window;
+    color: @text_primary;
+    box-shadow: none;
+}
+
+headerbar label.title {
+    font-weight: 600;
+    color: @text_primary;
+}
+
+headerbar label.subtitle {
+    color: @text_muted;
+    font-size: 11px;
+}
+
+headerbar button,
+headerbar button.titlebutton,
+windowcontrols button {
+    background-color: @bg_card;
+    border: 1px solid @border_window;
+    border-radius: 8px;
+    box-shadow: none;
+}
+
+headerbar button:hover,
+headerbar button.titlebutton:hover,
+windowcontrols button:hover {
+    background-color: @bg_card_hover;
+    color: @text_primary;
+}
+
+/* 4. Thunar & File Manager Specifics */
+.sidebar,
+.sidebar treeview,
+.sidebar .view,
+ThunarWindow .sidebar,
+ThunarWindow .sidebar .view,
+scrolledwindow.sidebar {
+    background-color: @bg_card;
+    color: @text_secondary;
+    border-right: 1px solid @border_window;
+}
+
+.sidebar treeview:hover,
+ThunarWindow .sidebar treeview:hover {
+    background-color: @bg_card;
+}
+
+.sidebar row:selected,
+.sidebar treeview:selected,
+ThunarWindow .sidebar row:selected {
+    background-color: @accent;
+    color: @text_inverse;
+    border-radius: 8px;
+}
+
+/* Thunar Splitter / Paned Separator */
+paned > separator {
+    background-color: @border_window;
+    min-width: 1px;
+    min-height: 1px;
+}
+
+/* Thunar Icon View & List View */
+exo-icon-view,
+ThunarIconView,
+.view,
+treeview.view,
+iconview {
+    background-color: @bg_window;
+    color: @text_primary;
+}
+
+iconview:selected,
+iconview:selected:focus,
+treeview.view:selected,
+treeview.view:selected:focus,
+.view:selected {
+    background-color: @accent;
+    color: @text_inverse;
+    border-radius: 8px;
+}
+
+iconview:hover,
+treeview.view:hover,
+.view:hover {
+    background-color: @bg_card_hover;
+    color: @text_primary;
+}
+
+/* Thunar Column Header (Name, Size, Type) */
+treeview header button,
+treeview header button:hover {
+    background-image: none;
+    background-color: @bg_card;
+    color: @text_secondary;
+    border: none;
+    border-bottom: 1px solid @border_window;
+    border-right: 1px solid @border_subtle;
+    box-shadow: none;
+    border-radius: 0;
+}
+
+/* 5. Toolbars & Navigation */
+toolbar,
+.toolbar,
+.path-bar-box,
+ThunarLocationButtons {
+    background-color: @bg_window;
+    border-bottom: 1px solid @border_window;
+    color: @text_primary;
+    padding: 4px;
+}
+
+toolbar button,
+.path-bar-box button {
+    background-color: @bg_card;
+    color: @text_secondary;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 10px;
+    margin: 2px;
+}
+
+toolbar button:hover,
+.path-bar-box button:hover {
+    background-color: @bg_card_hover;
+    color: @text_primary;
+}
+
+toolbar button:checked,
+toolbar button:active,
+.path-bar-box button:checked,
+.path-bar-box button:active {
+    background-color: @accent;
+    color: @text_inverse;
+}
+
+/* 6. Text Entries */
+entry,
+searchentry {
+    background-image: none;
+    background-color: @bg_card;
+    color: @text_primary;
+    border: 1px solid @border_window;
+    border-radius: 8px;
+    padding: 6px 10px;
+    caret-color: @accent;
+    box-shadow: none;
+}
+
+entry:focus,
+searchentry:focus {
+    border: 1px solid @accent;
+    background-color: @bg_card;
+}
+
+/* 7. Image Viewers (EOG - Eye of GNOME) */
+EogWindow,
+EogScrollView,
+EogScrollView.view,
+.eog-scroll-view {
+    background-color: @bg_window;
+    color: @text_primary;
+}
+
+/* 8. Menus, Popovers & Menubar */
+menubar,
+.menubar {
+    background-color: @bg_window;
+    border-bottom: 1px solid @border_window;
+}
+
+menubar > menuitem {
+    color: @text_secondary;
+    padding: 4px 10px;
+}
+
+menubar > menuitem:hover {
+    background-color: @accent;
+    color: @text_inverse;
+}
+
+menu,
+.menu,
+popover,
+popover.background {
+    background-color: @bg_card;
+    border: 1px solid @border_window;
+    border-radius: 10px;
+    padding: 6px;
+    box-shadow: none;
+}
+
+menuitem,
+.menuitem {
+    color: @text_secondary;
+    border-radius: 8px;
+    padding: 6px 12px;
+    margin: 1px 0;
+}
+
+menuitem:hover,
+.menuitem:hover {
+    background-color: @accent;
+    color: @text_inverse;
+}
+
+separator {
+    background-color: @border_window;
+    min-height: 1px;
+    margin: 4px 0;
+}
+
+/* 9. Notebooks & Statusbars */
+notebook,
+notebook > header {
+    background-color: @bg_window;
+    border: none;
+}
+
+notebook > header tab {
+    background-color: @bg_card;
+    color: @text_secondary;
+    border: none;
+    border-radius: 8px 8px 0 0;
+    padding: 6px 12px;
+}
+
+notebook > header tab:checked {
+    background-color: @bg_window;
+    color: @text_primary;
+    border-bottom: 2px solid @accent;
+}
+
+statusbar,
+.statusbar {
+    background-color: @bg_window;
+    color: @text_muted;
+    font-size: 11px;
+    border-top: 1px solid @border_subtle;
+    padding: 2px 8px;
+}
+
+/* === SCROLLBARS === */
+scrollbar {
+    background-color: transparent;
+    margin-right: 8px;
+}
+
+scrollbar slider {
+    background-color: @scrollbar_slider;
+    border-radius: 4px;
+    min-width: 6px;
+    min-height: 36px;
+    border: none;
+    transition: all 150ms ease;
+}
+
+scrollbar slider:hover {
+    background-color: @accent;
+    min-width: 8px;
+}

@@ -8,11 +8,11 @@ import sys
 def main():
     script_dir = os.path.dirname(os.path.abspath(__file__))
     root_dir = os.path.dirname(script_dir)
-    tokens_path = os.path.join(root_dir, "hyprland-serena", "theme", "tokens.json")
+    tokens_path = os.path.join(root_dir, "config", "theme", "tokens.json")
 
     if not os.path.exists(tokens_path):
         # Alternative search
-        alt_path = os.path.join(os.path.dirname(root_dir), "theme", "tokens.json")
+        alt_path = os.path.expanduser("~/.config/hypr/theme/tokens.json")
         if os.path.exists(alt_path):
             tokens_path = alt_path
         else:
@@ -25,7 +25,7 @@ def main():
     colors = data["colors"]
     typo = data.get("typography", {})
     geo = data.get("geometry", {})
-    hypr_base = os.path.join(root_dir, "hyprland-serena")
+    hypr_base = os.path.join(root_dir, "config")
 
     print("Compiling design tokens from tokens.json")
 
@@ -47,6 +47,10 @@ def main():
 
 @define-color accent {colors['accent']};
 @define-color accent_hover {colors['accent_hover']};
+
+@define-color scrollbar_slider {colors.get('accent_dim', colors['accent'])};
+@define-color scrollbar_slider_hover {colors['accent']};
+
 @define-color text_primary {colors['text_primary']};
 @define-color text_secondary {colors['text_secondary']};
 @define-color text_muted {colors['text_muted']};
@@ -83,6 +87,10 @@ def main():
 
 @define-color accent {colors['accent']};
 @define-color accent_hover {colors['accent_hover']};
+
+@define-color scrollbar_slider {colors.get('accent_dim', colors['accent'])};
+@define-color scrollbar_slider_hover {colors['accent']};
+
 @define-color text_primary {colors['text_primary']};
 @define-color text_secondary {colors['text_secondary']};
 @define-color text_muted {colors['text_muted']};
@@ -98,6 +106,18 @@ def main():
     with open(hypr_styles_palette, "w", encoding="utf-8") as f:
         f.write(hypr_styles_css)
     print("  ✔ Generated hypr/styles/palette.css")
+
+    # GTK-3.0, GTK-4.0, SwayNC, Wlogout palettes
+    for p in [
+        os.path.join(hypr_base, "gtk-3.0", "palette.css"),
+        os.path.join(hypr_base, "gtk-4.0", "palette.css"),
+        os.path.join(hypr_base, "swaync", "palette.css"),
+        os.path.join(hypr_base, "wlogout", "palette.css")
+    ]:
+        os.makedirs(os.path.dirname(p), exist_ok=True)
+        with open(p, "w", encoding="utf-8") as f:
+            f.write(hypr_styles_css)
+    print("  ✔ Generated gtk-3.0, gtk-4.0, swaync, wlogout palette.css")
 
     # 2. Hyprland palette.conf
     hypr_palette = os.path.join(hypr_base, "hypr", "palette.conf")
@@ -125,6 +145,34 @@ $ribbon_blue          = {colors['ribbon_blue_hypr']}
     with open(hypr_palette, "w", encoding="utf-8") as f:
         f.write(hypr_content)
     print("  ✔ Generated hypr/palette.conf")
+
+    hypr_lua = os.path.join(hypr_base, "hypr", "palette.lua")
+    hypr_lua_content = f"""-- palette.lua — Color tokens for Hyprland (Lua engine).
+-- NOTE: Generated from tokens.json. Do not edit directly.
+
+return {{
+    bg_window            = "{colors['bg_window_hypr']}",
+    bg_card              = "{colors['bg_card_hypr']}",
+    bg_card_hover        = "{colors['bg_card_hover_hypr']}",
+    bg_subtle            = "{colors['bg_subtle_hypr']}",
+    border_window        = "{colors['border_window_hypr']}",
+    border_card          = "{colors['border_card_hypr']}",
+    border_card_hover    = "{colors['border_card_hover_hypr']}",
+    accent               = "{colors['accent_hypr']}",
+    accent_hover         = "{colors['accent_hover_hypr']}",
+    text_primary         = "{colors['text_primary_hypr']}",
+    text_secondary       = "{colors['text_secondary_hypr']}",
+    text_muted           = "{colors['text_muted_hypr']}",
+    text_inverse         = "{colors['text_inverse_hypr']}",
+    status_warning       = "{colors['status_warning_hypr']}",
+    status_critical      = "{colors['status_critical_hypr']}",
+    status_success       = "{colors['status_success_hypr']}",
+    ribbon_blue          = "{colors['ribbon_blue_hypr']}",
+}}
+"""
+    with open(hypr_lua, "w", encoding="utf-8") as f:
+        f.write(hypr_lua_content)
+    print("  ✔ Generated hypr/palette.lua")
 
     # 3. Rofi colors-rofi.rasi
     rofi_palette = os.path.join(hypr_base, "rofi", "colors-rofi.rasi")
@@ -166,38 +214,43 @@ $ribbon_blue          = {colors['ribbon_blue_hypr']}
     py_palette = os.path.join(hypr_base, "hypr", "scripts", "palette.py")
     py_content = f"""#!/usr/bin/env python3
 # palette.py — Python design tokens.
-# NOTE: Generated from tokens.json. Do not edit directly.
+# NOTE: Generated automatically. Do not edit directly.
 
-PALETTE = {{
-    "bg_window": "{colors['bg_window']}",
-    "bg_window_alpha": "{colors['bg_window_alpha']}",
-    "bg_card": "{colors['bg_card']}",
-    "bg_card_alpha": "{colors['bg_card_alpha']}",
-    "bg_card_hover": "{colors['bg_card_hover']}",
-    "bg_card_hover_alpha": "{colors['bg_card_hover_alpha']}",
-    "bg_subtle": "{colors['bg_subtle']}",
-    "bg_subtle_alpha": "{colors['bg_subtle_alpha']}",
-    "bg_ghost": "{colors['bg_ghost']}",
-    "bg_ghost_hover": "{colors['bg_ghost_hover']}",
+PALETTE = {json.dumps(colors, indent=4, ensure_ascii=False)}
 
-    "border_window": "{colors['border_window']}",
-    "border_card": "{colors['border_card']}",
-    "border_card_hover": "{colors['border_card_hover']}",
+def hex_to_rgba(hex_code: str, alpha: float = 1.0):
+    h = hex_code.strip().lstrip('#')
+    if len(h) == 3:
+        h = ''.join(c * 2 for c in h)
+    return (int(h[0:2], 16) / 255.0, int(h[2:4], 16) / 255.0, int(h[4:6], 16) / 255.0, float(alpha))
 
-    "accent": "{colors['accent']}",
-    "accent_hover": "{colors['accent_hover']}",
+# Color hex constants
+C_BG_WIN        = PALETTE.get("bg_window", "#201011")
+C_BG_CARD       = PALETTE.get("bg_card", "#2A1A1E")
+C_BG_CARD_HOVER = PALETTE.get("bg_card_hover", "#3A222A")
+C_BG_SUBTLE     = PALETTE.get("bg_subtle", "#301F20")
+C_ACCENT        = PALETTE.get("accent", "#FF2A55")
+C_ACCENT_HOVER  = PALETTE.get("accent_hover", "#FF597B")
+C_TEXT_PRI      = PALETTE.get("text_primary", "#FFF0F5")
+C_TEXT_SEC      = PALETTE.get("text_secondary", "#E8C2D0")
+C_TEXT_MUT      = PALETTE.get("text_muted", "#A68595")
+C_TEXT_INV      = PALETTE.get("text_inverse", "#FFFFFF")
+C_STATUS_WARN   = PALETTE.get("status_warning", "#FFB86C")
+C_STATUS_CRIT   = PALETTE.get("status_critical", "#FF2A55")
+C_STATUS_SUCC   = PALETTE.get("status_success", "#8FBC8F")
+C_RIBBON        = PALETTE.get("ribbon_blue", "#50A6FF")
 
-    "text_primary": "{colors['text_primary']}",
-    "text_secondary": "{colors['text_secondary']}",
-    "text_muted": "{colors['text_muted']}",
-    "text_inverse": "{colors['text_inverse']}",
-
-    "status_warning": "{colors['status_warning']}",
-    "status_critical": "{colors['status_critical']}",
-    "status_success": "{colors['status_success']}",
-
-    "ribbon_blue": "{colors['ribbon_blue']}",
-}}
+# Pre-computed Cairo RGBA tuples
+BG_WINDOW_RGBA     = hex_to_rgba(C_BG_WIN, 0.98)
+BG_CARD_RGBA       = hex_to_rgba(C_BG_CARD, 0.95)
+BG_CARD_HOVER_RGBA = hex_to_rgba(C_BG_CARD_HOVER, 0.98)
+BG_SUBTLE_RGBA     = hex_to_rgba(C_BG_SUBTLE, 0.95)
+ACCENT_RGBA        = hex_to_rgba(C_ACCENT, 1.0)
+ACCENT_HOVER_RGBA  = hex_to_rgba(C_ACCENT_HOVER, 1.0)
+ACCENT_DIM_RGBA    = hex_to_rgba(C_ACCENT, 0.48)
+ACCENT_SUBTLE_RGBA = hex_to_rgba(C_ACCENT, 0.20)
+BORDER_WINDOW_RGBA = (1.0, 1.0, 1.0, 0.12)
+BORDER_CARD_RGBA   = (1.0, 1.0, 1.0, 0.12)
 """
     with open(py_palette, "w", encoding="utf-8") as f:
         f.write(py_content)
