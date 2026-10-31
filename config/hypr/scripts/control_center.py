@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# control_center.py — Floating quick settings and notifications panel.
+# control_center.py — Kalos Pokédex Control Center & Notifications Panel
 
 import os
 import sys
@@ -7,11 +7,15 @@ import time
 import json
 import signal
 import subprocess
+import shutil
+import math
 import threading
 import cairo
 import gi
 
 gi.require_version('Gtk', '3.0')
+gi.require_version('Pango', '1.0')
+gi.require_version('PangoCairo', '1.0')
 try:
     gi.require_version('GtkLayerShell', '0.1')
     from gi.repository import GtkLayerShell
@@ -19,57 +23,310 @@ try:
 except Exception:
     HAS_LAYER_SHELL = False
 
-from gi.repository import Gtk, Gdk, GLib, Pango
+from gi.repository import Gtk, Gdk, GLib, Pango, PangoCairo
 
-# Ensure script dir is in sys.path before loading palette
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-if SCRIPT_DIR not in sys.path:
-    sys.path.insert(0, SCRIPT_DIR)
+# Resolve script & service paths
+SCRIPTS_DIR = os.path.dirname(os.path.abspath(__file__))
+if SCRIPTS_DIR not in sys.path:
+    sys.path.insert(0, SCRIPTS_DIR)
 
-# Color tokens & Cairo RGBA
-try:
-    from palette import (
-        PALETTE, hex_to_rgba,
-        C_BG_WIN, C_BG_CARD, C_BG_CARD_HOVER, C_BG_SUBTLE,
-        C_ACCENT, C_ACCENT_HOVER, C_TEXT_PRI, C_TEXT_SEC, C_TEXT_MUT, C_TEXT_INV,
-        C_STATUS_WARN, C_STATUS_CRIT, C_STATUS_SUCC, C_RIBBON,
-        BG_WINDOW_RGBA, BG_CARD_RGBA, ACCENT_RGBA, ACCENT_HOVER_RGBA,
-        BORDER_WINDOW_RGBA, BORDER_CARD_RGBA
-    )
-except ImportError:
-    C_BG_WIN = "#201011"
-    C_BG_CARD = "#2A1A1E"
-    C_BG_CARD_HOVER = "#3A222A"
-    C_BG_SUBTLE = "#301F20"
-    C_ACCENT = "#FF2A55"
-    C_ACCENT_HOVER = "#FF597B"
-    C_TEXT_PRI = "#FFF0F5"
-    C_TEXT_SEC = "#E8C2D0"
-    C_TEXT_MUT = "#A68595"
-    C_TEXT_INV = "#FFFFFF"
-    C_STATUS_WARN = "#FFB86C"
-    C_STATUS_CRIT = "#FF2A55"
-    C_STATUS_SUCC = "#8FBC8F"
-    C_RIBBON = "#50A6FF"
-    BG_WINDOW_RGBA = (32.0/255.0, 16.0/255.0, 18.0/255.0, 0.98)
-    BG_CARD_RGBA = (42.0/255.0, 26.0/255.0, 31.0/255.0, 0.95)
-    ACCENT_RGBA = (255.0/255.0, 42.0/255.0, 85.0/255.0, 1.0)
-    ACCENT_HOVER_RGBA = (255.0/255.0, 89.0/255.0, 123.0/255.0, 1.0)
-    BORDER_WINDOW_RGBA = (1.0, 1.0, 1.0, 0.12)
-    BORDER_CARD_RGBA = (1.0, 1.0, 1.0, 0.12)
-
-PID_FILE = "/tmp/control_center.pid"
-CACHE_FILE = os.path.expanduser("~/.cache/notifications.json")
-STATUS_CACHE_FILE = "/tmp/status.json"
-
-# Path to external CSS stylesheet
-STYLESHEET_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "styles", "control_center.css")
-
-# Services
 from services.audio import AudioService
 from services.brightness import BrightnessService
 from services.bluetooth import BluetoothService
 from services.power import PowerService
+
+PID_FILE = "/tmp/control_center.pid"
+CACHE_FILE = os.path.expanduser("~/.cache/notifications.json")
+
+# ==============================================================================
+# 1. PURE CAIRO GEOMETRIC PATHS & HELPERS
+# ==============================================================================
+def clip_device_bounds(cr, x, y, w, h, r):
+    cr.new_sub_path()
+    cr.arc(x + r, y + r, r, math.pi, 1.5 * math.pi)
+    cr.arc(x + w - r, y + r, r, 1.5 * math.pi, 2 * math.pi)
+    cr.arc(x + w - r, y + h - r, r, 0, 0.5 * math.pi)
+    cr.arc(x + r, y + h - r, r, 0.5 * math.pi, math.pi)
+    cr.close_path()
+
+def draw_anime_grooves(cr, cx, cy, grooves, a1, a2):
+    for (r_in, r_out) in grooves:
+        cr.save()
+        cr.new_sub_path()
+        cr.arc(cx, cy, r_out, a1, a2)
+        cr.arc_negative(cx, cy, r_in, a2, a1)
+        cr.close_path()
+        cr.set_source_rgba(0x14/255.0, 0x02/255.0, 0x06/255.0, 0.62); cr.fill()
+
+        cr.arc(cx, cy, r_out, a1, a2)
+        cr.set_source_rgba(0x10/255.0, 0x02/255.0, 0x05/255.0, 0.90)
+        cr.set_line_width(1.1); cr.stroke()
+
+        cr.arc(cx, cy, r_in, a1, a2)
+        cr.set_source_rgba(0x18/255.0, 0x03/255.0, 0x07/255.0, 0.85)
+        cr.set_line_width(1.0); cr.stroke()
+
+        cr.arc(cx, cy, r_out + 0.8, a1, a2)
+        cr.set_source_rgba(1.0, 0.65, 0.75, 0.25)
+        cr.set_line_width(0.7); cr.stroke()
+        cr.restore()
+
+def create_top_red_casing_path(cr, x_left, x_right, y_dark_top, cx, cy_top, r_dark, ang_dark_top_start, ang_dark_top_end, x_dark_cut, device_r, notch_d=2.0, trans=1.8):
+    y_tl1_t = 48.0;  y_tl1_b = 52.0
+    y_tl2_t = 96.0;  y_tl2_b = 100.0
+    
+    cr.new_sub_path()
+    cr.move_to(x_left, y_dark_top)
+    cr.line_to(x_left, y_tl2_b + trans)
+    cr.curve_to(x_left, y_tl2_b + trans * 0.5, x_left + notch_d, y_tl2_b + trans * 0.5, x_left + notch_d, y_tl2_b)
+    cr.line_to(x_left + notch_d, y_tl2_t)
+    cr.curve_to(x_left + notch_d, y_tl2_t - trans * 0.5, x_left, y_tl2_t - trans * 0.5, x_left, y_tl2_t - trans)
+    
+    cr.line_to(x_left, y_tl1_b + trans)
+    cr.curve_to(x_left, y_tl1_b + trans * 0.5, x_left + notch_d, y_tl1_b + trans * 0.5, x_left + notch_d, y_tl1_b)
+    cr.line_to(x_left + notch_d, y_tl1_t)
+    cr.curve_to(x_left + notch_d, y_tl1_t - trans * 0.5, x_left, y_tl1_t - trans * 0.5, x_left, y_tl1_t - trans)
+    
+    cr.line_to(x_left, device_r)
+    cr.arc(x_left + device_r, device_r, device_r, math.pi, 1.5 * math.pi)
+    cr.line_to(x_right - device_r, 0)
+    cr.arc(x_right - device_r, device_r, device_r, 1.5 * math.pi, 2 * math.pi)
+    
+    cr.line_to(x_right, y_tl1_t - trans)
+    cr.curve_to(x_right, y_tl1_t - trans * 0.5, x_right - notch_d, y_tl1_t - trans * 0.5, x_right - notch_d, y_tl1_t)
+    cr.line_to(x_right - notch_d, y_tl1_b)
+    cr.curve_to(x_right - notch_d, y_tl1_b + trans * 0.5, x_right, y_tl1_b + trans * 0.5, x_right, y_tl1_b + trans)
+    
+    cr.line_to(x_right, y_tl2_t - trans)
+    cr.curve_to(x_right, y_tl2_t - trans * 0.5, x_right - notch_d, y_tl2_t - trans * 0.5, x_right - notch_d, y_tl2_t)
+    cr.line_to(x_right - notch_d, y_tl2_b)
+    cr.curve_to(x_right - notch_d, y_tl2_b + trans * 0.5, x_right, y_tl2_b + trans * 0.5, x_right, y_tl2_b + trans)
+    
+    cr.line_to(x_right, y_dark_top)
+    cr.line_to(cx + x_dark_cut, y_dark_top)
+    cr.arc_negative(cx, cy_top, r_dark, ang_dark_top_start, ang_dark_top_end)
+    cr.line_to(x_left, y_dark_top)
+    cr.close_path()
+
+def create_bottom_red_casing_path(cr, x_left, x_right, y_dark_bot, H_canvas, cx, cy_bot, r_dark, ang_dark_bot_start, ang_dark_bot_end, x_dark_cut, device_r, notch_d=2.0, trans=1.8):
+    y_bl1_b = H_canvas - 48.0; y_bl1_t = H_canvas - 52.0
+    y_bl2_b = H_canvas - 96.0; y_bl2_t = H_canvas - 100.0
+    
+    cr.new_sub_path()
+    cr.move_to(x_left, y_dark_bot)
+    cr.line_to(x_left, y_bl2_t - trans)
+    cr.curve_to(x_left, y_bl2_t - trans * 0.5, x_left + notch_d, y_bl2_t - trans * 0.5, x_left + notch_d, y_bl2_t)
+    cr.line_to(x_left + notch_d, y_bl2_b)
+    cr.curve_to(x_left + notch_d, y_bl2_b + trans * 0.5, x_left, y_bl2_b + trans * 0.5, x_left, y_bl2_b + trans)
+    
+    cr.line_to(x_left, y_bl1_t - trans)
+    cr.curve_to(x_left, y_bl1_t - trans * 0.5, x_left + notch_d, y_bl1_t - trans * 0.5, x_left + notch_d, y_bl1_t)
+    cr.line_to(x_left + notch_d, y_bl1_b)
+    cr.curve_to(x_left + notch_d, y_bl1_b + trans * 0.5, x_left, y_bl1_b + trans * 0.5, x_left, y_bl1_b + trans)
+    
+    cr.line_to(x_left, H_canvas - device_r)
+    cr.arc_negative(x_left + device_r, H_canvas - device_r, device_r, math.pi, 0.5 * math.pi)
+    cr.line_to(x_right - device_r, H_canvas)
+    cr.arc_negative(x_right - device_r, H_canvas - device_r, device_r, 0.5 * math.pi, 0)
+    
+    cr.line_to(x_right, y_bl1_b + trans)
+    cr.curve_to(x_right, y_bl1_b + trans * 0.5, x_right - notch_d, y_bl1_b + trans * 0.5, x_right - notch_d, y_bl1_b)
+    cr.line_to(x_right - notch_d, y_bl1_t)
+    cr.curve_to(x_right - notch_d, y_bl1_t - trans * 0.5, x_right, y_bl1_t - trans * 0.5, x_right, y_bl1_t - trans)
+    
+    cr.line_to(x_right, y_bl2_b + trans)
+    cr.curve_to(x_right, y_bl2_b + trans * 0.5, x_right - notch_d, y_bl2_b + trans * 0.5, x_right - notch_d, y_bl2_b)
+    cr.line_to(x_right - notch_d, y_bl2_t)
+    cr.curve_to(x_right - notch_d, y_bl2_t - trans * 0.5, x_right, y_bl2_t - trans * 0.5, x_right, y_bl2_t - trans)
+    
+    cr.line_to(x_right, y_dark_bot)
+    cr.line_to(cx + x_dark_cut, y_dark_bot)
+    cr.arc(cx, cy_bot, r_dark, ang_dark_bot_start, ang_dark_bot_end)
+    cr.line_to(x_left, y_dark_bot)
+    cr.close_path()
+
+# ==============================================================================
+# 2. PROPORTIONALLY KERNED CURVED TEXT (Fixes overlapping/colliding letters)
+# ==============================================================================
+def draw_curved_kerned(cr, text, cx, cy_top, r_text=60.0, font_desc="DejaVu Sans Bold 10", letter_spacing=3.2, color=(0x20/255.0, 0x10/255.0, 0x11/255.0)):
+    widths = []
+    for ch in text:
+        l = PangoCairo.create_layout(cr)
+        l.set_font_description(Pango.FontDescription(font_desc))
+        l.set_text(ch, -1)
+        ink, log = l.get_pixel_extents()
+        w = log.width if ch != ' ' else 8.5
+        widths.append(w + letter_spacing)
+    
+    total_arc = sum(widths)
+    total_ang = total_arc / r_text
+    start_ang = -math.pi / 2.0 - total_ang / 2.0
+    
+    curr_ang = start_ang
+    for i, ch in enumerate(text):
+        char_w = widths[i]
+        ang = curr_ang + (char_w / 2.0) / r_text
+        curr_ang += char_w / r_text
+        
+        x = cx + r_text * math.cos(ang)
+        y = cy_top + r_text * math.sin(ang)
+        cr.save()
+        cr.translate(x, y)
+        cr.rotate(ang + math.pi / 2.0)
+        l = PangoCairo.create_layout(cr)
+        l.set_font_description(Pango.FontDescription(font_desc))
+        l.set_text(ch, -1)
+        ink, log = l.get_pixel_extents()
+        cr.move_to(-log.width / 2.0, -log.height / 2.0)
+        cr.set_source_rgb(*color)
+        PangoCairo.show_layout(cr, l)
+        cr.restore()
+
+def draw_serena_flower(ctx, cx, cy, r_petal=9.0, r_center=3.8, color=(1.0, 0.165, 0.333)):
+    cy_opt = cy + 0.8
+    for i in range(5):
+        ang = i * (2 * math.pi / 5.0) - math.pi / 2.0
+        px = cx + (r_petal * 0.95) * math.cos(ang)
+        py = cy_opt + (r_petal * 0.95) * math.sin(ang)
+        ctx.arc(px, py, r_petal * 0.65, 0, 2 * math.pi)
+        ctx.set_source_rgba(color[0], color[1], color[2], 0.95); ctx.fill()
+    for i in range(5):
+        ang = i * (2 * math.pi / 5.0) - math.pi / 2.0
+        px = cx + (r_petal * 0.95) * math.cos(ang)
+        py = cy_opt + (r_petal * 0.95) * math.sin(ang)
+        ctx.arc(px, py, r_petal * 0.65, 0, 2 * math.pi)
+        ctx.set_source_rgba(0x20/255.0, 0x10/255.0, 0x11/255.0, 0.40); ctx.set_line_width(0.9); ctx.stroke()
+    ctx.arc(cx, cy_opt, r_center, 0, 2 * math.pi)
+    ctx.set_source_rgb(1.0, 0.94, 0.96); ctx.fill_preserve()
+    ctx.set_source_rgba(0x20/255.0, 0x10/255.0, 0x11/255.0, 0.50); ctx.set_line_width(0.8); ctx.stroke()
+
+def draw_bell_icon(ctx, cx, cy, font_size=20, color="#FF2A55"):
+    l = PangoCairo.create_layout(ctx)
+    l.set_font_description(Pango.FontDescription(f"JetBrains Mono Nerd Font Bold {font_size}"))
+    l.set_markup(f"<span color='{color}'>󰂚</span>", -1)
+    ink, log = l.get_pixel_extents()
+    ctx.move_to(cx - ink.x - ink.width / 2.0, cy - ink.y - ink.height / 2.0)
+    PangoCairo.show_layout(ctx, l)
+
+def draw_pokeball_dual_slider(cr, cx, cy, R=64.0, thickness=12.0, vol_val=0.35, bri_val=0.60, knob_style="round_knob", icon_color="#FF2A55", accent_rgb=(0xFF/255.0, 0x2A/255.0, 0x55/255.0), dark_color=(0x20/255.0, 0x10/255.0, 0x11/255.0), pwr_bg=(0x20/255.0, 0x10/255.0, 0x11/255.0)):
+    gap_ang = math.radians(16.0)
+    
+    # 1. TOP ARC: VOLUME (Sweeps Left -> Top -> Right)
+    ang_vol_start = math.pi + gap_ang
+    ang_vol_end = 2 * math.pi - gap_ang
+    ang_vol_span = ang_vol_end - ang_vol_start
+    ang_vol_thumb = ang_vol_start + vol_val * ang_vol_span
+
+    cr.save()
+    cr.set_line_width(thickness)
+    cr.set_line_cap(cairo.LINE_CAP_ROUND)
+    cr.new_sub_path()
+    cr.arc(cx, cy, R, ang_vol_start, ang_vol_end)
+    cr.set_source_rgb(*dark_color) # Token bg_window
+    cr.stroke()
+
+    if vol_val > 0.01:
+        cr.new_sub_path()
+        cr.arc(cx, cy, R, ang_vol_start, ang_vol_thumb)
+        cr.set_source_rgb(*accent_rgb)
+        cr.stroke()
+
+    if knob_style == "round_knob":
+        tx = cx + R * math.cos(ang_vol_thumb)
+        ty = cy + R * math.sin(ang_vol_thumb)
+        cr.new_path()
+        cr.arc(tx, ty, thickness * 0.62, 0, 2 * math.pi)
+        cr.set_source_rgb(1.0, 1.0, 1.0); cr.fill_preserve()
+        cr.set_source_rgb(*accent_rgb); cr.set_line_width(2.0); cr.stroke()
+    cr.restore()
+
+    # 2. BOTTOM ARC: BRIGHTNESS (Sweeps Left -> Bottom -> Right)
+    ang_bri_start = math.pi - gap_ang
+    ang_bri_end = gap_ang
+    ang_bri_span = (math.pi - 2 * gap_ang)
+    ang_bri_thumb = ang_bri_start - bri_val * ang_bri_span
+
+    cr.save()
+    cr.set_line_width(thickness)
+    cr.set_line_cap(cairo.LINE_CAP_ROUND)
+    cr.new_sub_path()
+    cr.arc_negative(cx, cy, R, ang_bri_start, ang_bri_end)
+    cr.set_source_rgb(*dark_color) # Token bg_window
+    cr.stroke()
+
+    if bri_val > 0.01:
+        cr.new_sub_path()
+        cr.arc_negative(cx, cy, R, ang_bri_start, ang_bri_thumb)
+        cr.set_source_rgb(*accent_rgb)
+        cr.stroke()
+
+    if knob_style == "round_knob":
+        bx = cx + R * math.cos(ang_bri_thumb)
+        by = cy + R * math.sin(ang_bri_thumb)
+        cr.new_path()
+        cr.arc(bx, by, thickness * 0.62, 0, 2 * math.pi)
+        cr.set_source_rgb(1.0, 1.0, 1.0); cr.fill_preserve()
+        cr.set_source_rgb(*accent_rgb); cr.set_line_width(2.0); cr.stroke()
+    cr.restore()
+
+    # 3. HORIZONTAL EQUATORIAL SEAMS
+    r_out = R + thickness / 2.0 + 3.0
+    r_btn_outer = 22.0
+
+    cr.save()
+    cr.set_line_width(2.8)
+    cr.set_source_rgb(*dark_color)
+    cr.new_sub_path()
+    cr.move_to(cx - r_out, cy); cr.line_to(cx - r_btn_outer, cy); cr.stroke()
+    cr.new_sub_path()
+    cr.move_to(cx + r_btn_outer, cy); cr.line_to(cx + r_out, cy); cr.stroke()
+    cr.restore()
+
+    # 4. CENTER POWER BUTTON (0.0px Offset, pure geometric vector)
+    cr.save()
+    cr.new_sub_path()
+    cr.arc(cx, cy, r_btn_outer, 0, 2 * math.pi)
+    cr.set_source_rgb(*pwr_bg); cr.fill_preserve()
+    cr.set_source_rgba(0x3A/255.0, 0x22/255.0, 0x2A/255.0, 0.9); cr.set_line_width(1.5); cr.stroke()
+
+    r_pwr = 7.0
+    ang_gap = math.radians(35.0)
+    ang_s = -math.pi / 2.0 + ang_gap
+    ang_e = 1.5 * math.pi - ang_gap
+
+    cr.set_line_width(2.0)
+    cr.set_line_cap(cairo.LINE_CAP_ROUND)
+    cr.new_sub_path()
+    cr.arc(cx, cy, r_pwr, ang_s, ang_e)
+    cr.set_source_rgb(*accent_rgb); cr.stroke()
+
+    cr.new_sub_path()
+    cr.move_to(cx, cy - r_pwr - 2.5)
+    cr.line_to(cx, cy - 1.0)
+    cr.stroke()
+    cr.restore()
+
+    # 5. ICONS NESTLED INSIDE THE LEFT CAVITY - PHƯƠNG ÁN B
+    vx = cx - 38.0
+    vy = cy - 23.0
+    bx = cx - 38.0
+    by = cy + 23.0
+
+    cr.save()
+    l_v = PangoCairo.create_layout(cr)
+    l_v.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 13.5"))
+    l_v.set_markup(f"<span color='{icon_color}'>󰕾</span>", -1)
+    ink_v, log_v = l_v.get_pixel_extents()
+    cr.move_to(vx - ink_v.x - ink_v.width / 2.0, vy - ink_v.y - ink_v.height / 2.0)
+    PangoCairo.show_layout(cr, l_v)
+
+    l_b = PangoCairo.create_layout(cr)
+    l_b.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 13.5"))
+    l_b.set_markup(f"<span color='{icon_color}'>󰃠</span>", -1)
+    ink_b, log_b = l_b.get_pixel_extents()
+    cr.move_to(bx - ink_b.x - ink_b.width / 2.0, by - ink_b.y - ink_b.height / 2.0)
+    PangoCairo.show_layout(cr, l_b)
+    cr.restore()
 
 def format_relative_time(timestamp):
     if not timestamp:
@@ -89,60 +346,113 @@ def format_relative_time(timestamp):
         return f"{days}d ago"
 
 def get_badge_info(app_name):
-    low = (app_name or "").lower()
-    if "code" in low:
-        return "notif-badge-vscode", "󰨞"
-    elif "discord" in low:
-        return "notif-badge-discord", "󰙯"
-    elif "spotify" in low:
-        return "notif-badge-spotify", "󰓇"
-    elif "firefox" in low or "chrome" in low or "edge" in low or "browser" in low:
-        return "notif-badge-browser", "󰈹"
-    elif "terminal" in low or "kitty" in low or "alacritty" in low:
-        return "notif-badge-terminal", "󰞷"
-    elif "system" in low or "update" in low or "ubuntu" in low:
-        return "notif-badge-system", "󰒓"
-    else:
-        return "notif-badge-default", "󰂚"
+    app_lower = app_name.lower()
+    if "discord" in app_lower:
+        return "#5865F2", "󰙯"
+    elif "firefox" in app_lower or "browser" in app_lower:
+        return "#FF7139", "󰈹"
+    elif "spotify" in app_lower or "music" in app_lower:
+        return "#1ED760", "󰓇"
+    elif "steam" in app_lower:
+        return "#1b2838", "󰓓"
+    elif "terminal" in app_lower or "alacritty" in app_lower or "kitty" in app_lower:
+        return "#FF2A55", "󰆍"
+    return "#FF2A55", "󰒓"
 
-def ensure_notif_daemon():
-    daemon_pid_file = "/tmp/notif_daemon.pid"
-    if os.path.exists(daemon_pid_file):
-        try:
-            with open(daemon_pid_file) as f:
-                pid = int(f.read().strip())
-            os.kill(pid, 0)
-            return
-        except Exception:
-            pass
-
-    script = os.path.expanduser("~/.config/hypr/scripts/notif_daemon.py")
-    if not os.path.exists(script):
-        script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "notif_daemon.py")
-    try:
-        subprocess.Popen(["python3", script], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    except Exception:
-        pass
-
-class ControlCenter(Gtk.Window):
+# ==============================================================================
+# 3. POKÉDEX GTK APPLICATION WITH SLIDING ANIMATION & CLOSED STATE
+# ==============================================================================
+class PokedexControlCenter(Gtk.Window):
     def __init__(self):
-        super().__init__(title="Control Center")
+        super().__init__(title="Pokédex Control Center")
         self.set_name("control-center-window")
         self.set_decorated(False)
         self.set_resizable(False)
-        self.set_default_size(315, -1)
-        self.set_size_request(315, -1)
 
-        self.launch_time = time.time()
-        self.mouse_entered = False
-        self.updating_sliders = False
+        # Logical canvas dimensions
+        self.W_canvas = 388.0
+        self.H_canvas = 780.0
+        self.set_default_size(int(self.W_canvas), int(self.H_canvas))
+        self.set_size_request(int(self.W_canvas), int(self.H_canvas))
 
-        # Load cached status for instant flicker-free rendering
-        self.status = self.load_status_cache()
+        self.current_page = "controls"
+        self.dragging_slider = None
 
-        # Non-blocking daemon check
-        threading.Thread(target=ensure_notif_daemon, daemon=True).start()
+        # ANIMATION & STATE:
+        # Starts in CLOSED state per user requirement (or open if --open passed)
+        if "--open" in sys.argv:
+            self.anim_state = "open"
+            self.anim_progress = 1.0
+        else:
+            self.anim_state = "closed"
+            self.anim_progress = 0.0
+        self.anim_start_time = 0.0
+        self.anim_duration = 0.32    # 320ms snappy anime sliding
+        self.anim_timer_id = None
+        self.quit_after_close = False
 
+        # State cache (Instant non-blocking defaults for 0.01s launch)
+        self.vol_val = 0.35
+        self.bri_val = 0.60
+        self.bt_enabled = False
+        self.bt_device = ""
+        self.power_mode = "Performance"
+        self.ime_text = "Vietnamese"
+        self.wifi_text, self.wifi_ssid = "Connected", ""
+        self.notifications = self.load_notifications()
+
+        # Non-blocking async status fetch immediately in background
+        threading.Thread(target=self.async_refresh_status, daemon=True).start()
+
+        # Geometry dimensions
+        self.pad_x = 4.0
+        self.x_left = self.pad_x
+        self.x_right = self.pad_x + 380.0
+        self.W_shell = 380.0
+        self.cx = self.pad_x + self.W_shell / 2.0
+        self.device_r = 24.0
+
+        self.r_inner = 82.0
+        self.r_outer = 124.0
+        self.r_chassis = 129.0
+        self.r_dark = 133.0
+        self.chassis_thick = 5.0
+        self.dark_thick = 4.0
+        self.grooves = [(48.0, 52.0), (96.0, 100.0)]
+        self.cut_y = 11.0
+        self.cuff_ext = 2.5
+        self.notch_d = 2.0
+        self.trans = 1.8
+
+        # Layout anchors for perfect geometric balance:
+        self.cy_pokeball = 468.0
+        self.socket_well_y = 636.5
+        self.top_mark_offset = 32.0
+
+        # Anime Pokémon Palette (Vibrant, high-tech, authentic to anime)
+        self.c_casing_l = (0xDC/255.0, 0x1A/255.0, 0x36/255.0)
+        self.c_casing_m = (0xF0/255.0, 0x2D/255.0, 0x4C/255.0)
+        self.c_casing_r = (0xDC/255.0, 0x1A/255.0, 0x36/255.0)
+        self.c_casing_border = (0x68/255.0, 0x0A/255.0, 0x16/255.0, 0.95)
+
+        # Pokéball Band & Chassis
+        self.c_band_stop0 = (0x1C/255.0, 0x1E/255.0, 0x22/255.0)
+        self.c_band_stop1 = (0x28/255.0, 0x2B/255.0, 0x32/255.0)
+        self.c_band_stop2 = (0x1C/255.0, 0x1E/255.0, 0x22/255.0)
+        self.c_band_stroke = (0x0E/255.0, 0x10/255.0, 0x13/255.0, 0.95)
+        self.c_slider_dark = (0x20/255.0, 0x21/255.0, 0x26/255.0)
+        self.c_pwr_bg = (0x20/255.0, 0x21/255.0, 0x26/255.0)
+        self.c_chassis = (0xD6/255.0, 0xDC/255.0, 0xE6/255.0)
+        self.c_flange = (0x18/255.0, 0x1A/255.0, 0x1E/255.0)
+
+        # Accent & Kalos Cyan Hologram roles (Vibrant Luminous Cyan - 100% Solid & Completely Uniform!)
+        self.c_accent = "#E5223E"
+        self.c_accent_rgb = (0xE5/255.0, 0x22/255.0, 0x3E/255.0)
+        self.c_holo_top = (0xC8/255.0, 0xF4/255.0, 0xFD/255.0)
+        self.c_holo_mid = (0xBA/255.0, 0xEE/255.0, 0xFC/255.0)
+        self.c_holo_bot = (0xAA/255.0, 0xE7/255.0, 0xFA/255.0)
+
+        # LayerShell setup
         if HAS_LAYER_SHELL:
             GtkLayerShell.init_for_window(self)
             GtkLayerShell.set_namespace(self, "control-center")
@@ -156,15 +466,7 @@ class ControlCenter(Gtk.Window):
             GtkLayerShell.set_keyboard_mode(self, GtkLayerShell.KeyboardMode.ON_DEMAND)
         else:
             self.set_position(Gtk.WindowPosition.NONE)
-            display = Gdk.Display.get_default()
-            if display:
-                monitor = display.get_primary_monitor() or display.get_monitor(0)
-                if monitor:
-                    geom = monitor.get_geometry()
-                    dash_w = 315
-                    x = geom.x + geom.width - dash_w - 14
-                    y = geom.y + 44
-                    self.move(x, y)
+            self.move(1600 - int(self.W_canvas) - 14, 44)
 
         screen = self.get_screen()
         visual = screen.get_rgba_visual()
@@ -172,168 +474,84 @@ class ControlCenter(Gtk.Window):
             self.set_visual(visual)
 
         self.set_app_paintable(True)
-        self.connect("draw", self.on_window_draw)
 
-        self.apply_css()
-        self.build_ui()
+        self.add_events(
+            Gdk.EventMask.BUTTON_PRESS_MASK |
+            Gdk.EventMask.BUTTON_RELEASE_MASK |
+            Gdk.EventMask.POINTER_MOTION_MASK |
+            Gdk.EventMask.KEY_PRESS_MASK
+        )
 
-        # Keyboard events
+        self.connect("draw", self.on_draw)
+        self.connect("button-press-event", self.on_button_press)
+        self.connect("button-release-event", self.on_button_release)
+        self.connect("motion-notify-event", self.on_motion_notify)
         self.connect("key-press-event", self.on_key_press)
 
-        # Trigger async status refresh immediately after showing
-        threading.Thread(target=self.refresh_all_status_async, daemon=True).start()
-        GLib.timeout_add(3000, self.trigger_async_refresh)
+        # Signal handling for Super+N toggling
+        GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGUSR1, self.on_sigusr1)
 
-    def on_window_draw(self, widget, cr):
-        # 1. Clear surface to 100% transparent (eliminates sharp rectangle leak)
-        cr.set_source_rgba(0, 0, 0, 0)
-        cr.set_operator(cairo.OPERATOR_CLEAR)
-        cr.paint()
-        cr.set_operator(cairo.OPERATOR_OVER)
+        GLib.timeout_add(1500, self.refresh_status_tick)
 
-        # 2. Draw perfectly rounded 16px background squircle
-        alloc = widget.get_allocation()
-        pad = 0.5
-        w = float(alloc.width) - pad * 2.0
-        h = float(alloc.height) - pad * 2.0
-        x = pad
-        y = pad
-        r = 16.0
-
-        cr.new_sub_path()
-        cr.arc(x + w - r, y + r, r, -1.57079632679, 0)
-        cr.arc(x + w - r, y + h - r, r, 0, 1.57079632679)
-        cr.arc(x + r, y + h - r, r, 1.57079632679, 3.14159265359)
-        cr.arc(x + r, y + r, r, 3.14159265359, 4.71238898038)
-        cr.close_path()
-
-        # Fill with the shared window background token.
-        cr.set_source_rgba(*BG_WINDOW_RGBA)
-        cr.fill_preserve()
-
-        # Draw the shared outer window border.
-        cr.set_source_rgba(*BORDER_WINDOW_RGBA)
-        cr.set_line_width(1.0)
-        cr.stroke()
-
-        return False
-
-    def load_status_cache(self):
-        defaults = {
-            "vol": 35,
-            "muted": False,
-            "bright": 60,
-            "bt_on": False,
-            "bt_sub": "Off",
-            "power_mode": "powersave",
-            "ime_sub": "Vietnamese",
-            "ime_note": "Telex - VIE",
-            "wifi_sub": "Connected",
-            "wifi_ssid": "Wi-Fi"
-        }
-        if os.path.exists(STATUS_CACHE_FILE):
-            try:
-                with open(STATUS_CACHE_FILE, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                    defaults.update(data)
-            except Exception:
-                pass
-        return defaults
-
-    def save_status_cache(self):
-        try:
-            with open(STATUS_CACHE_FILE, "w", encoding="utf-8") as f:
-                json.dump(self.status, f)
-        except Exception:
-            pass
-
-    def apply_css(self):
-        css_provider = Gtk.CssProvider()
-        css_file = STYLESHEET_PATH
-        if not os.path.exists(css_file):
-            css_file = os.path.expanduser("~/.config/hypr/styles/control_center.css")
-        if os.path.exists(css_file):
-            try:
-                css_provider.load_from_path(css_file)
-            except Exception as e:
-                print(f"Warning: Failed to load CSS from {css_file}: {e}", file=sys.stderr)
-        context = Gtk.StyleContext()
-        screen = Gdk.Screen.get_default()
-        context.add_provider_for_screen(screen, css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER + 10)
-
-    # Hover Handlers with explicit CSS class switching for 100% reliable GTK EventBox hover
-    def on_card_hover_enter(self, widget, event):
-        widget.get_style_context().add_class("card-hover")
-        window = widget.get_window()
-        if window:
-            window.set_cursor(Gdk.Cursor.new_from_name(Gdk.Display.get_default(), "pointer"))
-        return False
-
-    def on_card_hover_leave(self, widget, event):
-        widget.get_style_context().remove_class("card-hover")
-        window = widget.get_window()
-        if window:
-            window.set_cursor(None)
-        return False
-
-    def on_audio_hover_enter(self, widget, event):
-        self.card_audio.get_style_context().add_class("card-hover")
-        window = widget.get_window()
-        if window:
-            window.set_cursor(Gdk.Cursor.new_from_name(Gdk.Display.get_default(), "pointer"))
-        return False
-
-    def on_audio_hover_leave(self, widget, event):
-        self.card_audio.get_style_context().remove_class("card-hover")
-        window = widget.get_window()
-        if window:
-            window.set_cursor(None)
-        return False
-
-    def on_audio_card_clicked(self, widget, event):
-        self.toggle_audio_mute(widget, event)
-        return False
-
-    def on_audio_card_scroll(self, widget, event):
-        vol = self.status.get('vol', 50)
-        direction = event.direction
-        if direction == Gdk.ScrollDirection.UP:
-            vol = min(100, vol + 5)
-        elif direction == Gdk.ScrollDirection.DOWN:
-            vol = max(0, vol - 5)
-        elif direction == Gdk.ScrollDirection.SMOOTH:
-            _, delta_x, delta_y = event.get_scroll_deltas()
-            if delta_y < 0:
-                vol = min(100, vol + 5)
-            elif delta_y > 0:
-                vol = max(0, vol - 5)
-            else:
-                return False
+    def on_sigusr1(self, *args):
+        if self.anim_state in ("open", "opening"):
+            self.start_close_animation(quit_after=True)
         else:
-            return False
-        self.status['vol'] = vol
-        self.status['muted'] = False
-        self.lbl_vol_val.set_markup(f"<span font='10' color='{C_TEXT_SEC}'>{vol}%</span>")
-        self.update_vol_icon(vol, False)
-        threading.Thread(target=lambda v=vol: subprocess.run(['pamixer', '--set-volume', str(v)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL), daemon=True).start()
+            self.close_and_quit()
+        return GLib.SOURCE_CONTINUE
+
+    def start_open_animation(self):
+        if self.anim_state in ("open", "opening"):
+            return
+        self.anim_state = "opening"
+        self.anim_start_time = time.time()
+        self.anim_duration = 0.32
+        if not self.anim_timer_id:
+            self.anim_timer_id = GLib.timeout_add(16, self.on_anim_step)
+
+    def start_close_animation(self, quit_after=False):
+        if self.anim_state in ("closed", "closing"):
+            if quit_after:
+                self.close_and_quit()
+            return
+        self.anim_state = "closing"
+        self.anim_start_time = time.time()
+        self.anim_duration = 0.28
+        self.quit_after_close = quit_after
+        if not self.anim_timer_id:
+            self.anim_timer_id = GLib.timeout_add(16, self.on_anim_step)
+
+    def on_anim_step(self):
+        now = time.time()
+        elapsed = now - self.anim_start_time
+        t = min(1.0, elapsed / self.anim_duration)
+
+        if self.anim_state == "opening":
+            # Cubic ease-out: snappy opening bursting out then locking smoothly
+            e = 1.0 - math.pow(1.0 - t, 3)
+            self.anim_progress = e
+            if t >= 1.0:
+                self.anim_progress = 1.0
+                self.anim_state = "open"
+                self.anim_timer_id = None
+                self.queue_draw()
+                return False
+        elif self.anim_state == "closing":
+            # Smoothstep ease-in-out
+            e = t * t * (3.0 - 2.0 * t)
+            self.anim_progress = max(0.0, 1.0 - e)
+            if t >= 1.0:
+                self.anim_progress = 0.0
+                self.anim_state = "closed"
+                self.anim_timer_id = None
+                if getattr(self, "quit_after_close", False):
+                    self.close_and_quit()
+                    return False
+                self.queue_draw()
+                return False
+
+        self.queue_draw()
         return True
-
-    def on_key_press(self, widget, event):
-        if event.keyval == Gdk.KEY_Escape:
-            self.close_and_quit()
-            return True
-        return False
-
-    def on_enter_notify(self, widget, event):
-        self.mouse_entered = True
-        return False
-
-    def on_focus_out(self, widget, event):
-        if time.time() - getattr(self, "launch_time", 0) < 0.8:
-            return False
-        if getattr(self, "mouse_entered", False):
-            self.close_and_quit()
-        return False
 
     def close_and_quit(self):
         if os.path.exists(PID_FILE):
@@ -343,622 +561,706 @@ class ControlCenter(Gtk.Window):
                 pass
         Gtk.main_quit()
 
-    def build_ui(self):
-        card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14)
-        card.set_name("cc-main-card")
-
-        # === HEADER (Control Center | Quick Settings & Alerts) ===
-        header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
-
-        lbl_flower = Gtk.Label()
-        lbl_flower.set_markup(f"<span font='16' color='{C_ACCENT}'>✿</span>")
-        lbl_flower.set_valign(Gtk.Align.CENTER)
-        header_box.pack_start(lbl_flower, False, False, 0)
-
-        title_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=1)
-        lbl_title = Gtk.Label()
-        lbl_title.set_markup(f"<span font='14' weight='bold' color='{C_TEXT_PRI}'>Control Center</span>")
-        lbl_title.set_halign(Gtk.Align.START)
-        title_vbox.pack_start(lbl_title, False, False, 0)
-
-        lbl_sub = Gtk.Label()
-        lbl_sub.set_markup(f"<span font='10' color='{C_TEXT_MUT}'>Quick Settings &amp; Alerts</span>")
-        lbl_sub.set_halign(Gtk.Align.START)
-        title_vbox.pack_start(lbl_sub, False, False, 0)
-
-        header_box.pack_start(title_vbox, True, True, 0)
-
-        card.pack_start(header_box, False, False, 0)
-
-        # === QUICK ACTION TILES (2x2 Grid) ===
-        quick_grid = Gtk.Grid()
-        quick_grid.set_column_spacing(8)
-        quick_grid.set_row_spacing(8)
-        quick_grid.set_column_homogeneous(True)
-        quick_grid.set_row_homogeneous(True)
-
-        # --- Card 1: Input Method (Col 0, Row 0) ---
-        card_ime = Gtk.EventBox()
-        card_ime.get_style_context().add_class("quick-card")
-        card_ime.connect("button-press-event", lambda w, e: self.toggle_ime())
-        card_ime.connect("enter-notify-event", self.on_card_hover_enter)
-        card_ime.connect("leave-notify-event", self.on_card_hover_leave)
-
-        vbox_ime = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
-        vbox_ime.set_halign(Gtk.Align.CENTER)
-
-        lbl_ime_icon = Gtk.Label()
-        lbl_ime_icon.get_style_context().add_class("card-icon")
-        lbl_ime_icon.set_markup(f"<span font='18' color='{C_ACCENT}'>󰌌</span>")
-        vbox_ime.pack_start(lbl_ime_icon, False, False, 0)
-
-        lbl_ime_title = Gtk.Label()
-        lbl_ime_title.get_style_context().add_class("card-title")
-        lbl_ime_title.set_markup(f"<span font='10.5' weight='bold' color='{C_TEXT_PRI}'>Input</span>")
-        vbox_ime.pack_start(lbl_ime_title, False, False, 0)
-
-        self.lbl_ime_sub = Gtk.Label()
-        self.lbl_ime_sub.set_markup(f"<span font='9.5' color='{C_TEXT_SEC}'>{self.status['ime_sub']}</span>")
-        vbox_ime.pack_start(self.lbl_ime_sub, False, False, 0)
-
-        self.lbl_ime_note = Gtk.Label()
-        card_ime.add(vbox_ime)
-        quick_grid.attach(card_ime, 0, 0, 1, 1)
-
-        # --- Card 2: Wi-Fi (Col 1, Row 0) ---
-        card_wifi = Gtk.EventBox()
-        card_wifi.get_style_context().add_class("quick-card")
-        card_wifi.connect("button-press-event", lambda w, e: self.launch_app("nm-connection-editor"))
-        card_wifi.connect("enter-notify-event", self.on_card_hover_enter)
-        card_wifi.connect("leave-notify-event", self.on_card_hover_leave)
-
-        vbox_wifi = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
-        vbox_wifi.set_halign(Gtk.Align.CENTER)
-
-        lbl_wifi_icon = Gtk.Label()
-        lbl_wifi_icon.get_style_context().add_class("card-icon")
-        lbl_wifi_icon.set_markup(f"<span font='18' color='{C_ACCENT}'>󰖩</span>")
-        vbox_wifi.pack_start(lbl_wifi_icon, False, False, 0)
-
-        lbl_wifi_title = Gtk.Label()
-        lbl_wifi_title.get_style_context().add_class("card-title")
-        lbl_wifi_title.set_markup(f"<span font='10.5' weight='bold' color='{C_TEXT_PRI}'>Wi-Fi</span>")
-        vbox_wifi.pack_start(lbl_wifi_title, False, False, 0)
-
-        self.lbl_wifi_sub = Gtk.Label()
-        self.lbl_wifi_sub.set_markup(f"<span font='9.5' color='{C_TEXT_SEC}'>{self.status['wifi_sub']}</span>")
-        vbox_wifi.pack_start(self.lbl_wifi_sub, False, False, 0)
-
-        self.lbl_wifi_ssid = Gtk.Label()
-        card_wifi.add(vbox_wifi)
-        quick_grid.attach(card_wifi, 1, 0, 1, 1)
-
-        # --- Card 3: Bluetooth (Col 0, Row 1) ---
-        card_bt = Gtk.EventBox()
-        card_bt.get_style_context().add_class("quick-card")
-        card_bt.connect("button-press-event", lambda w, e: self.toggle_bluetooth())
-        card_bt.connect("enter-notify-event", self.on_card_hover_enter)
-        card_bt.connect("leave-notify-event", self.on_card_hover_leave)
-
-        vbox_bt = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
-        vbox_bt.set_halign(Gtk.Align.CENTER)
-
-        self.lbl_bt_icon = Gtk.Label()
-        self.lbl_bt_icon.get_style_context().add_class("card-icon")
-        vbox_bt.pack_start(self.lbl_bt_icon, False, False, 0)
-
-        lbl_bt_title = Gtk.Label()
-        lbl_bt_title.get_style_context().add_class("card-title")
-        lbl_bt_title.set_markup(f"<span font='10.5' weight='bold' color='{C_TEXT_PRI}'>Bluetooth</span>")
-        vbox_bt.pack_start(lbl_bt_title, False, False, 0)
-
-        self.lbl_bt_sub = Gtk.Label()
-        vbox_bt.pack_start(self.lbl_bt_sub, False, False, 0)
-
-        self.update_bluetooth_ui(self.status.get('bt_on', False), self.status.get('bt_sub', 'Off'))
-
-        card_bt.add(vbox_bt)
-        quick_grid.attach(card_bt, 0, 1, 1, 1)
-
-        # --- Card 4: Power Mode (Col 1, Row 1) ---
-        card_pwr = Gtk.EventBox()
-        card_pwr.get_style_context().add_class("quick-card")
-        card_pwr.connect("button-press-event", lambda w, e: self.toggle_power_mode(w, e))
-        card_pwr.connect("enter-notify-event", self.on_card_hover_enter)
-        card_pwr.connect("leave-notify-event", self.on_card_hover_leave)
-
-        vbox_pwr = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
-        vbox_pwr.set_halign(Gtk.Align.CENTER)
-
-        self.lbl_pwr_icon = Gtk.Label()
-        self.lbl_pwr_icon.get_style_context().add_class("card-icon")
-        vbox_pwr.pack_start(self.lbl_pwr_icon, False, False, 0)
-
-        lbl_pwr_title = Gtk.Label()
-        lbl_pwr_title.get_style_context().add_class("card-title")
-        lbl_pwr_title.set_markup(f"<span font='10.5' weight='bold' color='{C_TEXT_PRI}'>Power Mode</span>")
-        vbox_pwr.pack_start(lbl_pwr_title, False, False, 0)
-
-        self.lbl_pwr_sub = Gtk.Label()
-        vbox_pwr.pack_start(self.lbl_pwr_sub, False, False, 0)
-
-        self.update_power_ui(self.status.get('power_mode', 'powersave'))
-
-        card_pwr.add(vbox_pwr)
-        quick_grid.attach(card_pwr, 1, 1, 1, 1)
-
-        card.pack_start(quick_grid, False, False, 0)
-
-        # === SLIDERS SECTION (Volume & Brightness) ===
-        sliders_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
-
-        # 1. Volume Row
-        vol_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
-        vol_header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        
-        self.lbl_vol_icon = Gtk.Label()
-        self.lbl_vol_icon.get_style_context().add_class("card-icon")
-        self.lbl_vol_icon.set_markup(f"<span font='13' color='{C_ACCENT}'>󰕾</span>")
-        self.lbl_vol_icon.set_margin_start(4)
-        vol_header.pack_start(self.lbl_vol_icon, False, False, 0)
-
-        lbl_vol_title = Gtk.Label()
-        lbl_vol_title.set_markup(f"<span font='11' weight='bold' color='{C_TEXT_PRI}'> Volume</span>")
-        vol_header.pack_start(lbl_vol_title, False, False, 0)
-
-        self.lbl_vol_val = Gtk.Label()
-        self.lbl_vol_val.set_markup(f"<span font='10' color='{C_TEXT_SEC}'>{self.status['vol']}%</span>")
-        vol_header.pack_end(self.lbl_vol_val, False, False, 4)
-        vol_box.pack_start(vol_header, False, False, 0)
-
-        self.vol_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0, 100, 1)
-        self.vol_scale.set_name("vol-scale")
-        self.vol_scale.set_draw_value(False)
-        self.vol_scale.set_value(self.status['vol'])
-        self.vol_scale.connect("value-changed", self.on_vol_changed)
-        vol_box.pack_start(self.vol_scale, False, False, 0)
-        sliders_box.pack_start(vol_box, False, False, 0)
-
-        # 2. Brightness Row
-        bright_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
-        bright_header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-
-        lbl_bright_icon = Gtk.Label()
-        lbl_bright_icon.get_style_context().add_class("card-icon")
-        lbl_bright_icon.set_markup(f"<span font='13' color='{C_ACCENT}'>󰃠</span>")
-        lbl_bright_icon.set_margin_start(4)
-        bright_header.pack_start(lbl_bright_icon, False, False, 0)
-
-        lbl_bright_title = Gtk.Label()
-        lbl_bright_title.set_markup(f"<span font='11' weight='bold' color='{C_TEXT_PRI}'> Brightness</span>")
-        bright_header.pack_start(lbl_bright_title, False, False, 0)
-
-        self.lbl_bright_val = Gtk.Label()
-        self.lbl_bright_val.set_markup(f"<span font='10' color='{C_TEXT_SEC}'>{self.status.get('bright', 60)}%</span>")
-        bright_header.pack_end(self.lbl_bright_val, False, False, 4)
-        bright_box.pack_start(bright_header, False, False, 0)
-
-        self.bright_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 5, 100, 1)
-        self.bright_scale.set_name("bright-scale")
-        self.bright_scale.set_draw_value(False)
-        self.bright_scale.set_value(self.status.get('bright', 60))
-        self.bright_scale.connect("value-changed", self.on_bright_changed)
-        bright_box.pack_start(self.bright_scale, False, False, 0)
-        sliders_box.pack_start(bright_box, False, False, 0)
-
-        card.pack_start(sliders_box, False, False, 0)
-
-        # Update initial icons
-        self.update_vol_icon(self.status['vol'], self.status['muted'])
-
-        # === NOTIFICATIONS SECTION ===
-        notif_header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        
-        lbl_notif_title = Gtk.Label()
-        lbl_notif_title.set_markup(f"<span font='13.5' weight='bold' color='{C_TEXT_PRI}'>Notifications</span>")
-        lbl_notif_title.set_halign(Gtk.Align.START)
-        notif_header.pack_start(lbl_notif_title, True, True, 0)
-
-        self.btn_clear = Gtk.Button(label="Clear all")
-        self.btn_clear.set_relief(Gtk.ReliefStyle.NONE)
-        self.btn_clear.get_style_context().add_class("btn-clear-all")
-        self.btn_clear.connect("clicked", self.clear_all_notifications)
-        self.btn_clear.set_valign(Gtk.Align.CENTER)
-        notif_header.pack_end(self.btn_clear, False, False, 0)
-
-        card.pack_start(notif_header, False, False, 0)
-
-        # Scrollable Notifications Window
-        self.scrolled_window = Gtk.ScrolledWindow()
-        self.scrolled_window.set_name("cc-notif-scroll")
-        self.scrolled_window.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
-        self.scrolled_window.set_propagate_natural_height(True)
-        self.scrolled_window.set_max_content_height(280)
-
-        # Dynamic Notification Stack
-        self.notif_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
-        self.scrolled_window.add(self.notif_box)
-
-        card.pack_start(self.scrolled_window, True, True, 0)
-
-        # Load real notifications immediately from JSON
-        self.refresh_notifications()
-
-        # === BOTTOM POWER MENU CARD ===
-        card_power = Gtk.EventBox()
-        card_power.get_style_context().add_class("btn-power-card")
-        card_power.connect("button-press-event", lambda w, e: self.launch_app(os.path.expanduser("~/.config/hypr/scripts/Wlogout.sh")))
-        card_power.connect("enter-notify-event", self.on_card_hover_enter)
-        card_power.connect("leave-notify-event", self.on_card_hover_leave)
-
-        power_hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-
-        # Perfectly centered circular container for power icon
-        power_circle = Gtk.Box()
-        power_circle.get_style_context().add_class("power-icon-circle")
-        power_circle.set_valign(Gtk.Align.CENTER)
-        power_circle.set_halign(Gtk.Align.CENTER)
-        power_circle.set_size_request(28, 28)
-
-        lbl_power_icon = Gtk.Label()
-        lbl_power_icon.get_style_context().add_class("power-icon")
-        lbl_power_icon.set_markup(f"<span font='12.5' color='{C_ACCENT}'></span>")
-        lbl_power_icon.set_valign(Gtk.Align.CENTER)
-        lbl_power_icon.set_halign(Gtk.Align.CENTER)
-        lbl_power_icon.set_xalign(0.5)
-        lbl_power_icon.set_yalign(0.5)
-        # Optical centering: shift 2px to the left to counteract Nerd Font glyph right-bearing
-        lbl_power_icon.set_margin_end(2)
-        power_circle.pack_start(lbl_power_icon, True, True, 0)
-
-        power_hbox.pack_start(power_circle, False, False, 0)
-
-        lbl_power_label = Gtk.Label()
-        lbl_power_label.get_style_context().add_class("power-label")
-        lbl_power_label.set_markup(f"<span font='13' weight='bold' color='{C_TEXT_PRI}'>Power Menu</span>")
-        lbl_power_label.set_halign(Gtk.Align.START)
-        lbl_power_label.set_valign(Gtk.Align.CENTER)
-        power_hbox.pack_start(lbl_power_label, True, True, 0)
-
-        lbl_arrow = Gtk.Label()
-        lbl_arrow.get_style_context().add_class("power-arrow")
-        lbl_arrow.set_markup(f"<span font='13' weight='bold' color='{C_TEXT_MUT}'>&gt;</span>")
-        lbl_arrow.set_valign(Gtk.Align.CENTER)
-        lbl_arrow.set_margin_end(16)
-        power_hbox.pack_end(lbl_arrow, False, False, 0)
-
-        card_power.add(power_hbox)
-        card.pack_start(card_power, False, False, 0)
-
-        self.add(card)
-
-    def refresh_notifications(self):
-        for child in self.notif_box.get_children():
-            self.notif_box.remove(child)
-
-        notifs = []
+    def on_key_press(self, widget, event):
+        if event.keyval == Gdk.KEY_Escape:
+            if self.anim_state == "open":
+                self.start_close_animation(quit_after=True)
+            else:
+                self.close_and_quit()
+            return True
+        elif event.keyval == Gdk.KEY_Tab:
+            if self.anim_state == "open":
+                self.toggle_page()
+            return True
+        return False
+
+    def toggle_page(self):
+        self.current_page = "notifications" if self.current_page == "controls" else "controls"
+        self.queue_draw()
+
+    def get_ime_status(self):
+        try:
+            out = subprocess.check_output(["fcitx5-remote", "-n"], stderr=subprocess.DEVNULL).decode().strip()
+            if "unikey" in out.lower() or "bamboo" in out.lower():
+                return "Vietnamese"
+            return "English"
+        except Exception:
+            return "English"
+
+    def get_wifi_status(self):
+        try:
+            out = subprocess.check_output(
+                ["nmcli", "-t", "-f", "DEVICE,TYPE,STATE,CONNECTION", "dev"], 
+                stderr=subprocess.DEVNULL,
+                timeout=0.3
+            ).decode()
+            for line in out.splitlines():
+                parts = line.split(":")
+                if len(parts) >= 4 and parts[1] == "wifi" and parts[2] == "connected":
+                    ssid = parts[3].strip()
+                    return ("Connected", ssid if ssid else "Connected")
+            return ("Disconnected", "")
+        except Exception:
+            return ("Disconnected", "")
+
+    def async_refresh_status(self):
+        try:
+            vol = AudioService.get_volume() / 100.0
+            bri = BrightnessService.get_brightness() / 100.0
+            bt_on = BluetoothService.is_enabled()
+            bt_dev = BluetoothService.get_connected_device_name()
+            pwr = PowerService.get_power_mode()
+            ime = self.get_ime_status()
+            wifi_txt, wifi_ssid = self.get_wifi_status()
+
+            def apply():
+                self.vol_val = vol
+                self.bri_val = bri
+                self.bt_enabled = bt_on
+                self.bt_device = bt_dev
+                self.power_mode = pwr
+                self.ime_text = ime
+                self.wifi_text = wifi_txt
+                self.wifi_ssid = wifi_ssid
+                if self.anim_state == "open":
+                    self.queue_draw()
+                return False
+
+            GLib.idle_add(apply)
+        except Exception:
+            pass
+
+    def load_notifications(self):
         if os.path.exists(CACHE_FILE):
             try:
                 with open(CACHE_FILE, "r", encoding="utf-8") as f:
-                    notifs = json.load(f)
-            except Exception:
-                notifs = []
-
-        self.btn_clear.set_visible(bool(notifs))
-
-        if not notifs:
-            empty_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
-            empty_box.set_margin_top(10)
-            empty_box.set_margin_bottom(10)
-            
-            lbl_icon = Gtk.Label()
-            lbl_icon.set_markup(f"<span font='22' color='{C_TEXT_MUT}'>󰂚</span>")
-            empty_box.pack_start(lbl_icon, False, False, 0)
-
-            lbl_empty = Gtk.Label()
-            lbl_empty.set_markup(f"<span font='11' weight='bold' color='{C_TEXT_SEC}'>No new notifications</span>")
-            empty_box.pack_start(lbl_empty, False, False, 0)
-
-            lbl_sub = Gtk.Label()
-            lbl_sub.set_markup(f"<span font='9.5' color='{C_TEXT_MUT}'>You're all caught up!</span>")
-            empty_box.pack_start(lbl_sub, False, False, 0)
-
-            self.notif_box.pack_start(empty_box, True, True, 0)
-        else:
-            for item in notifs[:25]:
-                badge_class, icon_char = get_badge_info(item.get("app_name", ""))
-                app_title = item.get("app_name", "System")
-                time_ago = format_relative_time(item.get("timestamp"))
-                headline = item.get("summary", "")
-                detail = item.get("body", "")
-
-                card_item = self.create_notification_item(
-                    badge_class=badge_class,
-                    icon_char=icon_char,
-                    app_title=app_title,
-                    time_ago=time_ago,
-                    headline=headline,
-                    detail=detail
-                )
-                self.notif_box.pack_start(card_item, False, False, 0)
-
-        self.notif_box.show_all()
-
-    def create_notification_item(self, badge_class, icon_char, app_title, time_ago, headline, detail):
-        item_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-        item_box.get_style_context().add_class("notif-item")
-
-        # Perfectly centered square badge box
-        badge_box = Gtk.Box()
-        badge_box.get_style_context().add_class("notif-badge-box")
-        badge_box.get_style_context().add_class(badge_class)
-        badge_box.set_size_request(34, 34)
-        badge_box.set_valign(Gtk.Align.CENTER)
-        badge_box.set_halign(Gtk.Align.CENTER)
-
-        badge_icon = Gtk.Label()
-        badge_icon.set_markup(f"<span font='14' color='{C_TEXT_INV}'>{icon_char}</span>")
-        badge_icon.set_valign(Gtk.Align.CENTER)
-        badge_icon.set_halign(Gtk.Align.CENTER)
-        badge_icon.set_xalign(0.5)
-        badge_icon.set_yalign(0.5)
-        # Shift 2px left for optical centering to counteract Nerd Font glyph right-offset
-        badge_icon.set_margin_end(2)
-        badge_box.pack_start(badge_icon, True, True, 0)
-
-        item_box.pack_start(badge_box, False, False, 0)
-
-        vbox_content = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
-
-        row1 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        lbl_app = Gtk.Label()
-        safe_app = GLib.markup_escape_text(app_title)
-        lbl_app.set_markup(f"<span font='12' weight='bold' color='{C_TEXT_PRI}'>{safe_app}</span>")
-        lbl_app.set_halign(Gtk.Align.START)
-        lbl_app.set_ellipsize(Pango.EllipsizeMode.END)
-        lbl_app.set_max_width_chars(18)
-        row1.pack_start(lbl_app, True, True, 0)
-
-        lbl_time = Gtk.Label()
-        safe_time = GLib.markup_escape_text(time_ago)
-        lbl_time.set_markup(f"<span font='10' color='{C_TEXT_MUT}'>{safe_time}</span>")
-        row1.pack_end(lbl_time, False, False, 0)
-        vbox_content.pack_start(row1, False, False, 0)
-
-        if headline:
-            lbl_head = Gtk.Label()
-            safe_head = GLib.markup_escape_text(headline[:45] + ("..." if len(headline) > 45 else ""))
-            lbl_head.set_markup(f"<span font='11.5' color='{C_TEXT_PRI}'>{safe_head}</span>")
-            lbl_head.set_halign(Gtk.Align.START)
-            lbl_head.set_ellipsize(Pango.EllipsizeMode.END)
-            lbl_head.set_max_width_chars(24)
-            vbox_content.pack_start(lbl_head, False, False, 0)
-
-        if detail:
-            lbl_detail = Gtk.Label()
-            safe_detail = GLib.markup_escape_text(detail[:60] + ("..." if len(detail) > 60 else ""))
-            lbl_detail.set_markup(f"<span font='10.5' color='{C_TEXT_MUT}'>{safe_detail}</span>")
-            lbl_detail.set_halign(Gtk.Align.START)
-            lbl_detail.set_ellipsize(Pango.EllipsizeMode.END)
-            lbl_detail.set_max_width_chars(26)
-            vbox_content.pack_start(lbl_detail, False, False, 0)
-
-        item_box.pack_start(vbox_content, True, True, 0)
-        return item_box
-
-    def clear_all_notifications(self, widget=None):
-        try:
-            with open(CACHE_FILE, "w", encoding="utf-8") as f:
-                json.dump([], f)
-        except Exception:
-            pass
-
-        threading.Thread(target=lambda: subprocess.run(["swaync-client", "-C"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL), daemon=True).start()
-        self.refresh_notifications()
-
-    def launch_app(self, cmd):
-        subprocess.Popen(cmd, shell=True)
-        self.close_and_quit()
-
-    def toggle_ime(self, widget=None):
-        script = os.path.expanduser("~/.config/hypr/scripts/toggle_vietnamese.sh")
-        subprocess.run(["bash", script], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        GLib.timeout_add(100, lambda: threading.Thread(target=self.refresh_ime_async, daemon=True).start())
-
-    def update_vol_icon(self, vol, muted):
-        if muted:
-            self.lbl_vol_icon.set_markup(f"<span font='13' color='{C_TEXT_MUT}'>󰖁</span>")
-        elif vol <= 30:
-            self.lbl_vol_icon.set_markup(f"<span font='13' color='{C_ACCENT}'>󰕿</span>")
-        elif vol <= 70:
-            self.lbl_vol_icon.set_markup(f"<span font='13' color='{C_ACCENT}'>󰖀</span>")
-        else:
-            self.lbl_vol_icon.set_markup(f"<span font='13' color='{C_ACCENT}'>󰕾</span>")
-
-    def toggle_audio_mute(self, widget=None, event=None):
-        def do_toggle():
-            subprocess.run(['pamixer', '-t'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            try:
-                muted = subprocess.check_output(['pamixer', '--get-mute'], stderr=subprocess.DEVNULL).decode().strip() == 'true'
-                vol = int(subprocess.check_output(['pamixer', '--get-volume'], stderr=subprocess.DEVNULL).decode().strip())
-                GLib.idle_add(lambda: self.update_vol_icon(vol, muted))
+                    return json.load(f)
             except Exception:
                 pass
-        threading.Thread(target=do_toggle, daemon=True).start()
+        return []
+
+    def refresh_status_tick(self):
+        if self.anim_state == "open":
+            threading.Thread(target=self.async_refresh_status, daemon=True).start()
         return True
 
-    def on_vol_changed(self, scale):
-        if self.updating_sliders:
-            return
-        val = int(scale.get_value())
-        self.lbl_vol_val.set_markup(f"<span font='10' color='{C_TEXT_SEC}'>{val}%</span>")
-        self.update_vol_icon(val, False)
-        self.status['vol'] = val
-        self.status['muted'] = False
-        threading.Thread(target=lambda v=val: AudioService.set_volume(v), daemon=True).start()
+    # ---------------- INTERACTION ----------------
+    def on_button_press(self, widget, event):
+        x, y = event.x, event.y
 
-    def on_bright_changed(self, scale):
-        if self.updating_sliders:
-            return
-        val = int(scale.get_value())
-        self.lbl_bright_val.set_markup(f"<span font='10' color='{C_TEXT_SEC}'>{val}%</span>")
-        self.status['bright'] = val
-        threading.Thread(target=lambda v=val: BrightnessService.set_brightness(v), daemon=True).start()
-
-    POWER_ICONS = {
-        "powersave": "",
-        "balanced": "",
-        "performance": ""
-    }
-
-    def update_bluetooth_ui(self, bt_on: bool, sub: str):
-        ctx = self.lbl_bt_icon.get_style_context()
-        if bt_on:
-            ctx.remove_class("card-icon-muted")
-            if not ctx.has_class("card-icon"):
-                ctx.add_class("card-icon")
-            sub_color = C_TEXT_SEC
-            icon_color = C_ACCENT
-        else:
-            ctx.remove_class("card-icon")
-            if not ctx.has_class("card-icon-muted"):
-                ctx.add_class("card-icon-muted")
-            sub_color = C_TEXT_MUT
-            icon_color = C_TEXT_MUT
-        self.lbl_bt_icon.set_markup(f"<span font='18' color='{icon_color}'>󰂯</span>")
-        self.lbl_bt_sub.set_markup(f"<span font='9.5' color='{sub_color}'>{sub}</span>")
-
-    def toggle_bluetooth(self):
-        def do_toggle():
-            new_state = BluetoothService.toggle_power()
-            self.status['bt_on'] = new_state
-            dev_name = BluetoothService.get_connected_device_name() if new_state else ""
-            sub = dev_name if dev_name else ("On" if new_state else "Off")
-            self.status['bt_sub'] = sub
-            GLib.idle_add(lambda: self.update_bluetooth_ui(new_state, sub))
-            self.save_status_cache()
-        threading.Thread(target=do_toggle, daemon=True).start()
-
-    def update_power_ui(self, mode: str):
-        icon = self.POWER_ICONS.get(mode, "")
-        name = mode.capitalize()
-        self.lbl_pwr_icon.set_markup(f"<span font='18' color='{C_ACCENT}'>{icon}</span>")
-        self.lbl_pwr_sub.set_markup(f"<span font='9.5' color='{C_TEXT_SEC}'>{name}</span>")
-
-    def toggle_power_mode(self, widget=None, event=None):
-        def do_toggle():
-            cur = self.status.get('power_mode', 'powersave')
-            order = ["powersave", "balanced", "performance"]
-            try:
-                idx = order.index(cur)
-                next_p = order[(idx + 1) % len(order)]
-            except ValueError:
-                next_p = "powersave"
-            PowerService.set_power_mode(next_p)
-            self.status['power_mode'] = next_p
-            GLib.idle_add(lambda: self.update_power_ui(next_p))
-            self.save_status_cache()
-        threading.Thread(target=do_toggle, daemon=True).start()
-        return True
-
-    # Asynchronous Background Refresh (Zero GUI blocking)
-    def trigger_async_refresh(self):
-        threading.Thread(target=self.refresh_all_status_async, daemon=True).start()
-        return True
-
-    def refresh_ime_async(self):
-        try:
-            ime_path = os.path.expanduser("~/.config/hypr/scripts/get_ime.sh")
-            ime_output = subprocess.check_output(['bash', ime_path], stderr=subprocess.DEVNULL).decode().strip()
-        except Exception:
-            ime_output = "ENG"
-
-        is_vie = "VIE" in ime_output
-        sub = "Vietnamese" if is_vie else "English"
-        note = "Telex - VIE" if is_vie else "US - ENG"
-
-        self.status['ime_sub'] = sub
-        self.status['ime_note'] = note
-
-        GLib.idle_add(lambda: (
-            self.lbl_ime_sub.set_markup(f"<span font='9.5' color='{C_TEXT_SEC}'>{sub}</span>"),
-            self.lbl_ime_note.set_markup(f"<span font='9.5' color='{C_TEXT_MUT}'>{note}</span>")
-        ))
-
-    def refresh_all_status_async(self):
-        # 1. Volume
-        try:
-            vol = AudioService.get_volume()
-            muted = AudioService.is_muted()
-            self.status['vol'] = vol
-            self.status['muted'] = muted
-            def apply_vol():
-                self.updating_sliders = True
-                try:
-                    self.vol_scale.set_value(vol)
-                    self.lbl_vol_val.set_markup(f"<span font='10' color='{C_TEXT_SEC}'>{vol}%</span>")
-                    self.update_vol_icon(vol, muted)
-                finally:
-                    self.updating_sliders = False
-            GLib.idle_add(apply_vol)
-        except Exception:
-            pass
-
-        # 2. Brightness
-        try:
-            bright = BrightnessService.get_brightness()
-            self.status['bright'] = bright
-            def apply_bright():
-                self.updating_sliders = True
-                try:
-                    self.bright_scale.set_value(bright)
-                    self.lbl_bright_val.set_markup(f"<span font='10' color='{C_TEXT_SEC}'>{bright}%</span>")
-                finally:
-                    self.updating_sliders = False
-            GLib.idle_add(apply_bright)
-        except Exception:
-            pass
-
-        # 3. Bluetooth
-        try:
-            bt_on = BluetoothService.is_enabled()
-            dev_name = BluetoothService.get_connected_device_name() if bt_on else ""
-            sub = dev_name if dev_name else ("On" if bt_on else "Off")
-            self.status['bt_on'] = bt_on
-            self.status['bt_sub'] = sub
-            GLib.idle_add(lambda: self.update_bluetooth_ui(bt_on, sub))
-        except Exception:
-            pass
-
-        # 4. Power Mode
-        try:
-            pwr = PowerService.get_power_mode()
-            self.status['power_mode'] = pwr
-            GLib.idle_add(lambda: self.update_power_ui(pwr))
-        except Exception:
-            pass
-
-        # 5. IME
-        self.refresh_ime_async()
-
-        # 6. Wi-Fi
-        try:
-            out = subprocess.check_output("nmcli -t -f active,ssid dev wifi 2>/dev/null | grep '^yes' | cut -d: -f2 | head -n1", shell=True).decode().strip()
-            if out:
-                sub, ssid = "Connected", out
+        # 1. Closed state interaction:
+        if self.anim_state == "closed":
+            # The closed device occupies y in [190, 590], x in [x_left, x_right]
+            if 180.0 <= y <= 600.0 and self.x_left <= x <= self.x_right:
+                # Clicking the closed Pokédex shell triggers the opening slide!
+                self.start_open_animation()
+                return True
             else:
-                sub, ssid = "Disconnected", "Offline"
-            self.status['wifi_sub'] = sub
-            self.status['wifi_ssid'] = ssid
-            GLib.idle_add(lambda: (
-                self.lbl_wifi_sub.set_markup(f"<span font='9.5' color='{C_TEXT_SEC}'>{sub}</span>"),
-                self.lbl_wifi_ssid.set_markup(f"<span font='9.5' color='{C_TEXT_MUT}'>{ssid}</span>")
-            ))
-        except Exception:
-            pass
+                # Clicking outside closed Pokédex dismisses it
+                self.close_and_quit()
+                return True
 
-        # Save latest status cache for next opening
-        self.save_status_cache()
+        # 2. While in motion, absorb events to avoid glitching
+        if self.anim_state in ("opening", "closing"):
+            return True
+
+        # 3. Open state interaction:
+        # Close if clicking outside the device body entirely
+        if y < 10.0 or y > self.H_canvas - 10.0:
+            self.start_close_animation(quit_after=True)
+            return True
+
+        # Bottom Navigation Button (Floating Bell/Flower at cx, socket_well_y)
+        dist_nav = math.sqrt((x - self.cx)**2 + (y - self.socket_well_y)**2)
+        if dist_nav <= 28.0:
+            self.toggle_page()
+            return True
+
+        # Top Mark (Flower / Bell at cx, cy_top - top_mark_offset)
+        dist_top = math.sqrt((x - self.cx)**2 + (y - (190.0 - self.top_mark_offset))**2)
+        if dist_top <= 24.0:
+            self.toggle_page()
+            return True
+
+        # Clicking on top red casing header or bottom casing footer triggers slide-closed
+        if y < 170.0 and abs(x - self.cx) > 40.0:
+            self.start_close_animation()
+            return True
+        if y > 610.0 and dist_nav > 30.0:
+            self.start_close_animation()
+            return True
+
+        if self.current_page == "controls":
+            grid_x = self.x_left + 36.0
+            grid_y = 224.0
+            col_w = (self.W_shell - 72.0 - 20.0) / 2.0
+            row_h = 44.0
+            gap_y = 24.0
+
+            # Tile (0,0) - Input
+            if grid_x <= x <= grid_x + col_w and grid_y <= y <= grid_y + row_h:
+                toggle_sh = os.path.join(SCRIPTS_DIR, "toggle_vietnamese.sh")
+                if os.path.exists(toggle_sh):
+                    subprocess.Popen([toggle_sh])
+                self.ime_text = "Vietnamese" if self.ime_text == "English" else "English"
+                self.queue_draw()
+                return True
+
+            # Tile (1,0) - Wi-Fi
+            c1_x = grid_x + col_w + 20.0
+            if c1_x <= x <= c1_x + col_w and grid_y <= y <= grid_y + row_h:
+                wifi_sh = os.path.join(SCRIPTS_DIR, "rofi-wifi-menu.sh")
+                if os.path.exists(wifi_sh):
+                    subprocess.Popen([wifi_sh])
+                elif shutil.which("nm-connection-editor"):
+                    subprocess.Popen(["nm-connection-editor"])
+                return True
+
+            # Tile (0,1) - Bluetooth
+            r1_y = grid_y + row_h + gap_y
+            if grid_x <= x <= grid_x + col_w and r1_y <= y <= r1_y + row_h:
+                self.bt_enabled = BluetoothService.toggle_power()
+                self.queue_draw()
+                return True
+
+            # Tile (1,1) - Power Mode
+            if c1_x <= x <= c1_x + col_w and r1_y <= y <= r1_y + row_h:
+                order = ["powersave", "balanced", "performance"]
+                curr = self.power_mode.lower() if self.power_mode else "balanced"
+                next_idx = (order.index(curr) + 1) % len(order) if curr in order else 0
+                next_mode = order[next_idx]
+                PowerService.set_power_mode(next_mode)
+                self.power_mode = next_mode
+                self.queue_draw()
+                return True
+
+            # Pokéball Dual Slider
+            cy_poke = self.cy_pokeball
+            dx = x - self.cx
+            dy = y - cy_poke
+            dist_poke = math.sqrt(dx**2 + dy**2)
+
+            # Center Power Button
+            if dist_poke <= 22.0:
+                wlogout_sh = os.path.join(SCRIPTS_DIR, "Wlogout.sh")
+                if os.path.exists(wlogout_sh):
+                    subprocess.Popen([wlogout_sh])
+                elif shutil.which("wlogout"):
+                    subprocess.Popen(["wlogout"])
+                self.close_and_quit()
+                return True
+
+            # Circular Arcs (Radius ~ 64px, thickness 12px -> zone 46px to 82px)
+            if 46.0 <= dist_poke <= 82.0:
+                if dy < 0:
+                    self.dragging_slider = "volume"
+                    self.update_slider_from_coords(x, y, "volume")
+                else:
+                    self.dragging_slider = "brightness"
+                    self.update_slider_from_coords(x, y, "brightness")
+                return True
+
+        elif self.current_page == "notifications":
+            # "Clear all notifications" button at y = 490..530
+            if 480.0 <= y <= 530.0 and abs(x - self.cx) <= 100.0:
+                if os.path.exists(CACHE_FILE):
+                    try:
+                        with open(CACHE_FILE, "w", encoding="utf-8") as f:
+                            json.dump([], f)
+                    except Exception:
+                        pass
+                self.notifications = []
+                self.queue_draw()
+                return True
+
+        return False
+
+    def on_button_release(self, widget, event):
+        self.dragging_slider = None
+        return False
+
+    def on_motion_notify(self, widget, event):
+        if self.anim_state == "open" and self.dragging_slider:
+            self.update_slider_from_coords(event.x, event.y, self.dragging_slider)
+            return True
+        return False
+
+    def update_slider_from_coords(self, x, y, slider_type):
+        cy_poke = self.cy_pokeball
+        dx = x - self.cx
+        dy = y - cy_poke
+        ang = math.atan2(dy, dx)
+        if ang < 0:
+            ang += 2 * math.pi
+
+        gap_ang = math.radians(16.0)
+
+        if slider_type == "volume":
+            ang_vol_start = math.pi + gap_ang
+            ang_vol_end = 2 * math.pi - gap_ang
+            ang_vol_span = ang_vol_end - ang_vol_start
+
+            if ang < ang_vol_start:
+                if ang < math.pi * 0.5:
+                    val = 1.0
+                else:
+                    val = 0.0
+            elif ang > ang_vol_end:
+                val = 1.0
+            else:
+                val = (ang - ang_vol_start) / ang_vol_span
+
+            self.vol_val = max(0.0, min(1.0, val))
+            AudioService.set_volume(int(self.vol_val * 100.0))
+            self.queue_draw()
+
+        elif slider_type == "brightness":
+            ang_bri_start = math.pi - gap_ang
+            ang_bri_end = gap_ang
+            ang_bri_span = (math.pi - 2 * gap_ang)
+
+            if ang > ang_bri_start:
+                val = 0.0
+            elif ang < ang_bri_end:
+                val = 1.0
+            else:
+                val = (ang_bri_start - ang) / ang_bri_span
+
+            self.bri_val = max(0.0, min(1.0, val))
+            BrightnessService.set_brightness(int(self.bri_val * 100.0))
+            self.queue_draw()
+
+    # ---------------- DYNAMIC COORDINATES ----------------
+    def get_dynamic_coords(self, p):
+        # p=0.0: closed, p=1.0: fully open
+        cy_top = 390.0 - 200.0 * p
+        cy_bot = 390.0 + 200.0 * p
+        y_edge_top = cy_top - self.cut_y
+        y_edge_bot = cy_bot + self.cut_y
+        y_silver_top = y_edge_top - self.chassis_thick
+        y_dark_top = y_silver_top - self.dark_thick
+        y_silver_bot = y_edge_bot + self.chassis_thick
+        y_dark_bot = y_silver_bot + self.dark_thick
+
+        x_outer_cut = math.sqrt(self.r_outer**2 - self.cut_y**2)
+        ang_outer_top_start = 2 * math.pi - math.asin(self.cut_y / self.r_outer)
+        ang_outer_top_end = math.pi + math.asin(self.cut_y / self.r_outer)
+
+        x_inner_cut = math.sqrt(self.r_inner**2 - self.cut_y**2)
+        ang_inner_top_start = 2 * math.pi - math.asin(self.cut_y / self.r_inner)
+        ang_inner_top_end = math.pi + math.asin(self.cut_y / self.r_inner)
+
+        dy_chassis = abs(cy_top - y_silver_top)
+        x_chassis_cut = math.sqrt(self.r_chassis**2 - dy_chassis**2)
+        ang_chassis_top_start = 2 * math.pi - math.asin(dy_chassis / self.r_chassis)
+        ang_chassis_top_end = math.pi + math.asin(dy_chassis / self.r_chassis)
+
+        dy_dark = abs(cy_top - y_dark_top)
+        x_dark_cut = math.sqrt(self.r_dark**2 - dy_dark**2)
+        ang_dark_top_start = 2 * math.pi - math.asin(dy_dark / self.r_dark)
+        ang_dark_top_end = math.pi + math.asin(dy_dark / self.r_dark)
+
+        ang_dark_bot_start = math.asin(dy_dark / self.r_dark)
+        ang_dark_bot_end = math.pi - math.asin(dy_dark / self.r_dark)
+        ang_chassis_bot_start = math.asin(dy_chassis / self.r_chassis)
+        ang_chassis_bot_end = math.pi - math.asin(dy_chassis / self.r_chassis)
+        ang_outer_bot_start = math.asin(self.cut_y / self.r_outer)
+        ang_outer_bot_end = math.pi - math.asin(self.cut_y / self.r_outer)
+        ang_inner_bot_start = math.asin(self.cut_y / self.r_inner)
+        ang_inner_bot_end = math.pi - math.asin(self.cut_y / self.r_inner)
+
+        top_casing_y = cy_top - 190.0
+        bot_casing_y = cy_bot - 590.0
+
+        return {
+            "cy_top": cy_top,
+            "cy_bot": cy_bot,
+            "y_edge_top": y_edge_top,
+            "y_edge_bot": y_edge_bot,
+            "y_silver_top": y_silver_top,
+            "y_dark_top": y_dark_top,
+            "y_silver_bot": y_silver_bot,
+            "y_dark_bot": y_dark_bot,
+            "x_outer_cut": x_outer_cut,
+            "ang_outer_top_start": ang_outer_top_start,
+            "ang_outer_top_end": ang_outer_top_end,
+            "x_inner_cut": x_inner_cut,
+            "ang_inner_top_start": ang_inner_top_start,
+            "ang_inner_top_end": ang_inner_top_end,
+            "x_chassis_cut": x_chassis_cut,
+            "ang_chassis_top_start": ang_chassis_top_start,
+            "ang_chassis_top_end": ang_chassis_top_end,
+            "x_dark_cut": x_dark_cut,
+            "ang_dark_top_start": ang_dark_top_start,
+            "ang_dark_top_end": ang_dark_top_end,
+            "ang_dark_bot_start": ang_dark_bot_start,
+            "ang_dark_bot_end": ang_dark_bot_end,
+            "ang_chassis_bot_start": ang_chassis_bot_start,
+            "ang_chassis_bot_end": ang_chassis_bot_end,
+            "ang_outer_bot_start": ang_outer_bot_start,
+            "ang_outer_bot_end": ang_outer_bot_end,
+            "ang_inner_bot_start": ang_inner_bot_start,
+            "ang_inner_bot_end": ang_inner_bot_end,
+            "top_casing_y": top_casing_y,
+            "bot_casing_y": bot_casing_y,
+        }
+
+    # ---------------- MASTER DRAW PIPELINE ----------------
+    def on_draw(self, widget, cr):
+        # 0. Clear canvas surface to 100% transparent
+        cr.set_source_rgba(0, 0, 0, 0)
+        cr.set_operator(cairo.OPERATOR_CLEAR)
+        cr.paint()
+        cr.set_operator(cairo.OPERATOR_OVER)
+        cr.set_antialias(cairo.ANTIALIAS_BEST)
+
+        geo = self.get_dynamic_coords(self.anim_progress)
+
+        # 1. CYAN HOLOGRAM SCREEN: 100% SOLID MATTE
+        cr.save()
+        cr.new_sub_path()
+        cr.rectangle(self.x_left, geo["y_edge_top"], self.W_shell, geo["y_edge_bot"] - geo["y_edge_top"])
+        cr.arc(self.cx, geo["cy_top"], self.r_inner, geo["ang_inner_top_end"], geo["ang_inner_top_start"])
+        cr.close_path()
+        cr.arc(self.cx, geo["cy_bot"], self.r_inner, geo["ang_inner_bot_start"], geo["ang_inner_bot_end"])
+        cr.close_path()
+        cr.clip()
+
+        # 1. CYAN HOLOGRAM SCREEN: Luminous Vibrant Cyan (100% Solid - Bright, crystal clear!)
+        y_grad_top = geo["cy_top"] - self.r_inner
+        y_grad_bot = geo["cy_bot"] + self.r_inner
+        scr_pat = cairo.LinearGradient(0, y_grad_top, 0, y_grad_bot)
+        scr_pat.add_color_stop_rgb(0.0, *self.c_holo_top)
+        scr_pat.add_color_stop_rgb(0.5, *self.c_holo_mid)
+        scr_pat.add_color_stop_rgb(1.0, *self.c_holo_bot)
+        cr.set_source(scr_pat)
+        cr.paint()
+        cr.restore()
+
+        # 1B. CONTENT REVEALED INSIDE SCREEN (Fades in smoothly during opening)
+        if self.anim_progress > 0.05:
+            alpha = min(1.0, max(0.0, (self.anim_progress - 0.25) / 0.75))
+            cr.save()
+            # Clip strictly inside expanding screen area
+            cr.new_sub_path()
+            cr.rectangle(self.x_left, geo["y_edge_top"], self.W_shell, geo["y_edge_bot"] - geo["y_edge_top"])
+            cr.arc(self.cx, geo["cy_top"], self.r_inner, geo["ang_inner_top_end"], geo["ang_inner_top_start"])
+            cr.close_path()
+            cr.arc(self.cx, geo["cy_bot"], self.r_inner, geo["ang_inner_bot_start"], geo["ang_inner_bot_end"])
+            cr.close_path()
+            cr.clip()
+
+            cr.push_group()
+
+            socket_well_y = self.socket_well_y
+
+            if self.current_page == "controls":
+                # KERNED CURVED HEADER: No overlapping letters!
+                draw_curved_kerned(cr, "CONTROL CENTER", self.cx, geo["cy_top"], r_text=60.0, font_desc="DejaVu Sans Bold 10", letter_spacing=3.2)
+
+                # Flower icon at the top
+                cr.save()
+                draw_serena_flower(cr, self.cx, geo["cy_top"] - self.top_mark_offset, r_petal=5.5, r_center=2.4, color=self.c_accent_rgb)
+                cr.restore()
+
+                # Floating Quick Tiles
+                grid_x = self.x_left + 36.0
+                grid_y = 224.0
+                col_w = (self.W_shell - 72.0 - 20.0) / 2.0
+                row_h = 44.0
+                gap_y = 24.0
+
+                bt_val = self.bt_device if (self.bt_enabled and self.bt_device) else ("Enabled" if self.bt_enabled else "Disabled")
+                tiles = [
+                    ("󰌌", self.c_accent, "Input", self.ime_text, grid_x, grid_y),
+                    ("󰤨", self.c_accent, "Wi-Fi", self.wifi_text, grid_x + col_w + 20.0, grid_y),
+                    ("󰂯", self.c_accent, "Bluetooth", bt_val, grid_x, grid_y + row_h + gap_y),
+                    ("󰓅", self.c_accent, "Power Mode", self.power_mode.capitalize() if self.power_mode else "Balanced", grid_x + col_w + 20.0, grid_y + row_h + gap_y),
+                ]
+
+                for icon, ic_col, name, val, c_x, c_y in tiles:
+                    cr.save()
+                    l_ic = PangoCairo.create_layout(cr)
+                    l_ic.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font 20"))
+                    l_ic.set_markup(f"<span color='{ic_col}'>{icon}</span>", -1)
+                    cr.move_to(c_x, c_y + 4.0)
+                    PangoCairo.show_layout(cr, l_ic)
+
+                    txt_x = c_x + 32.0
+                    l_txt = PangoCairo.create_layout(cr)
+                    l_txt.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 10"))
+                    l_txt.set_markup(f"<span color='#223344'>{name}</span>", -1)
+                    cr.move_to(txt_x, c_y + 2.0)
+                    PangoCairo.show_layout(cr, l_txt)
+
+                    l_txt.set_markup(f"<span color='{self.c_accent}'>{val}</span>", -1)
+                    cr.move_to(txt_x, c_y + 20.0)
+                    PangoCairo.show_layout(cr, l_txt)
+                    cr.restore()
+
+                # Pokéball Dual Slider + Power Button (Option B)
+                cy_pokeball = self.cy_pokeball
+                draw_pokeball_dual_slider(
+                    cr, self.cx, cy_pokeball, 
+                    R=64.0, thickness=12.0, 
+                    vol_val=self.vol_val, bri_val=self.bri_val, 
+                    knob_style="round_knob",
+                    icon_color=self.c_accent,
+                    accent_rgb=self.c_accent_rgb,
+                    dark_color=self.c_slider_dark,
+                    pwr_bg=self.c_pwr_bg
+                )
+
+                # Bottom Navigation: Pure Floating Bell
+                btn_y = socket_well_y
+                cr.save()
+                draw_bell_icon(cr, self.cx, btn_y, font_size=20, color=self.c_accent)
+                cr.restore()
+
+            elif self.current_page == "notifications":
+                # KERNED CURVED HEADER: No overlapping letters!
+                draw_curved_kerned(cr, "NOTIFICATIONS", self.cx, geo["cy_top"], r_text=60.0, font_desc="DejaVu Sans Bold 10", letter_spacing=3.2)
+
+                # Bell icon at top of Notifications
+                cr.save()
+                draw_bell_icon(cr, self.cx, geo["cy_top"] - self.top_mark_offset, font_size=11, color=self.c_accent)
+                cr.restore()
+
+                # Notification stream
+                grid_x = self.x_left + 36.0
+                grid_y = 216.0
+                row_w = self.W_shell - 72.0
+
+                notifs = self.notifications
+                if not notifs:
+                    notifs = [
+                        ("󰙯", "#5865F2", "Discord", "5m ago", "Serena", "Hey! The anime showcase is starting in..."),
+                        ("󰈹", "#FF7139", "Firefox", "24m ago", "Download Completed", "hyprland-kalos-assets-v2.tar.gz (14.2 MB)"),
+                        ("󰓇", "#1ED760", "Spotify", "1h ago", "Now Playing", "Aim to Be a Pokémon Master - 2024 Remaster"),
+                        ("󰒓", self.c_accent, "System", "2h ago", "Package Updates", "3 packages ready to upgrade (pacman -Syu)"),
+                    ]
+
+                curr_y = grid_y
+                for item in notifs[:4]:
+                    if isinstance(item, tuple):
+                        icon, icon_col, app, time_str, title, body = item
+                    else:
+                        app = item.get("app_name", "System")
+                        time_str = format_relative_time(item.get("timestamp"))
+                        title = item.get("summary", "")
+                        body = item.get("body", "")
+                        icon_col, icon = get_badge_info(app)
+
+                    cr.save()
+                    l_ic = PangoCairo.create_layout(cr)
+                    l_ic.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font 16"))
+                    l_ic.set_markup(f"<span color='{icon_col}'>{icon}</span>", -1)
+                    cr.move_to(grid_x, curr_y + 2.0)
+                    PangoCairo.show_layout(cr, l_ic)
+
+                    txt_x = grid_x + 28.0
+                    l_app = PangoCairo.create_layout(cr)
+                    l_app.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 10"))
+                    l_app.set_markup(f"<span color='#201011'>{app}</span>  <span color='#201011' alpha='50%'>• {time_str}</span>", -1)
+                    cr.move_to(txt_x, curr_y)
+                    PangoCairo.show_layout(cr, l_app)
+
+                    l_tit = PangoCairo.create_layout(cr)
+                    l_tit.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 9.5"))
+                    l_tit.set_markup(f"<span color='{self.c_accent}'>{title}</span>", -1)
+                    cr.move_to(txt_x, curr_y + 16.0)
+                    PangoCairo.show_layout(cr, l_tit)
+
+                    l_bod = PangoCairo.create_layout(cr)
+                    l_bod.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font 8.5"))
+                    l_bod.set_markup(f"<span color='#201011' alpha='75%'>{body}</span>", -1)
+                    cr.move_to(txt_x, curr_y + 30.0)
+                    PangoCairo.show_layout(cr, l_bod)
+                    cr.restore()
+
+                    curr_y += 50.0
+
+                # "Clear all notifications" button
+                cr.save()
+                l_clr = PangoCairo.create_layout(cr)
+                l_clr.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 10.5"))
+                l_clr.set_markup(f"<span color='{self.c_accent}'>󰆴 Clear all notifications</span>", -1)
+                ink, log = l_clr.get_pixel_extents()
+                cr.move_to(self.cx - ink.x - ink.width / 2.0, 508.0)
+                PangoCairo.show_layout(cr, l_clr)
+                cr.restore()
+
+                # Bottom Navigation: Flower on Notifications
+                btn_y = socket_well_y
+                cr.save()
+                draw_serena_flower(cr, self.cx, btn_y, r_petal=9.0, r_center=3.8)
+                cr.restore()
+
+            cr.pop_group_to_source()
+            cr.paint_with_alpha(alpha)
+            cr.restore()
+
+        # 2. TOP RED CASING (Translates smoothly with expansion)
+        cr.save()
+        cr.translate(0, geo["top_casing_y"])
+
+        # 2A. Red anime satin fill
+        create_top_red_casing_path(cr, self.x_left, self.x_right, 170.0, self.cx, 190.0, self.r_dark, geo["ang_dark_top_start"], geo["ang_dark_top_end"], geo["x_dark_cut"], self.device_r, notch_d=self.notch_d, trans=self.trans)
+        red_pat = cairo.LinearGradient(self.x_left, 0, self.x_right, 0)
+        red_pat.add_color_stop_rgb(0, *self.c_casing_l)
+        red_pat.add_color_stop_rgb(0.5, *self.c_casing_m)
+        red_pat.add_color_stop_rgb(1, *self.c_casing_r)
+        cr.set_source(red_pat); cr.fill()
+
+        # 2B. Anime concentric grooves
+        draw_anime_grooves(cr, self.x_left, 0, self.grooves, 0, 0.5 * math.pi)
+        draw_anime_grooves(cr, self.x_right, 0, self.grooves, 0.5 * math.pi, math.pi)
+
+        # 2C. Stroke casing outline
+        create_top_red_casing_path(cr, self.x_left, self.x_right, 170.0, self.cx, 190.0, self.r_dark, geo["ang_dark_top_start"], geo["ang_dark_top_end"], geo["x_dark_cut"], self.device_r, notch_d=self.notch_d, trans=self.trans)
+        cr.set_source_rgba(*self.c_casing_border); cr.set_line_width(1.3); cr.stroke()
+        cr.restore()
+
+        # 3. BOTTOM RED CASING (Translates smoothly with expansion)
+        cr.save()
+        cr.translate(0, geo["bot_casing_y"])
+
+        # 3A. Red anime satin fill
+        create_bottom_red_casing_path(cr, self.x_left, self.x_right, 610.0, 780.0, self.cx, 590.0, self.r_dark, geo["ang_dark_bot_start"], geo["ang_dark_bot_end"], geo["x_dark_cut"], self.device_r, notch_d=self.notch_d, trans=self.trans)
+        red_pat_bot = cairo.LinearGradient(self.x_left, 590.0, self.x_right, 590.0)
+        red_pat_bot.add_color_stop_rgb(0, *self.c_casing_l)
+        red_pat_bot.add_color_stop_rgb(0.5, *self.c_casing_m)
+        red_pat_bot.add_color_stop_rgb(1, *self.c_casing_r)
+        cr.set_source(red_pat_bot); cr.fill()
+
+        # 3B. Anime concentric grooves
+        draw_anime_grooves(cr, self.x_left, 780.0, self.grooves, 1.5 * math.pi, 2 * math.pi)
+        draw_anime_grooves(cr, self.x_right, 780.0, self.grooves, math.pi, 1.5 * math.pi)
+
+        # 3C. Stroke casing outline
+        create_bottom_red_casing_path(cr, self.x_left, self.x_right, 610.0, 780.0, self.cx, 590.0, self.r_dark, geo["ang_dark_bot_start"], geo["ang_dark_bot_end"], geo["x_dark_cut"], self.device_r, notch_d=self.notch_d, trans=self.trans)
+        cr.set_source_rgba(*self.c_casing_border); cr.set_line_width(1.3); cr.stroke()
+        cr.restore()
+
+        # 4. DARK FLANGES
+        c_dark_r, c_dark_g, c_dark_b = self.c_flange
+        r_s, g_s, b_s = self.c_chassis
+
+        cr.save()
+        cr.new_sub_path()
+        cr.move_to(self.x_left, geo["y_silver_top"]); cr.line_to(self.x_left, geo["y_dark_top"]); cr.line_to(self.cx - geo["x_dark_cut"], geo["y_dark_top"])
+        cr.arc(self.cx, geo["cy_top"], self.r_dark, geo["ang_dark_top_end"], geo["ang_dark_top_start"])
+        cr.line_to(self.x_right, geo["y_dark_top"]); cr.line_to(self.x_right, geo["y_silver_top"]); cr.line_to(self.cx + geo["x_chassis_cut"], geo["y_silver_top"])
+        cr.arc_negative(self.cx, geo["cy_top"], self.r_chassis, geo["ang_chassis_top_start"], geo["ang_chassis_top_end"])
+        cr.close_path()
+        cr.set_source_rgba(c_dark_r, c_dark_g, c_dark_b, 0.85); cr.fill()
+        cr.move_to(self.x_left, geo["y_dark_top"]); cr.line_to(self.cx - geo["x_dark_cut"], geo["y_dark_top"])
+        cr.arc(self.cx, geo["cy_top"], self.r_dark, geo["ang_dark_top_end"], geo["ang_dark_top_start"]); cr.line_to(self.x_right, geo["y_dark_top"])
+        cr.set_source_rgba(0x10/255.0, 0x02/255.0, 0x05/255.0, 0.95); cr.set_line_width(1.0); cr.stroke()
+        cr.restore()
+
+        cr.save()
+        cr.new_sub_path()
+        cr.move_to(self.x_left, geo["y_silver_bot"]); cr.line_to(self.x_left, geo["y_dark_bot"]); cr.line_to(self.cx - geo["x_dark_cut"], geo["y_dark_bot"])
+        cr.arc_negative(self.cx, geo["cy_bot"], self.r_dark, geo["ang_dark_bot_end"], geo["ang_dark_bot_start"])
+        cr.line_to(self.x_right, geo["y_dark_bot"]); cr.line_to(self.x_right, geo["y_silver_bot"]); cr.line_to(self.cx + geo["x_chassis_cut"], geo["y_silver_bot"])
+        cr.arc(self.cx, geo["cy_bot"], self.r_chassis, geo["ang_chassis_bot_start"], geo["ang_chassis_bot_end"])
+        cr.close_path()
+        cr.set_source_rgba(c_dark_r, c_dark_g, c_dark_b, 0.85); cr.fill()
+        cr.move_to(self.x_left, geo["y_dark_bot"]); cr.line_to(self.cx - geo["x_dark_cut"], geo["y_dark_bot"])
+        cr.arc_negative(self.cx, geo["cy_bot"], self.r_dark, geo["ang_dark_bot_end"], geo["ang_dark_bot_start"]); cr.line_to(self.x_right, geo["y_dark_bot"])
+        cr.set_source_rgba(0x10/255.0, 0x02/255.0, 0x05/255.0, 0.95); cr.set_line_width(1.0); cr.stroke()
+        cr.restore()
+
+        # 5. TOP SILVER CHASSIS: VÒNG LÊN (Upward cuff)
+        prot = 2.5
+        r_cuff = 2.5
+        cr.save()
+        cr.new_sub_path()
+        cr.move_to(self.x_left, geo["y_edge_top"])
+        cr.arc(self.x_left, geo["y_edge_top"] - r_cuff, r_cuff, 0.5 * math.pi, math.pi)
+        cr.line_to(self.x_left - prot, geo["y_dark_top"] + r_cuff)
+        cr.arc(self.x_left, geo["y_dark_top"] + r_cuff, r_cuff, math.pi, 1.5 * math.pi)
+        cr.line_to(self.x_left, geo["y_silver_top"])
+        cr.line_to(self.cx - geo["x_chassis_cut"], geo["y_silver_top"])
+        cr.arc(self.cx, geo["cy_top"], self.r_chassis, geo["ang_chassis_top_end"], geo["ang_chassis_top_start"])
+        cr.line_to(self.x_right, geo["y_silver_top"])
+        cr.line_to(self.x_right, geo["y_dark_top"])
+        cr.arc(self.x_right, geo["y_dark_top"] + r_cuff, r_cuff, 1.5 * math.pi, 2 * math.pi)
+        cr.line_to(self.x_right + prot, geo["y_edge_top"] - r_cuff)
+        cr.arc(self.x_right, geo["y_edge_top"] - r_cuff, r_cuff, 0, 0.5 * math.pi)
+        cr.line_to(self.cx + geo["x_outer_cut"], geo["y_edge_top"])
+        cr.arc_negative(self.cx, geo["cy_top"], self.r_outer, geo["ang_outer_top_start"], geo["ang_outer_top_end"])
+        cr.close_path()
+        silver_pat_top = cairo.LinearGradient(self.x_left, geo["y_dark_top"], self.x_left, geo["y_edge_top"])
+        silver_pat_top.add_color_stop_rgb(0.0, 0xDE/255.0, 0xE4/255.0, 0xEE/255.0)
+        silver_pat_top.add_color_stop_rgb(1.0, 0xC6/255.0, 0xCE/255.0, 0xD8/255.0)
+        cr.set_source(silver_pat_top); cr.fill_preserve()
+        cr.set_source_rgba(*self.c_band_stroke); cr.set_line_width(1.0); cr.stroke()
+        cr.restore()
+
+        # 5B. BOTTOM SILVER CHASSIS: QUAY LÊN TRÊN ĐỒNG BỘ 100%!
+        y_up_top = geo["y_edge_bot"] - self.cuff_ext
+        cr.save()
+        cr.new_sub_path()
+        cr.move_to(self.x_left, geo["y_edge_bot"])
+        cr.line_to(self.x_left, y_up_top)
+        cr.arc_negative(self.x_left, y_up_top + r_cuff, r_cuff, 1.5 * math.pi, math.pi)
+        cr.line_to(self.x_left - prot, geo["y_silver_bot"] - r_cuff)
+        cr.arc_negative(self.x_left, geo["y_silver_bot"] - r_cuff, r_cuff, math.pi, 0.5 * math.pi)
+        cr.line_to(self.cx - geo["x_chassis_cut"], geo["y_silver_bot"])
+        cr.arc_negative(self.cx, geo["cy_bot"], self.r_chassis, geo["ang_chassis_bot_end"], geo["ang_chassis_bot_start"])
+        cr.line_to(self.x_right, geo["y_silver_bot"])
+        cr.arc_negative(self.x_right, geo["y_silver_bot"] - r_cuff, r_cuff, 0.5 * math.pi, 0)
+        cr.line_to(self.x_right + prot, y_up_top + r_cuff)
+        cr.arc_negative(self.x_right, y_up_top + r_cuff, r_cuff, 0, 1.5 * math.pi)
+        cr.line_to(self.x_right, geo["y_edge_bot"])
+        cr.line_to(self.cx + geo["x_outer_cut"], geo["y_edge_bot"])
+        cr.arc(self.cx, geo["cy_bot"], self.r_outer, geo["ang_outer_bot_start"], geo["ang_outer_bot_end"])
+        cr.close_path()
+        silver_pat_bot = cairo.LinearGradient(self.x_left, geo["y_edge_bot"], self.x_left, geo["y_silver_bot"])
+        silver_pat_bot.add_color_stop_rgb(0.0, 0xC6/255.0, 0xCE/255.0, 0xD8/255.0)
+        silver_pat_bot.add_color_stop_rgb(1.0, 0xDE/255.0, 0xE4/255.0, 0xEE/255.0)
+        cr.set_source(silver_pat_bot); cr.fill_preserve()
+        cr.set_source_rgba(*self.c_band_stroke); cr.set_line_width(1.0); cr.stroke()
+        cr.restore()
+
+        # 6. POKÉBALL BANDS
+        band_pat_top = cairo.LinearGradient(self.cx - self.r_outer, geo["cy_top"], self.cx + self.r_outer, geo["cy_top"])
+        band_pat_top.add_color_stop_rgb(0, *self.c_band_stop0)
+        band_pat_top.add_color_stop_rgb(0.5, *self.c_band_stop1)
+        band_pat_top.add_color_stop_rgb(1, *self.c_band_stop2)
+
+        cr.save()
+        cr.new_sub_path()
+        cr.arc_negative(self.cx, geo["cy_top"], self.r_outer, geo["ang_outer_top_start"], geo["ang_outer_top_end"])
+        cr.line_to(self.cx - geo["x_inner_cut"], geo["y_edge_top"])
+        cr.arc(self.cx, geo["cy_top"], self.r_inner, geo["ang_inner_top_end"], geo["ang_inner_top_start"])
+        cr.close_path()
+        cr.set_source(band_pat_top); cr.fill_preserve()
+        cr.set_source_rgba(*self.c_band_stroke); cr.set_line_width(1.3); cr.stroke()
+        cr.arc(self.cx, geo["cy_top"], self.r_inner, geo["ang_inner_top_end"], geo["ang_inner_top_start"])
+        cr.set_source_rgba(0, 0, 0, 0.30); cr.set_line_width(2.0); cr.stroke()
+        cr.restore()
+
+        band_pat_bot = cairo.LinearGradient(self.cx - self.r_outer, geo["cy_bot"], self.cx + self.r_outer, geo["cy_bot"])
+        band_pat_bot.add_color_stop_rgb(0, *self.c_band_stop0)
+        band_pat_bot.add_color_stop_rgb(0.5, *self.c_band_stop1)
+        band_pat_bot.add_color_stop_rgb(1, *self.c_band_stop2)
+
+        cr.save()
+        cr.new_sub_path()
+        cr.arc(self.cx, geo["cy_bot"], self.r_outer, geo["ang_outer_bot_start"], geo["ang_outer_bot_end"])
+        cr.line_to(self.cx - geo["x_inner_cut"], geo["y_edge_bot"])
+        cr.arc_negative(self.cx, geo["cy_bot"], self.r_inner, geo["ang_inner_bot_end"], geo["ang_inner_bot_start"])
+        cr.close_path()
+        cr.set_source(band_pat_bot); cr.fill_preserve()
+        cr.set_source_rgba(*self.c_band_stroke); cr.set_line_width(1.3); cr.stroke()
+        cr.arc(self.cx, geo["cy_bot"], self.r_inner, geo["ang_inner_bot_start"], geo["ang_inner_bot_end"])
+        cr.set_source_rgba(0, 0, 0, 0.30); cr.set_line_width(2.0); cr.stroke()
+        cr.restore()
+
+        return False
 
 def main():
     def sig_handler(signum, frame):
@@ -974,17 +1276,10 @@ def main():
     except Exception:
         pass
 
-    app = ControlCenter()
-
-    def cleanup(*args):
-        if os.path.exists(PID_FILE):
-            try:
-                os.remove(PID_FILE)
-            except Exception:
-                pass
-        Gtk.main_quit()
-
-    app.connect("destroy", cleanup)
+    app = PokedexControlCenter()
+    if "--open" in sys.argv:
+        app.anim_state = "open"
+        app.anim_progress = 1.0
     app.show_all()
     Gtk.main()
 

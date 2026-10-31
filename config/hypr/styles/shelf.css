@@ -209,7 +209,7 @@ button.chip-btn-del,
 
 button.chip-btn-del:hover,
 .chip-btn-del:hover {
-    background-color: @accent_subtle;
+    background-color: @bg_ghost_hover;
     border-width: 0;
     border-style: none;
 }
@@ -235,18 +235,18 @@ button.chip-btn-pin,
 
 button.chip-btn-pin:hover,
 .chip-btn-pin:hover {
-    background-color: @accent_subtle;
+    background-color: @bg_ghost_hover;
     color: @accent_hover;
 }
 
 button.chip-btn-pin.pinned,
 .chip-btn-pin.pinned {
-    background-color: @accent_border;
-    color: @accent;
+    background-color: @accent;
+    color: @text_inverse;
 }
 
 button.chip-btn-pin.pinned:hover {
-    background-color: @accent_dash;
+    background-color: @accent_hover;
     color: @text_inverse;
 }
 
@@ -254,7 +254,7 @@ button.chip-btn-pin.pinned:hover {
 button.chip-btn-action,
 .chip-btn-action {
     background-image: none;
-    background-color: @bg_action;
+    background-color: @bg_card;
     border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: none;
     padding: 2px 6px;
@@ -267,8 +267,8 @@ button.chip-btn-action,
 
 button.chip-btn-action:hover,
 .chip-btn-action:hover {
-    background-color: @bg_action_hover;
-    border-color: @accent_border;
+    background-color: @bg_card_hover;
+    border-color: @border_card_hover;
 }
 
 /* External Floating Popout Card */
@@ -299,9 +299,9 @@ button.chip-btn-action:hover,
 
 /* === DROP ZONE & FILE STASH === */
 .drop-zone {
-    border: 1.5px dashed @accent_dash;
+    border: 1.5px dashed @border_card;
     border-radius: 10px;
-    background-color: @bg_card_soft;
+    background-color: @bg_card;
     padding: 32px 16px;
     margin: 6px 0;
     transition: background-color 150ms ease, border-color 150ms ease;
@@ -309,13 +309,13 @@ button.chip-btn-action:hover,
 
 .drop-zone:hover {
     border-color: @accent;
-    background-color: @bg_card_subtle;
+    background-color: @bg_card_hover;
 }
 
 .drop-banner {
-    border: 1.5px dashed @accent_border;
+    border: 1.5px dashed @border_card;
     border-radius: 8px;
-    background-color: @bg_card_soft;
+    background-color: @bg_card;
     padding: 6px 12px;
     margin-bottom: 6px;
     transition: background-color 150ms ease, border-color 150ms ease;
@@ -323,7 +323,7 @@ button.chip-btn-action:hover,
 
 .drop-banner:hover {
     border-color: @accent;
-    background-color: @bg_card_subtle;
+    background-color: @bg_card_hover;
 }
 
 .drop-icon {
@@ -386,6 +386,6 @@ scrollbar.vertical slider:hover {
 }
 
 .drag-grip-zone:hover {
-    background-color: @accent_soft;
+    background-color: @bg_ghost_hover;
 }
 

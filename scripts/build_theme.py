@@ -369,13 +369,11 @@ theme[upload_end]="{colors['accent']}"
             },
             {
                 "type": "os",
-                "key": " OS",
-                "format": "{2} {9} LTS"
+                "key": " OS"
             },
             {
                 "type": "host",
-                "key": "󰌢 Host",
-                "format": "HP Pavilion x360"
+                "key": "󰌢 Host"
             },
             {
                 "type": "uptime",
@@ -427,25 +425,22 @@ theme[upload_end]="{colors['accent']}"
         ]
     }
 
+    if os.path.exists(fastfetch_path):
+        with open(fastfetch_path, "r", encoding="utf-8") as f:
+            existing_fastfetch = json.load(f)
+        display = existing_fastfetch.setdefault("display", {})
+        display["color"] = fastfetch_data["display"]["color"]
+        display.setdefault("percent", {})["color"] = fastfetch_data["display"]["percent"]["color"]
+        display.setdefault("bar", {})["color"] = fastfetch_data["display"]["bar"]["color"]
+        for module in existing_fastfetch.get("modules", []):
+            if module.get("type") == "separator":
+                module["outputColor"] = colors["text_muted"]
+        fastfetch_data = existing_fastfetch
+
     with open(fastfetch_path, "w", encoding="utf-8") as f:
         json.dump(fastfetch_data, f, indent=2, ensure_ascii=False)
-    print("  ✔ Generated fastfetch/config.jsonc")
-
-    # Also update ~/.config/fastfetch/ if directory exists and is writable
-    user_fastfetch_dir = os.path.expanduser("~/.config/fastfetch")
-    if os.path.exists(user_fastfetch_dir):
-        try:
-            user_config_path = os.path.join(user_fastfetch_dir, "config.jsonc")
-            with open(user_config_path, "w", encoding="utf-8") as f:
-                json.dump(fastfetch_data, f, indent=2, ensure_ascii=False)
-            for variant in ["config-compact.jsonc", "config-v2.jsonc", "config-pokemon.jsonc"]:
-                variant_path = os.path.join(user_fastfetch_dir, variant)
-                if os.path.exists(variant_path):
-                    with open(variant_path, "w", encoding="utf-8") as f:
-                        json.dump(fastfetch_data, f, indent=2, ensure_ascii=False)
-            print("  ✔ Synchronized ~/.config/fastfetch/ configs")
-        except OSError:
-            pass
+        f.write("\n")
+    print("  ✔ Updated fastfetch/config.jsonc colors")
 
     # 7. Kitty terminal kitty.conf
     kitty_path = os.path.join(hypr_base, "kitty", "kitty.conf")
@@ -518,16 +513,7 @@ color15 {colors['text_inverse']}
         f.write(kitty_content)
     print("  ✔ Generated kitty/kitty.conf")
 
-    user_kitty_dir = os.path.expanduser("~/.config/kitty")
-    if os.path.exists(user_kitty_dir):
-        try:
-            with open(os.path.join(user_kitty_dir, "kitty.conf"), "w", encoding="utf-8") as f:
-                f.write(kitty_content)
-            print("  ✔ Synchronized ~/.config/kitty/kitty.conf")
-        except OSError:
-            pass
-
-    print("✨ All components synchronized with Single Source of Truth successfully!")
+    print("  ✔ Generated repository theme files")
 
 if __name__ == "__main__":
     main()

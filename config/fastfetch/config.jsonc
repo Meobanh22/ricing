@@ -43,13 +43,11 @@
     },
     {
       "type": "os",
-      "key": " OS",
-      "format": "{2} {9} LTS"
+      "key": " OS"
     },
     {
       "type": "host",
-      "key": "󰌢 Host",
-      "format": "HP Pavilion x360"
+      "key": "󰌢 Host"
     },
     {
       "type": "uptime",

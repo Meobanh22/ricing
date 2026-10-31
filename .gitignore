@@ -14,3 +14,9 @@ Thumbs.db
 # Agent skills cache
 .agents/
 
+# Experiments, archive and scratch files
+experiments/
+archive/
+.vscode/
+
+
