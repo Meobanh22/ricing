@@ -84,6 +84,9 @@ hl.on("hyprland.start", function ()
 
     -- 9. Low battery alert daemon
     hl.exec_cmd("python3 ~/.config/hypr/scripts/battery_alert.py &")
+
+    -- 10. Desktop background widgets (Serena picture & weather)
+    hl.exec_cmd("python3 ~/.config/hypr/scripts/desktop_widgets.py &")
 end)
 
 -- === INPUT & TOUCH ===
@@ -289,7 +292,7 @@ hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())
 
 -- Serena Popups & Control Center
 hl.bind(mainMod .. " + ESCAPE",         hl.dsp.exec_cmd("~/.config/hypr/scripts/Wlogout.sh"))
-hl.bind(mainMod .. " + S",              hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle_dashboard.sh"))
+-- Dashboard disabled per user preference
 hl.bind(mainMod .. " + N",              hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle_control_center.sh"))
 hl.bind(mainMod .. " + M",              hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle_music.sh"))
 hl.bind(mainMod .. " + V",              hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle_shelf.sh --clip"))
