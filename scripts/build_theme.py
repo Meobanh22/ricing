@@ -62,6 +62,15 @@ def main():
 @define-color status_success {colors['status_success']};
 
 @define-color ribbon_blue {colors['ribbon_blue']};
+
+@define-color bg_waybar {colors.get('bg_waybar', '#851733')};
+@define-color bg_waybar_hover {colors.get('bg_waybar_hover', '#9C2241')};
+@define-color border_waybar_3d {colors.get('border_waybar_3d', '#4D0A1C')};
+@define-color border_waybar_3d_hover {colors.get('border_waybar_3d_hover', '#610E24')};
+@define-color shadow_extrusion {colors.get('shadow_extrusion', '#4D0A1C')};
+@define-color shadow_extrusion_hover {colors.get('shadow_extrusion_hover', '#610E24')};
+@define-color border_tactile_white {colors.get('border_tactile_white', 'rgba(255, 255, 255, 0.65)')};
+@define-color border_tactile_white_bright {colors.get('border_tactile_white_bright', 'rgba(255, 255, 255, 0.90)')};
 """
     with open(waybar_palette, "w", encoding="utf-8") as f:
         f.write(css_content)
@@ -102,6 +111,15 @@ def main():
 @define-color status_success {colors['status_success']};
 
 @define-color ribbon_blue {colors['ribbon_blue']};
+
+@define-color bg_waybar {colors.get('bg_waybar', '#851733')};
+@define-color bg_waybar_hover {colors.get('bg_waybar_hover', '#9C2241')};
+@define-color border_waybar_3d {colors.get('border_waybar_3d', '#4D0A1C')};
+@define-color border_waybar_3d_hover {colors.get('border_waybar_3d_hover', '#610E24')};
+@define-color shadow_extrusion {colors.get('shadow_extrusion', '#4D0A1C')};
+@define-color shadow_extrusion_hover {colors.get('shadow_extrusion_hover', '#610E24')};
+@define-color border_tactile_white {colors.get('border_tactile_white', 'rgba(255, 255, 255, 0.65)')};
+@define-color border_tactile_white_bright {colors.get('border_tactile_white_bright', 'rgba(255, 255, 255, 0.90)')};
 """
     with open(hypr_styles_palette, "w", encoding="utf-8") as f:
         f.write(hypr_styles_css)
@@ -141,6 +159,9 @@ $status_warning       = {colors['status_warning_hypr']}
 $status_critical      = {colors['status_critical_hypr']}
 $status_success       = {colors['status_success_hypr']}
 $ribbon_blue          = {colors['ribbon_blue_hypr']}
+$bg_waybar            = {colors.get('bg_waybar_hypr', 'rgba(851733f2)')}
+$border_waybar_3d     = {colors.get('border_waybar_3d_hypr', 'rgb(4D0A1C)')}
+$shadow_extrusion     = {colors.get('shadow_extrusion_hypr', 'rgb(4D0A1C)')}
 """
     with open(hypr_palette, "w", encoding="utf-8") as f:
         f.write(hypr_content)
@@ -168,6 +189,9 @@ return {{
     status_critical      = "{colors['status_critical_hypr']}",
     status_success       = "{colors['status_success_hypr']}",
     ribbon_blue          = "{colors['ribbon_blue_hypr']}",
+    bg_waybar            = "{colors.get('bg_waybar_hypr', 'rgba(851733f2)')}",
+    border_waybar_3d     = "{colors.get('border_waybar_3d_hypr', 'rgb(4D0A1C)')}",
+    shadow_extrusion     = "{colors.get('shadow_extrusion_hypr', 'rgb(4D0A1C)')}",
 }}
 """
     with open(hypr_lua, "w", encoding="utf-8") as f:
@@ -239,18 +263,25 @@ C_STATUS_WARN   = PALETTE.get("status_warning", "#FFB86C")
 C_STATUS_CRIT   = PALETTE.get("status_critical", "#FF2A55")
 C_STATUS_SUCC   = PALETTE.get("status_success", "#8FBC8F")
 C_RIBBON        = PALETTE.get("ribbon_blue", "#50A6FF")
+C_BG_WAYBAR     = PALETTE.get("bg_waybar", "#851733")
+C_BG_WAYBAR_HOV = PALETTE.get("bg_waybar_hover", "#9C2241")
+C_BORDER_3D     = PALETTE.get("border_waybar_3d", "#4D0A1C")
+C_SHADOW_EXTR   = PALETTE.get("shadow_extrusion", "#4D0A1C")
+C_SHADOW_EXTR_H = PALETTE.get("shadow_extrusion_hover", "#610E24")
 
 # Pre-computed Cairo RGBA tuples
-BG_WINDOW_RGBA     = hex_to_rgba(C_BG_WIN, 0.98)
-BG_CARD_RGBA       = hex_to_rgba(C_BG_CARD, 0.95)
-BG_CARD_HOVER_RGBA = hex_to_rgba(C_BG_CARD_HOVER, 0.98)
-BG_SUBTLE_RGBA     = hex_to_rgba(C_BG_SUBTLE, 0.95)
-ACCENT_RGBA        = hex_to_rgba(C_ACCENT, 1.0)
-ACCENT_HOVER_RGBA  = hex_to_rgba(C_ACCENT_HOVER, 1.0)
-ACCENT_DIM_RGBA    = hex_to_rgba(C_ACCENT, 0.48)
-ACCENT_SUBTLE_RGBA = hex_to_rgba(C_ACCENT, 0.20)
-BORDER_WINDOW_RGBA = (1.0, 1.0, 1.0, 0.12)
-BORDER_CARD_RGBA   = (1.0, 1.0, 1.0, 0.12)
+BG_WINDOW_RGBA        = hex_to_rgba(C_BG_WIN, 0.98)
+BG_CARD_RGBA          = hex_to_rgba(C_BG_CARD, 0.95)
+BG_CARD_HOVER_RGBA    = hex_to_rgba(C_BG_CARD_HOVER, 0.98)
+BG_SUBTLE_RGBA        = hex_to_rgba(C_BG_SUBTLE, 0.95)
+BG_WAYBAR_RGBA        = hex_to_rgba(C_BG_WAYBAR, 1.0)
+SHADOW_EXTRUSION_RGBA = hex_to_rgba(C_SHADOW_EXTR, 1.0)
+ACCENT_RGBA           = hex_to_rgba(C_ACCENT, 1.0)
+ACCENT_HOVER_RGBA     = hex_to_rgba(C_ACCENT_HOVER, 1.0)
+ACCENT_DIM_RGBA       = hex_to_rgba(C_ACCENT, 0.48)
+ACCENT_SUBTLE_RGBA    = hex_to_rgba(C_ACCENT, 0.20)
+BORDER_WINDOW_RGBA    = (1.0, 1.0, 1.0, 0.12)
+BORDER_CARD_RGBA      = (1.0, 1.0, 1.0, 0.12)
 """
     with open(py_palette, "w", encoding="utf-8") as f:
         f.write(py_content)

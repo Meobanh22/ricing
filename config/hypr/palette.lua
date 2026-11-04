@@ -19,4 +19,7 @@ return {
     status_critical      = "rgb(FF2A55)",
     status_success       = "rgb(8FBC8F)",
     ribbon_blue          = "rgb(50A6FF)",
+    bg_waybar            = "rgba(851733f2)",
+    border_waybar_3d     = "rgb(4D0A1C)",
+    shadow_extrusion     = "rgb(4D0A1C)",
 }

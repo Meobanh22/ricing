@@ -52,7 +52,22 @@ PALETTE = {
     "status_success_hypr": "rgb(8FBC8F)",
     "ribbon_blue": "#50A6FF",
     "ribbon_blue_alpha": "rgba(80, 166, 255, 0.95)",
-    "ribbon_blue_hypr": "rgb(50A6FF)"
+    "ribbon_blue_hypr": "rgb(50A6FF)",
+    "bg_waybar": "#851733",
+    "bg_waybar_alpha": "rgba(133, 23, 51, 0.95)",
+    "bg_waybar_hypr": "rgba(851733f2)",
+    "bg_waybar_hover": "#9C2241",
+    "bg_waybar_hover_alpha": "rgba(156, 34, 65, 0.98)",
+    "border_waybar_3d": "#4D0A1C",
+    "border_waybar_3d_hypr": "rgb(4D0A1C)",
+    "border_waybar_3d_hover": "#610E24",
+    "border_waybar_3d_hover_hypr": "rgb(610E24)",
+    "shadow_extrusion": "#4D0A1C",
+    "shadow_extrusion_hypr": "rgb(4D0A1C)",
+    "shadow_extrusion_hover": "#610E24",
+    "shadow_extrusion_hover_hypr": "rgb(610E24)",
+    "border_tactile_white": "rgba(255, 255, 255, 0.65)",
+    "border_tactile_white_bright": "rgba(255, 255, 255, 0.90)"
 }
 
 def hex_to_rgba(hex_code: str, alpha: float = 1.0):
@@ -76,15 +91,22 @@ C_STATUS_WARN   = PALETTE.get("status_warning", "#FFB86C")
 C_STATUS_CRIT   = PALETTE.get("status_critical", "#FF2A55")
 C_STATUS_SUCC   = PALETTE.get("status_success", "#8FBC8F")
 C_RIBBON        = PALETTE.get("ribbon_blue", "#50A6FF")
+C_BG_WAYBAR     = PALETTE.get("bg_waybar", "#851733")
+C_BG_WAYBAR_HOV = PALETTE.get("bg_waybar_hover", "#9C2241")
+C_BORDER_3D     = PALETTE.get("border_waybar_3d", "#4D0A1C")
+C_SHADOW_EXTR   = PALETTE.get("shadow_extrusion", "#4D0A1C")
+C_SHADOW_EXTR_H = PALETTE.get("shadow_extrusion_hover", "#610E24")
 
 # Pre-computed Cairo RGBA tuples
-BG_WINDOW_RGBA     = hex_to_rgba(C_BG_WIN, 0.98)
-BG_CARD_RGBA       = hex_to_rgba(C_BG_CARD, 0.95)
-BG_CARD_HOVER_RGBA = hex_to_rgba(C_BG_CARD_HOVER, 0.98)
-BG_SUBTLE_RGBA     = hex_to_rgba(C_BG_SUBTLE, 0.95)
-ACCENT_RGBA        = hex_to_rgba(C_ACCENT, 1.0)
-ACCENT_HOVER_RGBA  = hex_to_rgba(C_ACCENT_HOVER, 1.0)
-ACCENT_DIM_RGBA    = hex_to_rgba(C_ACCENT, 0.48)
-ACCENT_SUBTLE_RGBA = hex_to_rgba(C_ACCENT, 0.20)
-BORDER_WINDOW_RGBA = (1.0, 1.0, 1.0, 0.12)
-BORDER_CARD_RGBA   = (1.0, 1.0, 1.0, 0.12)
+BG_WINDOW_RGBA        = hex_to_rgba(C_BG_WIN, 0.98)
+BG_CARD_RGBA          = hex_to_rgba(C_BG_CARD, 0.95)
+BG_CARD_HOVER_RGBA    = hex_to_rgba(C_BG_CARD_HOVER, 0.98)
+BG_SUBTLE_RGBA        = hex_to_rgba(C_BG_SUBTLE, 0.95)
+BG_WAYBAR_RGBA        = hex_to_rgba(C_BG_WAYBAR, 1.0)
+SHADOW_EXTRUSION_RGBA = hex_to_rgba(C_SHADOW_EXTR, 1.0)
+ACCENT_RGBA           = hex_to_rgba(C_ACCENT, 1.0)
+ACCENT_HOVER_RGBA     = hex_to_rgba(C_ACCENT_HOVER, 1.0)
+ACCENT_DIM_RGBA       = hex_to_rgba(C_ACCENT, 0.48)
+ACCENT_SUBTLE_RGBA    = hex_to_rgba(C_ACCENT, 0.20)
+BORDER_WINDOW_RGBA    = (1.0, 1.0, 1.0, 0.12)
+BORDER_CARD_RGBA      = (1.0, 1.0, 1.0, 0.12)
