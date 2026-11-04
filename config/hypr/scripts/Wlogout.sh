@@ -35,6 +35,6 @@ CONFIG_DIR="$HOME/.config/wlogout"
 LAYOUT_OPT=""
 CSS_OPT=""
 [ -f "$CONFIG_DIR/layout" ] && LAYOUT_OPT="-l $CONFIG_DIR/layout"
-[ -f "$CONFIG_DIR/style.css" ] && CSS_OPT="-C $CONFIG_DIR/style.css"
+[ -f "$CONFIG_DIR/style.css" ] && CSS_OPT="--css $CONFIG_DIR/style.css"
 
 wlogout --protocol layer-shell -b 5 $LAYOUT_OPT $CSS_OPT -T "$T_val" -B "$B_val" -L "$L_val" -R "$R_val" -c 16 -r 16 &

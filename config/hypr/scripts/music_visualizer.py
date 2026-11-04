@@ -7,6 +7,7 @@ import time
 import signal
 import subprocess
 import threading
+import html
 import cairo
 import gi
 
@@ -123,37 +124,11 @@ class MusicVisualizer(Gtk.Window):
         self.update_media_info()
 
     def on_window_draw(self, widget, cr):
-        # Clear surface completely to prevent square artifacts
+        # Clear surface completely so GTK CSS renders 3D tactile borders
         cr.set_source_rgba(0, 0, 0, 0)
         cr.set_operator(cairo.OPERATOR_CLEAR)
         cr.paint()
         cr.set_operator(cairo.OPERATOR_OVER)
-
-        # Draw 16px Squircle Frame
-        alloc = widget.get_allocation()
-        pad = 0.5
-        w = float(alloc.width) - pad * 2.0
-        h = float(alloc.height) - pad * 2.0
-        x = pad
-        y = pad
-        r = 16.0
-
-        cr.new_sub_path()
-        cr.arc(x + w - r, y + r, r, -1.57079632679, 0)
-        cr.arc(x + w - r, y + h - r, r, 0, 1.57079632679)
-        cr.arc(x + r, y + h - r, r, 1.57079632679, 3.14159265359)
-        cr.arc(x + r, y + r, r, 3.14159265359, 4.71238898038)
-        cr.close_path()
-
-        # Background: --bg-window
-        cr.set_source_rgba(*BG_WINDOW_RGBA)
-        cr.fill_preserve()
-
-        # Border: --border-window
-        cr.set_source_rgba(*BORDER_WINDOW_RGBA)
-        cr.set_line_width(1.0)
-        cr.stroke()
-
         return False
 
     def close_and_quit(self):
@@ -221,17 +196,12 @@ class MusicVisualizer(Gtk.Window):
         main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
         main_box.set_name("main-card")
 
-        # === HEADER (Brand Title + Close Button) ===
+        # === HEADER (Brand Title) ===
         header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         
         lbl_header = Gtk.Label()
-        lbl_header.set_markup(f"<span font='11.5' color='{C_ACCENT}'>󰎆</span>   <span color='{C_TEXT_PRI}' font='10.5' weight='bold' letter_spacing='1024'>NOW PLAYING</span>")
+        lbl_header.set_markup(f"<span font='11.5' color='{C_ACCENT}'>󰎆</span>   <span color='#851733' font='10.5' weight='800' letter_spacing='1024'>NOW PLAYING</span>")
         header_box.pack_start(lbl_header, False, False, 0)
-
-        btn_close = Gtk.Button(label="✕")
-        btn_close.get_style_context().add_class("btn-close")
-        btn_close.connect("clicked", lambda x: self.close_and_quit())
-        header_box.pack_end(btn_close, False, False, 0)
 
         main_box.pack_start(header_box, False, False, 0)
 
@@ -465,8 +435,10 @@ ascii_max_range = 100
                     timeout=0.3
                 )
                 parts = res_meta.stdout.strip().split("|||")
-                title = parts[0] if len(parts) > 0 and parts[0] else "Playing Media"
-                artist = parts[1] if len(parts) > 1 and parts[1] else ""
+                raw_t = parts[0] if len(parts) > 0 and parts[0] else "Playing Media"
+                raw_a = parts[1] if len(parts) > 1 and parts[1] else ""
+                title = html.unescape(raw_t)
+                artist = html.unescape(raw_a)
                 art_url = parts[2] if len(parts) > 2 else ""
                 pos_us = int(parts[3]) if len(parts) > 3 and parts[3].isdigit() else 0
                 len_us = int(parts[4]) if len(parts) > 4 and parts[4].isdigit() else 0
@@ -477,8 +449,8 @@ ascii_max_range = 100
                 pos_us = 0
                 len_us = 0
 
-            self.lbl_title.set_markup(f"<span color='{C_TEXT_PRI}'><b>{GLib.markup_escape_text(title)}</b></span>")
-            self.lbl_artist.set_markup(f"<span color='{C_TEXT_SEC}'>{GLib.markup_escape_text(artist)}</span>")
+            self.lbl_title.set_markup(f"<span color='#FFFFFF'><b>{GLib.markup_escape_text(title)}</b></span>")
+            self.lbl_artist.set_markup(f"<span color='#FFF0F5'>{GLib.markup_escape_text(artist)}</span>")
 
             # Progress calculation
             pos_sec = pos_us / 1e6
@@ -486,12 +458,12 @@ ascii_max_range = 100
             if len_sec > 0:
                 fraction = max(0.0, min(1.0, pos_sec / len_sec))
                 self.progress_bar.set_fraction(fraction)
-                self.lbl_time_cur.set_markup(f"<span color='{C_TEXT_MUT}'>{self.format_time(pos_sec)}</span>")
-                self.lbl_time_total.set_markup(f"<span color='{C_TEXT_MUT}'>{self.format_time(len_sec)}</span>")
+                self.lbl_time_cur.set_markup(f"<span color='#4D0A1C'><b>{self.format_time(pos_sec)}</b></span>")
+                self.lbl_time_total.set_markup(f"<span color='#4D0A1C'><b>{self.format_time(len_sec)}</b></span>")
             else:
                 self.progress_bar.set_fraction(0.0)
-                self.lbl_time_cur.set_markup(f"<span color='{C_TEXT_MUT}'>00:00</span>")
-                self.lbl_time_total.set_markup(f"<span color='{C_TEXT_MUT}'>00:00</span>")
+                self.lbl_time_cur.set_markup("<span color='#4D0A1C'><b>00:00</b></span>")
+                self.lbl_time_total.set_markup("<span color='#4D0A1C'><b>00:00</b></span>")
 
             # Check and update album art
             if getattr(self, "current_art_url", None) != art_url:
@@ -509,10 +481,10 @@ ascii_max_range = 100
                 self.lbl_status.get_style_context().remove_class("playing")
                 self.lbl_status.get_style_context().add_class("paused")
         else:
-            self.lbl_title.set_markup(f"<span color='{C_TEXT_MUT}'>No media playing</span>")
+            self.lbl_title.set_markup("<span color='#FFFFFF'><b>No media playing</b></span>")
             self.lbl_artist.set_text("")
-            self.lbl_time_cur.set_markup(f"<span color='{C_TEXT_MUT}'>00:00</span>")
-            self.lbl_time_total.set_markup(f"<span color='{C_TEXT_MUT}'>00:00</span>")
+            self.lbl_time_cur.set_markup("<span color='#4D0A1C'><b>00:00</b></span>")
+            self.lbl_time_total.set_markup("<span color='#4D0A1C'><b>00:00</b></span>")
             self.btn_play.set_label("󰐊")
             self.lbl_status.set_text("Idle")
             self.lbl_status.get_style_context().remove_class("playing")

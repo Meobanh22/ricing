@@ -1,4 +1,4 @@
-/* config.rasi — Rofi application launcher theme. */
+/* config.rasi — Rofi application launcher theme in Tactile 3D Anime Style. */
 
 @import "colors-rofi.rasi"
 
@@ -9,11 +9,11 @@
 }
 
 window {
-    height: 470px;
-    border: 1px;
-    border-color: @border-window;
-    border-radius: 16px;
-    background-color: @bg-window;
+    height: 480px;
+    border: 2px 2px 6px 2px;
+    border-color: #4D0A1C;
+    border-radius: 18px;
+    background-color: rgba(255, 240, 245, 0.96);
     padding: 16px;
 }
 
@@ -24,17 +24,17 @@ mainbox {
 
 inputbar {
     children: [prompt, entry];
-    background-color: @bg-card;
-    border: 1px;
-    border-color: rgba(255, 255, 255, 0.08);
-    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.85);
+    border: 1.5px 1.5px 3.5px 1.5px;
+    border-color: #4D0A1C;
+    border-radius: 11px;
     padding: 6px 12px;
 }
 
 prompt {
     background-color: @accent;
     padding: 6px 14px;
-    text-color: @text-inverse;
+    text-color: #FFFFFF;
     border-radius: 8px;
     margin: 0px 8px 0px 0px;
     font-weight: bold;
@@ -42,9 +42,10 @@ prompt {
 
 entry {
     padding: 6px;
-    text-color: @text-primary;
+    text-color: #851733;
     placeholder: "Search applications...";
-    placeholder-color: @text-muted;
+    placeholder-color: #A68595;
+    font-weight: 600;
 }
 
 listview {
@@ -54,14 +55,16 @@ listview {
     columns: 2;
     lines: 6;
     background-color: transparent;
-    spacing: 6px;
+    spacing: 8px;
 }
 
 element {
-    padding: 8px 10px;
-    background-color: transparent;
-    text-color: @text-secondary;
-    border-radius: 8px;
+    padding: 8px 12px;
+    background-color: rgba(255, 255, 255, 0.50);
+    text-color: #851733;
+    border-radius: 10px;
+    border: 1px 1px 2px 1px;
+    border-color: transparent;
 }
 
 element normal.normal,
@@ -70,8 +73,9 @@ element normal.active,
 element alternate.normal,
 element alternate.urgent,
 element alternate.active {
-    background-color: transparent;
-    text-color: @text-secondary;
+    background-color: rgba(255, 255, 255, 0.50);
+    text-color: #851733;
+    border-color: transparent;
 }
 
 element-icon {
@@ -85,26 +89,26 @@ element-text {
     vertical-align: 0.5;
     background-color: inherit;
     text-color: inherit;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 element selected.normal, element selected {
-    background-color: @bg-card-hover;
-    border: 1px;
-    border-color: @border-card-hover;
-    text-color: @text-primary;
+    background-color: #FFFFFF;
+    border: 1.5px 1.5px 3.5px 1.5px;
+    border-color: #4D0A1C;
+    text-color: @accent;
 }
 
 element selected.urgent {
-    background-color: @bg-card-hover;
-    border: 1px;
-    border-color: @border-card-hover;
-    text-color: @text-primary;
+    background-color: #FFFFFF;
+    border: 1.5px 1.5px 3.5px 1.5px;
+    border-color: #FF2A55;
+    text-color: @accent;
 }
 
 element selected.active {
-    background-color: @bg-card-hover;
-    border: 1px;
-    border-color: @border-card-hover;
-    text-color: @text-primary;
+    background-color: #FFFFFF;
+    border: 1.5px 1.5px 3.5px 1.5px;
+    border-color: #4D0A1C;
+    text-color: @accent;
 }

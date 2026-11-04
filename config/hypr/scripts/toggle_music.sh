@@ -23,5 +23,5 @@ fi
 
 # 2. Launch in background
 rm -f "$PID_FILE"
-python3 "$SCRIPT_PATH" &
+setsid python3 "$SCRIPT_PATH" </dev/null >/dev/null 2>&1 &
 exit 0

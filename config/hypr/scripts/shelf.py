@@ -55,6 +55,13 @@ except ImportError:
     BORDER_WINDOW_RGBA = (1.0, 1.0, 1.0, 0.12)
     BORDER_CARD_RGBA = (1.0, 1.0, 1.0, 0.12)
 
+# Light Cream Tactile Theme tokens (matches widgets & Waybar)
+C_LIGHT_BG = "rgba(255, 240, 245, 0.96)"
+C_RUBY_PRI = "#851733"
+C_RUBY_SEC = "#B04D68"
+C_RUBY_MUT = "#8C6577"
+C_BORDER_3D = "#4D0A1C"
+
 # Paths & Directories
 SHELF_DIR = os.path.expanduser("~/.cache/serena/shelf")
 CLIPHIST_DB = os.path.expanduser("~/.cache/cliphist/db")
@@ -88,7 +95,7 @@ class ShelfWindow(Gtk.Window):
 
         # 1. Main Layer Shell Setup (Anchor Top-Left with dynamic draggable margins)
         screen_w, screen_h = self.get_monitor_geometry()
-        init_x = int((screen_w - 464) / 2)
+        init_x = int((screen_w - 480) / 2)
         init_y = 44
 
         # Restore saved position from temporary session cache if available
@@ -96,7 +103,7 @@ class ShelfWindow(Gtk.Window):
             try:
                 with open(POSITION_CACHE, "r") as f:
                     saved_pos = json.load(f)
-                    init_x = max(10, min(screen_w - 475, saved_pos.get("x", init_x)))
+                    init_x = max(10, min(screen_w - 495, saved_pos.get("x", init_x)))
                     init_y = max(10, min(screen_h - 100, saved_pos.get("y", init_y)))
             except Exception:
                 pass
@@ -118,10 +125,10 @@ class ShelfWindow(Gtk.Window):
         GtkLayerShell.set_margin(self, GtkLayerShell.Edge.LEFT, self.current_win_x)
         GtkLayerShell.set_keyboard_mode(self, GtkLayerShell.KeyboardMode.ON_DEMAND)
 
-        # Dynamic comfortable width (464px: spacious 2-column cards & drop frame)
+        # Dynamic comfortable width (480px: spacious 2-column cards & drop frame)
         self.set_title("Shelf")
         self.set_name("shelf-window-root")
-        self.set_default_size(464, -1)
+        self.set_default_size(480, -1)
         self.set_resizable(False)
 
         # Set transparent RGBA visual and app_paintable to eliminate sharp corner leakage
@@ -180,38 +187,11 @@ class ShelfWindow(Gtk.Window):
         GLib.timeout_add(300, self.check_cliphist_update)
 
     def on_window_draw(self, widget, cr):
-        # 1. Clear surface to 100% transparent (eliminates sharp rectangle leak)
+        # Clear surface to 100% transparent so GTK CSS renders 3D tactile borders
         cr.set_source_rgba(0, 0, 0, 0)
         cr.set_operator(cairo.OPERATOR_CLEAR)
         cr.paint()
         cr.set_operator(cairo.OPERATOR_OVER)
-
-        # 2. Draw perfectly rounded 16px background squircle for the main shelf window
-        if widget == self:
-            alloc = widget.get_allocation()
-            pad = 0.5
-            w = float(alloc.width) - pad * 2.0
-            h = float(alloc.height) - pad * 2.0
-            x = pad
-            y = pad
-            r = 16.0
-
-            cr.new_sub_path()
-            cr.arc(x + w - r, y + r, r, -1.57079632679, 0)
-            cr.arc(x + w - r, y + h - r, r, 0, 1.57079632679)
-            cr.arc(x + r, y + h - r, r, 1.57079632679, 3.14159265359)
-            cr.arc(x + r, y + r, r, 3.14159265359, 4.71238898038)
-            cr.close_path()
-
-            # Fill with the shared window background token.
-            cr.set_source_rgba(*BG_WINDOW_RGBA)
-            cr.fill_preserve()
-
-            # Draw the shared outer window border.
-            cr.set_source_rgba(*BORDER_WINDOW_RGBA)
-            cr.set_line_width(1.0)
-            cr.stroke()
-
         return False
 
     def on_popout_draw(self, widget, cr):
@@ -221,14 +201,14 @@ class ShelfWindow(Gtk.Window):
         cr.paint()
         cr.set_operator(cairo.OPERATOR_OVER)
 
-        # 2. Draw perfectly rounded 12px squircle for external floating popout card
+        # 2. Draw rounded squircle for external floating popout card
         alloc = widget.get_allocation()
         pad = 1.0
         w = float(alloc.width) - pad * 2.0
         h = float(alloc.height) - pad * 2.0
         x = pad
         y = pad
-        r = 12.0
+        r = 14.0
 
         cr.new_sub_path()
         cr.arc(x + w - r, y + r, r, -1.57079632679, 0)
@@ -237,13 +217,13 @@ class ShelfWindow(Gtk.Window):
         cr.arc(x + r, y + r, r, 3.14159265359, 4.71238898038)
         cr.close_path()
 
-        # Fill with the shared card background token.
-        cr.set_source_rgba(*BG_CARD_RGBA)
+        # Light cream card background
+        cr.set_source_rgba(255.0/255.0, 240.0/255.0, 245.0/255.0, 0.98)
         cr.fill_preserve()
 
-        # Draw the accent border.
-        cr.set_source_rgba(*ACCENT_RGBA)
-        cr.set_line_width(1.5)
+        # 3D wine border
+        cr.set_source_rgba(77.0/255.0, 10.0/255.0, 28.0/255.0, 1.0)
+        cr.set_line_width(2.0)
         cr.stroke()
 
         return False
@@ -255,7 +235,7 @@ class ShelfWindow(Gtk.Window):
         cr.paint()
         cr.set_operator(cairo.OPERATOR_OVER)
 
-        # 2. Draw perfectly rounded 16px squircle for lightbox modal
+        # 2. Draw rounded squircle for lightbox modal
         alloc = widget.get_allocation()
         pad = 1.0
         w = float(alloc.width) - pad * 2.0
@@ -271,13 +251,13 @@ class ShelfWindow(Gtk.Window):
         cr.arc(x + r, y + r, r, 3.14159265359, 4.71238898038)
         cr.close_path()
 
-        # Fill with the shared window background token.
-        cr.set_source_rgba(*BG_WINDOW_RGBA)
+        # Light cream background
+        cr.set_source_rgba(255.0/255.0, 240.0/255.0, 245.0/255.0, 0.98)
         cr.fill_preserve()
 
-        # Draw the accent border.
-        cr.set_source_rgba(*ACCENT_RGBA)
-        cr.set_line_width(1.5)
+        # 3D wine border
+        cr.set_source_rgba(77.0/255.0, 10.0/255.0, 28.0/255.0, 1.0)
+        cr.set_line_width(2.5)
         cr.stroke()
 
         return False
@@ -488,6 +468,7 @@ class ShelfWindow(Gtk.Window):
 
     def build_ui(self):
         main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+        main_box.set_size_request(480, -1)
         main_box.get_style_context().add_class("shelf-window")
 
         # --- HEADER ---
@@ -503,7 +484,7 @@ class ShelfWindow(Gtk.Window):
         # Tab: Clipboard
         self.btn_tab_clip = Gtk.Button()
         self.lbl_tab_clip = Gtk.Label()
-        self.lbl_tab_clip.set_markup(f"<span font='12' color='{C_TEXT_INV}'>󰅌</span>   <span color='{C_TEXT_INV}'><b>Clipboard</b></span>")
+        self.lbl_tab_clip.set_markup(f"<span font='12' color='#FFFFFF'>󰅌</span>   <span color='#FFFFFF'><b>Clipboard</b></span>")
         self.btn_tab_clip.add(self.lbl_tab_clip)
         self.btn_tab_clip.get_style_context().add_class("tab-btn")
         self.btn_tab_clip.connect("clicked", lambda w: self.switch_tab("clip"))
@@ -512,7 +493,7 @@ class ShelfWindow(Gtk.Window):
         # Tab: Shelf
         self.btn_tab_shelf = Gtk.Button()
         self.lbl_tab_shelf = Gtk.Label()
-        self.lbl_tab_shelf.set_markup(f"<span font='12' color='{C_ACCENT}'>󰏖</span>   <span color='{C_TEXT_SEC}'>Shelf</span>")
+        self.lbl_tab_shelf.set_markup(f"<span font='12' color='{C_ACCENT}'>󰏖</span>   <span color='{C_RUBY_PRI}'>Shelf</span>")
         self.btn_tab_shelf.add(self.lbl_tab_shelf)
         self.btn_tab_shelf.get_style_context().add_class("tab-btn")
         self.btn_tab_shelf.connect("clicked", lambda w: self.switch_tab("shelf"))
@@ -539,7 +520,7 @@ class ShelfWindow(Gtk.Window):
         # Stash Button
         self.btn_stash_clip = Gtk.Button()
         self.lbl_stash = Gtk.Label()
-        self.lbl_stash.set_markup(f"<span font='11' color='{C_ACCENT}'>󰅍</span>  <span color='{C_TEXT_SEC}'>Stash</span>")
+        self.lbl_stash.set_markup(f"<span font='11' color='{C_ACCENT}'>󰅍</span>  <span color='{C_RUBY_PRI}'>Stash</span>")
         self.btn_stash_clip.add(self.lbl_stash)
         self.btn_stash_clip.get_style_context().add_class("action-btn")
         self.btn_stash_clip.set_tooltip_text("Save current clipboard content into shelf")
@@ -559,7 +540,7 @@ class ShelfWindow(Gtk.Window):
         # Close Button
         btn_close = Gtk.Button()
         lbl_close = Gtk.Label()
-        lbl_close.set_markup(f"<span font='12' color='{C_TEXT_MUT}'>✕</span>")
+        lbl_close.set_markup(f"<span font='12' color='{C_RUBY_PRI}'>✕</span>")
         btn_close.add(lbl_close)
         btn_close.get_style_context().add_class("btn-close")
         btn_close.set_tooltip_text("Close (Esc)")
@@ -674,7 +655,7 @@ class ShelfWindow(Gtk.Window):
         empty_box.pack_start(lbl_icon, False, False, 0)
 
         lbl_msg = Gtk.Label()
-        lbl_msg.set_markup(f"<span font='11' color='{C_TEXT_MUT}'>No clipboard items found</span>")
+        lbl_msg.set_markup(f"<span font='11' color='{C_RUBY_MUT}'>No clipboard items found</span>")
         empty_box.pack_start(lbl_msg, False, False, 0)
 
         self.clip_stack.add_named(empty_box, "empty")
@@ -798,9 +779,9 @@ class ShelfWindow(Gtk.Window):
         lbl_icon = Gtk.Label()
         lbl_icon.set_margin_start(8)
         if item["is_image"]:
-            lbl_icon.set_markup(f"<span font='10.5' color='{C_ACCENT}'>󰋩</span>  <span font='10' color='{C_TEXT_MUT}'>Image</span>")
+            lbl_icon.set_markup(f"<span font='10.5' color='{C_ACCENT}'>󰋩</span>  <span font='10' color='{C_RUBY_MUT}'>Image</span>")
         else:
-            lbl_icon.set_markup(f"<span font='10.5' color='{C_ACCENT}'>󰈙</span>  <span font='10' color='{C_TEXT_MUT}'>Text</span>")
+            lbl_icon.set_markup(f"<span font='10.5' color='{C_ACCENT}'>󰈙</span>  <span font='10' color='{C_RUBY_MUT}'>Text</span>")
         top_row.pack_start(lbl_icon, False, False, 0)
 
         # Right actions in header: Pin + Zoom (if image) + Delete
@@ -843,7 +824,7 @@ class ShelfWindow(Gtk.Window):
         btn_del.get_style_context().add_class("flat")
         btn_del.get_style_context().add_class("chip-btn-del")
         lbl_x = Gtk.Label()
-        lbl_x.set_markup(f"<span font='9.5' color='{C_TEXT_MUT}'>✕</span>")
+        lbl_x.set_markup(f"<span font='9.5' color='{C_RUBY_PRI}'>✕</span>")
         btn_del.add(lbl_x)
         btn_del.set_tooltip_text("Delete")
         btn_del.connect("clicked", lambda b: self.delete_clip(item))
@@ -1063,7 +1044,7 @@ class ShelfWindow(Gtk.Window):
         top_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
         lbl_type = Gtk.Label()
         lbl_type.set_margin_start(8)
-        lbl_type.set_markup(f"<span font='9.5' color='{C_ACCENT}'>{icon}</span>  <span font='9.5' color='{C_TEXT_MUT}'>{type_label}</span>")
+        lbl_type.set_markup(f"<span font='9.5' color='{C_ACCENT}'>{icon}</span>  <span font='9.5' color='{C_RUBY_MUT}'>{type_label}</span>")
         top_row.pack_start(lbl_type, False, False, 0)
 
         right_hdr = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
@@ -1085,7 +1066,7 @@ class ShelfWindow(Gtk.Window):
         btn_del.get_style_context().add_class("flat")
         btn_del.get_style_context().add_class("chip-btn-del")
         lbl_x = Gtk.Label()
-        lbl_x.set_markup(f"<span font='9.5' color='{C_TEXT_MUT}'>✕</span>")
+        lbl_x.set_markup(f"<span font='9.5' color='{C_RUBY_PRI}'>✕</span>")
         btn_del.add(lbl_x)
         btn_del.set_tooltip_text("Remove")
         btn_del.connect("clicked", lambda b: self.remove_shelf_file(fpath))
@@ -1173,7 +1154,7 @@ class ShelfWindow(Gtk.Window):
 
         btn_copy = Gtk.Button()
         lbl_cp = Gtk.Label()
-        lbl_cp.set_markup(f"<span font='9.5' color='{C_TEXT_SEC}'>Copy</span>")
+        lbl_cp.set_markup(f"<span font='9.5' color='{C_RUBY_PRI}'>Copy</span>")
         btn_copy.add(lbl_cp)
         btn_copy.get_style_context().add_class("chip-btn-action")
         btn_copy.connect("clicked", lambda b: self.copy_shelf_file(fpath, is_image))
@@ -1301,7 +1282,7 @@ class ShelfWindow(Gtk.Window):
                     vbox.pack_start(img, False, False, 2)
 
                     lbl_meta = Gtk.Label()
-                    lbl_meta.set_markup(f"<span font='9.5' color='{C_TEXT_MUT}'>{orig_w}×{orig_h} · PNG Image</span>")
+                    lbl_meta.set_markup(f"<span font='9.5' color='{C_RUBY_MUT}'>{orig_w}×{orig_h} · PNG Image</span>")
                     lbl_meta.set_halign(Gtk.Align.START)
                     lbl_meta.set_margin_start(8)
                     vbox.pack_start(lbl_meta, False, False, 0)
@@ -1309,7 +1290,7 @@ class ShelfWindow(Gtk.Window):
                     lbl_err = Gtk.Label(label="[Image Preview]")
                     vbox.pack_start(lbl_err, False, False, 0)
             else:
-                lbl_type.set_markup(f"<span font='10.5' color='{C_ACCENT}'>󰈙</span>  <span font='10' color='{C_TEXT_PRI}'><b>Text Preview</b></span>")
+                lbl_type.set_markup(f"<span font='10.5' color='{C_ACCENT}'>󰈙</span>  <span font='10' color='{C_RUBY_PRI}'><b>Text Preview</b></span>")
                 top_row.pack_start(lbl_type, False, False, 0)
                 vbox.pack_start(top_row, False, False, 0)
 
@@ -1339,7 +1320,7 @@ class ShelfWindow(Gtk.Window):
                 vbox.pack_start(lbl_text, False, False, 2)
 
                 lbl_meta = Gtk.Label()
-                lbl_meta.set_markup(f"<span font='9.5' color='{C_TEXT_MUT}'>{line_count} line{'s' if line_count > 1 else ''} · {char_count} chars</span>")
+                lbl_meta.set_markup(f"<span font='9.5' color='{C_RUBY_MUT}'>{line_count} line{'s' if line_count > 1 else ''} · {char_count} chars</span>")
                 lbl_meta.set_halign(Gtk.Align.START)
                 lbl_meta.set_margin_start(8)
                 vbox.pack_start(lbl_meta, False, False, 0)
@@ -1350,7 +1331,7 @@ class ShelfWindow(Gtk.Window):
             size_str = self.format_file_size(fsize)
             icon, type_label, category = self.get_file_info(fpath)
             is_image = (category == "image")
-            lbl_type.set_markup(f"<span font='10.5' color='{C_ACCENT}'>{icon}</span>  <span font='10' color='{C_TEXT_PRI}'><b>{GLib.markup_escape_text(fname[:22])}</b></span>")
+            lbl_type.set_markup(f"<span font='10.5' color='{C_ACCENT}'>{icon}</span>  <span font='10' color='{C_RUBY_PRI}'><b>{GLib.markup_escape_text(fname[:22])}</b></span>")
             top_row.pack_start(lbl_type, False, False, 0)
             vbox.pack_start(top_row, False, False, 0)
 
@@ -1368,7 +1349,7 @@ class ShelfWindow(Gtk.Window):
                     vbox.pack_start(img, False, False, 2)
 
                     lbl_meta = Gtk.Label()
-                    lbl_meta.set_markup(f"<span font='9.5' color='{C_TEXT_MUT}'>{orig_w}×{orig_h} · {size_str}</span>")
+                    lbl_meta.set_markup(f"<span font='9.5' color='{C_RUBY_MUT}'>{orig_w}×{orig_h} · {size_str}</span>")
                     lbl_meta.set_halign(Gtk.Align.START)
                     lbl_meta.set_margin_start(8)
                     vbox.pack_start(lbl_meta, False, False, 0)
@@ -1397,7 +1378,7 @@ class ShelfWindow(Gtk.Window):
                     vbox.pack_start(lbl_text, False, False, 2)
 
                 lbl_meta = Gtk.Label()
-                lbl_meta.set_markup(f"<span font='9.5' color='{C_TEXT_MUT}'>{size_str} · {GLib.markup_escape_text(fname)}</span>")
+                lbl_meta.set_markup(f"<span font='9.5' color='{C_RUBY_MUT}'>{size_str} · {GLib.markup_escape_text(fname)}</span>")
                 lbl_meta.set_halign(Gtk.Align.START)
                 lbl_meta.set_margin_start(8)
                 vbox.pack_start(lbl_meta, False, False, 0)
@@ -1504,14 +1485,14 @@ class ShelfWindow(Gtk.Window):
         # Header
         hdr = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
         lbl_t = Gtk.Label()
-        lbl_t.set_markup(f"<span font='11' color='{C_ACCENT}'>󰋩</span>  <span font='11' color='{C_TEXT_PRI}'><b>{GLib.markup_escape_text(title_str[:30])}</b></span>  <span font='9.5' color='{C_TEXT_MUT}'>({orig_w}×{orig_h})</span>")
+        lbl_t.set_markup(f"<span font='11' color='{C_ACCENT}'>󰋩</span>  <span font='11' color='{C_RUBY_PRI}'><b>{GLib.markup_escape_text(title_str[:30])}</b></span>  <span font='9.5' color='{C_RUBY_MUT}'>({orig_w}×{orig_h})</span>")
         hdr.pack_start(lbl_t, False, False, 0)
 
         actions = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
 
         btn_open = Gtk.Button()
         lbl_o = Gtk.Label()
-        lbl_o.set_markup(f"<span font='9.5' color='{C_TEXT_SEC}'>󰅍 Open in App</span>")
+        lbl_o.set_markup(f"<span font='9.5' color='{C_RUBY_PRI}'>󰅍 Open in App</span>")
         btn_open.add(lbl_o)
         btn_open.get_style_context().add_class("action-btn")
         def do_open(b):
@@ -1526,7 +1507,7 @@ class ShelfWindow(Gtk.Window):
 
         btn_copy = Gtk.Button()
         lbl_c = Gtk.Label()
-        lbl_c.set_markup(f"<span font='9.5' color='{C_TEXT_SEC}'>󰆏 Copy</span>")
+        lbl_c.set_markup(f"<span font='9.5' color='{C_RUBY_PRI}'>󰆏 Copy</span>")
         btn_copy.add(lbl_c)
         btn_copy.get_style_context().add_class("action-btn")
         def do_copy(b):
@@ -1540,7 +1521,7 @@ class ShelfWindow(Gtk.Window):
 
         btn_cl = Gtk.Button()
         lbl_x = Gtk.Label()
-        lbl_x.set_markup(f"<span font='12' color='{C_TEXT_MUT}'>✕</span>")
+        lbl_x.set_markup(f"<span font='12' color='{C_RUBY_PRI}'>✕</span>")
         btn_cl.add(lbl_x)
         btn_cl.get_style_context().add_class("btn-close")
         btn_cl.connect("clicked", lambda b: win.destroy())
@@ -1564,7 +1545,7 @@ class ShelfWindow(Gtk.Window):
         frame.pack_start(img_widget, True, True, 4)
 
         lbl_foot = Gtk.Label()
-        lbl_foot.set_markup(f"<span font='9.5' color='{C_TEXT_MUT}'>Esc to close · Click Open in App to inspect in Loupe</span>")
+        lbl_foot.set_markup(f"<span font='9.5' color='{C_RUBY_MUT}'>Esc to close · Click Open in App to inspect in Loupe</span>")
         frame.pack_end(lbl_foot, False, False, 0)
 
         win.add(frame)
@@ -1782,7 +1763,7 @@ class ShelfWindow(Gtk.Window):
         if tab_name == "clip":
             self.btn_tab_clip.get_style_context().add_class("active")
             self.btn_tab_shelf.get_style_context().remove_class("active")
-            self.lbl_tab_clip.set_markup(f"<span font='12' color='{C_TEXT_INV}'>󰅌</span>   <span color='{C_TEXT_INV}'><b>Clipboard</b></span>")
+            self.lbl_tab_clip.set_markup(f"<span font='12' color='#FFFFFF'>󰅌</span>   <span color='#FFFFFF'><b>Clipboard</b></span>")
             self.update_shelf_badge()
             self.btn_stash_clip.hide()
             self.stack.set_visible_child_name("clip")
@@ -1791,7 +1772,7 @@ class ShelfWindow(Gtk.Window):
         else:
             self.btn_tab_shelf.get_style_context().add_class("active")
             self.btn_tab_clip.get_style_context().remove_class("active")
-            self.lbl_tab_clip.set_markup(f"<span font='12' color='{C_ACCENT}'>󰅌</span>   <span color='{C_TEXT_SEC}'>Clipboard</span>")
+            self.lbl_tab_clip.set_markup(f"<span font='12' color='{C_ACCENT}'>󰅌</span>   <span color='{C_RUBY_PRI}'>Clipboard</span>")
             self.update_shelf_badge()
             self.btn_stash_clip.show()
             self.stack.set_visible_child_name("shelf")
@@ -1804,9 +1785,9 @@ class ShelfWindow(Gtk.Window):
             except Exception:
                 count = 0
         if self.active_tab == "shelf":
-            txt = f"<span font='12' color='{C_TEXT_INV}'>󰏖</span>   <span color='{C_TEXT_INV}'><b>Shelf ({count})</b></span>" if count > 0 else f"<span font='12' color='{C_TEXT_INV}'>󰏖</span>   <span color='{C_TEXT_INV}'><b>Shelf</b></span>"
+            txt = f"<span font='12' color='#FFFFFF'>󰏖</span>   <span color='#FFFFFF'><b>Shelf ({count})</b></span>" if count > 0 else f"<span font='12' color='#FFFFFF'>󰏖</span>   <span color='#FFFFFF'><b>Shelf</b></span>"
         else:
-            txt = f"<span font='12' color='{C_ACCENT}'>󰏖</span>   <span color='{C_TEXT_SEC}'>Shelf ({count})</span>" if count > 0 else f"<span font='12' color='{C_ACCENT}'>󰏖</span>   <span color='{C_TEXT_SEC}'>Shelf</span>"
+            txt = f"<span font='12' color='{C_ACCENT}'>󰏖</span>   <span color='{C_RUBY_PRI}'>Shelf ({count})</span>" if count > 0 else f"<span font='12' color='{C_ACCENT}'>󰏖</span>   <span color='{C_RUBY_PRI}'>Shelf</span>"
         self.lbl_tab_shelf.set_markup(txt)
 
     def show_toast(self, message):
@@ -1909,8 +1890,7 @@ def main():
         with open(PID_FILE, "w") as f:
             f.write(str(os.getpid()))
         win.show_all()
-        if mode == "clip":
-            win.btn_stash_clip.hide()
+        win.switch_tab(mode)
         Gtk.main()
     except Exception as e:
         print(f"Error starting shelf: {e}", file=sys.stderr)

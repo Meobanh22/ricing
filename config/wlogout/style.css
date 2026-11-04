@@ -1,54 +1,61 @@
-/* style.css — Wlogout menu stylesheet. */
+/* style.css — Wlogout menu stylesheet in Tactile 3D Anime Light Theme. */
 @import "palette.css";
 
 * {
     font-family: "JetBrains Mono Nerd Font", "FiraCode Nerd Font", "Segoe UI", sans-serif;
     background-image: none;
     box-shadow: none;
+    outline: none;
 }
 
-/* === WINDOW === */
+/* === WINDOW (Darkened backdrop for focus) === */
 window {
-    background-color: @bg_window;
+    background-color: rgba(32, 16, 17, 0.72);
     border: none;
     border-radius: 0;
     padding: 0;
 }
 
-/* === ACTION CARDS === */
+/* === ACTION CARDS (Light Cream 3D Buttons) === */
 button {
-    color: @text_primary;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    background-color: @bg_card;
-    border: 1px solid @border_card;
-    border-radius: 10px;
-    margin: 8px;
+    color: #851733;
+    font-size: 13.5px;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    background-color: rgba(255, 240, 245, 0.96);
+    border-style: solid;
+    border-color: @border_waybar_3d;
+    border-top-width: 2px;
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 6.5px;
+    border-radius: 18px;
+    margin: 16px;
     background-repeat: no-repeat;
     background-position: center 32%;
-    background-size: 44px 44px;
+    background-size: 46px 46px;
     box-shadow: none;
-    transition: background-color 150ms ease, color 150ms ease;
+    transition: all 150ms ease;
     outline-style: none;
 }
 
 button span,
 button label {
-    font-size: 13px;
-    font-weight: 600;
-    color: @text_secondary;
-    margin-top: 56px;
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #851733;
+    margin-top: 58px;
     transition: color 150ms ease;
 }
 
-/* === HOVER === */
+/* === HOVER & ACTIVE (Elevated Pure White with Accent Border) === */
 button:focus,
 button:active,
 button:hover {
-    background-color: @bg_card_hover;
-    color: @text_primary;
-    border-color: @border_card_hover;
+    background-color: #FFFFFF;
+    color: @accent;
+    border-color: @accent;
+    border-bottom-color: @accent;
     outline-style: none;
     box-shadow: none;
 }
@@ -59,7 +66,7 @@ button:active span,
 button:active label,
 button:hover span,
 button:hover label {
-    color: @text_primary;
+    color: @accent;
 }
 
 /* === ACTION ICONS === */

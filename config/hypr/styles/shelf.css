@@ -1,4 +1,4 @@
-/* shelf.css — Stylesheet for Shelf (Clipboard & File Stash). */
+/* shelf.css — Stylesheet for Shelf (Clipboard & File Stash) with tactile 3D style. */
 @import "palette.css";
 
 /* === GLOBAL RESETS === */
@@ -27,12 +27,20 @@ window#shelf-lightbox-root.background,
     box-shadow: none;
 }
 
-/* === MAIN WINDOW === */
+/* === MAIN WINDOW (Cream Cel-shaded 3D Card) === */
 .shelf-window {
-    background-color: @bg_window;
-    border: 1px solid @border_window;
-    border-radius: 16px;
+    background-color: rgba(255, 240, 245, 0.96);
+    border-style: solid;
+    border-color: @border_waybar_3d;
+    border-top-width: 2px;
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 6px;
+    border-radius: 18px;
     padding: 0;
+    margin: 2px 6px 8px 6px;
+    min-width: 480px;
+    transition: background-color 150ms ease, border-color 150ms ease;
 }
 
 button {
@@ -45,90 +53,138 @@ button {
 
 /* === HEADER SWITCHER === */
 .tab-switcher {
-    background-color: @bg_subtle;
-    border-radius: 8px;
-    padding: 2px;
+    background-color: rgba(255, 255, 255, 0.70);
+    border-style: solid;
+    border-color: @border_waybar_3d;
+    border-top-width: 1.5px;
+    border-left-width: 1.5px;
+    border-right-width: 1.5px;
+    border-bottom-width: 3.5px;
+    border-radius: 10px;
+    padding: 3px;
 }
 
 button.tab-btn {
     background-image: none;
     background-color: transparent;
-    color: @text_secondary;
+    color: #851733;
     font-size: 11.5px;
-    font-weight: 600;
+    font-weight: 700;
     border: none;
-    border-radius: 8px;
+    border-radius: 7px;
     padding: 4px 12px;
-    transition: background-color 150ms ease, color 150ms ease;
+    transition: all 150ms ease;
 }
 
 button.tab-btn:hover {
-    color: @text_primary;
-    background-color: @bg_ghost_hover;
+    color: @accent;
+    background-color: rgba(255, 255, 255, 0.90);
 }
 
 button.tab-btn.active {
     background-color: @accent;
-    color: @text_inverse;
+    color: #FFFFFF;
+    border-style: solid;
+    border-color: @border_waybar_3d;
+    border-top-width: 1px;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 2.5px;
 }
 
 button.tab-btn.active:hover {
     background-color: @accent_hover;
 }
 
+/* === ACTION BUTTONS === */
 .action-btn {
     background-image: none;
-    background-color: @bg_card;
-    color: @text_secondary;
+    background-color: rgba(255, 255, 255, 0.75);
+    color: #851733;
     font-size: 11px;
-    font-weight: 600;
-    border: none;
-    border-radius: 8px;
+    font-weight: 700;
+    border-style: solid;
+    border-color: @border_waybar_3d;
+    border-top-width: 1.5px;
+    border-left-width: 1.5px;
+    border-right-width: 1.5px;
+    border-bottom-width: 3px;
+    border-radius: 9px;
     padding: 4px 10px;
-    transition: background-color 150ms ease, color 150ms ease;
+    transition: all 150ms ease;
 }
 
 .action-btn:hover {
-    background-color: @bg_card_hover;
-    color: @text_primary;
+    background-color: #FFFFFF;
+    color: @accent;
+    border-color: @accent;
 }
 
 .btn-close {
     background-image: none;
-    background-color: transparent;
-    color: @text_muted;
-    font-size: 13px;
-    font-weight: 700;
-    border: none;
-    border-radius: 8px;
-    padding: 4px 8px;
-    transition: color 150ms ease, background-color 150ms ease;
+    background-color: rgba(255, 255, 255, 0.75);
+    color: #851733;
+    font-size: 12px;
+    font-weight: 800;
+    border-style: solid;
+    border-color: @border_waybar_3d;
+    border-top-width: 1.5px;
+    border-left-width: 1.5px;
+    border-right-width: 1.5px;
+    border-bottom-width: 3px;
+    border-radius: 9px;
+    padding: 4px 9px;
+    transition: all 150ms ease;
 }
 
 .btn-close:hover {
+    background-color: #FFFFFF;
     color: @accent;
-    background-color: @bg_ghost_hover;
+    border-color: @accent;
+}
+
+/* Header Drag Handle Zone */
+.drag-grip-zone {
+    padding: 2px 8px;
+    border-radius: 8px;
+    transition: background-color 150ms ease;
+}
+
+.drag-grip-zone:hover {
+    background-color: rgba(133, 23, 51, 0.08);
+}
+
+.drag-handle-pill {
+    background-color: rgba(133, 23, 51, 0.25);
+    border-radius: 3px;
 }
 
 /* === SEARCH ENTRY === */
 entry,
 searchentry {
     background-image: none;
-    background-color: @bg_card;
-    color: @text_primary;
+    background-color: rgba(255, 255, 255, 0.85);
+    color: #851733;
     font-size: 11.5px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 8px;
+    font-weight: 600;
+    border-style: solid;
+    border-color: @border_waybar_3d;
+    border-top-width: 1.5px;
+    border-left-width: 1.5px;
+    border-right-width: 1.5px;
+    border-bottom-width: 3.5px;
+    border-radius: 11px;
     padding: 6px 12px;
     margin-bottom: 8px;
     caret-color: @accent;
     box-shadow: none;
-    transition: border-color 150ms ease;
+    transition: border-color 150ms ease, background-color 150ms ease;
 }
 
 entry:focus,
 searchentry:focus {
-    border: 1px solid @accent;
+    background-color: #FFFFFF;
+    border-color: @accent;
 }
 
 entry image,
@@ -139,6 +195,14 @@ searchentry image {
 }
 
 /* === CLIPBOARD CHIP GRID === */
+scrolledwindow,
+scrolledwindow viewport,
+viewport {
+    background-color: transparent;
+    background: transparent;
+    border: none;
+}
+
 flowbox {
     background-color: transparent;
 }
@@ -156,36 +220,45 @@ flowboxchild:selected {
 }
 
 .chip-card {
-    background-color: @bg_card;
-    border-radius: 10px;
-    border: 1px solid @border_card;
+    background-color: #FFFFFF;
+    border-style: solid;
+    border-color: @border_waybar_3d;
+    border-top-width: 1.5px;
+    border-left-width: 1.5px;
+    border-right-width: 1.5px;
+    border-bottom-width: 4.5px;
+    border-radius: 12px;
     padding: 8px 10px;
-    transition: background-color 150ms ease, border-color 150ms ease;
+    margin: 2px;
+    transition: all 150ms ease;
 }
 
 .chip-card:hover {
-    background-color: @bg_card_hover;
-    border: 1px solid @border_card_hover;
+    background-color: #FFFFFF;
+    border-color: @accent;
 }
 
 .chip-card.pinned {
-    border: 1px solid @border_card_hover;
-    background-color: @bg_subtle;
+    background-color: rgba(255, 240, 245, 0.95);
+    border-color: @accent;
+    border-bottom-width: 4.5px;
 }
 
 .chip-card.pinned:hover {
-    border: 1px solid @accent;
-    background-color: @bg_card_hover;
+    background-color: #FFFFFF;
+    border-color: @accent;
 }
 
 .chip-text {
-    color: @text_primary;
+    color: #851733;
     font-size: 11px;
+    font-weight: 600;
 }
 
 .chip-meta {
-    color: @text_muted;
+    color: #8C6577;
     font-size: 9.5px;
+    font-weight: 500;
     margin-top: 4px;
 }
 
@@ -193,82 +266,89 @@ flowboxchild:selected {
 button.chip-btn-del,
 .chip-btn-del {
     background-image: none;
-    background-color: transparent;
+    background-color: rgba(133, 23, 51, 0.08);
     border-width: 0;
     border-style: none;
     border-color: transparent;
     box-shadow: none;
     outline: none;
-    padding: 1px 4px;
+    padding: 2px 6px;
     margin: 0;
     min-height: 0;
     min-width: 0;
-    border-radius: 4px;
-    transition: background-color 150ms ease, color 150ms ease;
+    border-radius: 6px;
+    color: #851733;
+    transition: all 150ms ease;
 }
 
 button.chip-btn-del:hover,
 .chip-btn-del:hover {
-    background-color: @bg_ghost_hover;
-    border-width: 0;
-    border-style: none;
+    background-color: @accent;
+    color: #FFFFFF;
 }
 
 /* Pin button */
 button.chip-btn-pin,
 .chip-btn-pin {
     background-image: none;
-    background-color: transparent;
+    background-color: rgba(133, 23, 51, 0.08);
     border-width: 0;
     border-style: none;
     border-color: transparent;
     box-shadow: none;
     outline: none;
-    padding: 1px 4px;
+    padding: 2px 6px;
     margin: 0;
     min-height: 0;
     min-width: 0;
-    border-radius: 4px;
+    border-radius: 6px;
     color: @accent;
-    transition: background-color 150ms ease, color 150ms ease;
+    transition: all 150ms ease;
 }
 
 button.chip-btn-pin:hover,
 .chip-btn-pin:hover {
-    background-color: @bg_ghost_hover;
-    color: @accent_hover;
+    background-color: @accent;
+    color: #FFFFFF;
 }
 
 button.chip-btn-pin.pinned,
 .chip-btn-pin.pinned {
     background-color: @accent;
-    color: @text_inverse;
+    color: #FFFFFF;
 }
 
 button.chip-btn-pin.pinned:hover {
     background-color: @accent_hover;
-    color: @text_inverse;
+    color: #FFFFFF;
 }
 
 /* Card Action Button (Zoom / Copy) */
 button.chip-btn-action,
 .chip-btn-action {
     background-image: none;
-    background-color: @bg_card;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background-color: rgba(255, 255, 255, 0.85);
+    border-style: solid;
+    border-color: @border_waybar_3d;
+    border-top-width: 1px;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 2.5px;
     box-shadow: none;
     padding: 2px 6px;
     margin: 0;
     min-height: 0;
     min-width: 0;
-    border-radius: 4px;
-    transition: background-color 150ms ease;
+    border-radius: 6px;
+    color: #851733;
+    transition: all 150ms ease;
 }
 
 button.chip-btn-action:hover,
 .chip-btn-action:hover {
-    background-color: @bg_card_hover;
-    border-color: @border_card_hover;
+    background-color: #FFFFFF;
+    border-color: @accent;
+    color: @accent;
 }
 
 /* External Floating Popout Card */
@@ -280,12 +360,13 @@ button.chip-btn-action:hover,
 }
 
 .popout-text {
-    color: @text_primary;
+    color: #851733;
     font-size: 11.5px;
+    font-weight: 600;
 }
 
 .popout-meta {
-    color: @text_muted;
+    color: #8C6577;
     font-size: 9.5px;
 }
 
@@ -299,9 +380,9 @@ button.chip-btn-action:hover,
 
 /* === DROP ZONE & FILE STASH === */
 .drop-zone {
-    border: 1.5px dashed @border_card;
-    border-radius: 10px;
-    background-color: @bg_card;
+    border: 2px dashed @border_waybar_3d;
+    border-radius: 12px;
+    background-color: rgba(255, 255, 255, 0.65);
     padding: 32px 16px;
     margin: 6px 0;
     transition: background-color 150ms ease, border-color 150ms ease;
@@ -309,13 +390,13 @@ button.chip-btn-action:hover,
 
 .drop-zone:hover {
     border-color: @accent;
-    background-color: @bg_card_hover;
+    background-color: #FFFFFF;
 }
 
 .drop-banner {
-    border: 1.5px dashed @border_card;
-    border-radius: 8px;
-    background-color: @bg_card;
+    border: 1.5px dashed @border_waybar_3d;
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.75);
     padding: 6px 12px;
     margin-bottom: 6px;
     transition: background-color 150ms ease, border-color 150ms ease;
@@ -323,7 +404,7 @@ button.chip-btn-action:hover,
 
 .drop-banner:hover {
     border-color: @accent;
-    background-color: @bg_card_hover;
+    background-color: #FFFFFF;
 }
 
 .drop-icon {
@@ -332,21 +413,22 @@ button.chip-btn-action:hover,
 }
 
 .drop-title {
-    color: @text_primary;
+    color: #851733;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
     margin-top: 4px;
 }
 
 .drop-subtitle {
-    color: @text_muted;
+    color: #8C6577;
     font-size: 10.5px;
     margin-top: 2px;
 }
 
 .status-bar {
-    color: @text_muted;
-    font-size: 10px;
+    color: #851733;
+    font-size: 10.5px;
+    font-weight: 600;
     margin-top: 6px;
 }
 
@@ -365,7 +447,7 @@ scrollbar.vertical {
 }
 
 scrollbar.vertical slider {
-    background-color: @scrollbar_slider;
+    background-color: rgba(133, 23, 51, 0.35);
     border-radius: 4px;
     min-width: 6px;
     min-height: 36px;
@@ -377,15 +459,3 @@ scrollbar.vertical slider:hover {
     background-color: @accent;
     min-width: 8px;
 }
-
-/* Header Drag Handle Zone */
-.drag-grip-zone {
-    padding: 2px 8px;
-    border-radius: 8px;
-    transition: background-color 150ms ease;
-}
-
-.drag-grip-zone:hover {
-    background-color: @bg_ghost_hover;
-}
-

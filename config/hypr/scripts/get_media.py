@@ -20,6 +20,12 @@ def main():
     raw_title = get_output(["playerctl", "metadata", "--format", "{{title}}"])
     raw_artist = get_output(["playerctl", "metadata", "--format", "{{artist}}"])
 
+    # Unescape HTML entities from browser MPRIS (e.g. &amp;, &#39;, &#x27;)
+    if raw_title:
+        raw_title = html.unescape(raw_title)
+    if raw_artist:
+        raw_artist = html.unescape(raw_artist)
+
     # Truncate cleanly by Unicode codepoints (never slice multi-byte UTF-8 bytes)
     max_len = 20
     if raw_title:
@@ -27,25 +33,25 @@ def main():
     else:
         title = "Playing" if status == "Playing" else "Paused"
 
-    # Escape HTML/Pango markup entities (&, <, >) to prevent GTK crashes
-    safe_title = html.escape(title)
-    safe_artist = html.escape(raw_artist) if raw_artist else ""
+    artist = raw_artist if raw_artist else ""
 
     if status == "Playing":
         icon = ""
         cls = "playing"
-        tooltip = f"{safe_artist} - {safe_title}" if safe_artist else safe_title
+        tooltip = f"{artist} - {raw_title}" if artist and raw_title else (raw_title or title)
     elif status == "Paused":
         icon = "󰐎"
         cls = "paused"
-        tooltip = f"Paused: {safe_title}"
+        tooltip = f"Paused: {artist} - {raw_title}" if artist and raw_title else f"Paused: {raw_title or title}"
     else:
         icon = ""
         cls = "stopped"
         tooltip = "No music playing"
 
+    # NOTE: Output raw unescaped text because Waybar's custom module has "escape": true,
+    # which uses GLib/Pango g_markup_escape_text to safely escape markup entities without double-escaping.
     print(json.dumps({
-        "text": f"{icon} {safe_title}",
+        "text": f"{icon} {title}",
         "tooltip": tooltip,
         "class": cls
     }, ensure_ascii=False))
