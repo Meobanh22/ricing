@@ -159,6 +159,20 @@ sync_push() {
         echo -e "  ${GREEN}✔ Avatars (~/.config/hypr/assets/)${NC}"
     fi
 
+    if [ -d "$ASSETS_DIR/pokemon" ]; then
+        mkdir -p "$HOME/.config/hypr/assets/pokemon"
+        cp -rn "$ASSETS_DIR/pokemon/"* "$HOME/.config/hypr/assets/pokemon/" 2>/dev/null || true
+        cp -rn "$ASSETS_DIR/pokemon/"* "$HOME/.config/hypr/assets/" 2>/dev/null || true
+        echo -e "  ${GREEN}✔ Pokemon sprites (~/.config/hypr/assets/)${NC}"
+    fi
+
+    if [ -d "$ASSETS_DIR/banners" ]; then
+        mkdir -p "$HOME/.config/hypr/assets/banners"
+        cp -rn "$ASSETS_DIR/banners/"* "$HOME/.config/hypr/assets/banners/" 2>/dev/null || true
+        cp -rn "$ASSETS_DIR/banners/"* "$HOME/.config/hypr/assets/" 2>/dev/null || true
+        echo -e "  ${GREEN}✔ Cover banners (~/.config/hypr/assets/)${NC}"
+    fi
+
     # Reload Live Compositor & Services
     echo -e "\n${YELLOW}⚡ [3/4] Live reloading compositor & interface services...${NC}"
     if [ "$XDG_CURRENT_DESKTOP" = "Hyprland" ] || pgrep -x "Hyprland" &>/dev/null; then

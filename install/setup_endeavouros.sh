@@ -209,9 +209,14 @@ if [ -f "$HOME/.config/gtk-3.0/bookmarks" ]; then
     sed -i "s|\\\$HOME|$HOME|g" "$HOME/.config/gtk-3.0/bookmarks"
 fi
 
-# Wallpapers & Avatars
+# Wallpapers & Avatars & Desktop Widget Assets
 cp -rn "$REPO_ROOT/assets/wallpapers/"* "$HOME/Pictures/wallpapers/" 2>/dev/null || true
 cp -rn "$REPO_ROOT/assets/avatars/"* "$HOME/.config/hypr/assets/" 2>/dev/null || true
+mkdir -p "$HOME/.config/hypr/assets/pokemon" "$HOME/.config/hypr/assets/banners"
+cp -rn "$REPO_ROOT/assets/pokemon/"* "$HOME/.config/hypr/assets/pokemon/" 2>/dev/null || true
+cp -rn "$REPO_ROOT/assets/pokemon/"* "$HOME/.config/hypr/assets/" 2>/dev/null || true
+cp -rn "$REPO_ROOT/assets/banners/"* "$HOME/.config/hypr/assets/banners/" 2>/dev/null || true
+cp -rn "$REPO_ROOT/assets/banners/"* "$HOME/.config/hypr/assets/" 2>/dev/null || true
 
 echo -e "  ${GREEN}✔ Deployed all 14 configuration components to ~/.config/!${NC}\n"
 

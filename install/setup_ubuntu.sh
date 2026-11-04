@@ -101,6 +101,11 @@ echo -e "  ${GREEN}✔ Deployed configuration files!${NC}"
 echo -e "\n${YELLOW}[4/6] Synchronizing wallpapers & avatars...${NC}"
 cp -rn "$ASSETS_DIR/wallpapers/"* "$HOME/Pictures/wallpapers/" 2>/dev/null || true
 cp -rn "$ASSETS_DIR/avatars/"* "$HOME/.config/hypr/assets/" 2>/dev/null || true
+mkdir -p "$HOME/.config/hypr/assets/pokemon" "$HOME/.config/hypr/assets/banners"
+cp -rn "$ASSETS_DIR/pokemon/"* "$HOME/.config/hypr/assets/pokemon/" 2>/dev/null || true
+cp -rn "$ASSETS_DIR/pokemon/"* "$HOME/.config/hypr/assets/" 2>/dev/null || true
+cp -rn "$ASSETS_DIR/banners/"* "$HOME/.config/hypr/assets/banners/" 2>/dev/null || true
+cp -rn "$ASSETS_DIR/banners/"* "$HOME/.config/hypr/assets/" 2>/dev/null || true
 echo -e "  ${GREEN}✔ Wallpapers and avatars synchronized!${NC}"
 
 # === INPUT METHOD (FCITX5 / IBUS) ===
