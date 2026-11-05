@@ -13,6 +13,8 @@ import gi
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('Gdk', '3.0')
+gi.require_version('Pango', '1.0')
+gi.require_version('PangoCairo', '1.0')
 try:
     gi.require_version('GtkLayerShell', '0.1')
     from gi.repository import GtkLayerShell
@@ -20,7 +22,7 @@ try:
 except Exception:
     HAS_LAYER_SHELL = False
 
-from gi.repository import Gtk, Gdk, GLib, Pango, GdkPixbuf
+from gi.repository import Gtk, Gdk, GLib, Pango, PangoCairo, GdkPixbuf
 
 # Ensure script dir is in sys.path before loading palette
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -165,8 +167,39 @@ class MusicVisualizer(Gtk.Window):
         screen = Gdk.Screen.get_default()
         context.add_provider_for_screen(screen, css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER + 10)
 
+    def generate_default_art_pixbuf(self, size=56):
+        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, size, size)
+        cr = cairo.Context(surface)
+
+        # Clean floating musical note (no background frame/box)
+        layout = PangoCairo.create_layout(cr)
+        layout.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font 34"))
+        layout.set_text("", -1)
+        ink, log = layout.get_pixel_extents()
+        cx = (size - log.width) / 2.0 - log.x
+        cy = (size - log.height) / 2.0 - log.y - 1.0
+
+        # 3D shadow extrusion (#4D0A1C)
+        cr.move_to(cx, cy + 2.5)
+        cr.set_source_rgb(0x4D / 255.0, 0x0A / 255.0, 0x1C / 255.0)
+        PangoCairo.show_layout(cr, layout)
+
+        # Crisp subtle light contour
+        cr.move_to(cx, cy + 1.0)
+        cr.set_source_rgba(1.0, 1.0, 1.0, 0.65)
+        PangoCairo.show_layout(cr, layout)
+
+        # Main musical note: Ruby Wine (#851733, Waybar right corner color)
+        cr.move_to(cx, cy)
+        cr.set_source_rgb(0x85 / 255.0, 0x17 / 255.0, 0x33 / 255.0)
+        PangoCairo.show_layout(cr, layout)
+
+        return Gdk.pixbuf_get_from_surface(surface, 0, 0, size, size)
+
     def set_default_art(self):
-        self.art_img.set_from_icon_name("audio-x-generic", Gtk.IconSize.DND)
+        if not hasattr(self, "_default_art_pixbuf") or not self._default_art_pixbuf:
+            self._default_art_pixbuf = self.generate_default_art_pixbuf()
+        self.art_img.set_from_pixbuf(self._default_art_pixbuf)
 
     def load_art_async(self, art_url):
         if not art_url:
@@ -235,9 +268,11 @@ class MusicVisualizer(Gtk.Window):
         self.lbl_artist.set_halign(Gtk.Align.START)
         self.lbl_artist.set_ellipsize(Pango.EllipsizeMode.END)
 
-        self.lbl_status = Gtk.Label(label="Idle")
+        self.lbl_status = Gtk.Label(label="")
         self.lbl_status.get_style_context().add_class("status-badge")
         self.lbl_status.set_halign(Gtk.Align.START)
+        self.lbl_status.set_no_show_all(True)
+        self.lbl_status.hide()
 
         info_vbox.pack_start(self.lbl_title, False, False, 0)
         info_vbox.pack_start(self.lbl_artist, False, False, 0)
@@ -475,18 +510,21 @@ ascii_max_range = 100
                 self.lbl_status.set_text("● Playing")
                 self.lbl_status.get_style_context().remove_class("paused")
                 self.lbl_status.get_style_context().add_class("playing")
+                self.lbl_status.show()
             else:
                 self.btn_play.set_label("󰐊")
                 self.lbl_status.set_text("󰐎 Paused")
                 self.lbl_status.get_style_context().remove_class("playing")
                 self.lbl_status.get_style_context().add_class("paused")
+                self.lbl_status.show()
         else:
             self.lbl_title.set_markup("<span color='#FFFFFF'><b>No media playing</b></span>")
             self.lbl_artist.set_text("")
             self.lbl_time_cur.set_markup("<span color='#4D0A1C'><b>00:00</b></span>")
             self.lbl_time_total.set_markup("<span color='#4D0A1C'><b>00:00</b></span>")
             self.btn_play.set_label("󰐊")
-            self.lbl_status.set_text("Idle")
+            self.lbl_status.set_text("")
+            self.lbl_status.hide()
             self.lbl_status.get_style_context().remove_class("playing")
             self.lbl_status.get_style_context().remove_class("paused")
             self.progress_bar.set_fraction(0.0)

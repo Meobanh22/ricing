@@ -53,7 +53,7 @@ window#waybar {
     box-shadow: inset 0 0 0 2.8px #FF597B;
 }
 
-/* === WORKSPACES (Individual 3D Tactile Buttons) === */
+/* === WORKSPACES (Bold 3D Poké Puff Buttons) === */
 #workspaces {
     background: transparent;
     border: none;
@@ -63,51 +63,57 @@ window#waybar {
 }
 
 #workspaces button {
-    background-image: linear-gradient(to bottom, #9A1F3B 0%, #E24A75 25%, #FFA8BF 50%, #E2BBD5 75%, #AC84B5 100%);
-    color: #4D0A1C;
-    border-style: solid;
-    border-color: @border_waybar_3d;
-    border-top-width: 1.8px;
-    border-left-width: 1.8px;
-    border-right-width: 1.8px;
-    border-bottom-width: 5.5px;
-    border-radius: 14px;
+    background-image: url("icons/pokepuff_inactive.svg");
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: contain;
+    background-color: transparent;
+    border: none;
     box-shadow: none;
-    padding: 2px 10px 3px 10px;
-    margin: 2px 3px 4px 3px;
+    color: #4D0A1C;
     font-size: 13px;
     font-weight: 800;
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
+    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.85);
+    padding: 2px 0 0 0;
+    margin: 2px 4px 4px 4px;
+    min-width: 38px;
+    min-height: 35px;
     transition: all 0.15s ease;
 }
 
 #workspaces button:hover {
-    background-image: linear-gradient(to bottom, #A82544 0%, #EA557F 25%, #FFB5C9 50%, #EAC6DE 75%, #B890C0 100%);
-    border-color: @border_waybar_3d_hover;
+    background-image: url("icons/pokepuff_hover.svg");
+    background-color: transparent;
+    border: none;
     box-shadow: none;
     color: #300611;
 }
 
 #workspaces button.active {
-    background-image: linear-gradient(to bottom, #BA2246 0%, #FF3D71 25%, #FFCCD8 50%, #F0D5E7 75%, #C29BCA 100%);
-    border-color: @accent;
-    border-bottom-color: @border_waybar_3d;
+    background-image: url("icons/pokepuff_active.svg");
+    background-color: transparent;
+    border: none;
     box-shadow: none;
-    color: #4D0A1C;
-    font-weight: 900;
+    color: transparent;
+    font-size: 0px;
+    text-shadow: none;
+    padding: 0;
+    margin: 2px 4px 4px 4px;
+    min-width: 38px;
+    min-height: 35px;
 }
 
 #workspaces button.urgent {
-    background-image: none;
-    background-color: @status_warning;
-    color: @bg_window;
-    border-color: @status_warning;
+    background-image: url("icons/pokepuff_active.svg");
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
 }
 
 /* === MEDIA === */
 #custom-media,
 #mpris {
-    background-image: linear-gradient(to bottom, #9A1F3B 0%, #E24A75 25%, #FFA8BF 50%, #E2BBD5 75%, #AC84B5 100%);
+    background-image: linear-gradient(to bottom, #A3183D 0%, #E53262 25%, #FF7299 50%, #EAA2C6 75%, #BE7AA8 100%);
     color: #4D0A1C;
     border-style: solid;
     border-color: @border_waybar_3d;
@@ -127,7 +133,7 @@ window#waybar {
 
 #custom-media:hover,
 #mpris:hover {
-    background-image: linear-gradient(to bottom, #A82544 0%, #EA557F 25%, #FFB5C9 50%, #EAC6DE 75%, #B890C0 100%);
+    background-image: linear-gradient(to bottom, #B52048 0%, #F04070 25%, #FF80A6 50%, #F2B2D2 75%, #CA8BB4 100%);
     border-color: @border_waybar_3d_hover;
     box-shadow: none;
     color: #300611;

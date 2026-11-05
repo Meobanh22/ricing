@@ -1,0 +1,82 @@
+# ~/.config/starship.toml
+# Serena Anime Minimalist — Bubble / Capsule Preset
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+add_newline = true
+
+format = """
+$os\
+$directory\
+$git_branch\
+$git_status\
+$nodejs\
+$python\
+$rust\
+$golang\
+$c\
+$cmd_duration\
+\n$character"""
+
+right_format = """$time"""
+
+[os]
+disabled = false
+style = "bg:#FF597B fg:#201011 bold"
+symbols = { EndeavourOS = " " }
+format = '[](#FF597B)[ $symbol$name ]($style)[](#FF597B) '
+
+[directory]
+style = "bg:#50A6FF fg:#201011 bold"
+format = '[](#50A6FF)[  $path ]($style)[](#50A6FF) '
+truncation_length = 3
+truncation_symbol = "…/"
+
+[git_branch]
+style = "bg:#E8C2D0 fg:#201011 bold"
+symbol = ""
+format = '[](#E8C2D0)[ $symbol $branch]($style)'
+
+[git_status]
+style = "bg:#E8C2D0 fg:#FF2A55 bold"
+format = '[ $all_status$ahead_behind ]($style)[](#E8C2D0) '
+
+[nodejs]
+style = "bg:#3A222A fg:#50A6FF"
+symbol = ""
+format = '[](#3A222A)[ $symbol ($version) ]($style)[](#3A222A) '
+
+[python]
+style = "bg:#3A222A fg:#FFB86C"
+symbol = ""
+format = '[](#3A222A)[ $symbol ($version) ]($style)[](#3A222A) '
+
+[rust]
+style = "bg:#3A222A fg:#FF597B"
+symbol = "󱘗"
+format = '[](#3A222A)[ $symbol ($version) ]($style)[](#3A222A) '
+
+[golang]
+style = "bg:#3A222A fg:#50A6FF"
+symbol = ""
+format = '[](#3A222A)[ $symbol ($version) ]($style)[](#3A222A) '
+
+[c]
+style = "bg:#3A222A fg:#A68595"
+symbol = ""
+format = '[](#3A222A)[ $symbol ($version) ]($style)[](#3A222A) '
+
+[cmd_duration]
+min_time = 2_000
+style = "bg:#3A222A fg:#A68595"
+format = '[](#3A222A)[ 󱑂 $duration ]($style)[](#3A222A) '
+
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:#2A1A1E fg:#A68595"
+format = '[](#2A1A1E)[ 󱑂 $time ]($style)[](#2A1A1E)'
+
+[character]
+success_symbol = '[ ✿ ❯](bold #FF2A55) '
+error_symbol = '[ ✿ ✖](bold #FF597B) '

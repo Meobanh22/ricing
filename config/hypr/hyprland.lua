@@ -54,7 +54,7 @@ hl.on("hyprland.start", function ()
     hl.exec_cmd("python3 ~/.config/hypr/scripts/hyprland_ipc_bridge.py &")
 
     -- 1. Wallpaper daemon & initial wallpaper
-    hl.exec_cmd("swww-daemon &")
+    hl.exec_cmd("awww-daemon || swww-daemon &")
     hl.exec_cmd("sleep 0.8 && python3 ~/.config/hypr/scripts/wallpaper_switcher.py current")
 
     -- 2. Status bar (Waybar)
@@ -87,6 +87,9 @@ hl.on("hyprland.start", function ()
 
     -- 10. Desktop background widgets (Serena picture & weather)
     hl.exec_cmd("python3 ~/.config/hypr/scripts/desktop_widgets.py &")
+
+    -- 11. Lock screen on startup (seamless Hyprlock boot screen)
+    hl.exec_cmd("~/.config/hypr/scripts/boot_lock.sh")
 end)
 
 -- === INPUT & TOUCH ===

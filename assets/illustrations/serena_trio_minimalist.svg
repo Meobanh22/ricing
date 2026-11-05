@@ -1,0 +1,184 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 480" width="100%" height="100%">
+  <defs>
+    <!-- Background subtle radial glow -->
+    <radialGradient id="bgGlowLight" cx="50%" cy="45%" r="65%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="60%" stop-color="#FFF0F5"/>
+      <stop offset="100%" stop-color="#FCE7EE"/>
+    </radialGradient>
+    
+    <!-- Soft Minimalist Dropshadow -->
+    <filter id="softDrop" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#851733" flood-opacity="0.12"/>
+    </filter>
+    
+    <!-- Ribbon Blue Gradients -->
+    <linearGradient id="ribbonBlueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#70B8FF"/>
+      <stop offset="50%" stop-color="#50A6FF"/>
+      <stop offset="100%" stop-color="#2B7FE0"/>
+    </linearGradient>
+    <linearGradient id="ribbonTailGrad" x1="0%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#459BFA"/>
+      <stop offset="100%" stop-color="#1F6CCE"/>
+    </linearGradient>
+
+    <!-- Pokéball Gradients -->
+    <linearGradient id="pokeRedGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FF4268"/>
+      <stop offset="60%" stop-color="#EE1C44"/>
+      <stop offset="100%" stop-color="#BF082A"/>
+    </linearGradient>
+    <linearGradient id="pokeWhiteGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="70%" stop-color="#F5F0F2"/>
+      <stop offset="100%" stop-color="#D9CCD1"/>
+    </linearGradient>
+
+    <!-- Poké Puff Gradients -->
+    <linearGradient id="cupLinerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#D97746"/>
+      <stop offset="50%" stop-color="#F3A277"/>
+      <stop offset="100%" stop-color="#C86230"/>
+    </linearGradient>
+    <linearGradient id="spongeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FDE68A"/>
+      <stop offset="100%" stop-color="#F59E0B"/>
+    </linearGradient>
+    <linearGradient id="creamPinkGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFF5F8"/>
+      <stop offset="40%" stop-color="#FFA8BE"/>
+      <stop offset="100%" stop-color="#FF597B"/>
+    </linearGradient>
+    <linearGradient id="berryGrad" x1="30%" y1="20%" x2="90%" y2="90%">
+      <stop offset="0%" stop-color="#FF597B"/>
+      <stop offset="60%" stop-color="#E5193E"/>
+      <stop offset="100%" stop-color="#960822"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background Base -->
+  <rect width="960" height="480" rx="24" fill="url(#bgGlowLight)"/>
+  
+  <!-- Subtle decorative minimalist Japanese border frame -->
+  <rect x="24" y="24" width="912" height="432" rx="18" fill="none" stroke="#851733" stroke-width="1.5" stroke-opacity="0.15" stroke-dasharray="6 6"/>
+
+  <!-- Header Typography -->
+  <g text-anchor="middle">
+    <text x="480" y="72" font-family="'JetBrains Mono Nerd Font', 'Inter', sans-serif" font-size="14" font-weight="800" letter-spacing="8" fill="#851733">✿ KALOS MINIMALIST COLLECTION ✿</text>
+    <text x="480" y="94" font-family="'JetBrains Mono Nerd Font', 'Inter', sans-serif" font-size="11" font-weight="600" letter-spacing="4" fill="#A68595">SERENA’S RIBBON • POKÉBALL • POKÉ PUFF</text>
+  </g>
+
+  <!-- Grounding shadow shelf -->
+  <ellipse cx="210" cy="350" rx="80" ry="12" fill="#851733" fill-opacity="0.06"/>
+  <ellipse cx="480" cy="350" rx="85" ry="14" fill="#851733" fill-opacity="0.07"/>
+  <ellipse cx="750" cy="350" rx="80" ry="12" fill="#851733" fill-opacity="0.06"/>
+
+  <!-- ========================================================================= -->
+  <!-- ITEM 1: SERENA’S BLUE RIBBON (Center X: 210, Center Y: 240) -->
+  <!-- ========================================================================= -->
+  <g id="serena-ribbon" transform="translate(85, 115)" filter="url(#softDrop)">
+    <!-- Hanging Ribbon Tails -->
+    <path d="M 108 126 C 102 152, 80 190, 60 230 L 82 208 L 104 226 C 112 194, 120 156, 125 130 Z" 
+          fill="url(#ribbonTailGrad)" stroke="#16519E" stroke-width="2.2" stroke-linejoin="round"/>
+    <path d="M 142 126 C 148 152, 170 190, 190 230 L 168 208 L 146 226 C 138 194, 130 156, 125 130 Z" 
+          fill="url(#ribbonTailGrad)" stroke="#16519E" stroke-width="2.2" stroke-linejoin="round"/>
+
+    <!-- Left Loop -->
+    <path d="M 116 118 C 82 82, 38 68, 22 92 C 6 116, 26 150, 68 152 C 94 154, 114 136, 118 126 Z" 
+          fill="url(#ribbonBlueGrad)" stroke="#16519E" stroke-width="2.5" stroke-linejoin="round"/>
+    <!-- Left loop inner fold -->
+    <path d="M 42 104 C 52 96, 78 108, 92 128" fill="none" stroke="#1F6CCE" stroke-width="2" stroke-linecap="round"/>
+
+    <!-- Right Loop -->
+    <path d="M 134 118 C 168 82, 212 68, 228 92 C 244 116, 224 150, 182 152 C 156 154, 136 136, 132 126 Z" 
+          fill="url(#ribbonBlueGrad)" stroke="#16519E" stroke-width="2.5" stroke-linejoin="round"/>
+    <!-- Right loop inner fold -->
+    <path d="M 208 104 C 198 96, 172 108, 158 128" fill="none" stroke="#1F6CCE" stroke-width="2" stroke-linecap="round"/>
+
+    <!-- Center Knot -->
+    <rect x="110" y="106" width="30" height="30" rx="8" 
+          fill="url(#ribbonBlueGrad)" stroke="#16519E" stroke-width="2.5"/>
+    <!-- Knot Highlight -->
+    <path d="M 116 112 Q 125 109 134 112" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" opacity="0.8"/>
+
+    <text x="125" y="260" text-anchor="middle" font-family="'JetBrains Mono Nerd Font', sans-serif" font-size="12" font-weight="800" fill="#1B65C5" letter-spacing="2">BLUE RIBBON</text>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- ITEM 2: POKÉBALL (Center X: 480, Center Y: 240) -->
+  <!-- ========================================================================= -->
+  <g id="pokeball" transform="translate(365, 125)" filter="url(#softDrop)">
+    <!-- Base Outer Shell -->
+    <circle cx="115" cy="115" r="90" fill="#1E1215" stroke="#0F0709" stroke-width="2.8"/>
+
+    <!-- Bottom Hemisphere (White Pearl) -->
+    <path d="M 25 115 A 90 90 0 0 0 205 115 L 150 115 A 35 35 0 0 1 80 115 Z" fill="url(#pokeWhiteGrad)"/>
+
+    <!-- Top Hemisphere (Crimson Red) -->
+    <path d="M 25 115 A 90 90 0 0 1 205 115 L 150 115 A 35 35 0 0 0 80 115 Z" fill="url(#pokeRedGrad)"/>
+
+    <!-- Anime Specular Gloss Arc -->
+    <path d="M 48 80 A 80 80 0 0 1 115 36" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" opacity="0.65"/>
+    <circle cx="135" cy="42" r="3.5" fill="#FFFFFF" opacity="0.45"/>
+
+    <!-- Black Seam Line -->
+    <line x1="25" y1="115" x2="80" y2="115" stroke="#1E1215" stroke-width="9" stroke-linecap="round"/>
+    <line x1="150" y1="115" x2="205" y2="115" stroke="#1E1215" stroke-width="9" stroke-linecap="round"/>
+
+    <!-- Center Button Bezel -->
+    <circle cx="115" cy="115" r="34" fill="#1E1215" stroke="#0F0709" stroke-width="2.5"/>
+
+    <!-- Center Release Button Core -->
+    <circle cx="115" cy="115" r="20" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="2"/>
+    <circle cx="115" cy="115" r="12" fill="none" stroke="#E2E8F0" stroke-width="1.5"/>
+    <circle cx="110" cy="110" r="3" fill="#FFFFFF" opacity="0.9"/>
+
+    <text x="115" y="250" text-anchor="middle" font-family="'JetBrains Mono Nerd Font', sans-serif" font-size="12" font-weight="800" fill="#BA0B2B" letter-spacing="2">POKÉBALL</text>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- ITEM 3: POKÉ PUFF PASTRY (Center X: 750, Center Y: 240) -->
+  <!-- ========================================================================= -->
+  <g id="poke-puff" transform="translate(635, 125)" filter="url(#softDrop)">
+    <!-- 1. Liner Cupcake Base -->
+    <path d="M 65 145 L 76 200 C 76 204, 80 207, 85 207 L 145 207 C 150 207, 154 204, 154 200 L 165 145 Z" 
+          fill="url(#cupLinerGrad)" stroke="#8C3814" stroke-width="2.2" stroke-linejoin="round"/>
+    <!-- Clean pleats -->
+    <line x1="90" y1="146" x2="95" y2="206" stroke="#8C3814" stroke-width="1.8" opacity="0.55"/>
+    <line x1="115" y1="147" x2="115" y2="207" stroke="#8C3814" stroke-width="1.8" opacity="0.55"/>
+    <line x1="140" y1="146" x2="135" y2="206" stroke="#8C3814" stroke-width="1.8" opacity="0.55"/>
+
+    <!-- 2. Baked Sponge Golden Rim -->
+    <path d="M 60 146 C 52 136, 62 127, 86 128 C 102 129, 128 129, 144 128 C 168 127, 178 136, 170 146 C 162 153, 144 153, 115 153 C 86 153, 68 153, 60 146 Z" 
+          fill="url(#spongeGrad)" stroke="#B45309" stroke-width="1.8"/>
+
+    <!-- 3. Fluffy Strawberry Cream Body -->
+    <path d="M 58 132 
+             C 45 118, 65 100, 85 107 
+             C 96 90, 134 90, 145 107 
+             C 165 100, 185 118, 172 132 
+             C 158 141, 131 138, 115 138 
+             C 99 138, 72 141, 58 132 Z" 
+          fill="url(#creamPinkGrad)" stroke="#9F1239" stroke-width="2.2" stroke-linejoin="round"/>
+
+    <!-- 4. Swirl Apex Frosting -->
+    <path d="M 80 110 
+             C 76 90, 92 72, 110 62 
+             C 120 57, 129 59, 130 66 
+             C 131 73, 122 79, 117 77 
+             C 130 82, 139 90, 133 102 
+             C 126 111, 98 116, 80 110 Z" 
+          fill="url(#creamPinkGrad)" stroke="#881337" stroke-width="2" stroke-linejoin="round"/>
+
+    <!-- 5. Cheri Berry Topping -->
+    <circle cx="110" cy="46" r="15" fill="url(#berryGrad)" stroke="#881337" stroke-width="1.8"/>
+    <circle cx="106" cy="42" r="3" fill="#FFFFFF" opacity="0.75"/>
+
+    <!-- Mint Leaf -->
+    <path d="M 116 38 C 124 33, 131 36, 126 44 C 122 43, 118 40, 116 38 Z" 
+          fill="#4ADE80" stroke="#166534" stroke-width="1.2"/>
+
+    <text x="115" y="250" text-anchor="middle" font-family="'JetBrains Mono Nerd Font', sans-serif" font-size="12" font-weight="800" fill="#9F1239" letter-spacing="2">POKÉ PUFF</text>
+  </g>
+</svg>

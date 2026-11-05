@@ -494,6 +494,7 @@ dynamic_background_opacity yes
 confirm_os_window_close 0
 enable_audio_bell no
 linux_display_server auto
+shell zsh
 
 # === CURSOR ===
 cursor {colors['accent']}

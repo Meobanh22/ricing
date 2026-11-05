@@ -7,12 +7,12 @@
   "spacing": 8,
 
   "modules-left": [
-    "hyprland/workspaces",
+    "clock",
     "custom/media"
   ],
 
   "modules-center": [
-    "clock"
+    "hyprland/workspaces"
   ],
 
   "modules-right": [

@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <!-- Tactile Workspace Gradient -->
+    <linearGradient id="body-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#A3183D" />
+      <stop offset="25%" stop-color="#E53262" />
+      <stop offset="50%" stop-color="#FF7299" />
+      <stop offset="75%" stop-color="#EAA2C6" />
+      <stop offset="100%" stop-color="#BE7AA8" />
+    </linearGradient>
+
+    <!-- Single Shared Authentic Poké Puff Silhouette -->
+    <path id="puff-silhouette" d="
+      M 50 14
+      C 76 14, 95 24, 92 48
+      C 91 66, 78 80, 64 82
+      L 36 82
+      C 22 80, 9 66, 8 48
+      C 5 24, 24 14, 50 14
+      Z" />
+
+  </defs>
+
+  <!-- BOLD 3D Cel-shaded Bottom Border: shared silhouette offset down by 11px -->
+  <use href="#puff-silhouette" y="11" fill="#4D0A1C" />
+
+  <!-- Main Body Silhouette (Filled with smooth tactile gradient, clean matte, no highlight curve) -->
+  <use href="#puff-silhouette" fill="url(#body-grad)" stroke="#4D0A1C" stroke-width="3.5" stroke-linejoin="round" />
+
+  <!-- Stem at top -->
+  <path d="M 50 8 C 50 3, 56 0, 62 1" fill="none" stroke="#4D0A1C" stroke-width="3.5" stroke-linecap="round" />
+
+  <!-- Cherry on top (100% round circle filled with SAME gradient, NO red, NO gloss!) -->
+  <circle cx="50" cy="10" r="7.5" fill="url(#body-grad)" stroke="#4D0A1C" stroke-width="3" />
+</svg>

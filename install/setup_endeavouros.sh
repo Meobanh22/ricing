@@ -62,8 +62,6 @@ PACMAN_PACKAGES=(
     xdg-desktop-portal-gtk
     waybar
     swaync
-    rofi-wayland
-    wlogout
     swappy
 
     # Terminal & Tools
@@ -102,6 +100,7 @@ PACMAN_PACKAGES=(
     python
     python-gobject
     python-dbus
+    python-pillow
     gtk3
     gtk4
     gtk-layer-shell
@@ -110,7 +109,13 @@ PACMAN_PACKAGES=(
     python-cairo
     gobject-introspection
     libcanberra
+    fcitx5
+    fcitx5-bamboo
+    fcitx5-configtool
+    fcitx5-gtk
+    fcitx5-qt
     fcitx5-unikey
+    papirus-icon-theme
 
     # Fonts
     ttf-jetbrains-mono-nerd
@@ -119,14 +124,10 @@ PACMAN_PACKAGES=(
 )
 
 AUR_PACKAGES=(
-    # Wallpaper daemon
+    # AUR Wayland Tools
     swww
-
-    # Vietnamese input method Fcitx5 Bamboo (smooth Wayland support)
-    fcitx5-bamboo
-    fcitx5-im
-    fcitx5-gtk
-    fcitx5-qt
+    rofi-wayland
+    wlogout
 )
 
 echo -e "  ${CYAN}➔ Updating package databases and installing Pacman packages...${NC}"
@@ -229,6 +230,29 @@ python3 "$REPO_ROOT/scripts/theme_manager.py" "serena-wine" 2>/dev/null || true
 # Enable services
 systemctl --user enable --now pipewire pipewire-pulse wireplumber 2>/dev/null || true
 sudo systemctl enable --now bluetooth.service 2>/dev/null || true
+
+# TTY1 autologin & Hyprland autostart with Hyprlock screen
+sudo mkdir -p /etc/systemd/system/getty@tty1.service.d/
+cat << 'AUTOLOGIN_EOF' | sudo tee /etc/systemd/system/getty@tty1.service.d/autologin.conf > /dev/null
+[Service]
+ExecStart=
+ExecStart=-/usr/bin/agetty -o '-p -f -- \\u' --noclear --autologin meobanh %I $TERM
+Type=idle
+AUTOLOGIN_EOF
+sudo systemctl daemon-reload 2>/dev/null || true
+
+# Autostart Hyprland from login shell (zsh & bash)
+for prof in "$HOME/.zprofile" "$HOME/.bash_profile"; do
+    if ! grep -q "exec Hyprland" "$prof" 2>/dev/null; then
+        cat >> "$prof" << 'PROFILE_EOF'
+
+# Autostart Hyprland on TTY1
+if [ -z "$WAYLAND_DISPLAY" ] && [ "$XDG_VTNR" = "1" -o "$(tty)" = "/dev/tty1" ]; then
+    exec Hyprland
+fi
+PROFILE_EOF
+    fi
+done
 
 # Set desktop preferences
 gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' 2>/dev/null || true

@@ -8,6 +8,7 @@
 
 window#desktop-avatar-window,
 window#desktop-weather-window,
+window#desktop-calendar-window,
 window#desktop-widgets-window {
     background-color: transparent;
     background-image: none;
@@ -53,7 +54,7 @@ window#desktop-widgets-window {
 
 /* Frame 1: Waybar Sunset Gradient Style (No white border) */
 .sysinfo-box-gradient {
-    background-image: linear-gradient(to bottom, #9A1F3B 0%, #E24A75 25%, #FFA8BF 50%, #E2BBD5 75%, #AC84B5 100%);
+    background-image: linear-gradient(to bottom, #A3183D 0%, #E53262 25%, #FF7299 50%, #EAA2C6 75%, #BE7AA8 100%);
     border-style: solid;
     border-color: @border_waybar_3d;
     border-top-width: 1.5px;
@@ -68,7 +69,7 @@ window#desktop-widgets-window {
 }
 
 .sysinfo-box-gradient:hover {
-    background-image: linear-gradient(to bottom, #A82544 0%, #EA557F 25%, #FFB5C9 50%, #EAC6DE 75%, #B890C0 100%);
+    background-image: linear-gradient(to bottom, #B52048 0%, #F04070 25%, #FF80A6 50%, #F2B2D2 75%, #CA8BB4 100%);
     border-color: @accent;
     box-shadow: none;
 }
@@ -134,7 +135,7 @@ window#desktop-widgets-window {
 }
 
 .tactile-hero-box {
-    background-image: linear-gradient(to bottom, #9A1F3B 0%, #E24A75 25%, #FFA8BF 50%, #E2BBD5 75%, #AC84B5 100%);
+    background-image: linear-gradient(to bottom, #A3183D 0%, #E53262 25%, #FF7299 50%, #EAA2C6 75%, #BE7AA8 100%);
     border-style: solid;
     border-color: @border_waybar_3d;
     border-top-width: 1.8px;
@@ -149,7 +150,7 @@ window#desktop-widgets-window {
 }
 
 .tactile-hero-box:hover {
-    background-image: linear-gradient(to bottom, #A82544 0%, #EA557F 25%, #FFB5C9 50%, #EAC6DE 75%, #B890C0 100%);
+    background-image: linear-gradient(to bottom, #B52048 0%, #F04070 25%, #FF80A6 50%, #F2B2D2 75%, #CA8BB4 100%);
     border-color: @accent;
 }
 
@@ -253,4 +254,75 @@ window#desktop-widgets-window {
     font-weight: 700;
     color: #851733;
     margin-top: 1px;
+}
+
+/* === CALENDAR WIDGET === */
+.widget-calendar-card {
+    padding: 14px 13px 14px 13px;
+}
+
+.calendar-hero-header-box {
+    padding: 8px 10px 9px 10px;
+    margin: 2px 2px 5px 2px;
+}
+
+.calendar-hero-month-title {
+    font-size: 11.5px;
+    font-weight: 900;
+    letter-spacing: 0.10em;
+    color: #851733;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.70);
+}
+
+.calendar-nav-btn {
+    border-radius: 6px;
+    padding: 2px 4px;
+    transition: background-color 0.15s ease;
+}
+
+.calendar-nav-btn:hover {
+    background-color: rgba(255, 255, 255, 0.40);
+}
+
+.tactile-calendar-box {
+    background-color: rgba(255, 255, 255, 0.70);
+    border-style: solid;
+    border-color: @border_waybar_3d;
+    border-top-width: 1.5px;
+    border-left-width: 1.5px;
+    border-right-width: 1.5px;
+    border-bottom-width: 4.5px;
+    border-radius: 12px;
+    box-shadow: none;
+    padding: 8px 6px 8px 6px;
+    margin: 1px 2px 4px 2px;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.tactile-calendar-box:hover {
+    background-color: #FFFFFF;
+    border-color: @accent;
+}
+
+.calendar-day-header {
+    font-size: 8.5px;
+    font-weight: 800;
+    margin-bottom: 4px;
+}
+
+.calendar-cell-today {
+    background-color: #851733;
+    border-radius: 6px;
+    border-bottom: 2.5px solid #4D0A1C;
+    margin: 1px;
+}
+
+.calendar-cell-current {
+    border-radius: 4px;
+    margin: 1px;
+}
+
+.calendar-cell-other {
+    border-radius: 4px;
+    margin: 1px;
 }

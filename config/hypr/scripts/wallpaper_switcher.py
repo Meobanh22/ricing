@@ -6,6 +6,7 @@ import sys
 import glob
 import subprocess
 import time
+import shutil
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 # Wallpaper directory resolution: prioritize ~/Pictures/wallpapers, fallback to repo assets/wallpapers
@@ -53,17 +54,19 @@ def set_wallpaper(filepath):
     except Exception:
         pass
 
-    # 1. Ensure swww-daemon is running
-    is_swww = subprocess.run(["which", "swww"], stdout=subprocess.PIPE, stderr=subprocess.PIPE).returncode == 0
-    if is_swww:
-        check = subprocess.run(["swww", "query"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        if check.returncode != 0:
-            subprocess.Popen(["swww-daemon"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    # 1. Ensure wallpaper daemon is running (awww or swww)
+    cmd = "awww" if shutil.which("awww") else ("swww" if shutil.which("swww") else None)
+    daemon_cmd = f"{cmd}-daemon" if cmd else None
+
+    if cmd:
+        check = subprocess.run([cmd, "query"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if check.returncode != 0 and daemon_cmd:
+            subprocess.Popen([daemon_cmd], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             time.sleep(0.6)
 
         # Smooth 45-degree wipe transition
         subprocess.run([
-            "swww", "img", filepath,
+            cmd, "img", filepath,
             "--transition-type", "wipe",
             "--transition-angle", "45",
             "--transition-step", "90",
@@ -78,7 +81,6 @@ def set_wallpaper(filepath):
 
     # 3. Synchronize wallpaper for Hyprlock
     try:
-        import shutil
         lock_wp = os.path.expanduser("~/.config/hypr/wallpaper_effects/.wallpaper_current")
         os.makedirs(os.path.dirname(lock_wp), exist_ok=True)
         shutil.copy2(filepath, lock_wp)

@@ -155,22 +155,28 @@ sync_push() {
     fi
 
     if [ -d "$ASSETS_DIR/avatars" ]; then
-        cp -rn "$ASSETS_DIR/avatars/"* "$HOME/.config/hypr/assets/" 2>/dev/null || true
+        cp -rf "$ASSETS_DIR/avatars/"* "$HOME/.config/hypr/assets/" 2>/dev/null || true
         echo -e "  ${GREEN}✔ Avatars (~/.config/hypr/assets/)${NC}"
     fi
 
     if [ -d "$ASSETS_DIR/pokemon" ]; then
         mkdir -p "$HOME/.config/hypr/assets/pokemon"
-        cp -rn "$ASSETS_DIR/pokemon/"* "$HOME/.config/hypr/assets/pokemon/" 2>/dev/null || true
-        cp -rn "$ASSETS_DIR/pokemon/"* "$HOME/.config/hypr/assets/" 2>/dev/null || true
+        cp -rf "$ASSETS_DIR/pokemon/"* "$HOME/.config/hypr/assets/pokemon/" 2>/dev/null || true
+        cp -rf "$ASSETS_DIR/pokemon/"* "$HOME/.config/hypr/assets/" 2>/dev/null || true
         echo -e "  ${GREEN}✔ Pokemon sprites (~/.config/hypr/assets/)${NC}"
     fi
 
     if [ -d "$ASSETS_DIR/banners" ]; then
         mkdir -p "$HOME/.config/hypr/assets/banners"
-        cp -rn "$ASSETS_DIR/banners/"* "$HOME/.config/hypr/assets/banners/" 2>/dev/null || true
-        cp -rn "$ASSETS_DIR/banners/"* "$HOME/.config/hypr/assets/" 2>/dev/null || true
+        cp -rf "$ASSETS_DIR/banners/"* "$HOME/.config/hypr/assets/banners/" 2>/dev/null || true
+        cp -rf "$ASSETS_DIR/banners/"* "$HOME/.config/hypr/assets/" 2>/dev/null || true
         echo -e "  ${GREEN}✔ Cover banners (~/.config/hypr/assets/)${NC}"
+    fi
+
+    if [ -d "$ASSETS_DIR/illustrations" ]; then
+        mkdir -p "$HOME/.config/hypr/assets/illustrations"
+        cp -rn "$ASSETS_DIR/illustrations/"* "$HOME/.config/hypr/assets/illustrations/" 2>/dev/null || true
+        echo -e "  ${GREEN}✔ Minimalist illustrations (~/.config/hypr/assets/illustrations/)${NC}"
     fi
 
     # Reload Live Compositor & Services
@@ -200,6 +206,20 @@ sync_push() {
         if pgrep -x "swaync" &>/dev/null; then
             swaync-client -R -rs &>/dev/null || true
             echo -e "  ${GREEN}✔ SwayNC reloaded!${NC}"
+        fi
+
+        if pgrep -f "desktop_widgets.py" &>/dev/null; then
+            pkill -f "desktop_widgets.py" 2>/dev/null || true
+            sleep 0.2
+            setsid -f python3 "$HOME/.config/hypr/scripts/desktop_widgets.py" >/dev/null 2>&1
+            echo -e "  ${GREEN}✔ Desktop widgets reloaded!${NC}"
+        fi
+
+        if pgrep -f "music_visualizer.py" &>/dev/null; then
+            pkill -f "music_visualizer.py" 2>/dev/null || true
+            sleep 0.2
+            setsid -f python3 "$HOME/.config/hypr/scripts/music_visualizer.py" >/dev/null 2>&1
+            echo -e "  ${GREEN}✔ Music visualizer reloaded!${NC}"
         fi
 
         hyprctl setcursor sylveon-custom 24 &>/dev/null || true

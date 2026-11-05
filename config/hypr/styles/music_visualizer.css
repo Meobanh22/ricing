@@ -44,7 +44,7 @@ window#music-visualizer-window {
 
 /* === PLAYER CARD (Sunset Gradient Sub-card) === */
 .player-card {
-    background-image: linear-gradient(to bottom, #9A1F3B 0%, #E24A75 25%, #FFA8BF 50%, #E2BBD5 75%, #AC84B5 100%);
+    background-image: linear-gradient(to bottom, #A3183D 0%, #E53262 25%, #FF7299 50%, #EAA2C6 75%, #BE7AA8 100%);
     border-style: solid;
     border-color: @border_waybar_3d;
     border-top-width: 1.5px;
@@ -58,7 +58,7 @@ window#music-visualizer-window {
 }
 
 .player-card:hover {
-    background-image: linear-gradient(to bottom, #A82544 0%, #EA557F 25%, #FFB5C9 50%, #EAC6DE 75%, #B890C0 100%);
+    background-image: linear-gradient(to bottom, #B52048 0%, #F04070 25%, #FF80A6 50%, #F2B2D2 75%, #CA8BB4 100%);
     border-color: @border_waybar_3d_hover;
 }
 
