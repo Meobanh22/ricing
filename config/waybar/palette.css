@@ -10,13 +10,13 @@
 
 @define-color border_window rgba(255, 255, 255, 0.12);
 @define-color border_card rgba(255, 255, 255, 0.12);
-@define-color border_card_hover rgba(255, 42, 85, 0.65);
+@define-color border_card_hover rgba(220, 26, 54, 0.65);
 
-@define-color accent #FF2A55;
-@define-color accent_hover #FF597B;
+@define-color accent #DC1A36;
+@define-color accent_hover #F02D4C;
 
-@define-color scrollbar_slider rgba(255, 42, 85, 0.48);
-@define-color scrollbar_slider_hover #FF2A55;
+@define-color scrollbar_slider rgba(220, 26, 54, 0.48);
+@define-color scrollbar_slider_hover #DC1A36;
 
 @define-color text_primary #FFF0F5;
 @define-color text_secondary #E8C2D0;
@@ -25,10 +25,12 @@
 @define-color text_white #FFFFFF;
 
 @define-color status_warning #FFB86C;
-@define-color status_critical #FF2A55;
+@define-color status_critical #DC1A36;
 @define-color status_success #8FBC8F;
 
 @define-color ribbon_blue #50A6FF;
+@define-color screen_cyan #87F0FF;
+@define-color bg_tactile_cream rgba(255, 240, 245, 0.96);
 
 @define-color bg_waybar #851733;
 @define-color bg_waybar_hover #9C2241;
@@ -38,3 +40,12 @@
 @define-color shadow_extrusion_hover #610E24;
 @define-color border_tactile_white rgba(255, 255, 255, 0.65);
 @define-color border_tactile_white_bright rgba(255, 255, 255, 0.90);
+
+/* === GRADIENTS === */
+.gradient-sunset {
+    background-image: linear-gradient(to bottom, #A3183D 0%, #E53262 25%, #FF7299 50%, #EAA2C6 75%, #BE7AA8 100%);
+}
+.gradient-sunset:hover,
+.gradient-sunset-hover {
+    background-image: linear-gradient(to bottom, #B52048 0%, #F04070 25%, #FF80A6 50%, #F2B2D2 75%, #CA8BB4 100%);
+}

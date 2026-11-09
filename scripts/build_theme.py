@@ -23,11 +23,16 @@ def main():
         data = json.load(f)
 
     colors = data["colors"]
+    gradients = data.get("gradients", {})
     typo = data.get("typography", {})
     geo = data.get("geometry", {})
     hypr_base = os.path.join(root_dir, "config")
 
     print("Compiling design tokens from tokens.json")
+
+    # Gradient CSS definitions
+    grad_sunset = gradients.get("sunset", "linear-gradient(to bottom, #A3183D 0%, #E53262 25%, #FF7299 50%, #EAA2C6 75%, #BE7AA8 100%)")
+    grad_sunset_hover = gradients.get("sunset_hover", "linear-gradient(to bottom, #B52048 0%, #F04070 25%, #FF80A6 50%, #F2B2D2 75%, #CA8BB4 100%)")
 
     # 1. Waybar & GTK CSS palette
     waybar_palette = os.path.join(hypr_base, "waybar", "palette.css")
@@ -62,6 +67,8 @@ def main():
 @define-color status_success {colors['status_success']};
 
 @define-color ribbon_blue {colors['ribbon_blue']};
+@define-color screen_cyan {colors.get('screen_cyan', '#87F0FF')};
+@define-color bg_tactile_cream {colors.get('bg_tactile_cream', 'rgba(255, 240, 245, 0.96)')};
 
 @define-color bg_waybar {colors.get('bg_waybar', '#851733')};
 @define-color bg_waybar_hover {colors.get('bg_waybar_hover', '#9C2241')};
@@ -71,6 +78,15 @@ def main():
 @define-color shadow_extrusion_hover {colors.get('shadow_extrusion_hover', '#610E24')};
 @define-color border_tactile_white {colors.get('border_tactile_white', 'rgba(255, 255, 255, 0.65)')};
 @define-color border_tactile_white_bright {colors.get('border_tactile_white_bright', 'rgba(255, 255, 255, 0.90)')};
+
+/* === GRADIENTS === */
+.gradient-sunset {{
+    background-image: {grad_sunset};
+}}
+.gradient-sunset:hover,
+.gradient-sunset-hover {{
+    background-image: {grad_sunset_hover};
+}}
 """
     with open(waybar_palette, "w", encoding="utf-8") as f:
         f.write(css_content)
@@ -111,6 +127,8 @@ def main():
 @define-color status_success {colors['status_success']};
 
 @define-color ribbon_blue {colors['ribbon_blue']};
+@define-color screen_cyan {colors.get('screen_cyan', '#87F0FF')};
+@define-color bg_tactile_cream {colors.get('bg_tactile_cream', 'rgba(255, 240, 245, 0.96)')};
 
 @define-color bg_waybar {colors.get('bg_waybar', '#851733')};
 @define-color bg_waybar_hover {colors.get('bg_waybar_hover', '#9C2241')};
@@ -120,6 +138,15 @@ def main():
 @define-color shadow_extrusion_hover {colors.get('shadow_extrusion_hover', '#610E24')};
 @define-color border_tactile_white {colors.get('border_tactile_white', 'rgba(255, 255, 255, 0.65)')};
 @define-color border_tactile_white_bright {colors.get('border_tactile_white_bright', 'rgba(255, 255, 255, 0.90)')};
+
+/* === GRADIENTS === */
+.gradient-sunset {{
+    background-image: {grad_sunset};
+}}
+.gradient-sunset:hover,
+.gradient-sunset-hover {{
+    background-image: {grad_sunset_hover};
+}}
 """
     with open(hypr_styles_palette, "w", encoding="utf-8") as f:
         f.write(hypr_styles_css)
@@ -159,6 +186,7 @@ $status_warning       = {colors['status_warning_hypr']}
 $status_critical      = {colors['status_critical_hypr']}
 $status_success       = {colors['status_success_hypr']}
 $ribbon_blue          = {colors['ribbon_blue_hypr']}
+$screen_cyan          = {colors.get('screen_cyan_hypr', 'rgb(87F0FF)')}
 $bg_waybar            = {colors.get('bg_waybar_hypr', 'rgba(851733f2)')}
 $border_waybar_3d     = {colors.get('border_waybar_3d_hypr', 'rgb(4D0A1C)')}
 $shadow_extrusion     = {colors.get('shadow_extrusion_hypr', 'rgb(4D0A1C)')}
@@ -189,6 +217,7 @@ return {{
     status_critical      = "{colors['status_critical_hypr']}",
     status_success       = "{colors['status_success_hypr']}",
     ribbon_blue          = "{colors['ribbon_blue_hypr']}",
+    screen_cyan          = "{colors.get('screen_cyan_hypr', 'rgb(87F0FF)')}",
     bg_waybar            = "{colors.get('bg_waybar_hypr', 'rgba(851733f2)')}",
     border_waybar_3d     = "{colors.get('border_waybar_3d_hypr', 'rgb(4D0A1C)')}",
     shadow_extrusion     = "{colors.get('shadow_extrusion_hypr', 'rgb(4D0A1C)')}",
@@ -228,6 +257,8 @@ return {{
     status-success:     {colors['status_success']};
 
     ribbon-blue:        {colors['ribbon_blue']};
+    screen-cyan:        {colors.get('screen_cyan', '#87F0FF')};
+    bg-tactile-cream:   {colors.get('bg_tactile_cream', 'rgba(255, 240, 245, 0.96)')};
 }}
 """
     with open(rofi_palette, "w", encoding="utf-8") as f:
@@ -235,7 +266,7 @@ return {{
     print("  ✔ Generated rofi/colors-rofi.rasi")
 
     # 4. Python GTK palette.py
-    py_palette = os.path.join(hypr_base, "hypr", "scripts", "palette.py")
+    py_palette = os.path.join(hypr_base, "hypr", "scripts", "system", "palette.py")
     py_content = f"""#!/usr/bin/env python3
 # palette.py — Python design tokens.
 # NOTE: Generated automatically. Do not edit directly.
@@ -253,21 +284,38 @@ C_BG_WIN        = PALETTE.get("bg_window", "#201011")
 C_BG_CARD       = PALETTE.get("bg_card", "#2A1A1E")
 C_BG_CARD_HOVER = PALETTE.get("bg_card_hover", "#3A222A")
 C_BG_SUBTLE     = PALETTE.get("bg_subtle", "#301F20")
-C_ACCENT        = PALETTE.get("accent", "#FF2A55")
-C_ACCENT_HOVER  = PALETTE.get("accent_hover", "#FF597B")
+C_ACCENT        = PALETTE.get("accent", "#DC1A36")
+C_ACCENT_HOVER  = PALETTE.get("accent_hover", "#F02D4C")
 C_TEXT_PRI      = PALETTE.get("text_primary", "#FFF0F5")
 C_TEXT_SEC      = PALETTE.get("text_secondary", "#E8C2D0")
 C_TEXT_MUT      = PALETTE.get("text_muted", "#A68595")
 C_TEXT_INV      = PALETTE.get("text_inverse", "#FFFFFF")
 C_STATUS_WARN   = PALETTE.get("status_warning", "#FFB86C")
-C_STATUS_CRIT   = PALETTE.get("status_critical", "#FF2A55")
+C_STATUS_CRIT   = PALETTE.get("status_critical", "#DC1A36")
 C_STATUS_SUCC   = PALETTE.get("status_success", "#8FBC8F")
 C_RIBBON        = PALETTE.get("ribbon_blue", "#50A6FF")
+C_SCREEN_CYAN   = PALETTE.get("screen_cyan", "#87F0FF")
+C_BG_CREAM      = PALETTE.get("bg_tactile_cream", "rgba(255, 240, 245, 0.96)")
 C_BG_WAYBAR     = PALETTE.get("bg_waybar", "#851733")
 C_BG_WAYBAR_HOV = PALETTE.get("bg_waybar_hover", "#9C2241")
 C_BORDER_3D     = PALETTE.get("border_waybar_3d", "#4D0A1C")
 C_SHADOW_EXTR   = PALETTE.get("shadow_extrusion", "#4D0A1C")
 C_SHADOW_EXTR_H = PALETTE.get("shadow_extrusion_hover", "#610E24")
+
+# Gradient Design Tokens
+GRADIENTS = {json.dumps(gradients, indent=4, ensure_ascii=False)}
+SUNSET_STOPS = [
+    (float(p.replace('%', '')) / 100.0, c)
+    for p, c in GRADIENTS.get("sunset_stops", [
+        ["0%", "#A3183D"], ["25%", "#E53262"], ["50%", "#FF7299"], ["75%", "#EAA2C6"], ["100%", "#BE7AA8"]
+    ])
+]
+SUNSET_HOVER_STOPS = [
+    (float(p.replace('%', '')) / 100.0, c)
+    for p, c in GRADIENTS.get("sunset_hover_stops", [
+        ["0%", "#B52048"], ["25%", "#F04070"], ["50%", "#FF80A6"], ["75%", "#F2B2D2"], ["100%", "#CA8BB4"]
+    ])
+]
 
 # Pre-computed Cairo RGBA tuples
 BG_WINDOW_RGBA        = hex_to_rgba(C_BG_WIN, 0.98)
@@ -285,7 +333,7 @@ BORDER_CARD_RGBA      = (1.0, 1.0, 1.0, 0.12)
 """
     with open(py_palette, "w", encoding="utf-8") as f:
         f.write(py_content)
-    print("  ✔ Generated hypr/scripts/palette.py")
+    print("  ✔ Generated hypr/scripts/system/palette.py")
 
     # 5. btop theme
     btop_theme = os.path.join(hypr_base, "btop", "themes", "obsidian-wine.theme")

@@ -29,7 +29,7 @@ window#shelf-lightbox-root.background,
 
 /* === MAIN WINDOW (Cream Cel-shaded 3D Card) === */
 .shelf-window {
-    background-color: rgba(255, 240, 245, 0.96);
+    background-color: @bg_tactile_cream;
     border-style: solid;
     border-color: @border_waybar_3d;
     border-top-width: 2px;
@@ -67,7 +67,7 @@ button {
 button.tab-btn {
     background-image: none;
     background-color: transparent;
-    color: #851733;
+    color: @bg_waybar;
     font-size: 11.5px;
     font-weight: 700;
     border: none;
@@ -83,7 +83,7 @@ button.tab-btn:hover {
 
 button.tab-btn.active {
     background-color: @accent;
-    color: #FFFFFF;
+    color: @text_inverse;
     border-style: solid;
     border-color: @border_waybar_3d;
     border-top-width: 1px;
@@ -100,7 +100,7 @@ button.tab-btn.active:hover {
 .action-btn {
     background-image: none;
     background-color: rgba(255, 255, 255, 0.75);
-    color: #851733;
+    color: @bg_waybar;
     font-size: 11px;
     font-weight: 700;
     border-style: solid;
@@ -115,7 +115,7 @@ button.tab-btn.active:hover {
 }
 
 .action-btn:hover {
-    background-color: #FFFFFF;
+    background-color: @text_inverse;
     color: @accent;
     border-color: @accent;
 }
@@ -123,7 +123,7 @@ button.tab-btn.active:hover {
 .btn-close {
     background-image: none;
     background-color: rgba(255, 255, 255, 0.75);
-    color: #851733;
+    color: @bg_waybar;
     font-size: 12px;
     font-weight: 800;
     border-style: solid;
@@ -138,7 +138,7 @@ button.tab-btn.active:hover {
 }
 
 .btn-close:hover {
-    background-color: #FFFFFF;
+    background-color: @text_inverse;
     color: @accent;
     border-color: @accent;
 }
@@ -164,7 +164,7 @@ entry,
 searchentry {
     background-image: none;
     background-color: rgba(255, 255, 255, 0.85);
-    color: #851733;
+    color: @bg_waybar;
     font-size: 11.5px;
     font-weight: 600;
     border-style: solid;
@@ -183,7 +183,7 @@ searchentry {
 
 entry:focus,
 searchentry:focus {
-    background-color: #FFFFFF;
+    background-color: @text_inverse;
     border-color: @accent;
 }
 
@@ -220,7 +220,7 @@ flowboxchild:selected {
 }
 
 .chip-card {
-    background-color: #FFFFFF;
+    background-color: @text_inverse;
     border-style: solid;
     border-color: @border_waybar_3d;
     border-top-width: 1.5px;
@@ -234,29 +234,29 @@ flowboxchild:selected {
 }
 
 .chip-card:hover {
-    background-color: #FFFFFF;
+    background-color: @text_inverse;
     border-color: @accent;
 }
 
 .chip-card.pinned {
-    background-color: rgba(255, 240, 245, 0.95);
+    background-color: @bg_tactile_cream;
     border-color: @accent;
     border-bottom-width: 4.5px;
 }
 
 .chip-card.pinned:hover {
-    background-color: #FFFFFF;
+    background-color: @text_inverse;
     border-color: @accent;
 }
 
 .chip-text {
-    color: #851733;
+    color: @bg_waybar;
     font-size: 11px;
     font-weight: 600;
 }
 
 .chip-meta {
-    color: #8C6577;
+    color: @text_muted;
     font-size: 9.5px;
     font-weight: 500;
     margin-top: 4px;
@@ -277,14 +277,14 @@ button.chip-btn-del,
     min-height: 0;
     min-width: 0;
     border-radius: 6px;
-    color: #851733;
+    color: @bg_waybar;
     transition: all 150ms ease;
 }
 
 button.chip-btn-del:hover,
 .chip-btn-del:hover {
     background-color: @accent;
-    color: #FFFFFF;
+    color: @text_inverse;
 }
 
 /* Pin button */
@@ -309,18 +309,18 @@ button.chip-btn-pin,
 button.chip-btn-pin:hover,
 .chip-btn-pin:hover {
     background-color: @accent;
-    color: #FFFFFF;
+    color: @text_inverse;
 }
 
 button.chip-btn-pin.pinned,
 .chip-btn-pin.pinned {
     background-color: @accent;
-    color: #FFFFFF;
+    color: @text_inverse;
 }
 
 button.chip-btn-pin.pinned:hover {
     background-color: @accent_hover;
-    color: #FFFFFF;
+    color: @text_inverse;
 }
 
 /* Card Action Button (Zoom / Copy) */
@@ -340,13 +340,13 @@ button.chip-btn-action,
     min-height: 0;
     min-width: 0;
     border-radius: 6px;
-    color: #851733;
+    color: @bg_waybar;
     transition: all 150ms ease;
 }
 
 button.chip-btn-action:hover,
 .chip-btn-action:hover {
-    background-color: #FFFFFF;
+    background-color: @text_inverse;
     border-color: @accent;
     color: @accent;
 }
@@ -360,13 +360,13 @@ button.chip-btn-action:hover,
 }
 
 .popout-text {
-    color: #851733;
+    color: @bg_waybar;
     font-size: 11.5px;
     font-weight: 600;
 }
 
 .popout-meta {
-    color: #8C6577;
+    color: @text_muted;
     font-size: 9.5px;
 }
 
@@ -390,7 +390,7 @@ button.chip-btn-action:hover,
 
 .drop-zone:hover {
     border-color: @accent;
-    background-color: #FFFFFF;
+    background-color: @text_inverse;
 }
 
 .drop-banner {
@@ -404,7 +404,7 @@ button.chip-btn-action:hover,
 
 .drop-banner:hover {
     border-color: @accent;
-    background-color: #FFFFFF;
+    background-color: @text_inverse;
 }
 
 .drop-icon {
@@ -413,20 +413,20 @@ button.chip-btn-action:hover,
 }
 
 .drop-title {
-    color: #851733;
+    color: @bg_waybar;
     font-size: 12px;
     font-weight: 700;
     margin-top: 4px;
 }
 
 .drop-subtitle {
-    color: #8C6577;
+    color: @text_muted;
     font-size: 10.5px;
     margin-top: 2px;
 }
 
 .status-bar {
-    color: #851733;
+    color: @bg_waybar;
     font-size: 10.5px;
     font-weight: 600;
     margin-top: 6px;

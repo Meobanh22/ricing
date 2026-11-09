@@ -22,14 +22,14 @@
   </defs>
 
   <!-- BOLD 3D Cel-shaded Bottom Border: shared silhouette offset down by 11px -->
-  <use href="#puff-silhouette" y="11" fill="#5C0C22" />
+  <use href="#puff-silhouette" y="11" fill="#610E24" />
 
   <!-- Main Body Silhouette (Filled with smooth tactile gradient, clean matte, no highlight curve) -->
-  <use href="#puff-silhouette" fill="url(#body-grad)" stroke="#6E132D" stroke-width="3.5" stroke-linejoin="round" />
+  <use href="#puff-silhouette" fill="url(#body-grad)" stroke="#610E24" stroke-width="3.5" stroke-linejoin="round" />
 
   <!-- Stem at top -->
-  <path d="M 50 8 C 50 3, 56 0, 62 1" fill="none" stroke="#6E132D" stroke-width="3.5" stroke-linecap="round" />
+  <path d="M 50 8 C 50 3, 56 0, 62 1" fill="none" stroke="#610E24" stroke-width="3.5" stroke-linecap="round" />
 
   <!-- Cherry on top (100% round circle filled with SAME gradient, NO red, NO gloss!) -->
-  <circle cx="50" cy="10" r="7.5" fill="url(#body-grad)" stroke="#6E132D" stroke-width="3" />
+  <circle cx="50" cy="10" r="7.5" fill="url(#body-grad)" stroke="#610E24" stroke-width="3" />
 </svg>

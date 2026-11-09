@@ -49,9 +49,12 @@ class PowerService:
     @staticmethod
     def get_power_mode() -> str:
         """Returns current power mode ('powersave', 'balanced', or 'performance')."""
-        if os.path.exists("/tmp/serena_power_mode.txt"):
+        mode_file = "/tmp/power_mode.txt"
+        if not os.path.exists(mode_file) and os.path.exists("/tmp/serena_power_mode.txt"):
+            mode_file = "/tmp/serena_power_mode.txt"
+        if os.path.exists(mode_file):
             try:
-                with open("/tmp/serena_power_mode.txt", "r") as f:
+                with open(mode_file, "r") as f:
                     mode = f.read().strip().lower()
                     if mode in ["powersave", "balanced", "performance"]:
                         return mode
@@ -81,7 +84,7 @@ class PowerService:
     def set_power_mode(mode: str):
         """Sets power mode ('powersave', 'balanced', or 'performance')."""
         try:
-            with open("/tmp/serena_power_mode.txt", "w") as f:
+            with open("/tmp/power_mode.txt", "w") as f:
                 f.write(mode.lower())
         except Exception:
             pass
@@ -111,10 +114,10 @@ class PowerService:
             subprocess.Popen([
                 "notify-send",
                 "-u", "critical",
-                "-a", "Serena Power",
+                "-a", "Power Management",
                 "-i", "battery-empty",
-                "⚠️ Battery Critical!",
-                f"Battery level is at {capacity}%. Plug in charger immediately!"
+                "⚠️ Battery Critical",
+                f"Battery level is at {capacity}%. Connect charger immediately."
             ])
             # Optional system bell / sound
             subprocess.Popen(["paplay", "/usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga"], stderr=subprocess.DEVNULL)
@@ -122,9 +125,9 @@ class PowerService:
             subprocess.Popen([
                 "notify-send",
                 "-u", "normal",
-                "-a", "Serena Power",
+                "-a", "Power Management",
                 "-i", "battery-caution",
                 "✿ Battery Low",
-                f"Battery is at {capacity}%. Consider plugging in your charger."
+                f"Battery is at {capacity}%. Connect charger."
             ])
 

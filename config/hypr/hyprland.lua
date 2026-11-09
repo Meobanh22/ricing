@@ -50,46 +50,46 @@ hl.env("XCURSOR_SIZE", "24")
 
 -- === AUTOSTART ===
 hl.on("hyprland.start", function ()
-    -- 0. Hyprland IPC Bridge (Waybar workspaces & legacy hyprctl dispatch compatibility)
-    hl.exec_cmd("python3 ~/.config/hypr/scripts/hyprland_ipc_bridge.py &")
+    -- 0. Lock screen on startup (seamless handover from Plymouth stage lights into Hyprlock)
+    hl.exec_cmd("~/.config/hypr/scripts/system/boot_lock.sh &")
 
-    -- 1. Wallpaper daemon & initial wallpaper
+    -- 1. Hyprland IPC Bridge (Waybar workspaces & legacy hyprctl dispatch compatibility)
+    hl.exec_cmd("python3 ~/.config/hypr/scripts/services/hyprland_ipc_bridge.py &")
+
+    -- 2. Wallpaper daemon & initial wallpaper
     hl.exec_cmd("awww-daemon || swww-daemon &")
-    hl.exec_cmd("sleep 0.8 && python3 ~/.config/hypr/scripts/wallpaper_switcher.py current")
+    hl.exec_cmd("sleep 0.8 && python3 ~/.config/hypr/scripts/system/wallpaper_switcher.py current")
 
-    -- 2. Status bar (Waybar)
+    -- 3. Status bar (Waybar)
     hl.exec_cmd("waybar")
 
-    -- 3. Cursor theme live application
+    -- 4. Cursor theme live application
     hl.exec_cmd("hyprctl setcursor sylveon-custom 24")
     hl.exec_cmd("gsettings set org.gnome.desktop.interface cursor-theme 'sylveon-custom'")
 
-    -- 4. Polkit authentication agent (Arch / EndeavourOS / Ubuntu / Fedora fallback)
+    -- 5. Polkit authentication agent (Arch / EndeavourOS / Ubuntu / Fedora fallback)
     hl.exec_cmd("/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 || /usr/lib/policykit-1-gnome/polkit-gnome-authentication-agent-1 || /usr/libexec/polkit-gnome-authentication-agent-1")
 
-    -- 5. Vietnamese input method daemon (Fcitx5 or fallback)
-    hl.exec_cmd("(fcitx5 -d --replace || ~/.config/hypr/scripts/init_ime.sh)")
+    -- 6. Vietnamese input method daemon (Fcitx5 or fallback)
+    hl.exec_cmd("(fcitx5 -d --replace || ~/.config/hypr/scripts/system/init_ime.sh)")
 
-    -- 6. Notification Center (SwayNC & Notification Daemon)
+    -- 7. Notification Center (SwayNC & Notification Daemon)
     hl.exec_cmd("swaync &")
-    hl.exec_cmd("python3 ~/.config/hypr/scripts/notif_daemon.py &")
+    hl.exec_cmd("python3 ~/.config/hypr/scripts/services/notif_daemon.py &")
 
-    -- 7. GNOME Keyring & authentication environment
+    -- 8. GNOME Keyring & authentication environment
     hl.exec_cmd("gnome-keyring-daemon --start --components=secrets,pkcs11,ssh")
     hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP GNOME_KEYRING_CONTROL SSH_AUTH_SOCK")
 
-    -- 8. Clipboard watcher (cliphist for text & images)
+    -- 9. Clipboard watcher (cliphist for text & images)
     hl.exec_cmd("wl-paste --type text --watch cliphist store &")
     hl.exec_cmd("wl-paste --type image --watch cliphist store &")
 
-    -- 9. Low battery alert daemon
-    hl.exec_cmd("python3 ~/.config/hypr/scripts/battery_alert.py &")
+    -- 10. Low battery alert daemon
+    hl.exec_cmd("python3 ~/.config/hypr/scripts/services/battery_alert.py &")
 
-    -- 10. Desktop background widgets (Serena picture & weather)
-    hl.exec_cmd("python3 ~/.config/hypr/scripts/desktop_widgets.py &")
-
-    -- 11. Lock screen on startup (seamless Hyprlock boot screen)
-    hl.exec_cmd("~/.config/hypr/scripts/boot_lock.sh")
+    -- 11. Desktop background widgets (profile card & weather)
+    hl.exec_cmd("python3 ~/.config/hypr/scripts/widgets/desktop_widgets.py &")
 end)
 
 -- === INPUT & TOUCH ===
@@ -151,6 +151,13 @@ hl.config({
     animations = {
         enabled = true,
     },
+
+    misc = {
+        disable_watchdog_warning = true,
+        disable_hyprland_logo    = true,
+        disable_splash_rendering = true,
+        background_color         = "rgb(0c0608)",
+    },
 })
 
 -- === ANIMATIONS ===
@@ -193,8 +200,8 @@ hl.window_rule({
 })
 
 hl.window_rule({
-    name = "dashboard-rule",
-    match = { class = "^(dashboard)$" },
+    name = "settings-rule",
+    match = { class = "^(settings)$" },
     float = true,
     animation = "slide top",
 })
@@ -228,8 +235,19 @@ hl.layer_rule({
 hl.layer_rule({
     name = "cc-blur",
     match = { namespace = "^(control-center)$" },
-    blur = true,
-    ignore_alpha = 0.5,
+    blur = false,
+})
+
+hl.layer_rule({
+    name = "settings-anim",
+    match = { namespace = "^(settings)$" },
+    animation = "slide top",
+})
+
+hl.layer_rule({
+    name = "settings-blur",
+    match = { namespace = "^(settings)$" },
+    blur = false,
 })
 
 hl.layer_rule({
@@ -253,19 +271,6 @@ hl.layer_rule({
 })
 
 hl.layer_rule({
-    name = "dashboard-anim",
-    match = { namespace = "^(dashboard)$" },
-    animation = "slide top",
-})
-
-hl.layer_rule({
-    name = "dashboard-blur",
-    match = { namespace = "^(dashboard)$" },
-    blur = true,
-    ignore_alpha = 0.5,
-})
-
-hl.layer_rule({
     name = "music-vis-anim",
     match = { namespace = "^(music-visualizer)$" },
     animation = "slide top",
@@ -283,7 +288,7 @@ local mainMod = "SUPER"
 
 -- Applications
 hl.bind(mainMod .. " + RETURN", hl.dsp.exec_cmd("kitty || gnome-terminal"))
-hl.bind(mainMod .. " + SPACE",  hl.dsp.exec_cmd("~/.config/hypr/scripts/OpenApps.sh"))
+hl.bind(mainMod .. " + SPACE",  hl.dsp.exec_cmd("~/.config/hypr/scripts/system/OpenApps.sh"))
 hl.bind(mainMod .. " + E",      hl.dsp.exec_cmd("thunar || nautilus"))
 hl.bind(mainMod .. " + B",      hl.dsp.exec_cmd("firefox"))
 hl.bind(mainMod .. " + C",      hl.dsp.exec_cmd("code"))
@@ -293,23 +298,23 @@ hl.bind(mainMod .. " + Q", hl.dsp.window.close())
 hl.bind(mainMod .. " + SHIFT + V", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())
 
--- Serena Popups & Control Center
-hl.bind(mainMod .. " + ESCAPE",         hl.dsp.exec_cmd("~/.config/hypr/scripts/Wlogout.sh"))
--- Dashboard disabled per user preference
-hl.bind(mainMod .. " + N",              hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle_control_center.sh"))
-hl.bind(mainMod .. " + M",              hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle_music.sh"))
-hl.bind(mainMod .. " + V",              hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle_shelf.sh --clip"))
-hl.bind(mainMod .. " + D",              hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle_shelf.sh --shelf"))
+-- Popups & Control Center
+hl.bind(mainMod .. " + ESCAPE",         hl.dsp.exec_cmd("~/.config/hypr/scripts/system/Wlogout.sh"))
+hl.bind(mainMod .. " + N",              hl.dsp.exec_cmd("~/.config/hypr/scripts/popups/toggle_control_center.sh"))
+hl.bind(mainMod .. " + P",              hl.dsp.exec_cmd("~/.config/hypr/scripts/popups/toggle_settings.sh"))
+hl.bind(mainMod .. " + M",              hl.dsp.exec_cmd("~/.config/hypr/scripts/popups/toggle_music.sh"))
+hl.bind(mainMod .. " + V",              hl.dsp.exec_cmd("~/.config/hypr/scripts/popups/toggle_shelf.sh --clip"))
+hl.bind(mainMod .. " + D",              hl.dsp.exec_cmd("~/.config/hypr/scripts/popups/toggle_shelf.sh --shelf"))
 hl.bind("CTRL + SHIFT + ESCAPE",        hl.dsp.exec_cmd("kitty --class task-manager -T 'Task Manager' btop"))
 
 -- System Actions
 hl.bind(mainMod .. " + L",         hl.dsp.exec_cmd("hyprlock"))
-hl.bind("Print",                   hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot.sh area"))
-hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot.sh area"))
-hl.bind(mainMod .. " + W",         hl.dsp.exec_cmd("python3 ~/.config/hypr/scripts/wallpaper_switcher.py next"))
+hl.bind("Print",                   hl.dsp.exec_cmd("~/.config/hypr/scripts/system/screenshot.sh area"))
+hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("~/.config/hypr/scripts/system/screenshot.sh area"))
+hl.bind(mainMod .. " + W",         hl.dsp.exec_cmd("python3 ~/.config/hypr/scripts/system/wallpaper_switcher.py next"))
 
 -- Input Method Toggle
-hl.bind(mainMod .. " + SHIFT + SPACE", hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle_vietnamese.sh"))
+hl.bind(mainMod .. " + SHIFT + SPACE", hl.dsp.exec_cmd("~/.config/hypr/scripts/system/toggle_vietnamese.sh"))
 
 -- Multimedia keys (Volume & Brightness - capped at 100%)
 hl.bind("XF86AudioRaiseVolume",  hl.dsp.exec_cmd("wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 5%+"),   { locked = true, repeating = true })

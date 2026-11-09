@@ -11,10 +11,10 @@
 
     border-window:      rgba(255, 255, 255, 0.12);
     border-card:        rgba(255, 255, 255, 0.12);
-    border-card-hover:  rgba(255, 42, 85, 0.65);
+    border-card-hover:  rgba(220, 26, 54, 0.65);
 
-    accent:             #FF2A55;
-    accent-hover:       #FF597B;
+    accent:             #DC1A36;
+    accent-hover:       #F02D4C;
     text-primary:       #FFF0F5;
     text-secondary:     #E8C2D0;
     text-muted:         #A68595;
@@ -22,8 +22,10 @@
     text-white:         #FFFFFF;
 
     status-warning:     #FFB86C;
-    status-critical:    #FF2A55;
+    status-critical:    #DC1A36;
     status-success:     #8FBC8F;
 
     ribbon-blue:        #50A6FF;
+    screen-cyan:        #87F0FF;
+    bg-tactile-cream:   rgba(255, 240, 245, 0.96);
 }

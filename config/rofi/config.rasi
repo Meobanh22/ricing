@@ -13,7 +13,7 @@ window {
     border: 2px 2px 6px 2px;
     border-color: #4D0A1C;
     border-radius: 18px;
-    background-color: rgba(255, 240, 245, 0.96);
+    background-color: @bg-tactile-cream;
     padding: 16px;
 }
 
@@ -102,7 +102,7 @@ element selected.normal, element selected {
 element selected.urgent {
     background-color: #FFFFFF;
     border: 1.5px 1.5px 3.5px 1.5px;
-    border-color: #FF2A55;
+    border-color: @accent;
     text-color: @accent;
 }
 

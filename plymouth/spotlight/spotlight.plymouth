@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Spotlight
+Description=Theatrical stage spotlight boot splash
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/spotlight
+ScriptFile=/usr/share/plymouth/themes/spotlight/spotlight.script

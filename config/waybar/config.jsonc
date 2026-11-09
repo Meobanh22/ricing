@@ -25,9 +25,9 @@
   ],
 
   "custom/menu": {
-    "format": "<span color='#FF2A55'>✿</span> <span color='#FFF0F5'><b>Apps</b></span>",
+    "format": "<span color='#DC1A36'>✿</span> <span color='#FFF0F5'><b>Apps</b></span>",
     "tooltip": "Application Menu (Super + Space)",
-    "on-click": "~/.config/hypr/scripts/OpenApps.sh"
+    "on-click": "~/.config/hypr/scripts/system/OpenApps.sh"
   },
 
   "hyprland/workspaces": {
@@ -43,32 +43,32 @@
   "custom/media": {
     "format": "{}",
     "return-type": "json",
-    "exec": "python3 ~/.config/hypr/scripts/get_media.py",
+    "exec": "python3 ~/.config/hypr/scripts/system/get_media.py",
     "interval": 1,
-    "on-click": "bash ~/.config/hypr/scripts/toggle_music.sh",
+    "on-click": "bash ~/.config/hypr/scripts/popups/toggle_music.sh",
     "on-click-right": "playerctl play-pause",
     "on-click-middle": "playerctl next",
     "escape": true
   },
 
   "clock": {
-    "format": "<span color='#FF2A55'></span> <span color='#FFF0F5'><b>{0:%H:%M}</b></span>  <span color='#FF2A55'>·</span>  <span color='#E8C2D0'>{0:%d/%m}</span>",
-    "format-alt": "<span color='#FF2A55'></span> <span color='#FFF0F5'><b>{0:%H:%M:%S}</b></span>  <span color='#FF2A55'>·</span>  <span color='#E8C2D0'>{0:%A, %d/%m/%Y}</span>",
+    "format": "<span color='#DC1A36'></span> <span color='#FFF0F5'><b>{0:%H:%M}</b></span>  <span color='#DC1A36'>·</span>  <span color='#E8C2D0'>{0:%d/%m}</span>",
+    "format-alt": "<span color='#DC1A36'></span> <span color='#FFF0F5'><b>{0:%H:%M:%S}</b></span>  <span color='#DC1A36'>·</span>  <span color='#E8C2D0'>{0:%A, %d/%m/%Y}</span>",
     "interval": 1,
     "tooltip-format": "<tt><small>{calendar}</small></tt>",
     "tooltip": "Calendar"
   },
 
   "custom/ime": {
-    "exec": "~/.config/hypr/scripts/get_ime.sh",
+    "exec": "~/.config/hypr/scripts/system/get_ime.sh",
     "interval": 1,
     "format": "{}",
     "tooltip": "Input Method VIE / ENG (Ctrl + Shift or Super + Shift + Space)",
-    "on-click": "~/.config/hypr/scripts/toggle_vietnamese.sh"
+    "on-click": "~/.config/hypr/scripts/system/toggle_vietnamese.sh"
   },
 
   "pulseaudio": {
-    "format": "<span font='14.5px' color='#FF2A55'>{icon}</span> {volume}%",
+    "format": "<span font='14.5px' color='#DC1A36'>{icon}</span> {volume}%",
     "format-muted": "<span font='14.5px' color='#A68595'>󰖁</span> Muted",
     "format-icons": {
       "headphone": "󰋋",
@@ -80,16 +80,16 @@
     "scroll-step": 5,
     "tooltip-format": "Volume: {volume}%\n(Click: Pavucontrol | Right-click: Control Center)",
     "on-click": "pavucontrol",
-    "on-click-right": "~/.config/hypr/scripts/toggle_control_center.sh"
+    "on-click-right": "~/.config/hypr/scripts/popups/toggle_control_center.sh"
   },
 
   "network": {
-    "format-wifi": "<span color='#FF2A55'>󰖩</span> {essid}",
-    "format-ethernet": "<span color='#FF2A55'>󰈀</span> Wired",
+    "format-wifi": "<span color='#DC1A36'>󰖩</span> {essid}",
+    "format-ethernet": "<span color='#DC1A36'>󰈀</span> Wired",
     "format-disconnected": "<span color='#A68595'>󰖪</span> Offline",
     "tooltip-format": "Wi-Fi: {essid} ({signalStrength}%)\n(Click: Network Settings | Right-click: Control Center)",
     "on-click": "nm-connection-editor",
-    "on-click-right": "~/.config/hypr/scripts/toggle_control_center.sh"
+    "on-click-right": "~/.config/hypr/scripts/popups/toggle_control_center.sh"
   },
 
   "battery": {
@@ -98,25 +98,25 @@
       "warning": 30,
       "critical": 15
     },
-    "format": "<span color='#FF2A55'>{icon}</span> {capacity}%",
-    "format-charging": "<span color='#FF2A55'>󰂄</span> {capacity}%",
-    "format-plugged": "<span color='#FF2A55'>󰚥</span> {capacity}%",
-    "format-alt": "<span color='#FF2A55'>{icon}</span> {time}",
+    "format": "<span color='#DC1A36'>{icon}</span> {capacity}%",
+    "format-charging": "<span color='#DC1A36'>󰂄</span> {capacity}%",
+    "format-plugged": "<span color='#DC1A36'>󰚥</span> {capacity}%",
+    "format-alt": "<span color='#DC1A36'>{icon}</span> {time}",
     "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
     "tooltip-format": "Battery: {capacity}% ({time})\n(Right-click: Control Center)",
-    "on-click-right": "~/.config/hypr/scripts/toggle_control_center.sh"
+    "on-click-right": "~/.config/hypr/scripts/popups/toggle_control_center.sh"
   },
 
   "custom/notification": {
-    "format": "<span color='#FF2A55'>󰂚</span>",
-    "tooltip": "Control Center & Notifications (Super + N)",
-    "on-click": "~/.config/hypr/scripts/toggle_control_center.sh",
-    "on-click-right": "~/.config/hypr/scripts/toggle_control_center.sh"
+    "format": "<span color='#DC1A36'>󰂚</span>",
+    "tooltip": "Left-click: Control Center (Super + N)\nRight-click: Settings (Super + P)",
+    "on-click": "~/.config/hypr/scripts/popups/toggle_control_center.sh",
+    "on-click-right": "~/.config/hypr/scripts/popups/toggle_settings.sh"
   },
 
   "custom/power": {
     "format": "󰐥",
     "tooltip": "Power Menu (Click to open)",
-    "on-click": "~/.config/hypr/scripts/Wlogout.sh"
+    "on-click": "~/.config/hypr/scripts/system/Wlogout.sh"
   }
 }

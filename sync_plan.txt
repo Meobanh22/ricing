@@ -1,0 +1,10 @@
+1. Kiểm tra lại tên hàm, tên biến đặt phù hợp, đơn giản, dễ hiểu. 4 popup hiện tại của mik phải tên là control_center,music_visualizer,settings(tức cái phone đg làm á) và shelf
+Tuyệt đối ko thêm các từ khác mang tính cụ thể, ko thêm tên Serena vào linh tinh 
+2. Các câu comment để tối giản, ko dùng câu cảm thán. thêm các tính từ linh tinh, ko các câu kiểu "100% hoạt động", "ko còn lỗi",...
+3. Tái cấu trúc lại folder script nằm trong folder hypr, chia thành những nhóm nhỏ hơn
+4. Dọn dẹp laị thư mục dự án, xóa những file tạm, ảnh tạm ko cần thiết
+5. Rà soát lại toàn bộ dự án, tìm tất cả các màu đg sử dụng và liệt kê ra. Để cta tổng hợp lại, đồng bộ lại thành 1 bảng màu hoàn chỉnh
+ 
+Lưu ý:
+1. agents.md giờ bạn ch cần đọc đâu, nó đg hơi cũ r, mik sẽ sửa lại sau đợt đồng bộ và tái cấu trúc này
+2. tất cả trong thư mục đều phải sử dụng tiếng anh nhé

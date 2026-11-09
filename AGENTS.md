@@ -4,7 +4,7 @@ Applies to Hyprland, Waybar, Control Center, Shelf, Clipboard, Dashboard, Rofi, 
 
 ## Colors
 
-`config/theme/tokens.json` is the source of truth. This table is a quick reference for the default Serena Wine palette; theme presets may change values while keeping the same roles. Components use these roles through generated palettes or the shared Python palette.
+`config/theme/tokens.json` is the source of truth. This table is a quick reference for the default Serena Wine palette; theme presets may change values wh2ping the same roles. Components use these roles through generated palettes or the shared Python palette.
 
 | Use | Token | Default color |
 | :--- | :--- | :--- |
@@ -14,12 +14,15 @@ Applies to Hyprland, Waybar, Control Center, Shelf, Clipboard, Dashboard, Rofi, 
 | Small surface | `bg_subtle` | `#301F20` |
 | Quiet row / hover | `bg_ghost` / `bg_ghost_hover` | `transparent` / `rgba(42,26,30,0.50)` |
 | Outer / card border | `border_window` / `border_card` | `rgba(255,255,255,0.12)` |
-| Card hover border | `border_card_hover` | `rgba(255,42,85,0.65)` |
-| Accent / hover | `accent` / `accent_hover` | `#FF2A55` / `#FF597B` |
+| Card hover border | `border_card_hover` | `rgba(220,26,54,0.65)` |
+| Accent / hover | `accent` / `accent_hover` | `#DC1A36` / `#F02D4C` |
 | Main / supporting text | `text_primary` / `text_secondary` | `#FFF0F5` / `#E8C2D0` |
 | Muted / inverse text | `text_muted` / `text_inverse` | `#A68595` / `#FFFFFF` |
-| Warning / critical / success | `status_warning` / `status_critical` / `status_success` | `#FFB86C` / `#FF2A55` / `#8FBC8F` |
-| Ribbon | `ribbon_blue` | `#50A6FF` |
+| Warning / critical / success | `status_warning` / `status_critical` / `status_success` | `#FFB86C` / `#DC1A36` / `#8FBC8F` |
+| Ribbon / Screen | `ribbon_blue` / `screen_cyan` | `#50A6FF` / `#87F0FF` |
+| Waybar Ruby / 3D Shadow | `bg_waybar` / `border_waybar_3d` | `#851733` / `#4D0A1C` |
+| Tactile Cream Card | `bg_tactile_cream` | `rgba(255,240,245,0.96)` |
+| Sunset Gradient | `gradient_sunset` | `#A3183D` $\to$ `#E53262` $\to$ `#FF7299` $\to$ `#EAA2C6` $\to$ `#BE7AA8` |
 
 - Interactive status icons use `accent`. System badges use `accent` with `text_inverse`. Official third-party notification icons may retain their brand colors.
 - Do not add a local color when an existing role fits. Opacity variants may derive from a role's RGB value; exact alpha values are in `tokens.json`.

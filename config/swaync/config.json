@@ -69,11 +69,11 @@
         },
         {
           "label": "\udb80\udf0c",
-          "command": "bash -c $HOME/.config/hypr/scripts/toggle_vietnamese.sh"
+          "command": "bash -c $HOME/.config/hypr/scripts/system/toggle_vietnamese.sh"
         },
         {
           "label": "\uf011",
-          "command": "bash -c $HOME/.config/hypr/scripts/Wlogout.sh"
+          "command": "bash -c $HOME/.config/hypr/scripts/system/Wlogout.sh"
         }
       ]
     },

@@ -1,6 +1,6 @@
 {
     "label" : "lock",
-    "action" : "$HOME/.config/hypr/scripts/LockScreen.sh || hyprlock || swaylock",
+    "action" : "$HOME/.config/hypr/scripts/system/LockScreen.sh || hyprlock || swaylock",
     "text" : "Lock",
     "keybind" : "l"
 }

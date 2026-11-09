@@ -25,7 +25,7 @@ window#desktop-widgets-window {
 }
 
 .desktop-widget-card {
-    background-color: rgba(255, 240, 245, 0.96);
+    background-color: @bg_tactile_cream;
     border-style: solid;
     border-color: @border_waybar_3d;
     border-top-width: 2px;
@@ -40,7 +40,7 @@ window#desktop-widgets-window {
 
 .desktop-widget-card:hover,
 .desktop-widget-card.card-hover {
-    background-color: #FFFFFF;
+    background-color: @text_inverse;
     border-color: @accent;
 }
 
@@ -108,7 +108,7 @@ window#desktop-widgets-window {
 }
 
 .avatar-profile-name {
-    color: #851733;
+    color: @bg_waybar;
     font-size: 12px;
     font-weight: 800;
     margin: 0;
@@ -116,7 +116,7 @@ window#desktop-widgets-window {
 }
 
 .avatar-profile-subtitle {
-    color: #8C6577;
+    color: @text_muted;
     font-size: 8.5px;
     font-weight: 700;
     margin-top: 1px;
@@ -124,7 +124,7 @@ window#desktop-widgets-window {
 }
 
 .avatar-team-title {
-    color: #851733;
+    color: @bg_waybar;
     font-size: 9px;
     font-weight: 800;
     letter-spacing: 0.10em;
@@ -162,7 +162,7 @@ window#desktop-widgets-window {
     font-size: 10px;
     font-weight: 800;
     letter-spacing: 0.12em;
-    color: #851733;
+    color: @bg_waybar;
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.70);
 }
 
@@ -176,41 +176,41 @@ window#desktop-widgets-window {
 }
 
 .weather-hero-temp {
-    color: #851733;
+    color: @bg_waybar;
     font-size: 44px;
     font-weight: 800;
     letter-spacing: -0.03em;
     text-shadow: 
-        -2px -2px 0 #FFFFFF,
-         2px -2px 0 #FFFFFF,
-        -2px  2px 0 #FFFFFF,
-         2px  2px 0 #FFFFFF,
-        -2px  0   0 #FFFFFF,
-         2px  0   0 #FFFFFF,
-         0   -2px 0 #FFFFFF,
-         0    2px 0 #FFFFFF,
-        -1.5px -1px 0 #FFFFFF,
-         1.5px -1px 0 #FFFFFF,
-        -1.5px  1px 0 #FFFFFF,
-         1.5px  1px 0 #FFFFFF,
-        -1px    4px 0 #4D0A1C,
-         0      4px 0 #4D0A1C,
-         1px    4px 0 #4D0A1C;
+        -2px -2px 0 @text_inverse,
+         2px -2px 0 @text_inverse,
+        -2px  2px 0 @text_inverse,
+         2px  2px 0 @text_inverse,
+        -2px  0   0 @text_inverse,
+         2px  0   0 @text_inverse,
+         0   -2px 0 @text_inverse,
+         0    2px 0 @text_inverse,
+        -1.5px -1px 0 @text_inverse,
+         1.5px -1px 0 @text_inverse,
+        -1.5px  1px 0 @text_inverse,
+         1.5px  1px 0 @text_inverse,
+        -1px    4px 0 @border_waybar_3d,
+         0      4px 0 @border_waybar_3d,
+         1px    4px 0 @border_waybar_3d;
     margin-left: 2px;
 }
 
 .weather-hero-unit {
-    color: #851733;
+    color: @bg_waybar;
     font-size: 15px;
     font-weight: 800;
     margin-top: 6px;
     margin-left: 3px;
     text-shadow: 
-        -1.2px -1.2px 0 #FFFFFF,
-         1.2px -1.2px 0 #FFFFFF,
-        -1.2px  1.2px 0 #FFFFFF,
-         1.2px  1.2px 0 #FFFFFF,
-         0      2.5px 0 #4D0A1C;
+        -1.2px -1.2px 0 @text_inverse,
+         1.2px -1.2px 0 @text_inverse,
+        -1.2px  1.2px 0 @text_inverse,
+         1.2px  1.2px 0 @text_inverse,
+         0      2.5px 0 @border_waybar_3d;
 }
 
 .weather-forecast-container {
@@ -233,26 +233,26 @@ window#desktop-widgets-window {
 }
 
 .tactile-col-box:hover {
-    background-color: #FFFFFF;
+    background-color: @text_inverse;
     border-color: @accent;
 }
 
 .forecast-col-day {
     font-size: 9.5px;
     font-weight: 700;
-    color: #851733;
+    color: @bg_waybar;
 }
 
 .forecast-col-icon {
     font-size: 16px;
-    color: #851733;
+    color: @bg_waybar;
     margin: 1px 0;
 }
 
 .forecast-col-temp {
     font-size: 9px;
     font-weight: 700;
-    color: #851733;
+    color: @bg_waybar;
     margin-top: 1px;
 }
 
@@ -270,7 +270,7 @@ window#desktop-widgets-window {
     font-size: 11.5px;
     font-weight: 900;
     letter-spacing: 0.10em;
-    color: #851733;
+    color: @bg_waybar;
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.70);
 }
 
@@ -300,7 +300,7 @@ window#desktop-widgets-window {
 }
 
 .tactile-calendar-box:hover {
-    background-color: #FFFFFF;
+    background-color: @text_inverse;
     border-color: @accent;
 }
 
@@ -311,9 +311,9 @@ window#desktop-widgets-window {
 }
 
 .calendar-cell-today {
-    background-color: #851733;
+    background-color: @bg_waybar;
     border-radius: 6px;
-    border-bottom: 2.5px solid #4D0A1C;
+    border-bottom: 2.5px solid @border_waybar_3d;
     margin: 1px;
 }
 

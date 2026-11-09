@@ -1,0 +1,17 @@
+{
+  "include": [
+    "config",
+    "scripts"
+  ],
+  "extraPaths": [
+    "config/hypr/scripts",
+    "config/hypr/scripts/popups",
+    "config/hypr/scripts/services",
+    "config/hypr/scripts/system",
+    "config/hypr/scripts/widgets",
+    "scripts"
+  ],
+  "typeCheckingMode": "off",
+  "reportMissingImports": "none",
+  "reportMissingTypeStubs": "none"
+}

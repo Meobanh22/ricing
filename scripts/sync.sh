@@ -43,7 +43,10 @@ sync_push() {
     fi
 
     # Create destination directories
+    mkdir -p "$HOME/.config/hypr/scripts/popups"
+    mkdir -p "$HOME/.config/hypr/scripts/widgets"
     mkdir -p "$HOME/.config/hypr/scripts/services"
+    mkdir -p "$HOME/.config/hypr/scripts/system"
     mkdir -p "$HOME/.config/hypr/styles"
     mkdir -p "$HOME/.config/hypr/assets"
     mkdir -p "$HOME/.config/waybar"
@@ -64,10 +67,14 @@ sync_push() {
     # Synchronize tracked configurations
     echo -e "${YELLOW}📦 [1/4] Synchronizing configuration files...${NC}"
 
+    # Clean up obsolete flat scripts and dashboard from previous layout
+    rm -f "$HOME/.config/hypr/scripts/"*.py "$HOME/.config/hypr/scripts/"*.sh "$HOME/.config/hypr/scripts/"*.bak 2>/dev/null || true
+    rm -f "$HOME/.config/hypr/styles/dashboard.css" 2>/dev/null || true
+
     # Hyprland (Native hyprland.lua engine, remove legacy hyprland.conf)
     cp -rf "$DOTFILES_DIR/hypr/"* "$HOME/.config/hypr/"
     rm -f "$HOME/.config/hypr/hyprland.conf"
-    chmod +x "$HOME/.config/hypr/scripts/"*.sh "$HOME/.config/hypr/scripts/"*.py "$HOME/.config/hypr/scripts/services/"*.py 2>/dev/null || true
+    chmod +x "$HOME/.config/hypr/scripts/popups/"* "$HOME/.config/hypr/scripts/widgets/"* "$HOME/.config/hypr/scripts/services/"* "$HOME/.config/hypr/scripts/system/"* 2>/dev/null || true
     echo -e "  ${GREEN}✔ Hyprland (hyprland.lua, hyprlock.conf, scripts/)${NC}"
 
     # Waybar
@@ -211,14 +218,14 @@ sync_push() {
         if pgrep -f "desktop_widgets.py" &>/dev/null; then
             pkill -f "desktop_widgets.py" 2>/dev/null || true
             sleep 0.2
-            setsid -f python3 "$HOME/.config/hypr/scripts/desktop_widgets.py" >/dev/null 2>&1
+            setsid -f python3 "$HOME/.config/hypr/scripts/widgets/desktop_widgets.py" >/dev/null 2>&1
             echo -e "  ${GREEN}✔ Desktop widgets reloaded!${NC}"
         fi
 
         if pgrep -f "music_visualizer.py" &>/dev/null; then
             pkill -f "music_visualizer.py" 2>/dev/null || true
             sleep 0.2
-            setsid -f python3 "$HOME/.config/hypr/scripts/music_visualizer.py" >/dev/null 2>&1
+            setsid -f python3 "$HOME/.config/hypr/scripts/popups/music_visualizer.py" >/dev/null 2>&1
             echo -e "  ${GREEN}✔ Music visualizer reloaded!${NC}"
         fi
 

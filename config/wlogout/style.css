@@ -18,11 +18,11 @@ window {
 
 /* === ACTION CARDS (Light Cream 3D Buttons) === */
 button {
-    color: #851733;
+    color: @bg_waybar;
     font-size: 13.5px;
     font-weight: 800;
     letter-spacing: 0.03em;
-    background-color: rgba(255, 240, 245, 0.96);
+    background-color: @bg_tactile_cream;
     border-style: solid;
     border-color: @border_waybar_3d;
     border-top-width: 2px;
@@ -43,7 +43,7 @@ button span,
 button label {
     font-size: 13.5px;
     font-weight: 800;
-    color: #851733;
+    color: @bg_waybar;
     margin-top: 58px;
     transition: color 150ms ease;
 }
@@ -52,7 +52,7 @@ button label {
 button:focus,
 button:active,
 button:hover {
-    background-color: #FFFFFF;
+    background-color: @text_inverse;
     color: @accent;
     border-color: @accent;
     border-bottom-color: @accent;

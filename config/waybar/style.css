@@ -50,7 +50,7 @@ window#waybar {
 #custom-menu:hover {
     background-color: @bg_waybar_hover;
     border-color: @border_waybar_3d_hover;
-    box-shadow: inset 0 0 0 2.8px #FF597B;
+    box-shadow: inset 0 0 0 2.8px @accent_hover;
 }
 
 /* === WORKSPACES (Bold 3D Poké Puff Buttons) === */
@@ -70,7 +70,7 @@ window#waybar {
     background-color: transparent;
     border: none;
     box-shadow: none;
-    color: #4D0A1C;
+    color: @border_waybar_3d;
     font-size: 13px;
     font-weight: 800;
     text-shadow: 0 1px 1px rgba(255, 255, 255, 0.85);
@@ -86,7 +86,7 @@ window#waybar {
     background-color: transparent;
     border: none;
     box-shadow: none;
-    color: #300611;
+    color: @border_waybar_3d;
 }
 
 #workspaces button.active {
@@ -114,7 +114,7 @@ window#waybar {
 #custom-media,
 #mpris {
     background-image: linear-gradient(to bottom, #A3183D 0%, #E53262 25%, #FF7299 50%, #EAA2C6 75%, #BE7AA8 100%);
-    color: #4D0A1C;
+    color: @border_waybar_3d;
     border-style: solid;
     border-color: @border_waybar_3d;
     border-top-width: 1.8px;
@@ -136,23 +136,23 @@ window#waybar {
     background-image: linear-gradient(to bottom, #B52048 0%, #F04070 25%, #FF80A6 50%, #F2B2D2 75%, #CA8BB4 100%);
     border-color: @border_waybar_3d_hover;
     box-shadow: none;
-    color: #300611;
+    color: @border_waybar_3d;
 }
 
 #custom-media.playing {
-    color: #4D0A1C;
+    color: @border_waybar_3d;
     border-color: @accent;
     border-bottom-color: @border_waybar_3d;
     box-shadow: none;
 }
 
 #custom-media.paused {
-    color: #7D1B32;
+    color: @bg_waybar;
 }
 
 #custom-media.stopped {
     padding: 3px 14px 4px 14px;
-    color: #4D0A1C;
+    color: @border_waybar_3d;
 }
 
 /* === CLOCK === */
@@ -177,7 +177,7 @@ window#waybar {
 #clock:hover {
     background-color: @bg_waybar_hover;
     border-color: @border_waybar_3d_hover;
-    box-shadow: inset 0 0 0 2.8px #FF597B;
+    box-shadow: inset 0 0 0 2.8px @accent_hover;
 }
 
 /* === RIGHT MODULES === */

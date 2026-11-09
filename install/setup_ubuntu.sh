@@ -18,7 +18,7 @@ echo -e "${PINK}=== HYPRLAND SERENA DESKTOP SETUP (UBUNTU 24.04) ===${NC}\n"
 
 # === DIRECTORY INITIALIZATION ===
 echo -e "${YELLOW}[1/6] Initializing user config directories...${NC}"
-mkdir -p "$HOME/.config/hypr/scripts/services"
+mkdir -p "$HOME/.config/hypr/scripts/popups" "$HOME/.config/hypr/scripts/widgets" "$HOME/.config/hypr/scripts/services" "$HOME/.config/hypr/scripts/system"
 mkdir -p "$HOME/.config/hypr/styles"
 mkdir -p "$HOME/.config/hypr/assets"
 mkdir -p "$HOME/.config/waybar"
@@ -75,7 +75,7 @@ echo -e "  ${GREEN}✔ Sylveon Dual Theme (Hyprcursor + Xcursor) installed!${NC}
 echo -e "\n${YELLOW}[3/6] Deploying dotfiles to ~/.config/...${NC}"
 cp -rf "$CONFIG_DIR/hypr/"* "$HOME/.config/hypr/"
 rm -f "$HOME/.config/hypr/hyprland.conf"
-chmod +x "$HOME/.config/hypr/scripts/"*.sh "$HOME/.config/hypr/scripts/"*.py "$HOME/.config/hypr/scripts/services/"*.py 2>/dev/null || true
+chmod +x "$HOME/.config/hypr/scripts/popups/"* "$HOME/.config/hypr/scripts/widgets/"* "$HOME/.config/hypr/scripts/services/"* "$HOME/.config/hypr/scripts/system/"* 2>/dev/null || true
 
 cp -rf "$CONFIG_DIR/waybar/"* "$HOME/.config/waybar/"
 cp -rf "$CONFIG_DIR/kitty/"* "$HOME/.config/kitty/"
@@ -139,7 +139,7 @@ if [ "$XDG_CURRENT_DESKTOP" = "Hyprland" ] || pgrep -x "Hyprland" &>/dev/null; t
     nohup waybar >/dev/null 2>&1 &
     echo -e "  ${GREEN}✔ Waybar started!${NC}"
 
-    pkill -f dashboard.py 2>/dev/null || true
+    pkill -f settings.py 2>/dev/null || true
 fi
 
 echo -e "\n${PINK}=== SETUP COMPLETED! ===${NC}\n"

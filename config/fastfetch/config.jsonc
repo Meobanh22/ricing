@@ -11,21 +11,21 @@
   "display": {
     "separator": " ✿ ",
     "color": {
-      "keys": "#FF2A55",
-      "title": "#FF597B",
+      "keys": "#DC1A36",
+      "title": "#F02D4C",
       "separator": "#E8C2D0",
       "output": "#FFF0F5"
     },
     "percent": {
       "color": {
         "green": "#50A6FF",
-        "yellow": "#FF597B",
-        "red": "#FF2A55"
+        "yellow": "#F02D4C",
+        "red": "#DC1A36"
       }
     },
     "bar": {
       "color": {
-        "elapsed": "#FF2A55",
+        "elapsed": "#DC1A36",
         "total": "#3A222A",
         "border": "#A68595"
       }

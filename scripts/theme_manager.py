@@ -21,16 +21,16 @@ PRESETS = {
             "bg_subtle": "#301F20",
             "border_window": "rgba(255, 255, 255, 0.12)",
             "border_card": "rgba(255, 255, 255, 0.12)",
-            "border_card_hover": "rgba(255, 42, 85, 0.65)",
-            "accent": "#FF2A55",
-            "accent_hover": "#FF597B",
+            "border_card_hover": "rgba(220, 26, 54, 0.65)",
+            "accent": "#DC1A36",
+            "accent_hover": "#F02D4C",
             "ribbon_blue": "#50A6FF",
             "text_primary": "#FFF0F5",
             "text_secondary": "#E8C2D0",
             "text_muted": "#A68595",
             "text_inverse": "#FFFFFF",
             "status_warning": "#FFB86C",
-            "status_critical": "#FF2A55",
+            "status_critical": "#DC1A36",
             "status_success": "#8FBC8F",
         }
     },
@@ -259,12 +259,11 @@ def build_full_color_palette(base_colors: dict) -> dict:
 
 
 def find_workspace_root():
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    parent = os.path.dirname(script_dir)
-    if os.path.isdir(os.path.join(parent, "config")):
-        return parent
-    if os.path.isdir(os.path.join(script_dir, "config")):
-        return script_dir
+    curr = os.path.dirname(os.path.abspath(__file__))
+    while curr and curr != "/":
+        if os.path.isdir(os.path.join(curr, "config")):
+            return curr
+        curr = os.path.dirname(curr)
     candidate = os.path.expanduser("~/custom")
     if os.path.isdir(os.path.join(candidate, "config")):
         return candidate
@@ -307,7 +306,7 @@ def sync_waybar_config(hypr_base: str, user_config: str, colors: dict):
   "custom/menu": {{
     "format": "<span color='{accent}'>✿</span> <span color='{txt_pri}'><b>Apps</b></span>",
     "tooltip": "Application Menu (Super + Space)",
-    "on-click": "~/.config/hypr/scripts/OpenApps.sh"
+    "on-click": "~/.config/hypr/scripts/system/OpenApps.sh"
   }},
 
   "hyprland/workspaces": {{
@@ -323,9 +322,9 @@ def sync_waybar_config(hypr_base: str, user_config: str, colors: dict):
   "custom/media": {{
     "format": "{{}}",
     "return-type": "json",
-    "exec": "python3 ~/.config/hypr/scripts/get_media.py",
+    "exec": "python3 ~/.config/hypr/scripts/system/get_media.py",
     "interval": 1,
-    "on-click": "bash ~/.config/hypr/scripts/toggle_music.sh",
+    "on-click": "bash ~/.config/hypr/scripts/popups/toggle_music.sh",
     "on-click-right": "playerctl play-pause",
     "on-click-middle": "playerctl next",
     "escape": true
@@ -336,16 +335,15 @@ def sync_waybar_config(hypr_base: str, user_config: str, colors: dict):
     "format-alt": "<span color='{accent}'></span> <span color='{txt_pri}'><b>{{0:%H:%M:%S}}</b></span>  <span color='{accent}'>·</span>  <span color='{txt_sec}'>{{0:%A, %d/%m/%Y}}</span>",
     "interval": 1,
     "tooltip-format": "<tt><small>{{calendar}}</small></tt>",
-    "tooltip": "Calendar & Dashboard (Super + S)",
-    "on-click": "~/.config/hypr/scripts/toggle_dashboard.sh"
+    "tooltip": "Calendar"
   }},
 
   "custom/ime": {{
-    "exec": "~/.config/hypr/scripts/get_ime.sh",
+    "exec": "~/.config/hypr/scripts/system/get_ime.sh",
     "interval": 1,
     "format": "{{}}",
     "tooltip": "Input Method VIE / ENG (Ctrl + Shift or Super + Shift + Space)",
-    "on-click": "~/.config/hypr/scripts/toggle_vietnamese.sh"
+    "on-click": "~/.config/hypr/scripts/system/toggle_vietnamese.sh"
   }},
 
   "pulseaudio": {{
@@ -361,7 +359,7 @@ def sync_waybar_config(hypr_base: str, user_config: str, colors: dict):
     "scroll-step": 5,
     "tooltip-format": "Volume: {{volume}}%\\n(Click: Pavucontrol | Right-click: Control Center)",
     "on-click": "pavucontrol",
-    "on-click-right": "~/.config/hypr/scripts/toggle_control_center.sh"
+    "on-click-right": "~/.config/hypr/scripts/popups/toggle_control_center.sh"
   }},
 
   "network": {{
@@ -370,7 +368,7 @@ def sync_waybar_config(hypr_base: str, user_config: str, colors: dict):
     "format-disconnected": "<span color='{txt_mut}'>󰖪</span> Offline",
     "tooltip-format": "Wi-Fi: {{essid}} ({{signalStrength}}%)\\n(Click: Network Settings | Right-click: Control Center)",
     "on-click": "nm-connection-editor",
-    "on-click-right": "~/.config/hypr/scripts/toggle_control_center.sh"
+    "on-click-right": "~/.config/hypr/scripts/popups/toggle_control_center.sh"
   }},
 
   "battery": {{
@@ -385,20 +383,20 @@ def sync_waybar_config(hypr_base: str, user_config: str, colors: dict):
     "format-alt": "<span color='{accent}'>{{icon}}</span> {{time}}",
     "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
     "tooltip-format": "Battery: {{capacity}}% ({{time}})\\n(Right-click: Control Center)",
-    "on-click-right": "~/.config/hypr/scripts/toggle_control_center.sh"
+    "on-click-right": "~/.config/hypr/scripts/popups/toggle_control_center.sh"
   }},
 
   "custom/notification": {{
     "format": "<span color='{accent}'>󰂚</span>",
-    "tooltip": "Control Center & Notifications (Super + N)",
-    "on-click": "~/.config/hypr/scripts/toggle_control_center.sh",
-    "on-click-right": "~/.config/hypr/scripts/toggle_control_center.sh"
+    "tooltip": "Left-click: Control Center (Super + N)\\nRight-click: Settings (Super + P)",
+    "on-click": "~/.config/hypr/scripts/popups/toggle_control_center.sh",
+    "on-click-right": "~/.config/hypr/scripts/popups/toggle_settings.sh"
   }},
 
   "custom/power": {{
     "format": "󰐥",
     "tooltip": "Power Menu (Click to open)",
-    "on-click": "~/.config/hypr/scripts/Wlogout.sh"
+    "on-click": "~/.config/hypr/scripts/system/Wlogout.sh"
   }}
 }}
 """
@@ -503,7 +501,7 @@ def apply_theme_to_all_components(theme_name: str, colors: dict):
         os.makedirs(os.path.dirname(p), exist_ok=True)
         with open(p, "w", encoding="utf-8") as f:
             f.write(css_content)
-    print("  ✔ [3/10] Synchronize GTK Apps palette.css (Control Center, Dashboard, Shelf, Visualizer, GTK-3/4)")
+    print("  ✔ [3/10] Synchronize GTK Apps palette.css (Control Center, Settings, Shelf, Visualizer, GTK-3/4)")
 
     # 4. Write to Wlogout & Swaync
     for p in [os.path.join(hypr_base, "wlogout", "palette.css"), os.path.join(user_config, "wlogout", "palette.css")]:
@@ -627,14 +625,14 @@ C_BG_WIN        = PALETTE.get("bg_window", "#201011")
 C_BG_CARD       = PALETTE.get("bg_card", "#2A1A1E")
 C_BG_CARD_HOVER = PALETTE.get("bg_card_hover", "#3A222A")
 C_BG_SUBTLE     = PALETTE.get("bg_subtle", "#301F20")
-C_ACCENT        = PALETTE.get("accent", "#FF2A55")
-C_ACCENT_HOVER  = PALETTE.get("accent_hover", "#FF597B")
+C_ACCENT        = PALETTE.get("accent", "#DC1A36")
+C_ACCENT_HOVER  = PALETTE.get("accent_hover", "#F02D4C")
 C_TEXT_PRI      = PALETTE.get("text_primary", "#FFF0F5")
 C_TEXT_SEC      = PALETTE.get("text_secondary", "#E8C2D0")
 C_TEXT_MUT      = PALETTE.get("text_muted", "#A68595")
 C_TEXT_INV      = PALETTE.get("text_inverse", "#FFFFFF")
 C_STATUS_WARN   = PALETTE.get("status_warning", "#FFB86C")
-C_STATUS_CRIT   = PALETTE.get("status_critical", "#FF2A55")
+C_STATUS_CRIT   = PALETTE.get("status_critical", "#DC1A36")
 C_STATUS_SUCC   = PALETTE.get("status_success", "#8FBC8F")
 C_RIBBON        = PALETTE.get("ribbon_blue", "#50A6FF")
 
@@ -650,7 +648,7 @@ ACCENT_SUBTLE_RGBA = hex_to_rgba(C_ACCENT, 0.20)
 BORDER_WINDOW_RGBA = (1.0, 1.0, 1.0, 0.12)
 BORDER_CARD_RGBA   = (1.0, 1.0, 1.0, 0.12)
 """
-    for p in [os.path.join(hypr_base, "hypr", "scripts", "palette.py"), os.path.join(user_config, "hypr", "scripts", "palette.py")]:
+    for p in [os.path.join(hypr_base, "hypr", "scripts", "system", "palette.py"), os.path.join(user_config, "hypr", "scripts", "system", "palette.py")]:
         os.makedirs(os.path.dirname(p), exist_ok=True)
         with open(p, "w", encoding="utf-8") as f:
             f.write(py_content)
@@ -830,10 +828,10 @@ theme[upload_end]="{colors['accent']}"
     subprocess.run("swaync-client -R -rs 2>/dev/null || true", shell=True)
     # Terminate running GTK popups so their next launch uses new tokens immediately
     subprocess.run("pkill -f control_center.py 2>/dev/null || true", shell=True)
-    subprocess.run("pkill -f dashboard.py 2>/dev/null || true", shell=True)
+    subprocess.run("pkill -f settings.py 2>/dev/null || true", shell=True)
     subprocess.run("pkill -f shelf.py 2>/dev/null || true", shell=True)
     subprocess.run("pkill -f music_visualizer.py 2>/dev/null || true", shell=True)
-    for pf in ["/tmp/control_center.pid", "/tmp/dashboard.pid", "/tmp/shelf.pid", "/tmp/music_visualizer.pid"]:
+    for pf in ["/tmp/control_center.pid", "/tmp/settings.pid", "/tmp/shelf.pid", "/tmp/music_visualizer.pid"]:
         try:
             os.remove(pf)
         except OSError:
@@ -844,7 +842,7 @@ theme[upload_end]="{colors['accent']}"
     msg = f"Applied palette: {theme_name}\nAccent: {colors['accent']} | Background: {colors['bg_window']}"
     subprocess.run(["notify-send", "-i", "preferences-desktop-theme", "✿ System Theme Synchronized ✿", msg], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-    print(f"\033[1;32m✨ ENTIRE SYSTEM SYNCHRONIZED WITH THEME: {theme_name}! ✨\033[0m\n")
+    print(f"\033[1;32mSystem synchronized with theme: {theme_name}\033[0m\n")
 
 
 def run_interactive_menu():
@@ -881,12 +879,12 @@ def run_interactive_menu():
         full_colors = build_full_color_palette(item["colors"])
         apply_theme_to_all_components(item["name"], full_colors)
     elif choice == "8":
-        print("\n\033[1;34m--- ENTER CUSTOM HEX COLORS (e.g. #FF2A55 or FF2A55) ---\033[0m")
+        print("\n\033[1;34m--- ENTER CUSTOM HEX COLORS (e.g. #DC1A36 or DC1A36) ---\033[0m")
         try:
             bg_in = input("1. Window Background Hex (Default: #201011): ").strip() or "#201011"
             if not bg_in.startswith("#"):
                 bg_in = "#" + bg_in
-            accent_in = input("2. Accent Hex (Default: #FF2A55): ").strip() or "#FF2A55"
+            accent_in = input("2. Accent Hex (Default: #DC1A36): ").strip() or "#DC1A36"
             if not accent_in.startswith("#"):
                 accent_in = "#" + accent_in
             ribbon_in = input("3. Ribbon Hex (Default: #50A6FF): ").strip() or "#50A6FF"
@@ -936,7 +934,7 @@ def run_rofi_menu():
 
     if "Custom" in chosen:
         # Prompt for hex via rofi
-        hex_prompt = ["rofi", "-dmenu", "-p", "Enter Accent Hex (e.g. #FF2A55)"]
+        hex_prompt = ["rofi", "-dmenu", "-p", "Enter Accent Hex (e.g. #DC1A36)"]
         proc_hex = subprocess.run(hex_prompt, input="", text=True, stdout=subprocess.PIPE)
         custom_accent = proc_hex.stdout.strip()
         if custom_accent:
@@ -954,8 +952,8 @@ def main():
     parser = argparse.ArgumentParser(description="Serena Rice Theme & Palette Manager")
     parser.add_argument("preset_pos", nargs="?", default=None, help="Quick preset name (e.g. serena-wine, sakura-pastel, kalos-cyber)")
     parser.add_argument("--preset", "-p", type=str, help="Preset name (e.g. serena-wine, sakura-pastel, kalos-cyber, midnight-amethyst, matcha-sage, crimson-velvet, ocean-breeze)")
-    parser.add_argument("--accent", "-a", type=str, help="Custom accent hex color (e.g. '#FF597B')")
-    parser.add_argument("--bg", "-b", type=str, help="Custom background hex color (e.g. '#1C0D11')")
+    parser.add_argument("--accent", "-a", type=str, help="Custom accent hex color (e.g. '#F02D4C')")
+    parser.add_argument("--bg", "-b", type=str, help="Custom background hex color (e.g. '#201011')")
     parser.add_argument("--ribbon", "-r", type=str, help="Custom ribbon hex color (e.g. '#50A6FF')")
     parser.add_argument("--rofi", action="store_true", help="Open theme selector menu with Rofi")
     parser.add_argument("--list", "-l", action="store_true", help="List all available presets")
@@ -1014,7 +1012,7 @@ def main():
         bg = args.bg if args.bg else cur_colors.get("bg_window", "#201011")
         if not bg.startswith("#"):
             bg = "#" + bg
-        accent = args.accent if args.accent else cur_colors.get("accent", "#FF2A55")
+        accent = args.accent if args.accent else cur_colors.get("accent", "#DC1A36")
         if not accent.startswith("#"):
             accent = "#" + accent
         ribbon = args.ribbon if args.ribbon else cur_colors.get("ribbon_blue", "#50A6FF")

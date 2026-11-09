@@ -140,7 +140,7 @@ echo -e "  ${GREEN}✔ All packages installed successfully!${NC}\n"
 
 # === DIRECTORY INITIALIZATION ===
 echo -e "${YELLOW}📁 [2/5] Creating user config directories...${NC}"
-mkdir -p "$HOME/.config/hypr/scripts/services"
+mkdir -p "$HOME/.config/hypr/scripts/popups" "$HOME/.config/hypr/scripts/widgets" "$HOME/.config/hypr/scripts/services" "$HOME/.config/hypr/scripts/system"
 mkdir -p "$HOME/.config/hypr/styles"
 mkdir -p "$HOME/.config/hypr/assets"
 mkdir -p "$HOME/.config/waybar"
@@ -187,7 +187,7 @@ DOTFILES_DIR="$REPO_ROOT/config"
 # Hyprland (Native Lua Engine)
 cp -rf "$DOTFILES_DIR/hypr/"* "$HOME/.config/hypr/"
 rm -f "$HOME/.config/hypr/hyprland.conf"
-chmod +x "$HOME/.config/hypr/scripts/"*.sh "$HOME/.config/hypr/scripts/"*.py "$HOME/.config/hypr/scripts/services/"*.py 2>/dev/null || true
+chmod +x "$HOME/.config/hypr/scripts/popups/"* "$HOME/.config/hypr/scripts/widgets/"* "$HOME/.config/hypr/scripts/services/"* "$HOME/.config/hypr/scripts/system/"* 2>/dev/null || true
 
 # Deploy other components
 cp -rf "$DOTFILES_DIR/waybar/"* "$HOME/.config/waybar/"
@@ -243,14 +243,17 @@ sudo systemctl daemon-reload 2>/dev/null || true
 
 # Autostart Hyprland from login shell (zsh & bash)
 for prof in "$HOME/.zprofile" "$HOME/.bash_profile"; do
-    if ! grep -q "exec Hyprland" "$prof" 2>/dev/null; then
-        cat >> "$prof" << 'PROFILE_EOF'
+    if ! grep -q "exec start-hyprland" "$prof" 2>/dev/null; then
+        sed -i 's/exec Hyprland/exec start-hyprland/g' "$prof" 2>/dev/null || true
+        if ! grep -q "exec start-hyprland" "$prof" 2>/dev/null; then
+            cat >> "$prof" << 'PROFILE_EOF'
 
 # Autostart Hyprland on TTY1
 if [ -z "$WAYLAND_DISPLAY" ] && [ "$XDG_VTNR" = "1" -o "$(tty)" = "/dev/tty1" ]; then
-    exec Hyprland
+    exec start-hyprland
 fi
 PROFILE_EOF
+        fi
     fi
 done
 

@@ -34,7 +34,7 @@ SVG_ACTIVE = f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" w
     L 64 82
     C 78 80, 91 66, 92 48
     Z"
-    fill="#FF94B8" />
+    fill="#E8C2D0" />
 
   <!-- Lower Bun Cel-shading Shadow Tone -->
   <path d="
@@ -45,7 +45,7 @@ SVG_ACTIVE = f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" w
     C 76 74, 60 77, 50 77
     C 40 77, 24 74, 14 66
     Z"
-    fill="#E0688F" />
+    fill="#A68595" />
 
   <!-- Cream Filling (Soft wavy cream layer sandwiched in middle) -->
   <path d="
@@ -57,7 +57,7 @@ SVG_ACTIVE = f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" w
     C 54 64, 46 64, 36 65
     C 19 66, 9 60, 8 48
     Z"
-    fill="#FFF5F8" stroke="#4D0A1C" stroke-width="2.8" stroke-linejoin="round" />
+    fill="#FFF0F5" stroke="#4D0A1C" stroke-width="2.8" stroke-linejoin="round" />
 
   <!-- Upper Pastry Bun (fill only) -->
   <path d="
@@ -68,23 +68,23 @@ SVG_ACTIVE = f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" w
     C 54 43, 46 43, 37 48
     C 27 54, 18 54, 8 48
     Z"
-    fill="#FF5C8A" />
+    fill="#F02D4C" />
 
   <!-- Shared Outer Silhouette Stroke (Drawn on top to ensure 100% IDENTICAL border thickness) -->
   <use href="#puff-silhouette" fill="none" stroke="#4D0A1C" stroke-width="3.5" stroke-linejoin="round" />
 
   <!-- Stem at top -->
-  <path d="M 50 8 C 50 3, 56 0, 62 1" fill="none" stroke="#3D262C" stroke-width="3.5" stroke-linecap="round" />
+  <path d="M 50 8 C 50 3, 56 0, 62 1" fill="none" stroke="#4D0A1C" stroke-width="3.5" stroke-linecap="round" />
 
   <!-- Cherry on top (Solid flat ruby red, no highlight curve) -->
-  <circle cx="50" cy="10" r="7.5" fill="#D31D45" stroke="#4D0A1C" stroke-width="3" />
+  <circle cx="50" cy="10" r="7.5" fill="#DC1A36" stroke="#4D0A1C" stroke-width="3" />
 </svg>
 """
 
 def create_inactive_svg(stops, is_hover=False):
     grad_stops = "\n".join([f'      <stop offset="{pct}" stop-color="{col}" />' for pct, col in stops])
-    stroke_col = "#6E132D" if is_hover else "#4D0A1C"
-    bottom_3d = "#5C0C22" if is_hover else "#4D0A1C"
+    stroke_col = "#610E24" if is_hover else "#4D0A1C"
+    bottom_3d = "#610E24" if is_hover else "#4D0A1C"
     
     return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
   <defs>

@@ -1,0 +1,63 @@
+# spotlight.script — Theatrical Stage Progressive Boot & Fast All-at-Once Shut-off
+
+screen_width = Window.GetWidth();
+screen_height = Window.GetHeight();
+
+# 1. Background
+bg_image = Image("background.png");
+bg_scaled = bg_image.Scale(screen_width, screen_height);
+bg_sprite = Sprite(bg_scaled);
+bg_sprite.SetPosition(0, 0, -100);
+
+# 2. Load 45 optimized progressive frames (half RAM footprint, silky smooth)
+NUM_FRAMES = 45;
+for (i = 0; i < NUM_FRAMES; i++) {
+    frame_img = Image("frame-" + i + ".png");
+    if (screen_width != 1920 || screen_height != 1080) {
+        frames[i] = frame_img.Scale(screen_width, screen_height);
+    } else {
+        frames[i] = frame_img;
+    }
+}
+
+# 3. Main Stage Sprite
+mode = Plymouth.GetMode();
+stage_sprite = Sprite();
+stage_sprite.SetPosition(0, 0, 10);
+
+shutdown_opacity = 1.0;
+progress = 0.0;
+
+# If shutdown or reboot, start on the fully illuminated stage!
+if (mode == "shutdown" || mode == "reboot") {
+    stage_sprite.SetImage(frames[NUM_FRAMES - 1]);
+} else {
+    stage_sprite.SetImage(frames[0]);
+}
+
+# 4. Refresh Callback
+# Boot: 0.60 (~6s build-up to center hero spotlight, then holds on stage)
+# Shutdown: all lights fade out together to black in ~0.6s
+fun refresh_callback () {
+    if (mode == "shutdown" || mode == "reboot") {
+        if (shutdown_opacity > 0.0) {
+            shutdown_opacity = shutdown_opacity - 0.08;
+            if (shutdown_opacity < 0.0) {
+                shutdown_opacity = 0.0;
+            }
+            stage_sprite.SetOpacity(shutdown_opacity);
+        }
+    } else {
+        # Boot: play forward smoothly from 0 to 44
+        idx = Math.Int(progress);
+        if (idx < NUM_FRAMES) {
+            stage_sprite.SetImage(frames[idx]);
+        } else {
+            # Hold indefinitely on the fully illuminated grand stage! Never loop.
+            stage_sprite.SetImage(frames[NUM_FRAMES - 1]);
+        }
+        progress = progress + 0.30;
+    }
+}
+
+Plymouth.SetRefreshFunction(refresh_callback);

@@ -22,9 +22,9 @@ right_format = """$time"""
 
 [os]
 disabled = false
-style = "bg:#FF597B fg:#201011 bold"
+style = "bg:#F02D4C fg:#201011 bold"
 symbols = { EndeavourOS = " " }
-format = '[](#FF597B)[ $symbol$name ]($style)[](#FF597B) '
+format = '[](#F02D4C)[ $symbol$name ]($style)[](#F02D4C) '
 
 [directory]
 style = "bg:#50A6FF fg:#201011 bold"
@@ -38,7 +38,7 @@ symbol = ""
 format = '[](#E8C2D0)[ $symbol $branch]($style)'
 
 [git_status]
-style = "bg:#E8C2D0 fg:#FF2A55 bold"
+style = "bg:#E8C2D0 fg:#DC1A36 bold"
 format = '[ $all_status$ahead_behind ]($style)[](#E8C2D0) '
 
 [nodejs]
@@ -52,7 +52,7 @@ symbol = ""
 format = '[](#3A222A)[ $symbol ($version) ]($style)[](#3A222A) '
 
 [rust]
-style = "bg:#3A222A fg:#FF597B"
+style = "bg:#3A222A fg:#F02D4C"
 symbol = "󱘗"
 format = '[](#3A222A)[ $symbol ($version) ]($style)[](#3A222A) '
 
@@ -78,5 +78,5 @@ style = "bg:#2A1A1E fg:#A68595"
 format = '[](#2A1A1E)[ 󱑂 $time ]($style)[](#2A1A1E)'
 
 [character]
-success_symbol = '[ ✿ ❯](bold #FF2A55) '
-error_symbol = '[ ✿ ✖](bold #FF597B) '
+success_symbol = '[ ✿ ❯](bold #DC1A36) '
+error_symbol = '[ ✿ ✖](bold #F02D4C) '

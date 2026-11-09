@@ -15,7 +15,7 @@ window#music-visualizer-window {
 }
 
 #main-card {
-    background-color: rgba(255, 240, 245, 0.96);
+    background-color: @bg_tactile_cream;
     border-style: solid;
     border-color: @border_waybar_3d;
     border-top-width: 2px;
@@ -31,15 +31,56 @@ window#music-visualizer-window {
 }
 
 #main-card:hover {
-    background-color: #FFFFFF;
+    background-color: @text_inverse;
 }
 
 /* === HEADER === */
 .title-header {
-    color: #851733;
+    color: @bg_waybar;
     font-size: 11px;
     font-weight: 800;
     letter-spacing: 0.05em;
+}
+
+/* === DRAG HANDLE (Tactile Pill) === */
+.drag-grip-zone {
+    padding: 2px 4px;
+    border-radius: 6px;
+    transition: background-color 0.15s ease;
+}
+
+.drag-grip-zone:hover {
+    background-color: rgba(133, 23, 51, 0.08);
+}
+
+.drag-handle-pill {
+    background-color: rgba(133, 23, 51, 0.25);
+    border-radius: 3px;
+    min-height: 4px;
+    margin: 4px 8px;
+}
+
+.btn-header-close {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0 4px;
+    min-width: 22px;
+    min-height: 22px;
+    color: @bg_waybar;
+    font-size: 13px;
+    border-radius: 6px;
+    transition: all 0.15s ease;
+}
+
+.btn-header-close:hover {
+    background-color: rgba(133, 23, 51, 0.12);
+    color: @accent;
+}
+
+.btn-close-icon {
+    font-size: 12px;
+    font-weight: 700;
 }
 
 /* === PLAYER CARD (Sunset Gradient Sub-card) === */
@@ -71,21 +112,21 @@ window#music-visualizer-window {
 }
 
 .track-title {
-    color: #FFFFFF;
+    color: @text_inverse;
     font-size: 13px;
     font-weight: 800;
     text-shadow: 0 1px 2px rgba(77, 10, 28, 0.65);
 }
 
 .track-artist {
-    color: #FFF0F5;
+    color: @text_primary;
     font-size: 11px;
     font-weight: 600;
     text-shadow: 0 1px 1px rgba(77, 10, 28, 0.50);
 }
 
 .time-label {
-    color: #4D0A1C;
+    color: @border_waybar_3d;
     font-size: 10.5px;
     font-weight: 800;
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
@@ -107,7 +148,7 @@ progressbar trough {
 }
 
 progressbar progress {
-    background-color: #851733;
+    background-color: @bg_waybar;
     border: 1px solid rgba(255, 255, 255, 0.40);
     border-radius: 3px;
     min-height: 6px;
@@ -142,12 +183,12 @@ button {
 .btn-ctrl-nav:hover {
     background-color: @bg_waybar_hover;
     border-color: @border_waybar_3d_hover;
-    box-shadow: inset 0 0 0 1.8px #FF597B;
-    color: #FFFFFF;
+    box-shadow: inset 0 0 0 1.8px @accent_hover;
+    color: @text_inverse;
 }
 
 .btn-ctrl-play {
-    color: #FFFFFF;
+    color: @text_inverse;
     background-color: @bg_waybar;
     border-style: solid;
     border-color: @border_waybar_3d;
@@ -167,7 +208,7 @@ button {
 .btn-ctrl-play:hover {
     background-color: @bg_waybar_hover;
     border-color: @border_waybar_3d_hover;
-    box-shadow: inset 0 0 0 1.8px #FF597B;
+    box-shadow: inset 0 0 0 1.8px @accent_hover;
     color: @accent_hover;
 }
 
@@ -175,7 +216,7 @@ button {
 .status-badge {
     background-color: rgba(77, 10, 28, 0.35);
     border: 1px solid rgba(77, 10, 28, 0.45);
-    color: #FFF0F5;
+    color: @text_primary;
     font-size: 9px;
     font-weight: 700;
     padding: 2px 7px;
@@ -184,11 +225,11 @@ button {
 }
 
 .status-badge.playing {
-    color: #8FBC8F;
+    color: @status_success;
     border-color: rgba(143, 188, 143, 0.60);
 }
 
 .status-badge.paused {
-    color: #FFE4EC;
+    color: @text_primary;
     border-color: rgba(77, 10, 28, 0.50);
 }
