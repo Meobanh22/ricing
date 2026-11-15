@@ -57,7 +57,7 @@
     C 54 43, 46 43, 37 48
     C 27 54, 18 54, 8 48
     Z"
-    fill="#F02D4C" />
+    fill="#FF5C8A" />
 
   <!-- Shared Outer Silhouette Stroke (Drawn on top to ensure 100% IDENTICAL border thickness) -->
   <use href="#puff-silhouette" fill="none" stroke="#4D0A1C" stroke-width="3.5" stroke-linejoin="round" />

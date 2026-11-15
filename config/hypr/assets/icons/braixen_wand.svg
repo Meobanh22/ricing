@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- Self-contained centered Braixen Wand + Bandage + Serena Bow (Minimal Matte Cel) -->
+  <!-- Wooden Branch (Top & Bottom with twig spur) -->
+  <path d="M 46 8 C 48 6, 52 6, 54 8 L 54 40 L 46 40 Z"
+        fill="#8E542C" stroke="#4D0A1C" stroke-width="3.0" stroke-linejoin="round"/>
+  <path d="M 46 74 L 46 82 L 38 89 C 36 91, 38 94, 41 92 L 46 87 L 46 93 C 48 95, 52 95, 54 93 L 54 74 Z"
+        fill="#8E542C" stroke="#4D0A1C" stroke-width="3.0" stroke-linejoin="round"/>
+
+  <!-- White Bandage Wrap (Compact Matte Layers) -->
+  <rect x="43.5" y="54" width="13" height="21" rx="3"
+        fill="#FFF0F5" stroke="#4D0A1C" stroke-width="3.0" stroke-linejoin="round"/>
+  <line x1="44" y1="61" x2="56" y2="63" stroke="#4D0A1C" stroke-width="2.2" stroke-linecap="round"/>
+  <line x1="44" y1="68" x2="56" y2="70" stroke="#4D0A1C" stroke-width="2.2" stroke-linecap="round"/>
+
+  <!-- Serena Minimal Matte Bow -->
+  <path d="M 42 38 C 31 24, 18 20, 12 26 C 8 30, 8 62, 12 66 C 18 72, 31 68, 42 54 Z"
+        fill="#DC1A36" stroke="#4D0A1C" stroke-width="3.2" stroke-linejoin="round"/>
+  <path d="M 58 38 C 69 24, 82 20, 88 26 C 92 30, 92 62, 88 66 C 82 72, 69 68, 58 54 Z"
+        fill="#DC1A36" stroke="#4D0A1C" stroke-width="3.2" stroke-linejoin="round"/>
+  <rect x="41.5" y="32" width="17" height="28" rx="6.5"
+        fill="#F02D4C" stroke="#4D0A1C" stroke-width="3.2" stroke-linejoin="round"/>
+</svg>

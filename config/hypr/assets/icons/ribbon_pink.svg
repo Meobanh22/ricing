@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="100%" height="100%">
+  <defs>
+    <linearGradient id="pGradLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF6B8B"/>
+      <stop offset="60%" stop-color="#FF2A55"/>
+      <stop offset="100%" stop-color="#D90E38"/>
+    </linearGradient>
+    <linearGradient id="pGradRight" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FF6B8B"/>
+      <stop offset="60%" stop-color="#FF2A55"/>
+      <stop offset="100%" stop-color="#D90E38"/>
+    </linearGradient>
+    <linearGradient id="pTailLeft" x1="0%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#E81742"/>
+      <stop offset="100%" stop-color="#A80727"/>
+    </linearGradient>
+    <linearGradient id="pTailRight" x1="100%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#E81742"/>
+      <stop offset="100%" stop-color="#A80727"/>
+    </linearGradient>
+    <linearGradient id="pKnot" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FF85A0"/>
+      <stop offset="45%" stop-color="#FF2A55"/>
+      <stop offset="100%" stop-color="#C20A30"/>
+    </linearGradient>
+    <filter id="pGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#5E0013" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#pGlow)">
+    <path d="M 112 126 C 106 148, 86 182, 68 218 L 88 198 L 108 214 C 114 186, 122 152, 126 130 Z" 
+          fill="url(#pTailLeft)" stroke="#680017" stroke-width="2.5" stroke-linejoin="round"/>
+    
+    <path d="M 144 126 C 150 148, 170 182, 188 218 L 168 198 L 148 214 C 142 186, 134 152, 130 130 Z" 
+          fill="url(#pTailRight)" stroke="#680017" stroke-width="2.5" stroke-linejoin="round"/>
+
+    <path d="M 116 112 C 96 74, 52 48, 32 64 C 14 80, 24 120, 64 128 C 88 132, 108 124, 116 120 Z" 
+          fill="url(#pGradLeft)" stroke="#680017" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M 116 114 C 84 104, 48 94, 38 78 C 42 74, 60 72, 86 86 C 104 96, 114 108, 116 114 Z" 
+          fill="#B8072B" opacity="0.55"/>
+    <path d="M 40 68 C 56 56, 88 74, 104 98" fill="none" stroke="#FFF0F5" stroke-width="3" stroke-linecap="round" opacity="0.6"/>
+
+    <path d="M 140 112 C 160 74, 204 48, 224 64 C 242 80, 232 120, 192 128 C 168 132, 148 124, 140 120 Z" 
+          fill="url(#pGradRight)" stroke="#680017" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M 140 114 C 172 104, 208 94, 218 78 C 214 74, 196 72, 170 86 C 152 96, 142 108, 140 114 Z" 
+          fill="#B8072B" opacity="0.55"/>
+    <path d="M 216 68 C 200 56, 168 74, 152 98" fill="none" stroke="#FFF0F5" stroke-width="3" stroke-linecap="round" opacity="0.6"/>
+
+    <ellipse cx="128" cy="116" rx="19" ry="17" fill="url(#pKnot)" stroke="#680017" stroke-width="3"/>
+    <path d="M 122 102 C 124 114, 124 120, 121 130" fill="none" stroke="#680017" stroke-width="2" stroke-linecap="round" opacity="0.65"/>
+    <path d="M 134 102 C 132 114, 132 120, 135 130" fill="none" stroke="#680017" stroke-width="2" stroke-linecap="round" opacity="0.65"/>
+    <ellipse cx="127" cy="110" rx="9" ry="5" fill="#FFFFFF" opacity="0.45"/>
+  </g>
+</svg>

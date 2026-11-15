@@ -5,7 +5,20 @@ exit $?
 ":"""
 # generate_pokepuffs.py — Authentic Pokémon Amie Sweet Poké Puff icons for Waybar (clean matte anime cel-shaded, no white highlight curves).
 import os
+import json
 import subprocess
+
+def get_pokepuff_pink():
+    try:
+        tokens_file = os.path.expanduser("~/custom/config/theme/tokens.json")
+        if os.path.exists(tokens_file):
+            with open(tokens_file, "r") as f:
+                data = json.load(f)
+                colors = data.get("colors", {})
+                return colors.get("vivid_pink", colors.get("pokepuff_pink", "#FF5C8A"))
+    except Exception:
+        pass
+    return "#FF5C8A"
 
 COMMON_DEFS = """
     <!-- Single Shared Authentic Poké Puff Silhouette -->
@@ -68,7 +81,7 @@ SVG_ACTIVE = f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" w
     C 54 43, 46 43, 37 48
     C 27 54, 18 54, 8 48
     Z"
-    fill="#F02D4C" />
+    fill="{get_pokepuff_pink()}" />
 
   <!-- Shared Outer Silhouette Stroke (Drawn on top to ensure 100% IDENTICAL border thickness) -->
   <use href="#puff-silhouette" fill="none" stroke="#4D0A1C" stroke-width="3.5" stroke-linejoin="round" />

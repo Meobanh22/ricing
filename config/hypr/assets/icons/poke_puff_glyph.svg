@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Base Liner -->
+  <path d="M 7 15 L 8.2 21 C 8.2 21.5, 8.6 22, 9.2 22 L 14.8 22 C 15.4 22, 15.8 21.5, 15.8 21 L 17 15 Z"/>
+  <!-- Pleats -->
+  <line x1="10.5" y1="15" x2="10.8" y2="22"/>
+  <line x1="13.5" y1="15" x2="13.2" y2="22"/>
+  <!-- Fluffy Cream Body -->
+  <path d="M 6.2 15 C 5 12.8, 7.8 11.5, 9.5 12.2 C 10.5 9.8, 13.5 9.8, 14.5 12.2 C 16.2 11.5, 19 12.8, 17.8 15 Z"/>
+  <!-- Swirl Peak -->
+  <path d="M 9.5 12 C 10 9.2, 12.5 8, 13.5 9.5"/>
+  <!-- Top Berry -->
+  <circle cx="12" cy="5.5" r="1.8" fill="currentColor"/>
+  <path d="M 12.5 4 C 13.5 3.2, 14.5 3.5, 14 4.5"/>
+</svg>
