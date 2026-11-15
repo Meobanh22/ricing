@@ -88,7 +88,10 @@ hl.on("hyprland.start", function ()
     -- 10. Low battery alert daemon
     hl.exec_cmd("python3 ~/.config/hypr/scripts/services/battery_alert.py &")
 
-    -- 11. Desktop background widgets (profile card & weather)
+    -- 11. Application usage tracker daemon
+    hl.exec_cmd("python3 ~/.config/hypr/scripts/services/app_tracker.py daemon &")
+
+    -- 12. Desktop background widgets (profile card & weather)
     hl.exec_cmd("python3 ~/.config/hypr/scripts/widgets/desktop_widgets.py &")
 end)
 
@@ -194,9 +197,7 @@ hl.window_rule({
 hl.window_rule({
     name = "task-manager-rule",
     match = { class = "^(task-manager|btop)$" },
-    float = true,
-    size = "960 620",
-    center = true,
+    tile = true,
 })
 
 hl.window_rule({
@@ -229,7 +230,7 @@ hl.layer_rule({
 hl.layer_rule({
     name = "cc-anim",
     match = { namespace = "^(control-center)$" },
-    animation = "slide top",
+    animation = "none",
 })
 
 hl.layer_rule({
@@ -328,6 +329,10 @@ hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left" }))
 hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
 hl.bind(mainMod .. " + up",    hl.dsp.focus({ direction = "up" }))
 hl.bind(mainMod .. " + down",  hl.dsp.focus({ direction = "down" }))
+
+-- Tab Switching (Super + Tab -> Next Tab, Super + Shift + Tab -> Previous Tab)
+hl.bind(mainMod .. " + Tab",         hl.dsp.send_shortcut({ mods = "CTRL", key = "Tab" }))
+hl.bind(mainMod .. " + SHIFT + Tab", hl.dsp.send_shortcut({ mods = "CTRL + SHIFT", key = "Tab" }))
 
 -- Workspaces 1 -> 5
 for i = 1, 5 do
