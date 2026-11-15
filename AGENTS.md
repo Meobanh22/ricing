@@ -4,7 +4,7 @@ Applies to Hyprland, Waybar, Control Center, Shelf, Clipboard, Dashboard, Rofi, 
 
 ## Colors
 
-`config/theme/tokens.json` is the source of truth. This table is a quick reference for the default Serena Wine palette; theme presets may change values wh2ping the same roles. Components use these roles through generated palettes or the shared Python palette.
+`config/theme/tokens.json` is the source of truth. This table is a quick reference for the Serena Wine palette. Components use these roles through generated palettes or the shared Python palette.
 
 | Use | Token | Default color |
 | :--- | :--- | :--- |
@@ -22,6 +22,7 @@ Applies to Hyprland, Waybar, Control Center, Shelf, Clipboard, Dashboard, Rofi, 
 | Ribbon / Screen | `ribbon_blue` / `screen_cyan` | `#50A6FF` / `#87F0FF` |
 | Waybar Ruby / 3D Shadow | `bg_waybar` / `border_waybar_3d` | `#851733` / `#4D0A1C` |
 | Tactile Cream Card | `bg_tactile_cream` | `rgba(255,240,245,0.96)` |
+| Poképuff Pink | `pokepuff_pink` | `#FF5C8A` |
 | Sunset Gradient | `gradient_sunset` | `#A3183D` $\to$ `#E53262` $\to$ `#FF7299` $\to$ `#EAA2C6` $\to$ `#BE7AA8` |
 
 - Interactive status icons use `accent`. System badges use `accent` with `text_inverse`. Official third-party notification icons may retain their brand colors.
@@ -32,7 +33,7 @@ Applies to Hyprland, Waybar, Control Center, Shelf, Clipboard, Dashboard, Rofi, 
 
 - Follow the existing component's structure. Adjust width, spacing, radius, and text size to keep content readable and unclipped; the old numeric scales are not requirements.
 - Keep static popups aligned with Waybar. Shelf remains draggable. Hover states may change surface, border, icon, or text color using the roles above. Keyboard focus must remain visible.
-- Avoid neon, glow, and decorative shadows. Keep motion short and subtle.
+- Avoid neon, glow, and decorative shadows. Keep motion short and subtle. Do not add tooltips to desktop background widgets.
 
 ## Text and files
 

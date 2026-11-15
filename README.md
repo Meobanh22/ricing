@@ -22,25 +22,13 @@ Anime minimalist dotfiles configuration system inspired by Serena, running on **
 
 ---
 
-## Synchronization & Theme Manager
+## Synchronization (`./sync.sh`)
 
-### 1. Two-way Dotfiles Synchronization (`./sync.sh`)
+### Two-way Dotfiles Synchronization
 ```bash
 ./sync.sh           # Push repository configs -> ~/.config & Hot-Reload live
 ./sync.sh --pull    # Pull changes from ~/.config -> repository
 ./sync.sh --diff    # Compare differences between repository and ~/.config
-```
-
-### 2. System-wide Theme Switching (`./change_theme.sh`)
-Synchronizes and live reloads all 10 component targets (Waybar, Hyprland Lua, GTK 3/4, Popups, Kitty, VS Code, btop, Rofi, Wlogout, SwayNC):
-```bash
-./change_theme.sh --list                    # List available theme presets
-./change_theme.sh midnight-amethyst         # Switch to Midnight Amethyst
-./change_theme.sh matcha-sage               # Switch to Matcha Sage
-./change_theme.sh crimson-velvet            # Switch to Crimson Velvet
-./change_theme.sh sakura-pastel             # Switch to Sakura Pastel
-./change_theme.sh serena-wine               # Switch to default Serena Wine
-./change_theme.sh --rofi                    # Open interactive Rofi palette selector
 ```
 
 ---
@@ -88,7 +76,7 @@ custom/ (Repository Root)
 │   ├── wallpapers/         # Curated HD wallpapers
 │   ├── avatars/            # Serena profile & Sylveon avatars
 │   └── cursors/            # Sylveon Custom dual cursor theme
-├── scripts/                # Administration tools (theme_manager.py, sync.sh, change_theme.sh)
+├── scripts/                # Administration tools (build_theme.py, sync.sh)
 ├── install/                # Automated installer scripts (setup_endeavouros.sh, setup_ubuntu.sh)
 ├── dev_tools/              # Asset generators & cursor builders
 ├── archive/                # Safely archived legacy configs & drafts
