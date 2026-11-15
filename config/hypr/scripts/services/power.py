@@ -49,6 +49,18 @@ class PowerService:
     @staticmethod
     def get_power_mode() -> str:
         """Returns current power mode ('powersave', 'balanced', or 'performance')."""
+        if shutil.which("powerprofilesctl"):
+            try:
+                res = subprocess.run(["powerprofilesctl", "get"], capture_output=True, text=True, check=False)
+                if res.returncode == 0:
+                    mode = res.stdout.strip().lower()
+                    if mode == "power-saver":
+                        return "powersave"
+                    elif mode in ["powersave", "balanced", "performance"]:
+                        return mode
+            except Exception:
+                pass
+
         mode_file = "/tmp/power_mode.txt"
         if not os.path.exists(mode_file) and os.path.exists("/tmp/serena_power_mode.txt"):
             mode_file = "/tmp/serena_power_mode.txt"
@@ -58,14 +70,6 @@ class PowerService:
                     mode = f.read().strip().lower()
                     if mode in ["powersave", "balanced", "performance"]:
                         return mode
-            except Exception:
-                pass
-
-        if shutil.which("powerprofilesctl"):
-            try:
-                res = subprocess.run(["powerprofilesctl", "get"], capture_output=True, text=True, check=False)
-                if res.returncode == 0:
-                    return res.stdout.strip()
             except Exception:
                 pass
 
@@ -83,18 +87,20 @@ class PowerService:
     @staticmethod
     def set_power_mode(mode: str):
         """Sets power mode ('powersave', 'balanced', or 'performance')."""
-        try:
-            with open("/tmp/power_mode.txt", "w") as f:
-                f.write(mode.lower())
-        except Exception:
-            pass
+        mode = mode.lower()
+        ctl_mode = "power-saver" if mode in ["powersave", "power-saver"] else mode
 
         if shutil.which("powerprofilesctl"):
             try:
-                subprocess.Popen(["powerprofilesctl", "set", mode])
-                return
+                subprocess.run(["powerprofilesctl", "set", ctl_mode], check=False)
             except Exception:
                 pass
+
+        try:
+            with open("/tmp/power_mode.txt", "w") as f:
+                f.write("powersave" if mode in ["powersave", "power-saver"] else mode)
+        except Exception:
+            pass
 
         gov = "performance" if mode == "performance" else "powersave"
         for gov_file in glob.glob("/sys/devices/system/cpu/cpu*/cpufreq/scaling_governor"):
@@ -120,7 +126,10 @@ class PowerService:
                 f"Battery level is at {capacity}%. Connect charger immediately."
             ])
             # Optional system bell / sound
-            subprocess.Popen(["paplay", "/usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga"], stderr=subprocess.DEVNULL)
+            if shutil.which("paplay"):
+                sound = "/usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga"
+                if os.path.exists(sound):
+                    subprocess.Popen(["paplay", sound], stderr=subprocess.DEVNULL)
         else:
             subprocess.Popen([
                 "notify-send",
@@ -128,6 +137,10 @@ class PowerService:
                 "-a", "Power Management",
                 "-i", "battery-caution",
                 "✿ Battery Low",
-                f"Battery is at {capacity}%. Connect charger."
+                f"Battery is at {capacity}%. Please connect your charger."
             ])
+            if shutil.which("paplay"):
+                sound = "/usr/share/sounds/freedesktop/stereo/dialog-warning.oga"
+                if os.path.exists(sound):
+                    subprocess.Popen(["paplay", sound], stderr=subprocess.DEVNULL)
 

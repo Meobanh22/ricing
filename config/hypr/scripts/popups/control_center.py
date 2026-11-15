@@ -5,6 +5,7 @@ import os
 import sys
 import time
 import json
+import re
 import signal
 import subprocess
 import shutil
@@ -83,6 +84,19 @@ def clip_device_bounds(cr, x, y, w, h, r):
     cr.arc(x + r, y + h - r, r, 0.5 * math.pi, math.pi)
     cr.close_path()
 
+def draw_rounded_rect(cr, x, y, w, h, r):
+    cr.new_sub_path()
+    cr.arc(x + r, y + r, r, math.pi, 1.5 * math.pi)
+    cr.arc(x + w - r, y + r, r, 1.5 * math.pi, 2 * math.pi)
+    cr.arc(x + w - r, y + h - r, r, 0, 0.5 * math.pi)
+    cr.arc(x + r, y + h - r, r, 0.5 * math.pi, math.pi)
+    cr.close_path()
+
+C_GROOVE_FILL = hex_to_rgba(C_BG_WIN, 0.62)
+C_GROOVE_STROKE1 = hex_to_rgba(C_BG_WIN, 0.90)
+C_GROOVE_STROKE2 = hex_to_rgba(C_BORDER_3D, 0.85)
+C_GROOVE_STROKE3 = hex_to_rgba(C_TEXT_SEC, 0.25)
+
 def draw_anime_grooves(cr, cx, cy, grooves, a1, a2):
     for (r_in, r_out) in grooves:
         cr.save()
@@ -90,24 +104,32 @@ def draw_anime_grooves(cr, cx, cy, grooves, a1, a2):
         cr.arc(cx, cy, r_out, a1, a2)
         cr.arc_negative(cx, cy, r_in, a2, a1)
         cr.close_path()
-        cr.set_source_rgba(*hex_to_rgba(C_BG_WIN, 0.62)); cr.fill()
+        cr.set_source_rgba(*C_GROOVE_FILL); cr.fill()
 
         cr.arc(cx, cy, r_out, a1, a2)
-        cr.set_source_rgba(*hex_to_rgba(C_BG_WIN, 0.90))
+        cr.set_source_rgba(*C_GROOVE_STROKE1)
         cr.set_line_width(1.1); cr.stroke()
 
         cr.arc(cx, cy, r_in, a1, a2)
-        cr.set_source_rgba(*hex_to_rgba(C_BORDER_3D, 0.85))
+        cr.set_source_rgba(*C_GROOVE_STROKE2)
         cr.set_line_width(1.0); cr.stroke()
 
         cr.arc(cx, cy, r_out + 0.8, a1, a2)
-        cr.set_source_rgba(*hex_to_rgba(C_TEXT_SEC, 0.25))
+        cr.set_source_rgba(*C_GROOVE_STROKE3)
         cr.set_line_width(0.7); cr.stroke()
         cr.restore()
 
-def create_top_red_casing_path(cr, x_left, x_right, y_dark_top, cx, cy_top, r_dark, ang_dark_top_start, ang_dark_top_end, x_dark_cut, device_r, notch_d=2.0, trans=1.8):
+def create_top_red_casing_path(cr, x_left, x_right, y_dark_top, cx, cy_top, r_dark, ang_dark_top_start, ang_dark_top_end, x_dark_cut, device_r, notch_d=2.0, trans=1.8, y_top=0.0):
     y_tl1_t = 48.0;  y_tl1_b = 52.0
     y_tl2_t = 96.0;  y_tl2_b = 100.0
+
+    # Top edge notch coordinates (aligned with concentric grooves centered at corners)
+    x_orig_l = x_left - y_top
+    x_orig_r = x_right + y_top
+    x_t1_l = x_orig_l + 48.0; x_t1_r = x_orig_l + 52.0
+    x_t2_l = x_orig_l + 96.0; x_t2_r = x_orig_l + 100.0
+    x_tr2_l = x_orig_r - 100.0; x_tr2_r = x_orig_r - 96.0
+    x_tr1_l = x_orig_r - 52.0; x_tr1_r = x_orig_r - 48.0
     
     cr.new_sub_path()
     cr.move_to(x_left, y_dark_top)
@@ -121,10 +143,32 @@ def create_top_red_casing_path(cr, x_left, x_right, y_dark_top, cx, cy_top, r_da
     cr.line_to(x_left + notch_d, y_tl1_t)
     cr.curve_to(x_left + notch_d, y_tl1_t - trans * 0.5, x_left, y_tl1_t - trans * 0.5, x_left, y_tl1_t - trans)
     
-    cr.line_to(x_left, device_r)
-    cr.arc(x_left + device_r, device_r, device_r, math.pi, 1.5 * math.pi)
-    cr.line_to(x_right - device_r, 0)
-    cr.arc(x_right - device_r, device_r, device_r, 1.5 * math.pi, 2 * math.pi)
+    cr.line_to(x_left, y_top + device_r)
+    cr.arc(x_left + device_r, y_top + device_r, device_r, math.pi, 1.5 * math.pi)
+
+    # Top edge notches (inward dipping: +notch_d in y)
+    cr.line_to(x_t1_l - trans, y_top)
+    cr.curve_to(x_t1_l - trans * 0.5, y_top, x_t1_l - trans * 0.5, y_top + notch_d, x_t1_l, y_top + notch_d)
+    cr.line_to(x_t1_r, y_top + notch_d)
+    cr.curve_to(x_t1_r + trans * 0.5, y_top + notch_d, x_t1_r + trans * 0.5, y_top, x_t1_r + trans, y_top)
+
+    cr.line_to(x_t2_l - trans, y_top)
+    cr.curve_to(x_t2_l - trans * 0.5, y_top, x_t2_l - trans * 0.5, y_top + notch_d, x_t2_l, y_top + notch_d)
+    cr.line_to(x_t2_r, y_top + notch_d)
+    cr.curve_to(x_t2_r + trans * 0.5, y_top + notch_d, x_t2_r + trans * 0.5, y_top, x_t2_r + trans, y_top)
+
+    cr.line_to(x_tr2_l - trans, y_top)
+    cr.curve_to(x_tr2_l - trans * 0.5, y_top, x_tr2_l - trans * 0.5, y_top + notch_d, x_tr2_l, y_top + notch_d)
+    cr.line_to(x_tr2_r, y_top + notch_d)
+    cr.curve_to(x_tr2_r + trans * 0.5, y_top + notch_d, x_tr2_r + trans * 0.5, y_top, x_tr2_r + trans, y_top)
+
+    cr.line_to(x_tr1_l - trans, y_top)
+    cr.curve_to(x_tr1_l - trans * 0.5, y_top, x_tr1_l - trans * 0.5, y_top + notch_d, x_tr1_l, y_top + notch_d)
+    cr.line_to(x_tr1_r, y_top + notch_d)
+    cr.curve_to(x_tr1_r + trans * 0.5, y_top + notch_d, x_tr1_r + trans * 0.5, y_top, x_tr1_r + trans, y_top)
+
+    cr.line_to(x_right - device_r, y_top)
+    cr.arc(x_right - device_r, y_top + device_r, device_r, 1.5 * math.pi, 2 * math.pi)
     
     cr.line_to(x_right, y_tl1_t - trans)
     cr.curve_to(x_right, y_tl1_t - trans * 0.5, x_right - notch_d, y_tl1_t - trans * 0.5, x_right - notch_d, y_tl1_t)
@@ -216,23 +260,60 @@ def draw_curved_kerned(cr, text, cx, cy_top, r_text=62.0, font_desc="DejaVu Sans
         PangoCairo.show_layout(cr, l)
         cr.restore()
 
-def draw_flower_mark(ctx, cx, cy, r_petal=9.0, r_center=3.8, color=(1.0, 0.165, 0.333)):
-    cy_opt = cy + 0.8
-    for i in range(5):
-        ang = i * (2 * math.pi / 5.0) - math.pi / 2.0
-        px = cx + (r_petal * 0.95) * math.cos(ang)
-        py = cy_opt + (r_petal * 0.95) * math.sin(ang)
-        ctx.arc(px, py, r_petal * 0.65, 0, 2 * math.pi)
-        ctx.set_source_rgba(color[0], color[1], color[2], 0.95); ctx.fill()
-    for i in range(5):
-        ang = i * (2 * math.pi / 5.0) - math.pi / 2.0
-        px = cx + (r_petal * 0.95) * math.cos(ang)
-        py = cy_opt + (r_petal * 0.95) * math.sin(ang)
-        ctx.arc(px, py, r_petal * 0.65, 0, 2 * math.pi)
-        ctx.set_source_rgba(0x20/255.0, 0x10/255.0, 0x11/255.0, 0.40); ctx.set_line_width(0.9); ctx.stroke()
-    ctx.arc(cx, cy_opt, r_center, 0, 2 * math.pi)
-    ctx.set_source_rgb(1.0, 0.94, 0.96); ctx.fill_preserve()
-    ctx.set_source_rgba(0x20/255.0, 0x10/255.0, 0x11/255.0, 0.50); ctx.set_line_width(0.8); ctx.stroke()
+_CURVED_TEXT_SURFACES = {}
+def draw_curved_kerned_cached(cr, text, cx, cy_top, r_text=62.0, font_desc="DejaVu Sans Bold 8.5", letter_spacing=1.6, color=(0x20/255.0, 0x10/255.0, 0x11/255.0)):
+    key = (text, font_desc, r_text, letter_spacing, color)
+    entry = _CURVED_TEXT_SURFACES.get(key)
+    if entry is None:
+        ref_w = int(r_text * 2 + 60)
+        ref_h = int(r_text + 40)
+        rel_cx = ref_w / 2.0
+        rel_cy = float(ref_h - 10)
+        surf = cairo.ImageSurface(cairo.FORMAT_ARGB32, ref_w, ref_h)
+        scr = cairo.Context(surf)
+        draw_curved_kerned(scr, text, rel_cx, rel_cy, r_text, font_desc, letter_spacing, color)
+        entry = (surf, ref_w, ref_h, rel_cx, rel_cy)
+        _CURVED_TEXT_SURFACES[key] = entry
+    surf, ref_w, ref_h, rel_cx, rel_cy = entry
+    cr.save()
+    cr.set_source_surface(surf, cx - rel_cx, cy_top - rel_cy)
+    cr.paint()
+    cr.restore()
+
+def draw_bow_mark(ctx, cx, cy, size=24.0, color=(0xDC/255.0, 0x1A/255.0, 0x36/255.0)):
+    """Draws the solid minimal bow mark centered at (cx, cy)."""
+    scale = size / 24.0
+    ctx.save()
+    ctx.translate(cx, cy)
+    ctx.scale(scale, scale)
+    ctx.translate(-12.0, -12.0)
+    ctx.set_source_rgb(color[0], color[1], color[2])
+
+    # Left Wing
+    ctx.new_path()
+    ctx.move_to(8.9, 9.3)
+    ctx.curve_to(6.4, 6.1, 3.9, 5.1, 2.6, 6.2)
+    ctx.curve_to(1.4, 7.4, 1.4, 16.6, 2.6, 17.8)
+    ctx.curve_to(3.9, 18.9, 6.4, 17.9, 8.9, 14.7)
+    ctx.curve_to(8.5, 13.0, 8.5, 11.0, 8.9, 9.3)
+    ctx.close_path()
+    ctx.fill()
+
+    # Right Wing
+    ctx.new_path()
+    ctx.move_to(15.1, 9.3)
+    ctx.curve_to(17.6, 6.1, 20.1, 5.1, 21.4, 6.2)
+    ctx.curve_to(22.6, 7.4, 22.6, 16.6, 21.4, 17.8)
+    ctx.curve_to(20.1, 18.9, 17.6, 17.9, 15.1, 14.7)
+    ctx.curve_to(15.5, 13.0, 15.5, 11.0, 15.1, 9.3)
+    ctx.close_path()
+    ctx.fill()
+
+    # Center Knot
+    draw_rounded_rect(ctx, 10.1, 8.0, 3.8, 8.0, 1.6)
+    ctx.fill()
+
+    ctx.restore()
 
 def draw_bell_icon(ctx, cx, cy, font_size=20, color="#DC1A36"):
     l = PangoCairo.create_layout(ctx)
@@ -425,9 +506,21 @@ class PokedexControlCenter(Gtk.Window):
             self.anim_state = "closed"
             self.anim_progress = 0.0
         self.anim_start_time = None
-        self.anim_duration = 0.32    # 320ms snappy anime sliding
+        self.anim_duration = 0.30    # 300ms smooth anime sliding (+40ms)
+        self._cached_top_casing = None
+        self._cached_bot_casing = None
+        self._cached_content_surf = None
+        self._cached_content_page = None
         self._tick_id = None
         self.quit_after_close = False
+
+        # Cached Pango font descriptions for quick tiles (avoids string parsing overhead on every frame)
+        self.pango_font_tile_icon = Pango.FontDescription("JetBrains Mono Nerd Font 20")
+        self.pango_font_tile_title = Pango.FontDescription("JetBrains Mono Nerd Font Bold 10")
+        self.pango_font_tile_val = Pango.FontDescription("JetBrains Mono Nerd Font Bold 10")
+
+        # Warm up Fontconfig, Pango glyph caches, and curved header surfaces to prevent mid-animation hitch
+        self._warmup_cache()
 
         # State cache (Instant non-blocking defaults for 0.01s launch)
         self.vol_val = 0.35
@@ -438,6 +531,20 @@ class PokedexControlCenter(Gtk.Window):
         self.ime_text = "Vietnamese"
         self.wifi_text, self.wifi_ssid = "Connected", ""
         self.notifications = self.load_notifications()
+        self.notif_page_idx = 0
+        self.last_vol_set_time = 0.0
+        self.last_bri_set_time = 0.0
+        self.last_slider_drag_time = 0.0
+
+        # Wi-Fi Selection View State
+        self.wifi_networks = []
+        self.wifi_scanning = False
+        self.wifi_connecting = False
+        self.wifi_status_msg = ""
+        self.wifi_page_idx = 0
+        self.wifi_password_prompt_ssid = None
+        self.wifi_password_input = ""
+        self.wifi_radio_enabled = True
 
         # Non-blocking async status fetch immediately in background
         threading.Thread(target=self.async_refresh_status, daemon=True).start()
@@ -488,27 +595,26 @@ class PokedexControlCenter(Gtk.Window):
         # Accent & Screen Cyan roles
         self.c_accent = C_ACCENT
         self.c_accent_rgb = hex_to_rgba(C_ACCENT)[:3]
+        self.c_accent_hover = C_ACCENT_HOVER
+        self.c_accent_hover_rgb = hex_to_rgba(C_ACCENT_HOVER)[:3]
         self.c_holo_top = hex_to_rgba(C_SCREEN_CYAN)[:3]
         self.c_holo_mid = hex_to_rgba(C_SCREEN_CYAN)[:3]
         self.c_holo_bot = hex_to_rgba(C_SCREEN_CYAN)[:3]
         self.holo_alpha_top = 0.58
         self.holo_alpha_mid = 0.52
         self.holo_alpha_bot = 0.58
-        self.holo_alpha_top = 0.58
-        self.holo_alpha_mid = 0.52
-        self.holo_alpha_bot = 0.58
 
         # LayerShell setup via shared DraggablePopup manager
         def cc_bounds(x, y, mon_w, mon_h):
-            min_x = 10
-            max_x = mon_w - int(self.W_canvas) - 10
-            if self.anim_state in ("closed", "opening"):
-                # When closed, physical shell is y in [180.0, 600.0]
-                min_y = 44 - 180  # Top of closed casing can touch Waybar / top margin
-                max_y = mon_h - 600 - 10  # Bottom of closed casing touches bottom margin
+            min_x = 14
+            max_x = mon_w - int(self.W_canvas) - 14
+            if self.anim_state in ("closed", "closing"):
+                # When closed, physical shell is local y in [180.0, 600.0]
+                min_y = 14 - 180  # Top of closed casing can reach Y = 66 (aligned with VS Code)
+                max_y = mon_h - 52 - 600 - 14
             else:
-                min_y = 44
-                max_y = max(min_y, mon_h - int(self.H_canvas) - 10)
+                min_y = 14
+                max_y = max(min_y, mon_h - 52 - int(self.H_canvas) - 14)
             if max_y < min_y:
                 max_y = min_y
             return max(min_x, min(max_x, x)), max(min_y, min(max_y, y))
@@ -516,9 +622,9 @@ class PokedexControlCenter(Gtk.Window):
         self.drag_manager = DraggablePopup(
             self,
             name="control_center",
-            default_pos=lambda mw, mh: (mw - int(self.W_canvas) - 14, 44),
+            default_pos=lambda mw, mh: (mw - int(self.W_canvas) - 14, 14),
             bounds_fn=cc_bounds,
-            drag_threshold=5.0
+            drag_threshold=14.0
         )
         self.drag_manager.init_layer_shell(
             namespace="control-center",
@@ -538,7 +644,8 @@ class PokedexControlCenter(Gtk.Window):
             Gdk.EventMask.BUTTON_RELEASE_MASK |
             Gdk.EventMask.POINTER_MOTION_MASK |
             Gdk.EventMask.LEAVE_NOTIFY_MASK |
-            Gdk.EventMask.KEY_PRESS_MASK
+            Gdk.EventMask.KEY_PRESS_MASK |
+            Gdk.EventMask.SCROLL_MASK
         )
 
         self.connect("draw", self.on_draw)
@@ -547,11 +654,37 @@ class PokedexControlCenter(Gtk.Window):
         self.connect("motion-notify-event", self.on_motion_notify)
         self.connect("leave-notify-event", self.on_leave_notify)
         self.connect("key-press-event", self.on_key_press)
+        self.connect("scroll-event", self.on_scroll)
 
         # Signal handling for Super+N toggling
         GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGUSR1, self.on_sigusr1)
 
         GLib.timeout_add(1500, self.refresh_status_tick)
+
+        # Bake initial surface caches
+        self._bake_casings()
+        self._bake_content()
+
+    def _warmup_cache(self):
+        try:
+            dummy_surf = cairo.ImageSurface(cairo.FORMAT_ARGB32, 10, 10)
+            dummy_cr = cairo.Context(dummy_surf)
+            # Pre-render curved header surfaces to memory
+            draw_curved_kerned_cached(dummy_cr, "CONTROL CENTER", 0, 0)
+            draw_curved_kerned_cached(dummy_cr, "NOTIFICATIONS", 0, 0)
+            draw_curved_kerned_cached(dummy_cr, "WI-FI NETWORKS", 0, 0)
+            # Pre-rasterize fonts and icon glyphs into Fontconfig/Pango cache
+            for f_desc, txt in [
+                ("JetBrains Mono Nerd Font 20", "󰌌󰤨󰤮󰖪󰂯󰂱󰂲󰓅󰾅󰌪󰌾󰂚"),
+                ("JetBrains Mono Nerd Font Bold 10", "Input Wi-Fi Bluetooth Power Mode Vietnamese English Connected Disconnected Disabled Balanced Performance"),
+                ("DejaVu Sans Bold 8.5", "CONTROL CENTER NOTIFICATIONS WI-FI NETWORKS")
+            ]:
+                l = PangoCairo.create_layout(dummy_cr)
+                l.set_font_description(Pango.FontDescription(f_desc))
+                l.set_text(txt, -1)
+                l.get_pixel_extents()
+        except Exception:
+            pass
 
     # --- Draggable Properties & Wrappers ---
     @property
@@ -587,7 +720,28 @@ class PokedexControlCenter(Gtk.Window):
         self.drag_manager.reset_to_default()
 
     def on_sigusr1(self, *args):
+        page_file = "/tmp/control_center_page.txt"
+        target_page = None
+        if os.path.exists(page_file):
+            try:
+                with open(page_file, "r") as f:
+                    target_page = f.read().strip()
+                os.remove(page_file)
+            except Exception:
+                pass
+
         if self.anim_state in ("open", "opening"):
+            if target_page and target_page in ("controls", "notifications", "wifi"):
+                if self.current_page != target_page:
+                    self.current_page = target_page
+                    if target_page == "wifi":
+                        self.scan_wifi_networks()
+                    elif target_page == "notifications":
+                        self.notifications = self.load_notifications()
+                        self.notif_page_idx = 0
+                    self._bake_content()
+                    self.queue_draw()
+                    return GLib.SOURCE_CONTINUE
             self.start_close_animation(quit_after=True)
         else:
             self.close_and_quit()
@@ -599,12 +753,12 @@ class PokedexControlCenter(Gtk.Window):
 
         # Ensure open Pokédex fits completely on screen vertically
         mon_w, mon_h = self.get_monitor_geometry()
-        min_open_y = 44
-        max_open_y = max(min_open_y, mon_h - int(self.H_canvas) - 10)
+        min_open_y = 14
+        max_open_y = max(min_open_y, mon_h - 52 - int(self.H_canvas) - 14)
         target_y = max(min_open_y, min(max_open_y, self.current_win_y))
 
-        min_open_x = 10
-        max_open_x = mon_w - int(self.W_canvas) - 10
+        min_open_x = 14
+        max_open_x = mon_w - int(self.W_canvas) - 14
         target_x = max(min_open_x, min(max_open_x, self.current_win_x))
 
         self.anim_start_x = self.current_win_x
@@ -614,7 +768,8 @@ class PokedexControlCenter(Gtk.Window):
 
         self.anim_state = "opening"
         self.anim_start_time = None
-        self.anim_duration = 0.32
+        self.anim_duration = 0.30
+        self._bake_content()
         if self._tick_id is None:
             self._tick_id = self.add_tick_callback(self._on_anim_tick)
 
@@ -623,9 +778,10 @@ class PokedexControlCenter(Gtk.Window):
             if quit_after:
                 self.close_and_quit()
             return
+
         self.anim_state = "closing"
         self.anim_start_time = None
-        self.anim_duration = 0.28
+        self.anim_duration = 0.22
         self.quit_after_close = quit_after
         if self._tick_id is None:
             self._tick_id = self.add_tick_callback(self._on_anim_tick)
@@ -639,16 +795,15 @@ class PokedexControlCenter(Gtk.Window):
         t = min(1.0, max(0.0, elapsed / self.anim_duration))
 
         if self.anim_state == "opening":
-            # Snappy cubic ease-out for Pokédex casing slide
-            e = 1.0 - math.pow(1.0 - t, 3)
+            # Perlin Smootherstep: zero 1st & 2nd derivatives for liquid-smooth mechanical glide
+            e = t * t * t * (t * (t * 6.0 - 15.0) + 10.0)
             self.anim_progress = e
 
-            # Smoothstep (Hermite) for window margin translation: starts gently, glides, lands softly
+            # Smooth window margin translation in lockstep with easing
             if hasattr(self, 'anim_start_y') and hasattr(self, 'anim_target_y'):
                 if self.anim_start_x != self.anim_target_x or self.anim_start_y != self.anim_target_y:
-                    e_move = t * t * (3.0 - 2.0 * t)
-                    cur_x = self.anim_start_x + (self.anim_target_x - self.anim_start_x) * e_move
-                    cur_y = self.anim_start_y + (self.anim_target_y - self.anim_start_y) * e_move
+                    cur_x = self.anim_start_x + (self.anim_target_x - self.anim_start_x) * e
+                    cur_y = self.anim_start_y + (self.anim_target_y - self.anim_start_y) * e
                     self.drag_manager.set_position(cur_x, cur_y, save=False, clamp=False)
 
             self.queue_draw()
@@ -661,8 +816,8 @@ class PokedexControlCenter(Gtk.Window):
                 self.queue_draw()
                 return False
         elif self.anim_state == "closing":
-            # Smoothstep ease-in-out for closing
-            e = t * t * (3.0 - 2.0 * t)
+            # Perlin Smootherstep for closing
+            e = t * t * t * (t * (t * 6.0 - 15.0) + 10.0)
             self.anim_progress = max(0.0, 1.0 - e)
             self.queue_draw()
             if t >= 1.0:
@@ -684,9 +839,81 @@ class PokedexControlCenter(Gtk.Window):
                 pass
         Gtk.main_quit()
 
+    def on_scroll(self, widget, event):
+        if self.current_page == "wifi" and not self.wifi_password_prompt_ssid:
+            max_page = max(0, (len(self.wifi_networks) - 1) // 5)
+            if event.direction in (Gdk.ScrollDirection.UP, Gdk.ScrollDirection.SMOOTH):
+                if event.direction == Gdk.ScrollDirection.SMOOTH and hasattr(event, 'delta_y') and event.delta_y > 0:
+                    if self.wifi_page_idx < max_page:
+                        self.wifi_page_idx += 1
+                        self._bake_content()
+                    self.queue_draw()
+                elif self.wifi_page_idx > 0:
+                    self.wifi_page_idx -= 1
+                    self._bake_content()
+                    self.queue_draw()
+                return True
+            elif event.direction == Gdk.ScrollDirection.DOWN:
+                if self.wifi_page_idx < max_page:
+                    self.wifi_page_idx += 1
+                    self._bake_content()
+                    self.queue_draw()
+                return True
+        elif self.current_page == "notifications":
+            max_page = max(0, (len(self.notifications) - 1) // 5)
+            if event.direction in (Gdk.ScrollDirection.UP, Gdk.ScrollDirection.SMOOTH):
+                if event.direction == Gdk.ScrollDirection.SMOOTH and hasattr(event, 'delta_y') and event.delta_y > 0:
+                    if self.notif_page_idx < max_page:
+                        self.notif_page_idx += 1
+                        self._bake_content()
+                    self.queue_draw()
+                elif self.notif_page_idx > 0:
+                    self.notif_page_idx -= 1
+                    self._bake_content()
+                    self.queue_draw()
+                return True
+            elif event.direction == Gdk.ScrollDirection.DOWN:
+                if self.notif_page_idx < max_page:
+                    self.notif_page_idx += 1
+                    self._bake_content()
+                    self.queue_draw()
+                return True
+        return False
+
     def on_key_press(self, widget, event):
+        if self.current_page == "wifi" and self.wifi_password_prompt_ssid:
+            if event.keyval == Gdk.KEY_Escape:
+                self.wifi_password_prompt_ssid = None
+                self.wifi_password_input = ""
+                self.wifi_status_msg = ""
+                if HAS_LAYER_SHELL:
+                    try:
+                        GtkLayerShell.set_keyboard_mode(self, GtkLayerShell.KeyboardMode.ON_DEMAND)
+                    except Exception:
+                        pass
+                self.queue_draw()
+                return True
+            elif event.keyval in (Gdk.KEY_Return, Gdk.KEY_KP_Enter):
+                self.submit_wifi_password()
+                return True
+            elif event.keyval == Gdk.KEY_BackSpace:
+                self.wifi_password_input = self.wifi_password_input[:-1]
+                self.queue_draw()
+                return True
+            else:
+                char = Gdk.keyval_to_unicode(event.keyval)
+                if char >= 32:
+                    self.wifi_password_input += chr(char)
+                    self._bake_content()
+                    self.queue_draw()
+                    return True
+
         if event.keyval == Gdk.KEY_Escape:
-            if self.anim_state == "open":
+            if self.current_page == "wifi":
+                self.current_page = "controls"
+                self.queue_draw()
+                return True
+            elif self.anim_state == "open":
                 self.start_close_animation(quit_after=True)
             else:
                 self.close_and_quit()
@@ -698,8 +925,236 @@ class PokedexControlCenter(Gtk.Window):
         return False
 
     def toggle_page(self):
-        self.current_page = "notifications" if self.current_page == "controls" else "controls"
+        if self.current_page == "wifi":
+            self.current_page = "controls"
+        else:
+            self.current_page = "notifications" if self.current_page == "controls" else "controls"
+            if self.current_page == "notifications":
+                self.notifications = self.load_notifications()
+                self.notif_page_idx = 0
         self.queue_draw()
+
+    @staticmethod
+    def _parse_wifi_lines(output, saved_set):
+        net_map = {}
+        for line in output.strip().split("\n"):
+            if not line:
+                continue
+            parts = line.replace(r"\:", "__COLON__").split(":")
+            parts = [p.replace("__COLON__", ":") for p in parts]
+            if len(parts) >= 4:
+                in_use = (parts[0].strip() == "*")
+                ssid = parts[1].strip()
+                try:
+                    signal = int(parts[2])
+                except ValueError:
+                    signal = 0
+                security = parts[3].strip()
+
+                if not ssid or ssid == "--":
+                    continue
+
+                if ssid not in net_map or in_use or signal > net_map[ssid]["signal"]:
+                    net_map[ssid] = {
+                        "ssid": ssid,
+                        "in_use": in_use,
+                        "signal": signal,
+                        "security": security,
+                        "saved": (ssid in saved_set)
+                    }
+
+        return sorted(
+            net_map.values(),
+            key=lambda x: (not x["in_use"], not x["saved"], -x["signal"])
+        )
+
+    def scan_wifi_networks(self, fast=True):
+        if not self.wifi_radio_enabled or self.wifi_scanning:
+            return
+        self.wifi_scanning = True
+        if not self.wifi_networks:
+            self.wifi_status_msg = "Scanning networks..."
+            self.queue_draw()
+
+        def worker():
+            nets = []
+            radio_on = True
+            try:
+                radio_res = subprocess.run(["nmcli", "radio", "wifi"], capture_output=True, text=True, timeout=2)
+                radio_on = radio_res.stdout.strip().lower() == "enabled"
+
+                saved = set()
+                res = subprocess.run(["nmcli", "-t", "-f", "NAME,TYPE", "connection", "show"],
+                                     capture_output=True, text=True, timeout=3)
+                for line in res.stdout.strip().split("\n"):
+                    if not line:
+                        continue
+                    parts = line.replace(r"\:", "__COLON__").split(":")
+                    parts = [p.replace("__COLON__", ":") for p in parts]
+                    if len(parts) >= 2 and parts[1] == "802-11-wireless":
+                        saved.add(parts[0])
+
+                # 1. Quick initial scan from cache
+                res_fast = subprocess.run(["nmcli", "-t", "-f", "IN-USE,SSID,SIGNAL,SECURITY", "dev", "wifi", "list"],
+                                          capture_output=True, text=True, timeout=4)
+                nets_initial = self._parse_wifi_lines(res_fast.stdout, saved)
+                if nets_initial:
+                    def apply_initial():
+                        self.wifi_networks = nets_initial
+                        self.wifi_radio_enabled = radio_on
+                        self._bake_content()
+                    self.queue_draw()
+                    GLib.idle_add(apply_initial)
+
+                # 2. Hardware rescan if requested or if initial list is sparse
+                if radio_on and (not fast or len(nets_initial) <= 1):
+                    try:
+                        subprocess.run(["nmcli", "dev", "wifi", "rescan"], capture_output=True, timeout=3)
+                        time.sleep(1.2)
+                    except Exception:
+                        pass
+                    res_full = subprocess.run(["nmcli", "-t", "-f", "IN-USE,SSID,SIGNAL,SECURITY", "dev", "wifi", "list"],
+                                              capture_output=True, text=True, timeout=4)
+                    nets_full = self._parse_wifi_lines(res_full.stdout, saved)
+                    nets = nets_full if nets_full else nets_initial
+                else:
+                    nets = nets_initial
+            except Exception:
+                pass
+
+            def apply_final():
+                self.wifi_networks = nets
+                self.wifi_scanning = False
+                self.wifi_status_msg = ""
+                self.wifi_radio_enabled = radio_on
+                txt, wifi_ssid = self.get_wifi_status()
+                self.wifi_ssid = wifi_ssid
+                self.wifi_text = txt
+                self._bake_content()
+                self.queue_draw()
+
+            GLib.idle_add(apply_final)
+
+        threading.Thread(target=worker, daemon=True).start()
+
+    def connect_to_network(self, ssid, password=None):
+        if self.wifi_connecting:
+            return
+        self.wifi_connecting = True
+        self.wifi_status_msg = f"Connecting to {ssid}..."
+        self.queue_draw()
+
+        def worker():
+            success = False
+            err_msg = ""
+            try:
+                if password is not None:
+                    res = subprocess.run(
+                        ["nmcli", "dev", "wifi", "connect", ssid, "password", password],
+                        capture_output=True, text=True, timeout=25
+                    )
+                else:
+                    res = subprocess.run(
+                        ["nmcli", "con", "up", "id", ssid],
+                        capture_output=True, text=True, timeout=15
+                    )
+                    if res.returncode != 0:
+                        res = subprocess.run(
+                            ["nmcli", "dev", "wifi", "connect", ssid],
+                            capture_output=True, text=True, timeout=15
+                        )
+                success = (res.returncode == 0)
+                if not success:
+                    err_msg = res.stderr.strip() or "Connection failed"
+            except Exception as e:
+                err_msg = str(e)
+
+            def apply_result():
+                self.wifi_connecting = False
+                if success:
+                    self.wifi_password_prompt_ssid = None
+                    self.wifi_password_input = ""
+                    self.wifi_status_msg = f"Connected to {ssid}!"
+                    self.wifi_ssid = ssid
+                    self.wifi_text = "Connected"
+                    GLib.timeout_add(1500, self.scan_wifi_networks)
+                else:
+                    self.wifi_status_msg = f"Failed: {err_msg[:20]}"
+                self.queue_draw()
+
+            GLib.idle_add(apply_result)
+
+        threading.Thread(target=worker, daemon=True).start()
+
+    def disconnect_wifi(self):
+        self.wifi_status_msg = "Disconnecting..."
+        self.queue_draw()
+
+        def worker():
+            try:
+                subprocess.run(["nmcli", "dev", "disconnect", "wlan0"], capture_output=True, timeout=5)
+            except Exception:
+                pass
+
+            def apply_disc():
+                self.wifi_status_msg = "Disconnected"
+                self.wifi_ssid = ""
+                self.wifi_text = "Disconnected"
+                GLib.timeout_add(1000, self.scan_wifi_networks)
+                self.queue_draw()
+
+            GLib.idle_add(apply_disc)
+
+        threading.Thread(target=worker, daemon=True).start()
+
+    def toggle_wifi_radio(self):
+        curr = self.wifi_radio_enabled
+        new_state = not curr
+        self.wifi_radio_enabled = new_state
+        if not new_state:
+            self.wifi_networks = []
+            self.wifi_ssid = ""
+            self.wifi_text = "Disabled"
+            self.wifi_status_msg = ""
+        else:
+            self.wifi_text = "Disconnected"
+            self.wifi_status_msg = "Enabling Wi-Fi..."
+        self._bake_content()
+        self.queue_draw()
+
+        def worker():
+            try:
+                state_str = "on" if new_state else "off"
+                subprocess.run(["nmcli", "radio", "wifi", state_str], capture_output=True, timeout=5)
+            except Exception:
+                pass
+            if new_state:
+                time.sleep(1.0)
+                self.scan_wifi_networks(fast=False)
+            else:
+                def apply_off():
+                    self.wifi_radio_enabled = False
+                    self.wifi_networks = []
+                    self.wifi_ssid = ""
+                    self.wifi_text = "Disabled"
+                    self.wifi_status_msg = ""
+                    self._bake_content()
+                    self.queue_draw()
+                GLib.idle_add(apply_off)
+
+        threading.Thread(target=worker, daemon=True).start()
+
+    def submit_wifi_password(self):
+        ssid = self.wifi_password_prompt_ssid
+        pwd = self.wifi_password_input
+        if not ssid:
+            return
+        if HAS_LAYER_SHELL:
+            try:
+                GtkLayerShell.set_keyboard_mode(self, GtkLayerShell.KeyboardMode.ON_DEMAND)
+            except Exception:
+                pass
+        self.connect_to_network(ssid, password=pwd)
 
     def get_ime_status(self):
         try:
@@ -712,6 +1167,11 @@ class PokedexControlCenter(Gtk.Window):
 
     def get_wifi_status(self):
         try:
+            radio_res = subprocess.run(["nmcli", "radio", "wifi"], capture_output=True, text=True, timeout=0.3)
+            if radio_res.returncode == 0 and radio_res.stdout.strip().lower() != "enabled":
+                self.wifi_radio_enabled = False
+                return ("Disabled", "")
+            self.wifi_radio_enabled = True
             out = subprocess.check_output(
                 ["nmcli", "-t", "-f", "DEVICE,TYPE,STATE,CONNECTION", "dev"], 
                 stderr=subprocess.DEVNULL,
@@ -731,21 +1191,35 @@ class PokedexControlCenter(Gtk.Window):
             vol = AudioService.get_volume() / 100.0
             bri = BrightnessService.get_brightness() / 100.0
             bt_on = BluetoothService.is_enabled()
-            bt_dev = BluetoothService.get_connected_device_name()
+            bt_dev = BluetoothService.get_connected_device_name() if bt_on else ""
             pwr = PowerService.get_power_mode()
             ime = self.get_ime_status()
             wifi_txt, wifi_ssid = self.get_wifi_status()
 
+            if self.current_page == "wifi" and self.wifi_radio_enabled and not self.wifi_networks and not self.wifi_scanning:
+                self.scan_wifi_networks(fast=True)
+
             def apply():
-                self.vol_val = vol
-                self.bri_val = bri
+                now = time.time()
+                if not self.dragging_slider and (now - self.last_slider_drag_time) > 2.0:
+                    self.vol_val = vol
+                    self.bri_val = bri
+                changed = (
+                    self.bt_enabled != bt_on or
+                    self.bt_device != bt_dev or
+                    self.power_mode != pwr or
+                    self.ime_text != ime or
+                    self.wifi_text != wifi_txt or
+                    self.wifi_ssid != wifi_ssid
+                )
                 self.bt_enabled = bt_on
                 self.bt_device = bt_dev
                 self.power_mode = pwr
                 self.ime_text = ime
                 self.wifi_text = wifi_txt
                 self.wifi_ssid = wifi_ssid
-                if self.anim_state == "open":
+                if changed and self.anim_state == "open":
+                    self._bake_content()
                     self.queue_draw()
                 return False
 
@@ -774,10 +1248,6 @@ class PokedexControlCenter(Gtk.Window):
         x, y = event.x / sx, event.y / sy
 
         if event.button == 1:
-            if event.type == Gdk.EventType._2BUTTON_PRESS:
-                self.reset_window_pos()
-                return True
-
             if self.anim_state in ("opening", "closing"):
                 return True
 
@@ -818,7 +1288,13 @@ class PokedexControlCenter(Gtk.Window):
     def on_button_release(self, widget, event):
         if event.button == 1:
             if self.dragging_slider:
+                slider = self.dragging_slider
                 self.dragging_slider = None
+                self.last_slider_drag_time = time.time()
+                if slider == "volume":
+                    AudioService.set_volume(int(self.vol_val * 100.0))
+                elif slider == "brightness":
+                    BrightnessService.set_brightness(int(self.bri_val * 100.0))
                 return True
             return self.drag_manager.handle_release(event, on_click=self.handle_click)
         return False
@@ -844,13 +1320,13 @@ class PokedexControlCenter(Gtk.Window):
             self.start_close_animation(quit_after=True)
             return
 
-        # Bottom Navigation Button (Floating Bell/Flower at cx, socket_well_y)
+        # Bottom Navigation Button (Floating Bell/Bow at cx, socket_well_y)
         dist_nav = math.sqrt((x - self.cx)**2 + (y - self.socket_well_y)**2)
         if dist_nav <= 28.0:
             self.toggle_page()
             return
 
-        # Top Mark (Flower / Bell at cx, cy_top - top_mark_offset)
+        # Top Mark (Bow / Bell at cx, cy_top - top_mark_offset)
         dist_top = math.sqrt((x - self.cx)**2 + (y - (190.0 - self.top_mark_offset))**2)
         if dist_top <= 24.0:
             self.toggle_page()
@@ -881,36 +1357,48 @@ class PokedexControlCenter(Gtk.Window):
                 if os.path.exists(toggle_sh):
                     subprocess.Popen([toggle_sh])
                 self.ime_text = "Vietnamese" if self.ime_text == "English" else "English"
+                self._bake_content()
                 self.queue_draw()
                 return
 
             # Tile (1,0) - Wi-Fi
             c1_x = grid_x + col_w + 20.0
-            if c1_x <= x <= c1_x + col_w and grid_y <= y <= grid_y + row_h:
-                wifi_sh = os.path.join(SYSTEM_DIR, "rofi-wifi-menu.sh")
-                if not os.path.exists(wifi_sh):
-                    wifi_sh = os.path.expanduser("~/.config/hypr/scripts/system/rofi-wifi-menu.sh")
-                if os.path.exists(wifi_sh):
-                    subprocess.Popen([wifi_sh])
-                elif shutil.which("nm-connection-editor"):
-                    subprocess.Popen(["nm-connection-editor"])
+            if c1_x - 10.0 <= x <= c1_x + col_w + 15.0 and grid_y - 8.0 <= y <= grid_y + row_h + 8.0:
+                self.current_page = "wifi"
+                self.wifi_password_prompt_ssid = None
+                self.wifi_password_input = ""
+                self.wifi_status_msg = ""
+                self.wifi_page_idx = 0
+                self.scan_wifi_networks()
+                self._bake_content()
+                self.queue_draw()
                 return
 
             # Tile (0,1) - Bluetooth
             r1_y = grid_y + row_h + gap_y
             if grid_x <= x <= grid_x + col_w and r1_y <= y <= r1_y + row_h:
                 self.bt_enabled = BluetoothService.toggle_power()
+                if not self.bt_enabled:
+                    self.bt_device = ""
+                self._bake_content()
                 self.queue_draw()
                 return
 
             # Tile (1,1) - Power Mode
             if c1_x <= x <= c1_x + col_w and r1_y <= y <= r1_y + row_h:
                 order = ["powersave", "balanced", "performance"]
-                curr = self.power_mode.lower() if self.power_mode else "balanced"
-                next_idx = (order.index(curr) + 1) % len(order) if curr in order else 0
+                raw = (self.power_mode or "balanced").lower()
+                if raw in ("powersave", "power-saver", "power saver"):
+                    curr = "powersave"
+                elif raw == "performance":
+                    curr = "performance"
+                else:
+                    curr = "balanced"
+                next_idx = (order.index(curr) + 1) % len(order)
                 next_mode = order[next_idx]
                 PowerService.set_power_mode(next_mode)
                 self.power_mode = next_mode
+                self._bake_content()
                 self.queue_draw()
                 return
 
@@ -928,8 +1416,11 @@ class PokedexControlCenter(Gtk.Window):
                 return
 
         elif self.current_page == "notifications":
-            # "Clear all notifications" button at y = 490..530
-            if 480.0 <= y <= 530.0 and abs(x - self.cx) <= 100.0:
+            content_x = self.x_left + 36.0
+            content_w = self.W_shell - 72.0
+
+            # 1. "Clear all notifications" button
+            if len(self.notifications) > 0 and 468.0 <= y <= 496.0 and abs(x - self.cx) <= 120.0:
                 if os.path.exists(CACHE_FILE):
                     try:
                         with open(CACHE_FILE, "w", encoding="utf-8") as f:
@@ -937,8 +1428,131 @@ class PokedexControlCenter(Gtk.Window):
                     except Exception:
                         pass
                 self.notifications = []
+                self.notif_page_idx = 0
                 self.queue_draw()
                 return
+
+            # 2. Pagination Prev / Next if > 5 notifications
+            if len(self.notifications) > 5 and 498.0 <= y <= 524.0:
+                total_pages = max(1, (len(self.notifications) + 4) // 5)
+                if content_x <= x <= content_x + 65.0:
+                    if self.notif_page_idx > 0:
+                        self.notif_page_idx -= 1
+                        self._bake_content()
+                    self.queue_draw()
+                    return
+                elif content_x + content_w - 65.0 <= x <= content_x + content_w:
+                    if self.notif_page_idx < total_pages - 1:
+                        self.notif_page_idx += 1
+                        self._bake_content()
+                    self.queue_draw()
+                    return
+
+            # 3. Click individual notification row to dismiss it
+            start_idx = self.notif_page_idx * 5
+            page_notifs = self.notifications[start_idx : start_idx + 5]
+            for idx in range(len(page_notifs)):
+                item_y = 214.0 + idx * 49.0
+                if content_x <= x <= content_x + content_w and item_y <= y <= item_y + 46.0:
+                    real_idx = start_idx + idx
+                    if real_idx < len(self.notifications):
+                        del self.notifications[real_idx]
+                        if os.path.exists(CACHE_FILE):
+                            try:
+                                with open(CACHE_FILE, "w", encoding="utf-8") as f:
+                                    json.dump(self.notifications, f, ensure_ascii=False, indent=2)
+                            except Exception:
+                                pass
+                        max_page = max(0, (len(self.notifications) - 1) // 5)
+                        if self.notif_page_idx > max_page:
+                            self.notif_page_idx = max_page
+                        self._bake_content()
+                    self.queue_draw()
+                    return
+
+        elif self.current_page == "wifi":
+            content_x = self.x_left + 36.0
+            content_w = self.W_shell - 72.0
+
+            # 1. Wi-Fi toggle: [content_x + content_w - 110.0, content_x + content_w - 55.0], y in [210.0, 236.0]
+            if content_x + content_w - 110.0 <= x <= content_x + content_w - 55.0 and 210.0 <= y <= 236.0:
+                self.toggle_wifi_radio()
+                return
+
+            # 2. Rescan button: [content_x + content_w - 52.0, content_x + content_w + 5.0], y in [210.0, 236.0]
+            if content_x + content_w - 52.0 <= x <= content_x + content_w + 5.0 and 210.0 <= y <= 236.0:
+                self.scan_wifi_networks(fast=False)
+                return
+
+            # 3. Disconnect if connected: [content_x + content_w - 110.0, content_x + content_w + 5.0], y in [236.0, 258.0]
+            if self.wifi_ssid and content_x + content_w - 110.0 <= x <= content_x + content_w + 5.0 and 236.0 <= y <= 258.0:
+                self.disconnect_wifi()
+                return
+
+            # 4. Password prompt mode
+            if self.wifi_password_prompt_ssid:
+                if content_x <= x <= content_x + 115.0 and 368.0 <= y <= 408.0:
+                    self.submit_wifi_password()
+                    return
+                if content_x + 125.0 <= x <= content_x + 210.0 and 368.0 <= y <= 408.0:
+                    self.wifi_password_prompt_ssid = None
+                    self.wifi_password_input = ""
+                    self.wifi_status_msg = ""
+                    if HAS_LAYER_SHELL:
+                        try:
+                            GtkLayerShell.set_keyboard_mode(self, GtkLayerShell.KeyboardMode.ON_DEMAND)
+                        except Exception:
+                            pass
+                    self._bake_content()
+                    self.queue_draw()
+                    return
+                return
+
+            # 5. Network items mode (5 clean floating rows)
+            start_idx = self.wifi_page_idx * 5
+            page_nets = self.wifi_networks[start_idx : start_idx + 5]
+            curr_y = 262.0
+            for idx, net in enumerate(page_nets):
+                if content_x - 6.0 <= x <= content_x + content_w + 6.0 and curr_y - 4.0 <= y <= curr_y + 44.0:
+                    if net.get("in_use"):
+                        self.wifi_status_msg = f"Connected to {net.get('ssid')}"
+                        self._bake_content()
+                        self.queue_draw()
+                        return
+                    elif net.get("saved") or not (net.get("security") and net.get("security") != "--"):
+                        self.connect_to_network(net["ssid"])
+                        return
+                    else:
+                        self.wifi_password_prompt_ssid = net["ssid"]
+                        self.wifi_password_input = ""
+                        self.wifi_status_msg = ""
+                        if HAS_LAYER_SHELL:
+                            try:
+                                GtkLayerShell.set_keyboard_mode(self, GtkLayerShell.KeyboardMode.EXCLUSIVE)
+                            except Exception:
+                                pass
+                        self.grab_focus()
+                        self._bake_content()
+                        self.queue_draw()
+                        return
+                curr_y += 48.0
+
+            # 6. Pagination buttons
+            if len(self.wifi_networks) > 5:
+                py_y = 514.0
+                total_pages = max(1, (len(self.wifi_networks) + 4) // 5)
+                if content_x <= x <= content_x + 70.0 and py_y - 6.0 <= y <= py_y + 24.0:
+                    if self.wifi_page_idx > 0:
+                        self.wifi_page_idx -= 1
+                        self._bake_content()
+                    self.queue_draw()
+                    return
+                if content_x + content_w - 70.0 <= x <= content_x + content_w and py_y - 6.0 <= y <= py_y + 24.0:
+                    if self.wifi_page_idx < total_pages - 1:
+                        self.wifi_page_idx += 1
+                        self._bake_content()
+                    self.queue_draw()
+                    return
 
     def on_leave_notify(self, widget, event):
         if self.hovered_item is not None:
@@ -987,7 +1601,7 @@ class PokedexControlCenter(Gtk.Window):
 
                 if grid_x <= x <= grid_x + col_w and grid_y <= y <= grid_y + row_h:
                     new_hover = "ime"
-                elif c1_x <= x <= c1_x + col_w and grid_y <= y <= grid_y + row_h:
+                elif c1_x - 10.0 <= x <= c1_x + col_w + 15.0 and grid_y - 8.0 <= y <= grid_y + row_h + 8.0:
                     new_hover = "wifi"
                 elif grid_x <= x <= grid_x + col_w and r1_y <= y <= r1_y + row_h:
                     new_hover = "bt"
@@ -1002,32 +1616,69 @@ class PokedexControlCenter(Gtk.Window):
                         if dist_nav <= 24.0:
                             new_hover = "nav"
 
+            elif self.current_page == "wifi":
+                content_x = self.x_left + 36.0
+                content_w = self.W_shell - 72.0
+
+                if content_x + content_w - 110.0 <= x <= content_x + content_w - 55.0 and 210.0 <= y <= 236.0:
+                    new_hover = "wifi_toggle"
+                elif content_x + content_w - 52.0 <= x <= content_x + content_w + 5.0 and 210.0 <= y <= 236.0:
+                    new_hover = "wifi_rescan"
+                elif self.wifi_ssid and content_x + content_w - 110.0 <= x <= content_x + content_w + 5.0 and 236.0 <= y <= 258.0:
+                    new_hover = "wifi_disconnect"
+                elif self.wifi_password_prompt_ssid:
+                    if content_x <= x <= content_x + 115.0 and 368.0 <= y <= 408.0:
+                        new_hover = "wifi_pass_connect"
+                    elif content_x + 125.0 <= x <= content_x + 210.0 and 368.0 <= y <= 408.0:
+                        new_hover = "wifi_pass_cancel"
+                else:
+                    start_idx = self.wifi_page_idx * 5
+                    page_nets = self.wifi_networks[start_idx : start_idx + 5]
+                    curr_y = 262.0
+                    for idx in range(len(page_nets)):
+                        if content_x - 6.0 <= x <= content_x + content_w + 6.0 and curr_y - 4.0 <= y <= curr_y + 44.0:
+                            new_hover = f"wifi_item_{idx}"
+                            break
+                        curr_y += 48.0
+                    if not new_hover and len(self.wifi_networks) > 5:
+                        py_y = 514.0
+                        if content_x <= x <= content_x + 70.0 and py_y - 6.0 <= y <= py_y + 24.0:
+                            new_hover = "wifi_prev"
+                        elif content_x + content_w - 70.0 <= x <= content_x + content_w and py_y - 6.0 <= y <= py_y + 24.0:
+                            new_hover = "wifi_next"
+                    if not new_hover:
+                        dist_nav = math.sqrt((x - self.cx)**2 + (y - self.socket_well_y)**2)
+                        if dist_nav <= 28.0:
+                            new_hover = "nav"
+
             elif self.current_page == "notifications":
                 grid_x = self.x_left + 36.0
-                grid_y = 216.0
+                grid_y = 214.0
                 row_w = self.W_shell - 72.0
-                card_h = 60.0
-                card_gap = 10.0
+                card_h = 46.0
+                card_pitch = 49.0
 
-                curr_y = grid_y
-                count = min(4, len(self.notifications) if self.notifications else 4)
-                for idx in range(count):
-                    if grid_x <= x <= grid_x + row_w and curr_y <= y <= curr_y + card_h:
+                start_idx = self.notif_page_idx * 5
+                page_notifs = self.notifications[start_idx : start_idx + 5]
+                for idx in range(len(page_notifs)):
+                    item_y = grid_y + idx * card_pitch
+                    if grid_x - 6.0 <= x <= grid_x + row_w + 6.0 and item_y - 2.0 <= y <= item_y + card_h:
                         new_hover = f"notif_{idx}"
                         break
-                    curr_y += card_h + card_gap
+
+                if not new_hover and len(self.notifications) > 0:
+                    if 468.0 <= y <= 496.0 and abs(x - self.cx) <= 120.0:
+                        new_hover = "clear_all"
+                    elif len(self.notifications) > 5 and 498.0 <= y <= 524.0:
+                        if grid_x <= x <= grid_x + 65.0:
+                            new_hover = "notif_prev"
+                        elif grid_x + row_w - 65.0 <= x <= grid_x + row_w:
+                            new_hover = "notif_next"
 
                 if not new_hover:
-                    clr_w = 200.0
-                    clr_h = 28.0
-                    clr_x = self.cx - clr_w / 2.0
-                    clr_y = 502.0
-                    if clr_x <= x <= clr_x + clr_w and clr_y <= y <= clr_y + clr_h:
-                        new_hover = "clear_all"
-                    else:
-                        dist_nav = math.sqrt((x - self.cx)**2 + (y - self.socket_well_y)**2)
-                        if dist_nav <= 24.0:
-                            new_hover = "nav"
+                    dist_nav = math.sqrt((x - self.cx)**2 + (y - self.socket_well_y)**2)
+                    if dist_nav <= 24.0:
+                        new_hover = "nav"
 
             if new_hover != self.hovered_item:
                 self.hovered_item = new_hover
@@ -1049,46 +1700,58 @@ class PokedexControlCenter(Gtk.Window):
         cy_poke = self.cy_pokeball
         dx = x - self.cx
         dy = y - cy_poke
-        ang = math.atan2(dy, dx)
-        if ang < 0:
-            ang += 2 * math.pi
+        self.last_slider_drag_time = time.time()
+        now = time.time()
 
-        gap_ang = math.radians(16.0)
+        gap_deg = 16.0
 
         if slider_type == "volume":
-            ang_vol_start = math.pi + gap_ang
-            ang_vol_end = 2 * math.pi - gap_ang
-            ang_vol_span = ang_vol_end - ang_vol_start
+            # Volume: top arc (left=-164 deg -> right=-16 deg)
+            start_deg = -180.0 + gap_deg  # -164.0 deg (0%)
+            end_deg = -gap_deg            # -16.0 deg (100%)
+            span_deg = end_deg - start_deg # 148.0 deg
 
-            if ang < ang_vol_start:
-                if ang < math.pi * 0.5:
+            if dy > 0:
+                # Below equator: clamp to 0% if on left, 100% if on right
+                val = 1.0 if dx > 0 else 0.0
+            else:
+                a_deg = math.degrees(math.atan2(dy, dx)) # [-180, 0]
+                if a_deg <= start_deg:
+                    val = 0.0
+                elif a_deg >= end_deg:
                     val = 1.0
                 else:
-                    val = 0.0
-            elif ang > ang_vol_end:
-                val = 1.0
-            else:
-                val = (ang - ang_vol_start) / ang_vol_span
+                    val = (a_deg - start_deg) / span_deg
 
             self.vol_val = max(0.0, min(1.0, val))
-            AudioService.set_volume(int(self.vol_val * 100.0))
             self.queue_draw()
+            if (now - self.last_vol_set_time) >= 0.04:
+                self.last_vol_set_time = now
+                AudioService.set_volume(int(self.vol_val * 100.0))
 
         elif slider_type == "brightness":
-            ang_bri_start = math.pi - gap_ang
-            ang_bri_end = gap_ang
-            ang_bri_span = (math.pi - 2 * gap_ang)
+            # Brightness: bottom arc (left=164 deg -> right=16 deg)
+            start_deg = 180.0 - gap_deg   # 164.0 deg (0%)
+            end_deg = gap_deg             # 16.0 deg (100%)
+            span_deg = start_deg - end_deg # 148.0 deg
 
-            if ang > ang_bri_start:
-                val = 0.0
-            elif ang < ang_bri_end:
-                val = 1.0
+            if dy < 0:
+                # Above equator: clamp to 0% if on left, 100% if on right (PREVENTS 100% -> 0% WRAP)
+                val = 1.0 if dx > 0 else 0.0
             else:
-                val = (ang_bri_start - ang) / ang_bri_span
+                a_deg = math.degrees(math.atan2(dy, dx)) # [0, 180]
+                if a_deg >= start_deg:
+                    val = 0.0
+                elif a_deg <= end_deg:
+                    val = 1.0
+                else:
+                    val = (start_deg - a_deg) / span_deg
 
             self.bri_val = max(0.0, min(1.0, val))
-            BrightnessService.set_brightness(int(self.bri_val * 100.0))
             self.queue_draw()
+            if (now - self.last_bri_set_time) >= 0.04:
+                self.last_bri_set_time = now
+                BrightnessService.set_brightness(int(self.bri_val * 100.0))
 
     # ---------------- DYNAMIC COORDINATES ----------------
     def get_dynamic_coords(self, p):
@@ -1166,147 +1829,279 @@ class PokedexControlCenter(Gtk.Window):
         }
 
     # ---------------- MASTER DRAW PIPELINE ----------------
-    def on_draw(self, widget, cr):
-        # 0. Clear canvas surface to transparent
-        cr.set_source_rgba(0, 0, 0, 0)
-        cr.set_operator(cairo.OPERATOR_CLEAR)
-        cr.paint()
-        cr.set_operator(cairo.OPERATOR_OVER)
-        cr.set_antialias(cairo.ANTIALIAS_BEST)
+    def _bake_casings(self):
+        W, H = int(self.base_w), int(self.base_h)
+        geo0 = self.get_dynamic_coords(1.0)
+        c_dark_r, c_dark_g, c_dark_b = self.c_flange
+        prot = 2.5; r_cuff = 2.5
 
-        cr.save()
-        sx = self.W_canvas / self.base_w
-        sy = self.H_canvas / self.base_h
-        cr.scale(sx, sy)
+        # 1. Top Casing Assembly
+        top_surf = cairo.ImageSurface(cairo.FORMAT_ARGB32, W, H)
+        tcr = cairo.Context(top_surf)
+        tcr.set_antialias(cairo.ANTIALIAS_DEFAULT)
+        y_dark_top_base = 190.0 - (self.cut_y + self.chassis_thick + self.dark_thick)
 
-        geo = self.get_dynamic_coords(self.anim_progress)
+        create_top_red_casing_path(tcr, self.x_left, self.x_right, y_dark_top_base, self.cx, 190.0, self.r_dark, geo0["ang_dark_top_start"], geo0["ang_dark_top_end"], geo0["x_dark_cut"], self.device_r, notch_d=self.notch_d, trans=self.trans)
+        red_pat = cairo.LinearGradient(self.x_left, 0, self.x_right, 0)
+        red_pat.add_color_stop_rgb(0, *self.c_casing_l); red_pat.add_color_stop_rgb(0.5, *self.c_casing_m); red_pat.add_color_stop_rgb(1, *self.c_casing_r)
+        tcr.set_source(red_pat); tcr.fill()
 
-        # 1. Cyan hologram screen: solid matte surface
-        cr.save()
-        cr.new_sub_path()
-        cr.rectangle(self.x_left, geo["y_edge_top"], self.W_shell, geo["y_edge_bot"] - geo["y_edge_top"])
-        cr.arc(self.cx, geo["cy_top"], self.r_inner, geo["ang_inner_top_end"], geo["ang_inner_top_start"])
-        cr.close_path()
-        cr.arc(self.cx, geo["cy_bot"], self.r_inner, geo["ang_inner_bot_start"], geo["ang_inner_bot_end"])
-        cr.close_path()
-        cr.clip()
+        draw_anime_grooves(tcr, self.x_left, 0, self.grooves, 0, 0.5 * math.pi)
+        draw_anime_grooves(tcr, self.x_right, 0, self.grooves, 0.5 * math.pi, math.pi)
 
-        # 1. CYAN HOLOGRAM SCREEN: Translucent Luminous Holographic Glass
-        y_grad_top = geo["cy_top"] - self.r_inner
-        y_grad_bot = geo["cy_bot"] + self.r_inner
-        scr_pat = cairo.LinearGradient(0, y_grad_top, 0, y_grad_bot)
-        scr_pat.add_color_stop_rgba(0.0, self.c_holo_top[0], self.c_holo_top[1], self.c_holo_top[2], self.holo_alpha_top)
-        scr_pat.add_color_stop_rgba(0.5, self.c_holo_mid[0], self.c_holo_mid[1], self.c_holo_mid[2], self.holo_alpha_mid)
-        scr_pat.add_color_stop_rgba(1.0, self.c_holo_bot[0], self.c_holo_bot[1], self.c_holo_bot[2], self.holo_alpha_bot)
-        cr.set_source(scr_pat)
-        cr.paint()
-        cr.restore()
+        create_top_red_casing_path(tcr, self.x_left, self.x_right, y_dark_top_base, self.cx, 190.0, self.r_dark, geo0["ang_dark_top_start"], geo0["ang_dark_top_end"], geo0["x_dark_cut"], self.device_r, notch_d=self.notch_d, trans=self.trans)
+        tcr.set_source_rgba(*self.c_border_3d); tcr.set_line_width(2.0); tcr.stroke()
 
-        # 1B. CONTENT REVEALED INSIDE SCREEN (Fades in smoothly during opening)
-        if self.anim_progress > 0.05:
-            alpha = min(1.0, max(0.0, (self.anim_progress - 0.25) / 0.75))
+        create_top_red_casing_path(tcr, self.x_left + 1.6, self.x_right - 1.6, y_dark_top_base - 0.8, self.cx, 190.0, self.r_dark - 1.2, geo0["ang_dark_top_start"], geo0["ang_dark_top_end"], geo0["x_dark_cut"], max(4.0, self.device_r - 1.6), notch_d=self.notch_d, trans=self.trans, y_top=1.6)
+        tcr.set_source_rgba(*self.c_tactile_white); tcr.set_line_width(1.3); tcr.stroke()
+
+        tcr.new_sub_path()
+        tcr.move_to(self.x_left, geo0["y_silver_top"]); tcr.line_to(self.x_left, geo0["y_dark_top"]); tcr.line_to(self.cx - geo0["x_dark_cut"], geo0["y_dark_top"])
+        tcr.arc(self.cx, 190.0, self.r_dark, geo0["ang_dark_top_end"], geo0["ang_dark_top_start"])
+        tcr.line_to(self.x_right, geo0["y_dark_top"]); tcr.line_to(self.x_right, geo0["y_silver_top"]); tcr.line_to(self.cx + geo0["x_chassis_cut"], geo0["y_silver_top"])
+        tcr.arc_negative(self.cx, 190.0, self.r_chassis, geo0["ang_chassis_top_start"], geo0["ang_chassis_top_end"]); tcr.close_path()
+        tcr.set_source_rgba(c_dark_r, c_dark_g, c_dark_b, 0.85); tcr.fill()
+        tcr.move_to(self.x_left, geo0["y_dark_top"]); tcr.line_to(self.cx - geo0["x_dark_cut"], geo0["y_dark_top"])
+        tcr.arc(self.cx, 190.0, self.r_dark, geo0["ang_dark_top_end"], geo0["ang_dark_top_start"]); tcr.line_to(self.x_right, geo0["y_dark_top"])
+        tcr.set_source_rgba(*self.c_border_3d); tcr.set_line_width(1.4); tcr.stroke()
+
+        tcr.new_sub_path()
+        tcr.move_to(self.x_left, geo0["y_edge_top"]); tcr.arc(self.x_left, geo0["y_edge_top"] - r_cuff, r_cuff, 0.5 * math.pi, math.pi)
+        tcr.line_to(self.x_left - prot, geo0["y_dark_top"] + r_cuff); tcr.arc(self.x_left, geo0["y_dark_top"] + r_cuff, r_cuff, math.pi, 1.5 * math.pi)
+        tcr.line_to(self.x_left, geo0["y_silver_top"]); tcr.line_to(self.cx - geo0["x_chassis_cut"], geo0["y_silver_top"])
+        tcr.arc(self.cx, 190.0, self.r_chassis, geo0["ang_chassis_top_end"], geo0["ang_chassis_top_start"]); tcr.line_to(self.x_right, geo0["y_silver_top"])
+        tcr.line_to(self.x_right, geo0["y_dark_top"]); tcr.arc(self.x_right, geo0["y_dark_top"] + r_cuff, r_cuff, 1.5 * math.pi, 2 * math.pi)
+        tcr.line_to(self.x_right + prot, geo0["y_edge_top"] - r_cuff); tcr.arc(self.x_right, geo0["y_edge_top"] - r_cuff, r_cuff, 0, 0.5 * math.pi)
+        tcr.line_to(self.cx + geo0["x_outer_cut"], geo0["y_edge_top"]); tcr.arc_negative(self.cx, 190.0, self.r_outer, geo0["ang_outer_top_start"], geo0["ang_outer_top_end"]); tcr.close_path()
+        silver_pat_top = cairo.LinearGradient(self.x_left, geo0["y_dark_top"], self.x_left, geo0["y_edge_top"])
+        silver_pat_top.add_color_stop_rgb(0.0, *hex_to_rgba(C_TEXT_PRI)[:3]); silver_pat_top.add_color_stop_rgb(1.0, *hex_to_rgba(C_TEXT_SEC)[:3])
+        tcr.set_source(silver_pat_top); tcr.fill_preserve(); tcr.set_source_rgba(*self.c_border_3d); tcr.set_line_width(1.4); tcr.stroke()
+
+        band_pat_top = cairo.LinearGradient(self.cx - self.r_outer, 190.0, self.cx + self.r_outer, 190.0)
+        band_pat_top.add_color_stop_rgb(0, *self.c_band_stop0); band_pat_top.add_color_stop_rgb(0.5, *self.c_band_stop1); band_pat_top.add_color_stop_rgb(1, *self.c_band_stop2)
+        tcr.new_sub_path()
+        tcr.arc_negative(self.cx, 190.0, self.r_outer, geo0["ang_outer_top_start"], geo0["ang_outer_top_end"]); tcr.line_to(self.cx - geo0["x_inner_cut"], geo0["y_edge_top"])
+        tcr.arc(self.cx, 190.0, self.r_inner, geo0["ang_inner_top_end"], geo0["ang_inner_top_start"]); tcr.close_path()
+        tcr.set_source(band_pat_top); tcr.fill_preserve(); tcr.set_source_rgba(*self.c_border_3d); tcr.set_line_width(1.6); tcr.stroke()
+        tcr.arc(self.cx, 190.0, self.r_inner, geo0["ang_inner_top_end"], geo0["ang_inner_top_start"])
+        tcr.set_source_rgba(0, 0, 0, 0.35); tcr.set_line_width(2.2); tcr.stroke()
+        self._cached_top_casing = top_surf
+
+        # 2. Bottom Casing Assembly
+        bot_surf = cairo.ImageSurface(cairo.FORMAT_ARGB32, W, H)
+        bcr = cairo.Context(bot_surf)
+        bcr.set_antialias(cairo.ANTIALIAS_DEFAULT)
+        y_dark_bot_base = 590.0 + (self.cut_y + self.chassis_thick + self.dark_thick)
+        for s in range(4):
+            dy = 5.0 * (s / 3.0)
+            bcr.save(); bcr.translate(0, dy)
+            create_bottom_red_casing_path(bcr, self.x_left, self.x_right, y_dark_bot_base, 780.0, self.cx, 590.0, self.r_dark, geo0["ang_dark_bot_start"], geo0["ang_dark_bot_end"], geo0["x_dark_cut"], self.device_r, notch_d=self.notch_d, trans=self.trans)
+            bcr.set_source_rgba(*self.c_border_3d); bcr.fill(); bcr.restore()
+        create_bottom_red_casing_path(bcr, self.x_left, self.x_right, y_dark_bot_base, 780.0, self.cx, 590.0, self.r_dark, geo0["ang_dark_bot_start"], geo0["ang_dark_bot_end"], geo0["x_dark_cut"], self.device_r, notch_d=self.notch_d, trans=self.trans)
+        red_pat_b = cairo.LinearGradient(self.x_left, 0, self.x_right, 0)
+        red_pat_b.add_color_stop_rgb(0, *self.c_casing_l); red_pat_b.add_color_stop_rgb(0.5, *self.c_casing_m); red_pat_b.add_color_stop_rgb(1, *self.c_casing_r)
+        bcr.set_source(red_pat_b); bcr.fill()
+        draw_anime_grooves(bcr, self.x_left, 780.0, self.grooves, 1.5 * math.pi, 2 * math.pi)
+        draw_anime_grooves(bcr, self.x_right, 780.0, self.grooves, math.pi, 1.5 * math.pi)
+        create_bottom_red_casing_path(bcr, self.x_left, self.x_right, y_dark_bot_base, 780.0, self.cx, 590.0, self.r_dark, geo0["ang_dark_bot_start"], geo0["ang_dark_bot_end"], geo0["x_dark_cut"], self.device_r, notch_d=self.notch_d, trans=self.trans)
+        bcr.set_source_rgba(*self.c_border_3d); bcr.set_line_width(2.0); bcr.stroke()
+        create_bottom_red_casing_path(bcr, self.x_left + 1.6, self.x_right - 1.6, y_dark_bot_base + 0.8, 778.4, self.cx, 590.0, self.r_dark - 1.2, geo0["ang_dark_bot_start"], geo0["ang_dark_bot_end"], geo0["x_dark_cut"], max(4.0, self.device_r - 1.6), notch_d=self.notch_d, trans=self.trans)
+        bcr.set_source_rgba(*self.c_tactile_white); bcr.set_line_width(1.3); bcr.stroke()
+        bcr.new_sub_path()
+        bcr.move_to(self.x_left, geo0["y_silver_bot"]); bcr.line_to(self.x_left, geo0["y_dark_bot"]); bcr.line_to(self.cx - geo0["x_dark_cut"], geo0["y_dark_bot"])
+        bcr.arc_negative(self.cx, 590.0, self.r_dark, geo0["ang_dark_bot_end"], geo0["ang_dark_bot_start"])
+        bcr.line_to(self.x_right, geo0["y_dark_bot"]); bcr.line_to(self.x_right, geo0["y_silver_bot"]); bcr.line_to(self.cx + geo0["x_chassis_cut"], geo0["y_silver_bot"])
+        bcr.arc(self.cx, 590.0, self.r_chassis, geo0["ang_chassis_bot_start"], geo0["ang_chassis_bot_end"]); bcr.close_path()
+        bcr.set_source_rgba(c_dark_r, c_dark_g, c_dark_b, 0.85); bcr.fill()
+        bcr.move_to(self.x_left, geo0["y_dark_bot"]); bcr.line_to(self.cx - geo0["x_dark_cut"], geo0["y_dark_bot"])
+        bcr.arc_negative(self.cx, 590.0, self.r_dark, geo0["ang_dark_bot_end"], geo0["ang_dark_bot_start"]); bcr.line_to(self.x_right, geo0["y_dark_bot"])
+        bcr.set_source_rgba(*self.c_border_3d); bcr.set_line_width(1.4); bcr.stroke()
+        y_up_top = geo0["y_edge_bot"] - self.cuff_ext
+        bcr.new_sub_path()
+        bcr.move_to(self.x_left, geo0["y_edge_bot"]); bcr.line_to(self.x_left, y_up_top)
+        bcr.arc_negative(self.x_left, y_up_top + r_cuff, r_cuff, 1.5 * math.pi, math.pi)
+        bcr.line_to(self.x_left - prot, geo0["y_silver_bot"] - r_cuff)
+        bcr.arc_negative(self.x_left, geo0["y_silver_bot"] - r_cuff, r_cuff, math.pi, 0.5 * math.pi)
+        bcr.line_to(self.cx - geo0["x_chassis_cut"], geo0["y_silver_bot"])
+        bcr.arc_negative(self.cx, 590.0, self.r_chassis, geo0["ang_chassis_bot_end"], geo0["ang_chassis_bot_start"])
+        bcr.line_to(self.x_right, geo0["y_silver_bot"])
+        bcr.arc_negative(self.x_right, geo0["y_silver_bot"] - r_cuff, r_cuff, 0.5 * math.pi, 0)
+        bcr.line_to(self.x_right + prot, y_up_top + r_cuff)
+        bcr.arc_negative(self.x_right, y_up_top + r_cuff, r_cuff, 0, 1.5 * math.pi)
+        bcr.line_to(self.x_right, geo0["y_edge_bot"]); bcr.line_to(self.cx + geo0["x_outer_cut"], geo0["y_edge_bot"])
+        bcr.arc(self.cx, 590.0, self.r_outer, geo0["ang_outer_bot_start"], geo0["ang_outer_bot_end"])
+        bcr.close_path()
+        silver_pat_bot = cairo.LinearGradient(self.x_left, geo0["y_edge_bot"], self.x_left, geo0["y_silver_bot"])
+        silver_pat_bot.add_color_stop_rgb(0.0, *hex_to_rgba(C_TEXT_SEC)[:3]); silver_pat_bot.add_color_stop_rgb(1.0, *hex_to_rgba(C_TEXT_PRI)[:3])
+        bcr.set_source(silver_pat_bot); bcr.fill_preserve(); bcr.set_source_rgba(*self.c_border_3d); bcr.set_line_width(1.4); bcr.stroke()
+        band_pat_bot = cairo.LinearGradient(self.cx - self.r_outer, 590.0, self.cx + self.r_outer, 590.0)
+        band_pat_bot.add_color_stop_rgb(0, *self.c_band_stop0); band_pat_bot.add_color_stop_rgb(0.5, *self.c_band_stop1); band_pat_bot.add_color_stop_rgb(1, *self.c_band_stop2)
+        bcr.new_sub_path()
+        bcr.arc(self.cx, 590.0, self.r_outer, geo0["ang_outer_bot_start"], geo0["ang_outer_bot_end"])
+        bcr.line_to(self.cx - geo0["x_inner_cut"], geo0["y_edge_bot"])
+        bcr.arc_negative(self.cx, 590.0, self.r_inner, geo0["ang_inner_bot_end"], geo0["ang_inner_bot_start"])
+        bcr.close_path()
+        bcr.set_source(band_pat_bot); bcr.fill_preserve(); bcr.set_source_rgba(*self.c_border_3d); bcr.set_line_width(1.6); bcr.stroke()
+        bcr.arc(self.cx, 590.0, self.r_inner, geo0["ang_inner_bot_start"], geo0["ang_inner_bot_end"])
+        bcr.set_source_rgba(0, 0, 0, 0.35); bcr.set_line_width(2.2); bcr.stroke()
+        self._cached_bot_casing = bot_surf
+
+    def _bake_content(self):
+        W, H = int(self.base_w), int(self.base_h)
+        surf = cairo.ImageSurface(cairo.FORMAT_ARGB32, W, H)
+        cr = cairo.Context(surf)
+        cr.set_antialias(cairo.ANTIALIAS_DEFAULT)
+        self._draw_content_elements(cr, cy_top=190.0)
+        self._cached_content_surf = surf
+        self._cached_content_page = self.current_page
+
+    def _draw_content_elements(self, cr, cy_top=190.0):
+        socket_well_y = self.socket_well_y
+
+        if self.current_page == "controls":
+            # KERNED CURVED HEADER: Perfectly contained within the arc band
+            draw_curved_kerned_cached(cr, "CONTROL CENTER", self.cx, cy_top, r_text=62.0, font_desc="DejaVu Sans Bold 8.5", letter_spacing=1.6)
+
+            # Bow icon at the top
             cr.save()
-            # Clip strictly inside expanding screen area
-            cr.new_sub_path()
-            cr.rectangle(self.x_left, geo["y_edge_top"], self.W_shell, geo["y_edge_bot"] - geo["y_edge_top"])
-            cr.arc(self.cx, geo["cy_top"], self.r_inner, geo["ang_inner_top_end"], geo["ang_inner_top_start"])
-            cr.close_path()
-            cr.arc(self.cx, geo["cy_bot"], self.r_inner, geo["ang_inner_bot_start"], geo["ang_inner_bot_end"])
-            cr.close_path()
-            cr.clip()
+            draw_bow_mark(cr, self.cx, cy_top - self.top_mark_offset, size=22.0, color=self.c_accent_rgb)
+            cr.restore()
 
-            cr.push_group()
+            # Floating Quick Tiles
+            grid_x = self.x_left + 36.0
+            grid_y = 224.0
+            col_w = (self.W_shell - 72.0 - 20.0) / 2.0
+            row_h = 44.0
+            gap_y = 24.0
 
-            socket_well_y = self.socket_well_y
+            # Dynamic Tile Resolution: Bluetooth, Power Mode, Wi-Fi, Input (Always Red)
+            if self.bt_enabled:
+                bt_icon = "󰂱" if self.bt_device else "󰂯"
+                bt_val = self.bt_device if self.bt_device else "Enabled"
+            else:
+                bt_icon = "󰂲"
+                bt_val = "Disabled"
 
-            if self.current_page == "controls":
-                # KERNED CURVED HEADER: Perfectly contained within the arc band
-                draw_curved_kerned(cr, "CONTROL CENTER", self.cx, geo["cy_top"], r_text=62.0, font_desc="DejaVu Sans Bold 8.5", letter_spacing=1.6)
+            pwr_lower = (self.power_mode or "balanced").lower()
+            if pwr_lower == "performance":
+                pwr_icon = "󰓅"
+                pwr_val = "Performance"
+            elif pwr_lower in ("powersave", "power-saver", "power saver"):
+                pwr_icon = "󰌪"
+                pwr_val = "Power Saver"
+            else:
+                pwr_icon = "󰾅"
+                pwr_val = "Balanced"
 
-                # Flower icon at the top
+            if not self.wifi_radio_enabled or self.wifi_text == "Disabled":
+                wifi_icon = "󰤮"
+                wifi_val = "Disabled"
+            elif self.wifi_text == "Connected" or self.wifi_ssid:
+                wifi_icon = "󰤨"
+                wifi_val = self.wifi_ssid if self.wifi_ssid else "Connected"
+            else:
+                wifi_icon = "󰖪"
+                wifi_val = "Disconnected"
+
+            tiles = [
+                ("󰌌", "Input", self.ime_text, grid_x, grid_y),
+                (wifi_icon, "Wi-Fi", wifi_val, grid_x + col_w + 20.0, grid_y),
+                (bt_icon, "Bluetooth", bt_val, grid_x, grid_y + row_h + gap_y),
+                (pwr_icon, "Power Mode", pwr_val, grid_x + col_w + 20.0, grid_y + row_h + gap_y),
+            ]
+
+            box_w = 26.0
+            for icon, name, val, c_x, c_y in tiles:
                 cr.save()
-                draw_flower_mark(cr, self.cx, geo["cy_top"] - self.top_mark_offset, r_petal=5.5, r_center=2.4, color=self.c_accent_rgb)
+                l_ic = PangoCairo.create_layout(cr)
+                l_ic.set_font_description(self.pango_font_tile_icon)
+                l_ic.set_markup(f"<span color='{self.c_accent}'>{icon}</span>", -1)
+                ink, _ = l_ic.get_pixel_extents()
+                # Perfectly center icon horizontally in box_w
+                ic_x = c_x + (box_w - ink.width) / 2.0 - ink.x
+                cr.move_to(ic_x, c_y + 4.0)
+                PangoCairo.show_layout(cr, l_ic)
+
+                txt_x = c_x + 32.0
+                l_txt = PangoCairo.create_layout(cr)
+                l_txt.set_font_description(self.pango_font_tile_title)
+                l_txt.set_markup(f"<span color='{C_BORDER_3D}'>{name}</span>", -1)
+                cr.move_to(txt_x, c_y + 2.0)
+                PangoCairo.show_layout(cr, l_txt)
+
+                l_txt.set_width(int((col_w - 34.0) * Pango.SCALE))
+                l_txt.set_ellipsize(Pango.EllipsizeMode.END)
+                l_txt.set_markup(f"<span color='{self.c_accent}'>{val}</span>", -1)
+                cr.move_to(txt_x, c_y + 20.0)
+                PangoCairo.show_layout(cr, l_txt)
                 cr.restore()
 
-                # Floating Quick Tiles
-                grid_x = self.x_left + 36.0
-                grid_y = 224.0
-                col_w = (self.W_shell - 72.0 - 20.0) / 2.0
-                row_h = 44.0
-                gap_y = 24.0
+            # Pokéball Dual Slider + Power Button (Option B)
+            cy_pokeball = self.cy_pokeball
+            draw_pokeball_dual_slider(
+                cr, self.cx, cy_pokeball, 
+                R=64.0, thickness=12.0, 
+                vol_val=self.vol_val, bri_val=self.bri_val, 
+                knob_style="round_knob",
+                icon_color=self.c_accent,
+                accent_rgb=self.c_accent_rgb,
+                dark_color=self.c_slider_dark,
+                pwr_bg=self.c_pwr_bg
+            )
 
-                bt_val = self.bt_device if (self.bt_enabled and self.bt_device) else ("Enabled" if self.bt_enabled else "Disabled")
-                tiles = [
-                    ("󰌌", self.c_accent, "Input", self.ime_text, grid_x, grid_y),
-                    ("󰤨", self.c_accent, "Wi-Fi", self.wifi_text, grid_x + col_w + 20.0, grid_y),
-                    ("󰂯", self.c_accent, "Bluetooth", bt_val, grid_x, grid_y + row_h + gap_y),
-                    ("󰓅", self.c_accent, "Power Mode", self.power_mode.capitalize() if self.power_mode else "Balanced", grid_x + col_w + 20.0, grid_y + row_h + gap_y),
-                ]
+            # Bottom Navigation: Pure Floating Bell
+            btn_y = socket_well_y
+            cr.save()
+            draw_bell_icon(cr, self.cx, btn_y, font_size=20, color=self.c_accent)
+            cr.restore()
 
-                for icon, ic_col, name, val, c_x, c_y in tiles:
+        elif self.current_page == "notifications":
+            # KERNED CURVED HEADER: Perfectly contained within the arc band
+            draw_curved_kerned_cached(cr, "NOTIFICATIONS", self.cx, cy_top, r_text=62.0, font_desc="DejaVu Sans Bold 8.5", letter_spacing=1.6)
+
+            # Bell icon at top of Notifications
+            cr.save()
+            draw_bell_icon(cr, self.cx, cy_top - self.top_mark_offset, font_size=11, color=self.c_accent)
+            cr.restore()
+
+            # Notification stream (5 items per page)
+            grid_x = self.x_left + 36.0
+            grid_y = 214.0
+            row_w = self.W_shell - 72.0
+
+            notifs = self.notifications
+            if not notifs:
+                # Minimalist empty state in accent red (pops clearly on holographic cyan screen)
+                cr.save()
+                l_ic = PangoCairo.create_layout(cr)
+                l_ic.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font 30"))
+                l_ic.set_markup(f"<span color='{self.c_accent}'>󰂛</span>", -1)
+                ink_i, _ = l_ic.get_pixel_extents()
+                cr.move_to(self.cx - ink_i.width / 2.0, 308.0)
+                PangoCairo.show_layout(cr, l_ic)
+
+                l_msg = PangoCairo.create_layout(cr)
+                l_msg.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 11.5"))
+                l_msg.set_markup(f"<span color='{self.c_accent}'>No notifications</span>", -1)
+                ink_m, _ = l_msg.get_pixel_extents()
+                cr.move_to(self.cx - ink_m.width / 2.0, 350.0)
+                PangoCairo.show_layout(cr, l_msg)
+                cr.restore()
+            else:
+                start_idx = self.notif_page_idx * 5
+                page_notifs = notifs[start_idx : start_idx + 5]
+
+                for idx, item in enumerate(page_notifs):
+                    item_y = grid_y + idx * 49.0
+                    is_hover = (self.hovered_item == f"notif_{idx}")
+
                     cr.save()
-                    l_ic = PangoCairo.create_layout(cr)
-                    l_ic.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font 20"))
-                    l_ic.set_markup(f"<span color='{ic_col}'>{icon}</span>", -1)
-                    cr.move_to(c_x, c_y + 4.0)
-                    PangoCairo.show_layout(cr, l_ic)
+                    # Subtle wash on hover
+                    if is_hover:
+                        draw_rounded_rect(cr, grid_x - 6.0, item_y - 2.0, row_w + 12.0, 45.0, 8.0)
+                        cr.set_source_rgba(*hex_to_rgba(self.c_accent, 0.08))
+                        cr.fill()
 
-                    txt_x = c_x + 32.0
-                    l_txt = PangoCairo.create_layout(cr)
-                    l_txt.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 10"))
-                    l_txt.set_markup(f"<span color='{C_BORDER_3D}'>{name}</span>", -1)
-                    cr.move_to(txt_x, c_y + 2.0)
-                    PangoCairo.show_layout(cr, l_txt)
-
-                    l_txt.set_markup(f"<span color='{self.c_accent}'>{val}</span>", -1)
-                    cr.move_to(txt_x, c_y + 20.0)
-                    PangoCairo.show_layout(cr, l_txt)
-                    cr.restore()
-
-                # Pokéball Dual Slider + Power Button (Option B)
-                cy_pokeball = self.cy_pokeball
-                draw_pokeball_dual_slider(
-                    cr, self.cx, cy_pokeball, 
-                    R=64.0, thickness=12.0, 
-                    vol_val=self.vol_val, bri_val=self.bri_val, 
-                    knob_style="round_knob",
-                    icon_color=self.c_accent,
-                    accent_rgb=self.c_accent_rgb,
-                    dark_color=self.c_slider_dark,
-                    pwr_bg=self.c_pwr_bg
-                )
-
-                # Bottom Navigation: Pure Floating Bell
-                btn_y = socket_well_y
-                cr.save()
-                draw_bell_icon(cr, self.cx, btn_y, font_size=20, color=self.c_accent)
-                cr.restore()
-
-            elif self.current_page == "notifications":
-                # KERNED CURVED HEADER: Perfectly contained within the arc band
-                draw_curved_kerned(cr, "NOTIFICATIONS", self.cx, geo["cy_top"], r_text=62.0, font_desc="DejaVu Sans Bold 8.5", letter_spacing=1.6)
-
-                # Bell icon at top of Notifications
-                cr.save()
-                draw_bell_icon(cr, self.cx, geo["cy_top"] - self.top_mark_offset, font_size=11, color=self.c_accent)
-                cr.restore()
-
-                # Notification stream
-                grid_x = self.x_left + 36.0
-                grid_y = 216.0
-                row_w = self.W_shell - 72.0
-
-                notifs = self.notifications
-                if not notifs:
-                    notifs = [
-                        ("󰙯", "#5865F2", "Discord", "5m ago", "Team Chat", "The presentation is starting soon."),
-                        ("󰈹", "#FF7139", "Firefox", "24m ago", "Download Completed", "hyprland-kalos-assets-v2.tar.gz (14.2 MB)"),
-                        ("󰓇", "#1ED760", "Spotify", "1h ago", "Now Playing", "Aim to Be a Pokémon Master - 2024 Remaster"),
-                        ("󰒓", self.c_accent, "System", "2h ago", "Package Updates", "3 packages ready to upgrade (pacman -Syu)"),
-                    ]
-
-                curr_y = grid_y
-                for item in notifs[:4]:
                     if isinstance(item, tuple):
                         icon, icon_col, app, time_str, title, body = item
                     else:
@@ -1316,237 +2111,483 @@ class PokedexControlCenter(Gtk.Window):
                         body = item.get("body", "")
                         icon_col, icon = get_badge_info(app)
 
-                    cr.save()
+                    # Icon
                     l_ic = PangoCairo.create_layout(cr)
                     l_ic.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font 16"))
                     l_ic.set_markup(f"<span color='{icon_col}'>{icon}</span>", -1)
-                    cr.move_to(grid_x, curr_y + 2.0)
+                    cr.move_to(grid_x, item_y + 2.0)
                     PangoCairo.show_layout(cr, l_ic)
 
                     txt_x = grid_x + 28.0
+                    max_text_w = row_w - (50.0 if is_hover else 32.0)
+
+                    # Line 1: App name + relative time
                     l_app = PangoCairo.create_layout(cr)
                     l_app.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 10"))
-                    l_app.set_markup(f"<span color='#201011'>{app}</span>  <span color='#201011' alpha='50%'>• {time_str}</span>", -1)
-                    cr.move_to(txt_x, curr_y)
+                    l_app.set_width(int(max_text_w * Pango.SCALE))
+                    l_app.set_ellipsize(Pango.EllipsizeMode.END)
+                    l_app.set_markup(f"<span color='{C_BG_WIN}'>{app}</span>  <span color='{C_BG_WIN}' alpha='50%'>• {time_str}</span>", -1)
+                    cr.move_to(txt_x, item_y)
                     PangoCairo.show_layout(cr, l_app)
 
+                    # Line 2: Title / Summary
                     l_tit = PangoCairo.create_layout(cr)
                     l_tit.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 9.5"))
+                    l_tit.set_width(int(max_text_w * Pango.SCALE))
+                    l_tit.set_ellipsize(Pango.EllipsizeMode.END)
                     l_tit.set_markup(f"<span color='{self.c_accent}'>{title}</span>", -1)
-                    cr.move_to(txt_x, curr_y + 16.0)
+                    cr.move_to(txt_x, item_y + 15.0)
                     PangoCairo.show_layout(cr, l_tit)
 
+                    # Line 3: Body text
                     l_bod = PangoCairo.create_layout(cr)
                     l_bod.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font 8.5"))
-                    l_bod.set_markup(f"<span color='#201011' alpha='75%'>{body}</span>", -1)
-                    cr.move_to(txt_x, curr_y + 30.0)
+                    l_bod.set_width(int(max_text_w * Pango.SCALE))
+                    l_bod.set_ellipsize(Pango.EllipsizeMode.END)
+                    l_bod.set_markup(f"<span color='{C_BG_WIN}' alpha='75%'>{body}</span>", -1)
+                    cr.move_to(txt_x, item_y + 29.0)
                     PangoCairo.show_layout(cr, l_bod)
-                    cr.restore()
 
-                    curr_y += 50.0
+                    # Hover dismiss '󰅖' indicator on right
+                    if is_hover:
+                        l_del = PangoCairo.create_layout(cr)
+                        l_del.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 11"))
+                        l_del.set_markup(f"<span color='{self.c_accent}'>󰅖</span>", -1)
+                        cr.move_to(grid_x + row_w - 14.0, item_y + 14.0)
+                        PangoCairo.show_layout(cr, l_del)
+
+                    cr.restore()
 
                 # "Clear all notifications" button
                 cr.save()
+                is_clr_hover = (self.hovered_item == "clear_all")
+                clr_col = self.c_accent_hover if is_clr_hover else self.c_accent
                 l_clr = PangoCairo.create_layout(cr)
                 l_clr.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 10.5"))
-                l_clr.set_markup(f"<span color='{self.c_accent}'>󰆴 Clear all notifications</span>", -1)
+                l_clr.set_markup(f"<span color='{clr_col}'>󰆴 Clear all notifications</span>", -1)
                 ink, log = l_clr.get_pixel_extents()
-                cr.move_to(self.cx - ink.x - ink.width / 2.0, 508.0)
+                cr.move_to(self.cx - ink.width / 2.0, 478.0)
                 PangoCairo.show_layout(cr, l_clr)
                 cr.restore()
 
-                # Bottom Navigation: Flower on Notifications
-                btn_y = socket_well_y
+                # Floating Pagination Row (if > 5 notifications)
+                if len(notifs) > 5:
+                    cr.save()
+                    total_pages = max(1, (len(notifs) + 4) // 5)
+                    py_y = 504.0
+
+                    # Prev
+                    is_pv_hover = (self.hovered_item == "notif_prev")
+                    pv_col = self.c_accent if is_pv_hover else (C_BG_WIN if self.notif_page_idx > 0 else C_TEXT_MUT)
+                    l_prv = PangoCairo.create_layout(cr)
+                    l_prv.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 10"))
+                    l_prv.set_markup(f"<span color='{pv_col}'><b>◀ Prev</b></span>", -1)
+                    cr.move_to(grid_x + 4.0, py_y)
+                    PangoCairo.show_layout(cr, l_prv)
+
+                    # Page indicator
+                    l_pg = PangoCairo.create_layout(cr)
+                    l_pg.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 9.5"))
+                    l_pg.set_markup(f"<span color='{C_BG_WIN}' alpha='75%'><b>{self.notif_page_idx + 1} / {total_pages}</b></span>", -1)
+                    ink, _ = l_pg.get_pixel_extents()
+                    cr.move_to(self.cx - ink.width / 2.0, py_y)
+                    PangoCairo.show_layout(cr, l_pg)
+
+                    # Next
+                    is_nx_hover = (self.hovered_item == "notif_next")
+                    nx_col = self.c_accent if is_nx_hover else (C_BG_WIN if self.notif_page_idx < total_pages - 1 else C_TEXT_MUT)
+                    l_nxt = PangoCairo.create_layout(cr)
+                    l_nxt.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 10"))
+                    l_nxt.set_markup(f"<span color='{nx_col}'><b>Next ▶</b></span>", -1)
+                    cr.move_to(grid_x + row_w - 52.0, py_y)
+                    PangoCairo.show_layout(cr, l_nxt)
+                    cr.restore()
+
+            # Bottom Navigation: Bow on Notifications
+            btn_y = socket_well_y
+            cr.save()
+            draw_bow_mark(cr, self.cx, btn_y, size=34.0, color=self.c_accent_rgb)
+            cr.restore()
+
+        elif self.current_page == "wifi":
+            # KERNED CURVED HEADER: Perfectly contained within the arc band
+            draw_curved_kerned_cached(cr, "WI-FI NETWORKS", self.cx, cy_top, r_text=62.0, font_desc="DejaVu Sans Bold 8.5", letter_spacing=1.6)
+
+            # Wi-Fi icon at top
+            cr.save()
+            l_top = PangoCairo.create_layout(cr)
+            l_top.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font 13"))
+            l_top.set_markup(f"<span color='{self.c_accent}'>󰖩</span>", -1)
+            ink, log = l_top.get_pixel_extents()
+            cr.move_to(self.cx - ink.width / 2.0, cy_top - self.top_mark_offset - ink.height / 2.0)
+            PangoCairo.show_layout(cr, l_top)
+            cr.restore()
+
+            content_x = self.x_left + 36.0
+            content_w = self.W_shell - 72.0
+
+            # 1. TOP HEADER & ACTION ROW (y = 214.0) - Pure floating, NO boxes
+            cr.save()
+            l_htit = PangoCairo.create_layout(cr)
+            l_htit.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 12"))
+            l_htit.set_markup(f"<span color='{C_BG_WIN}'>Wi-Fi Networks</span>", -1)
+            cr.move_to(content_x, 212.0)
+            PangoCairo.show_layout(cr, l_htit)
+
+            # Action: Toggle Radio (ON / OFF)
+            is_tg_hover = (self.hovered_item == "wifi_toggle")
+            tg_text = "󰖩 ON" if self.wifi_radio_enabled else "󰖪 OFF"
+            tg_col = (self.c_accent if is_tg_hover else self.c_accent) if self.wifi_radio_enabled else (self.c_accent if is_tg_hover else C_TEXT_MUT)
+            l_tg = PangoCairo.create_layout(cr)
+            l_tg.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 10.5"))
+            l_tg.set_markup(f"<span color='{tg_col}'><b>{tg_text}</b></span>", -1)
+            cr.move_to(content_x + content_w - 105.0, 213.0)
+            PangoCairo.show_layout(cr, l_tg)
+
+            # Action: Rescan
+            is_sc_hover = (self.hovered_item == "wifi_rescan")
+            sc_col = self.c_accent if is_sc_hover else C_BG_WIN
+            l_sc = PangoCairo.create_layout(cr)
+            l_sc.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 10.5"))
+            l_sc.set_markup(f"<span color='{sc_col}'><b>󰑐 Scan</b></span>", -1)
+            cr.move_to(content_x + content_w - 48.0, 213.0)
+            PangoCairo.show_layout(cr, l_sc)
+            cr.restore()
+
+            # 2. STATUS / ACTIVE ROW (y = 238.0) - Pure floating, NO boxes
+            cr.save()
+            l_st = PangoCairo.create_layout(cr)
+            l_st.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 10"))
+
+            if self.wifi_status_msg:
+                l_st.set_markup(f"<span color='{self.c_accent}'><b>{self.wifi_status_msg}</b></span>", -1)
+                cr.move_to(content_x, 238.0)
+                PangoCairo.show_layout(cr, l_st)
+            elif self.wifi_ssid:
+                l_st.set_markup(f"<span color='{C_BG_WIN}' alpha='80%'>Connected: </span><span color='{self.c_accent}'><b>{self.wifi_ssid}</b></span>", -1)
+                cr.move_to(content_x, 238.0)
+                PangoCairo.show_layout(cr, l_st)
+
+                # Disconnect pure text link
+                is_dc_hover = (self.hovered_item == "wifi_disconnect")
+                dc_col = self.c_accent if is_dc_hover else C_BG_WAYBAR
+                l_dc = PangoCairo.create_layout(cr)
+                l_dc.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 9.5"))
+                l_dc.set_markup(f"<span color='{dc_col}'><b><u>󰖪 Disconnect</u></b></span>", -1)
+                cr.move_to(content_x + content_w - 95.0, 238.0)
+                PangoCairo.show_layout(cr, l_dc)
+            elif not self.wifi_radio_enabled:
+                l_st.set_markup(f"<span color='{C_TEXT_MUT}'>Wi-Fi is currently disabled</span>", -1)
+                cr.move_to(content_x, 238.0)
+                PangoCairo.show_layout(cr, l_st)
+            else:
+                l_st.set_markup(f"<span color='{C_BG_WIN}' alpha='75%'>{len(self.wifi_networks)} networks found</span>", -1)
+                cr.move_to(content_x, 238.0)
+                PangoCairo.show_layout(cr, l_st)
+            cr.restore()
+
+            # 3. CONTENT: PASSWORD PROMPT OR NETWORK LIST
+            if self.wifi_password_prompt_ssid:
+                # Clean Floating Password Entry Mode (NO white boxes)
                 cr.save()
-                draw_flower_mark(cr, self.cx, btn_y, r_petal=9.0, r_center=3.8)
+                l_ptit = PangoCairo.create_layout(cr)
+                l_ptit.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 12"))
+                l_ptit.set_markup(f"<span color='{C_BG_WIN}'>Password Required</span>", -1)
+                cr.move_to(content_x, 275.0)
+                PangoCairo.show_layout(cr, l_ptit)
+
+                l_pssid = PangoCairo.create_layout(cr)
+                l_pssid.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 11"))
+                l_pssid.set_markup(f"<span color='{C_BG_WIN}' alpha='75%'>Network: </span><span color='{self.c_accent}'><b>{self.wifi_password_prompt_ssid}</b></span>", -1)
+                cr.move_to(content_x, 298.0)
+                PangoCairo.show_layout(cr, l_pssid)
+
+                # Subtle Input underline / slot
+                input_y = 326.0
+                input_h = 34.0
+                draw_rounded_rect(cr, content_x, input_y, content_w, input_h, 6.0)
+                cr.set_source_rgba(0.13, 0.06, 0.07, 0.06)
+                cr.fill_preserve()
+                cr.set_source_rgba(*hex_to_rgba(C_BORDER_3D, 0.35))
+                cr.set_line_width(1.0)
+                cr.stroke()
+
+                l_inp = PangoCairo.create_layout(cr)
+                l_inp.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font 11"))
+                if self.wifi_password_input:
+                    masked = "•" * len(self.wifi_password_input)
+                    l_inp.set_markup(f"<span color='{C_BG_WIN}'>{masked}</span><span color='{self.c_accent}'>|</span>", -1)
+                else:
+                    l_inp.set_markup(f"<span color='{C_TEXT_MUT}'>Enter password...|</span>", -1)
+                cr.move_to(content_x + 10.0, input_y + 7.0)
+                PangoCairo.show_layout(cr, l_inp)
+
+                # Floating Action Buttons
+                btn_y = 374.0
+
+                # Connect pill button
+                draw_rounded_rect(cr, content_x, btn_y, 110.0, 30.0, 6.0)
+                if self.hovered_item == "wifi_pass_connect":
+                    cr.set_source_rgba(*hex_to_rgba(C_ACCENT_HOVER, 1.0))
+                else:
+                    cr.set_source_rgba(*hex_to_rgba(self.c_accent, 0.90))
+                cr.fill()
+                l_btnc = PangoCairo.create_layout(cr)
+                l_btnc.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 10"))
+                l_btnc.set_markup(f"<span color='{C_TEXT_INV}'>Connect ↵</span>", -1)
+                cr.move_to(content_x + 16.0, btn_y + 6.0)
+                PangoCairo.show_layout(cr, l_btnc)
+
+                # Cancel floating text
+                is_cxl_hover = (self.hovered_item == "wifi_pass_cancel")
+                cxl_col = self.c_accent if is_cxl_hover else C_BG_WIN
+                l_btnx = PangoCairo.create_layout(cr)
+                l_btnx.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 10"))
+                l_btnx.set_markup(f"<span color='{cxl_col}'>Cancel</span>", -1)
+                cr.move_to(content_x + 135.0, btn_y + 6.0)
+                PangoCairo.show_layout(cr, l_btnx)
+
+                # Helper note
+                l_hint = PangoCairo.create_layout(cr)
+                l_hint.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font 9"))
+                l_hint.set_markup(f"<span color='{C_BG_WIN}' alpha='60%'>Press Enter to connect, Esc to return</span>", -1)
+                cr.move_to(content_x, 420.0)
+                PangoCairo.show_layout(cr, l_hint)
                 cr.restore()
 
-            cr.pop_group_to_source()
-            cr.paint_with_alpha(alpha)
-            cr.restore()
+            else:
+                # Network List (5 items per page) - Pure floating rows, NO white card boxes
+                start_idx = self.wifi_page_idx * 5
+                page_nets = self.wifi_networks[start_idx : start_idx + 5]
 
-        # 2. TOP RED CASING (WITH TACTILE 3D BORDER & INNER WHITE HIGHLIGHT)
-        y_dark_top_base = 190.0 - (self.cut_y + self.chassis_thick + self.dark_thick)
-        y_dark_bot_base = 590.0 + (self.cut_y + self.chassis_thick + self.dark_thick)
+                if not page_nets:
+                    cr.save()
+                    l_empty = PangoCairo.create_layout(cr)
+                    l_empty.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 11"))
+                    if self.wifi_scanning:
+                        msg = "󰑐 Scanning nearby networks..."
+                        col = self.c_accent
+                    elif not self.wifi_radio_enabled:
+                        msg = "󰖪 Wi-Fi is disabled"
+                        col = self.c_accent
+                    else:
+                        msg = "󰤯 No networks found"
+                        col = self.c_accent
+                    l_empty.set_markup(f"<span color='{col}'>{msg}</span>", -1)
+                    ink, log = l_empty.get_pixel_extents()
+                    cr.move_to(self.cx - ink.width / 2.0, 340.0)
+                    PangoCairo.show_layout(cr, l_empty)
+                    cr.restore()
+                else:
+                    for idx, net in enumerate(page_nets):
+                        cr.save()
+                        item_y = 262.0 + idx * 48.0
+                        is_active = net.get("in_use") or (net.get("ssid") == self.wifi_ssid)
+                        is_hover = (self.hovered_item == f"wifi_item_{idx}")
 
-        cr.save()
-        cr.translate(0, geo["top_casing_y"])
+                        # Subtle translucent wash on hover or active (NO borders, NO boxes)
+                        if is_active:
+                            draw_rounded_rect(cr, content_x - 6.0, item_y - 2.0, content_w + 12.0, 44.0, 8.0)
+                            cr.set_source_rgba(*hex_to_rgba(self.c_accent, 0.12))
+                            cr.fill()
+                        elif is_hover:
+                            draw_rounded_rect(cr, content_x - 6.0, item_y - 2.0, content_w + 12.0, 44.0, 8.0)
+                            cr.set_source_rgba(*hex_to_rgba(self.c_accent, 0.08))
+                            cr.fill()
 
-        # 2A. Red anime satin fill
-        create_top_red_casing_path(cr, self.x_left, self.x_right, y_dark_top_base, self.cx, 190.0, self.r_dark, geo["ang_dark_top_start"], geo["ang_dark_top_end"], geo["x_dark_cut"], self.device_r, notch_d=self.notch_d, trans=self.trans)
-        red_pat = cairo.LinearGradient(self.x_left, 0, self.x_right, 0)
-        red_pat.add_color_stop_rgb(0, *self.c_casing_l)
-        red_pat.add_color_stop_rgb(0.5, *self.c_casing_m)
-        red_pat.add_color_stop_rgb(1, *self.c_casing_r)
-        cr.set_source(red_pat); cr.fill()
+                        # Signal icon (Size 20, matches main page icon scale)
+                        sig = net.get("signal", 0)
+                        sig_icon = "󰤨" if sig >= 80 else "󰤥" if sig >= 60 else "󰤢" if sig >= 40 else "󰤟" if sig >= 20 else "󰤯"
+                        ic_col = self.c_accent if (is_active or is_hover) else C_BORDER_3D
+                        l_sig = PangoCairo.create_layout(cr)
+                        l_sig.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font 20"))
+                        l_sig.set_markup(f"<span color='{ic_col}'>{sig_icon}</span>", -1)
+                        cr.move_to(content_x, item_y + 2.0)
+                        PangoCairo.show_layout(cr, l_sig)
 
-        # 2B. Anime concentric grooves
-        draw_anime_grooves(cr, self.x_left, 0, self.grooves, 0, 0.5 * math.pi)
-        draw_anime_grooves(cr, self.x_right, 0, self.grooves, 0.5 * math.pi, math.pi)
+                        # SSID (Size 11.5 Bold)
+                        ssid_str = net.get("ssid", "Unknown")
+                        ssid_disp = (ssid_str[:17] + "…") if len(ssid_str) > 18 else ssid_str
+                        l_nm = PangoCairo.create_layout(cr)
+                        l_nm.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 11.5"))
+                        nm_col = self.c_accent if is_active else (C_BORDER_3D if is_hover else C_BG_WIN)
+                        l_nm.set_markup(f"<span color='{nm_col}'>{ssid_disp}</span>", -1)
+                        cr.move_to(content_x + 36.0, item_y)
+                        PangoCairo.show_layout(cr, l_nm)
 
-        # 2C. Tactile 3D Stroke casing outline in #4D0A1C
-        create_top_red_casing_path(cr, self.x_left, self.x_right, y_dark_top_base, self.cx, 190.0, self.r_dark, geo["ang_dark_top_start"], geo["ang_dark_top_end"], geo["x_dark_cut"], self.device_r, notch_d=self.notch_d, trans=self.trans)
-        cr.set_source_rgba(*self.c_border_3d); cr.set_line_width(2.0); cr.stroke()
+                        # Sub info: signal % and security (Size 9.5)
+                        sec_str = net.get("security", "")
+                        sec_disp = sec_str.replace("WPA1", "").replace("WPA2", "WPA2").strip() if sec_str and sec_str != "--" else "Open"
+                        l_inf = PangoCairo.create_layout(cr)
+                        l_inf.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font 9.5"))
+                        l_inf.set_markup(f"<span color='{C_BG_WIN}' alpha='70%'>{sig}%  •  {sec_disp}</span>", -1)
+                        cr.move_to(content_x + 36.0, item_y + 21.0)
+                        PangoCairo.show_layout(cr, l_inf)
 
-        # 2D. Inner Tactile White Highlight along top red casing
-        create_top_red_casing_path(cr, self.x_left + 1.6, self.x_right - 1.6, y_dark_top_base - 0.8, self.cx, 190.0, self.r_dark - 1.2, geo["ang_dark_top_start"], geo["ang_dark_top_end"], geo["x_dark_cut"], max(4.0, self.device_r - 1.6), notch_d=self.notch_d, trans=self.trans)
-        cr.set_source_rgba(*self.c_tactile_white); cr.set_line_width(1.3); cr.stroke()
-        cr.restore()
+                        # Badges on right side
+                        badge_x = content_x + content_w - 78.0
+                        if is_active:
+                            l_bg = PangoCairo.create_layout(cr)
+                            l_bg.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 9.5"))
+                            l_bg.set_markup(f"<span color='{C_STATUS_SUCC}'>✔ Active</span>", -1)
+                            cr.move_to(badge_x, item_y + 2.0)
+                            PangoCairo.show_layout(cr, l_bg)
+                        elif net.get("saved"):
+                            l_bg = PangoCairo.create_layout(cr)
+                            l_bg.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 9"))
+                            l_bg.set_markup(f"<span color='{C_BG_WIN}' alpha='55%'>Saved</span>", -1)
+                            cr.move_to(badge_x + 10.0, item_y + 2.0)
+                            PangoCairo.show_layout(cr, l_bg)
 
-        # 3. BOTTOM RED CASING (WITH 3D EXTRUSION BASE DOWNWARD)
-        cr.save()
-        cr.translate(0, geo["bot_casing_y"])
+                        # Lock icon (Security) - only show for unsaved, non-active secured networks
+                        if not is_active and not net.get("saved") and sec_str and sec_str != "--":
+                            l_lk = PangoCairo.create_layout(cr)
+                            l_lk.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font 12"))
+                            l_lk.set_markup(f"<span color='{self.c_accent}' alpha='85%'>󰌾</span>", -1)
+                            cr.move_to(content_x + content_w - 18.0, item_y + 19.0)
+                            PangoCairo.show_layout(cr, l_lk)
 
-        # 3A. Extrusion Base downward in #4D0A1C
-        casing_extrusion = 5.0
-        steps = 14
-        for s in range(steps + 1):
-            dy = casing_extrusion * (s / steps)
+                        cr.restore()
+
+                # Floating Pagination Row (NO boxes)
+                if len(self.wifi_networks) > 5:
+                    cr.save()
+                    total_pages = max(1, (len(self.wifi_networks) + 4) // 5)
+                    py_y = 514.0
+
+                    # Prev
+                    is_pv_hover = (self.hovered_item == "wifi_prev")
+                    pv_col = self.c_accent if is_pv_hover else (C_BG_WIN if self.wifi_page_idx > 0 else C_TEXT_MUT)
+                    l_prv = PangoCairo.create_layout(cr)
+                    l_prv.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 10.5"))
+                    l_prv.set_markup(f"<span color='{pv_col}'><b>◀ Prev</b></span>", -1)
+                    cr.move_to(content_x + 4.0, py_y)
+                    PangoCairo.show_layout(cr, l_prv)
+
+                    # Page indicator
+                    l_pg = PangoCairo.create_layout(cr)
+                    l_pg.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 10"))
+                    l_pg.set_markup(f"<span color='{C_BG_WIN}' alpha='75%'><b>{self.wifi_page_idx + 1} / {total_pages}</b></span>", -1)
+                    ink, log = l_pg.get_pixel_extents()
+                    cr.move_to(self.cx - ink.width / 2.0, py_y)
+                    PangoCairo.show_layout(cr, l_pg)
+
+                    # Next
+                    is_nx_hover = (self.hovered_item == "wifi_next")
+                    nx_col = self.c_accent if is_nx_hover else (C_BG_WIN if self.wifi_page_idx < total_pages - 1 else C_TEXT_MUT)
+                    l_nxt = PangoCairo.create_layout(cr)
+                    l_nxt.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 10.5"))
+                    l_nxt.set_markup(f"<span color='{nx_col}'><b>Next ▶</b></span>", -1)
+                    cr.move_to(content_x + content_w - 56.0, py_y)
+                    PangoCairo.show_layout(cr, l_nxt)
+                    cr.restore()
+
+            # Bottom Navigation: Bow mark to return to Controls
+            btn_y = socket_well_y
             cr.save()
-            cr.translate(0, dy)
-            create_bottom_red_casing_path(cr, self.x_left, self.x_right, y_dark_bot_base, 780.0, self.cx, 590.0, self.r_dark, geo["ang_dark_bot_start"], geo["ang_dark_bot_end"], geo["x_dark_cut"], self.device_r, notch_d=self.notch_d, trans=self.trans)
-            cr.set_source_rgba(*self.c_border_3d)
-            cr.fill()
+            draw_bow_mark(cr, self.cx, btn_y, size=34.0, color=self.c_accent_rgb)
             cr.restore()
 
-        # 3B. Red anime satin fill
-        create_bottom_red_casing_path(cr, self.x_left, self.x_right, y_dark_bot_base, 780.0, self.cx, 590.0, self.r_dark, geo["ang_dark_bot_start"], geo["ang_dark_bot_end"], geo["x_dark_cut"], self.device_r, notch_d=self.notch_d, trans=self.trans)
-        red_pat_bot = cairo.LinearGradient(self.x_left, 590.0, self.x_right, 590.0)
-        red_pat_bot.add_color_stop_rgb(0, *self.c_casing_l)
-        red_pat_bot.add_color_stop_rgb(0.5, *self.c_casing_m)
-        red_pat_bot.add_color_stop_rgb(1, *self.c_casing_r)
-        cr.set_source(red_pat_bot); cr.fill()
 
-        # 3C. Anime concentric grooves
-        draw_anime_grooves(cr, self.x_left, 780.0, self.grooves, 1.5 * math.pi, 2 * math.pi)
-        draw_anime_grooves(cr, self.x_right, 780.0, self.grooves, math.pi, 1.5 * math.pi)
-
-        # 3D. Tactile 3D Stroke casing outline in #4D0A1C
-        create_bottom_red_casing_path(cr, self.x_left, self.x_right, y_dark_bot_base, 780.0, self.cx, 590.0, self.r_dark, geo["ang_dark_bot_start"], geo["ang_dark_bot_end"], geo["x_dark_cut"], self.device_r, notch_d=self.notch_d, trans=self.trans)
-        cr.set_source_rgba(*self.c_border_3d); cr.set_line_width(2.0); cr.stroke()
-
-        # 3E. Inner Tactile White Highlight along bottom red casing
-        create_bottom_red_casing_path(cr, self.x_left + 1.6, self.x_right - 1.6, y_dark_bot_base + 0.8, 780.0 - 1.6, self.cx, 590.0, self.r_dark - 1.2, geo["ang_dark_bot_start"], geo["ang_dark_bot_end"], geo["x_dark_cut"], max(4.0, self.device_r - 1.6), notch_d=self.notch_d, trans=self.trans)
-        cr.set_source_rgba(*self.c_tactile_white); cr.set_line_width(1.3); cr.stroke()
-        cr.restore()
-
-        # 4. DARK FLANGES
-        c_dark_r, c_dark_g, c_dark_b = self.c_flange
-        cr.save()
-        cr.new_sub_path()
-        cr.move_to(self.x_left, geo["y_silver_top"]); cr.line_to(self.x_left, geo["y_dark_top"]); cr.line_to(self.cx - geo["x_dark_cut"], geo["y_dark_top"])
-        cr.arc(self.cx, geo["cy_top"], self.r_dark, geo["ang_dark_top_end"], geo["ang_dark_top_start"])
-        cr.line_to(self.x_right, geo["y_dark_top"]); cr.line_to(self.x_right, geo["y_silver_top"]); cr.line_to(self.cx + geo["x_chassis_cut"], geo["y_silver_top"])
-        cr.arc_negative(self.cx, geo["cy_top"], self.r_chassis, geo["ang_chassis_top_start"], geo["ang_chassis_top_end"])
-        cr.close_path()
-        cr.set_source_rgba(c_dark_r, c_dark_g, c_dark_b, 0.85); cr.fill()
-        cr.move_to(self.x_left, geo["y_dark_top"]); cr.line_to(self.cx - geo["x_dark_cut"], geo["y_dark_top"])
-        cr.arc(self.cx, geo["cy_top"], self.r_dark, geo["ang_dark_top_end"], geo["ang_dark_top_start"]); cr.line_to(self.x_right, geo["y_dark_top"])
-        cr.set_source_rgba(*self.c_border_3d); cr.set_line_width(1.4); cr.stroke()
-        cr.restore()
+    def on_draw(self, widget, cr):
+        # 0. Clear canvas surface to transparent
+        cr.set_source_rgba(0, 0, 0, 0)
+        cr.set_operator(cairo.OPERATOR_CLEAR)
+        cr.paint()
+        cr.set_operator(cairo.OPERATOR_OVER)
+        cr.set_antialias(cairo.ANTIALIAS_DEFAULT)
 
         cr.save()
-        cr.new_sub_path()
-        cr.move_to(self.x_left, geo["y_silver_bot"]); cr.line_to(self.x_left, geo["y_dark_bot"]); cr.line_to(self.cx - geo["x_dark_cut"], geo["y_dark_bot"])
-        cr.arc_negative(self.cx, geo["cy_bot"], self.r_dark, geo["ang_dark_bot_end"], geo["ang_dark_bot_start"])
-        cr.line_to(self.x_right, geo["y_dark_bot"]); cr.line_to(self.x_right, geo["y_silver_bot"]); cr.line_to(self.cx + geo["x_chassis_cut"], geo["y_silver_bot"])
-        cr.arc(self.cx, geo["cy_bot"], self.r_chassis, geo["ang_chassis_bot_start"], geo["ang_chassis_bot_end"])
-        cr.close_path()
-        cr.set_source_rgba(c_dark_r, c_dark_g, c_dark_b, 0.85); cr.fill()
-        cr.move_to(self.x_left, geo["y_dark_bot"]); cr.line_to(self.cx - geo["x_dark_cut"], geo["y_dark_bot"])
-        cr.arc_negative(self.cx, geo["cy_bot"], self.r_dark, geo["ang_dark_bot_end"], geo["ang_dark_bot_start"]); cr.line_to(self.x_right, geo["y_dark_bot"])
-        cr.set_source_rgba(*self.c_border_3d); cr.set_line_width(1.4); cr.stroke()
-        cr.restore()
+        sx = self.W_canvas / self.base_w
+        sy = self.H_canvas / self.base_h
+        cr.scale(sx, sy)
 
-        # 5. TOP SILVER CHASSIS: VÒNG LÊN (Upward cuff)
-        prot = 2.5
-        r_cuff = 2.5
+        geo = self.get_dynamic_coords(self.anim_progress)
+
+        if self.anim_state in ("opening", "closing", "closed"):
+            # 1. Screen aperture (always drawn so center eye has cyan hologram glass when closed)
+            cr.save()
+            cr.new_sub_path()
+            cr.rectangle(self.x_left, geo["y_edge_top"], self.W_shell, geo["y_edge_bot"] - geo["y_edge_top"])
+            cr.arc(self.cx, geo["cy_top"], self.r_inner, geo["ang_inner_top_end"], geo["ang_inner_top_start"])
+            cr.close_path()
+            cr.arc(self.cx, geo["cy_bot"], self.r_inner, geo["ang_inner_bot_start"], geo["ang_inner_bot_end"])
+            cr.close_path()
+            cr.clip()
+
+            y_grad_top = geo["cy_top"] - self.r_inner
+            y_grad_bot = geo["cy_bot"] + self.r_inner
+            scr_pat = cairo.LinearGradient(0, y_grad_top, 0, y_grad_bot)
+            scr_pat.add_color_stop_rgba(0.0, self.c_holo_top[0], self.c_holo_top[1], self.c_holo_top[2], self.holo_alpha_top)
+            scr_pat.add_color_stop_rgba(0.5, self.c_holo_mid[0], self.c_holo_mid[1], self.c_holo_mid[2], self.holo_alpha_mid)
+            scr_pat.add_color_stop_rgba(1.0, self.c_holo_bot[0], self.c_holo_bot[1], self.c_holo_bot[2], self.holo_alpha_bot)
+            cr.set_source(scr_pat)
+            cr.paint()
+
+            # Content revealed
+            if self.anim_progress > 0.25:
+                if not self._cached_content_surf or self._cached_content_page != self.current_page:
+                    self._bake_content()
+                alpha = min(1.0, max(0.0, (self.anim_progress - 0.25) / 0.75))
+                cr.set_source_surface(self._cached_content_surf, 0, 0)
+                cr.paint_with_alpha(alpha)
+            cr.restore()
+
+            # 2. Baked top casing
+            if not self._cached_top_casing:
+                self._bake_casings()
+            cr.save()
+            cr.set_source_surface(self._cached_top_casing, 0, geo["top_casing_y"])
+            cr.paint()
+            cr.restore()
+
+            # 3. Baked bottom casing
+            if not self._cached_bot_casing:
+                self._bake_casings()
+            cr.save()
+            cr.set_source_surface(self._cached_bot_casing, 0, geo["bot_casing_y"])
+            cr.paint()
+            cr.restore()
+
+            cr.restore()
+            return False
+
+        # --- LIVE INTERACTIVE OPEN STATE (anim_state == "open", p == 1.0) ---
         cr.save()
         cr.new_sub_path()
-        cr.move_to(self.x_left, geo["y_edge_top"])
-        cr.arc(self.x_left, geo["y_edge_top"] - r_cuff, r_cuff, 0.5 * math.pi, math.pi)
-        cr.line_to(self.x_left - prot, geo["y_dark_top"] + r_cuff)
-        cr.arc(self.x_left, geo["y_dark_top"] + r_cuff, r_cuff, math.pi, 1.5 * math.pi)
-        cr.line_to(self.x_left, geo["y_silver_top"])
-        cr.line_to(self.cx - geo["x_chassis_cut"], geo["y_silver_top"])
-        cr.arc(self.cx, geo["cy_top"], self.r_chassis, geo["ang_chassis_top_end"], geo["ang_chassis_top_start"])
-        cr.line_to(self.x_right, geo["y_silver_top"])
-        cr.line_to(self.x_right, geo["y_dark_top"])
-        cr.arc(self.x_right, geo["y_dark_top"] + r_cuff, r_cuff, 1.5 * math.pi, 2 * math.pi)
-        cr.line_to(self.x_right + prot, geo["y_edge_top"] - r_cuff)
-        cr.arc(self.x_right, geo["y_edge_top"] - r_cuff, r_cuff, 0, 0.5 * math.pi)
-        cr.line_to(self.cx + geo["x_outer_cut"], geo["y_edge_top"])
-        cr.arc_negative(self.cx, geo["cy_top"], self.r_outer, geo["ang_outer_top_start"], geo["ang_outer_top_end"])
-        cr.close_path()
-        silver_pat_top = cairo.LinearGradient(self.x_left, geo["y_dark_top"], self.x_left, geo["y_edge_top"])
-        silver_pat_top.add_color_stop_rgb(0.0, *hex_to_rgba(C_TEXT_PRI)[:3])
-        silver_pat_top.add_color_stop_rgb(1.0, *hex_to_rgba(C_TEXT_SEC)[:3])
-        cr.set_source(silver_pat_top); cr.fill_preserve()
-        cr.set_source_rgba(*self.c_border_3d); cr.set_line_width(1.4); cr.stroke()
-        cr.restore()
-
-        # 5B. Bottom silver chassis: synchronous upward slide
-        y_up_top = geo["y_edge_bot"] - self.cuff_ext
-        cr.save()
-        cr.new_sub_path()
-        cr.move_to(self.x_left, geo["y_edge_bot"])
-        cr.line_to(self.x_left, y_up_top)
-        cr.arc_negative(self.x_left, y_up_top + r_cuff, r_cuff, 1.5 * math.pi, math.pi)
-        cr.line_to(self.x_left - prot, geo["y_silver_bot"] - r_cuff)
-        cr.arc_negative(self.x_left, geo["y_silver_bot"] - r_cuff, r_cuff, math.pi, 0.5 * math.pi)
-        cr.line_to(self.cx - geo["x_chassis_cut"], geo["y_silver_bot"])
-        cr.arc_negative(self.cx, geo["cy_bot"], self.r_chassis, geo["ang_chassis_bot_end"], geo["ang_chassis_bot_start"])
-        cr.line_to(self.x_right, geo["y_silver_bot"])
-        cr.arc_negative(self.x_right, geo["y_silver_bot"] - r_cuff, r_cuff, 0.5 * math.pi, 0)
-        cr.line_to(self.x_right + prot, y_up_top + r_cuff)
-        cr.arc_negative(self.x_right, y_up_top + r_cuff, r_cuff, 0, 1.5 * math.pi)
-        cr.line_to(self.x_right, geo["y_edge_bot"])
-        cr.line_to(self.cx + geo["x_outer_cut"], geo["y_edge_bot"])
-        cr.arc(self.cx, geo["cy_bot"], self.r_outer, geo["ang_outer_bot_start"], geo["ang_outer_bot_end"])
-        cr.close_path()
-        silver_pat_bot = cairo.LinearGradient(self.x_left, geo["y_edge_bot"], self.x_left, geo["y_silver_bot"])
-        silver_pat_bot.add_color_stop_rgb(0.0, *hex_to_rgba(C_TEXT_SEC)[:3])
-        silver_pat_bot.add_color_stop_rgb(1.0, *hex_to_rgba(C_TEXT_PRI)[:3])
-        cr.set_source(silver_pat_bot); cr.fill_preserve()
-        cr.set_source_rgba(*self.c_border_3d); cr.set_line_width(1.4); cr.stroke()
-        cr.restore()
-
-        # 6. POKÉBALL BANDS
-        band_pat_top = cairo.LinearGradient(self.cx - self.r_outer, geo["cy_top"], self.cx + self.r_outer, geo["cy_top"])
-        band_pat_top.add_color_stop_rgb(0, *self.c_band_stop0)
-        band_pat_top.add_color_stop_rgb(0.5, *self.c_band_stop1)
-        band_pat_top.add_color_stop_rgb(1, *self.c_band_stop2)
-
-        cr.save()
-        cr.new_sub_path()
-        cr.arc_negative(self.cx, geo["cy_top"], self.r_outer, geo["ang_outer_top_start"], geo["ang_outer_top_end"])
-        cr.line_to(self.cx - geo["x_inner_cut"], geo["y_edge_top"])
+        cr.rectangle(self.x_left, geo["y_edge_top"], self.W_shell, geo["y_edge_bot"] - geo["y_edge_top"])
         cr.arc(self.cx, geo["cy_top"], self.r_inner, geo["ang_inner_top_end"], geo["ang_inner_top_start"])
         cr.close_path()
-        cr.set_source(band_pat_top); cr.fill_preserve()
-        cr.set_source_rgba(*self.c_border_3d); cr.set_line_width(1.6); cr.stroke()
-        cr.arc(self.cx, geo["cy_top"], self.r_inner, geo["ang_inner_top_end"], geo["ang_inner_top_start"])
-        cr.set_source_rgba(0, 0, 0, 0.35); cr.set_line_width(2.2); cr.stroke()
-        cr.restore()
-
-        band_pat_bot = cairo.LinearGradient(self.cx - self.r_outer, geo["cy_bot"], self.cx + self.r_outer, geo["cy_bot"])
-        band_pat_bot.add_color_stop_rgb(0, *self.c_band_stop0)
-        band_pat_bot.add_color_stop_rgb(0.5, *self.c_band_stop1)
-        band_pat_bot.add_color_stop_rgb(1, *self.c_band_stop2)
-
-        cr.save()
-        cr.new_sub_path()
-        cr.arc(self.cx, geo["cy_bot"], self.r_outer, geo["ang_outer_bot_start"], geo["ang_outer_bot_end"])
-        cr.line_to(self.cx - geo["x_inner_cut"], geo["y_edge_bot"])
-        cr.arc_negative(self.cx, geo["cy_bot"], self.r_inner, geo["ang_inner_bot_end"], geo["ang_inner_bot_start"])
-        cr.close_path()
-        cr.set_source(band_pat_bot); cr.fill_preserve()
-        cr.set_source_rgba(*self.c_border_3d); cr.set_line_width(1.6); cr.stroke()
         cr.arc(self.cx, geo["cy_bot"], self.r_inner, geo["ang_inner_bot_start"], geo["ang_inner_bot_end"])
-        cr.set_source_rgba(0, 0, 0, 0.35); cr.set_line_width(2.2); cr.stroke()
-        cr.restore()
+        cr.close_path()
+        cr.clip()
+
+        y_grad_top = geo["cy_top"] - self.r_inner
+        y_grad_bot = geo["cy_bot"] + self.r_inner
+        scr_pat = cairo.LinearGradient(0, y_grad_top, 0, y_grad_bot)
+        scr_pat.add_color_stop_rgba(0.0, self.c_holo_top[0], self.c_holo_top[1], self.c_holo_top[2], self.holo_alpha_top)
+        scr_pat.add_color_stop_rgba(0.5, self.c_holo_mid[0], self.c_holo_mid[1], self.c_holo_mid[2], self.holo_alpha_mid)
+        scr_pat.add_color_stop_rgba(1.0, self.c_holo_bot[0], self.c_holo_bot[1], self.c_holo_bot[2], self.holo_alpha_bot)
+        cr.set_source(scr_pat)
+        cr.paint()
+
+        self._draw_content_elements(cr, cy_top=geo["cy_top"])
         cr.restore()
 
+        # Baked Casings at p=1.0 (top_casing_y=0, bot_casing_y=0)
+        if not self._cached_top_casing or not self._cached_bot_casing:
+            self._bake_casings()
+        cr.save()
+        cr.set_source_surface(self._cached_top_casing, 0, 0)
+        cr.paint()
+        cr.restore()
+
+        cr.save()
+        cr.set_source_surface(self._cached_bot_casing, 0, 0)
+        cr.paint()
+        cr.restore()
+
+        cr.restore()
         return False
 
 def main():
@@ -1567,6 +2608,33 @@ def main():
     if "--open" in sys.argv:
         app.anim_state = "open"
         app.anim_progress = 1.0
+    if "--page" in sys.argv:
+        try:
+            p_idx = sys.argv.index("--page")
+            target = sys.argv[p_idx + 1]
+            if target in ("controls", "notifications", "wifi"):
+                app.current_page = target
+        except Exception:
+            pass
+    elif "wifi" in sys.argv:
+        app.current_page = "wifi"
+
+    page_file = "/tmp/control_center_page.txt"
+    if os.path.exists(page_file):
+        try:
+            with open(page_file, "r") as f:
+                target = f.read().strip()
+            os.remove(page_file)
+            if target in ("controls", "notifications", "wifi"):
+                app.current_page = target
+        except Exception:
+            pass
+
+    if app.current_page == "wifi":
+        app.scan_wifi_networks()
+    elif app.current_page == "notifications":
+        app.notifications = app.load_notifications()
+        app.notif_page_idx = 0
     app.show_all()
     Gtk.main()
 

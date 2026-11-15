@@ -31,6 +31,7 @@
 @define-color ribbon_blue #50A6FF;
 @define-color screen_cyan #87F0FF;
 @define-color bg_tactile_cream rgba(255, 240, 245, 0.96);
+@define-color pokepuff_pink #FF5C8A;
 
 @define-color bg_waybar #851733;
 @define-color bg_waybar_hover #9C2241;
@@ -47,5 +48,5 @@
 }
 .gradient-sunset:hover,
 .gradient-sunset-hover {
-    background-image: linear-gradient(to bottom, #B52048 0%, #F04070 25%, #FF80A6 50%, #F2B2D2 75%, #CA8BB4 100%);
+    background-image: linear-gradient(to bottom, #A3183D 0%, #E53262 25%, #FF7299 50%, #EAA2C6 75%, #BE7AA8 100%);
 }

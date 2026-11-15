@@ -1,0 +1,36 @@
+/* palette.css — Color tokens for Firefox userChrome. */
+/* NOTE: Generated from tokens.json. Do not edit directly. */
+
+:root {
+    --bg-window: #201011;
+    --bg-window-alpha: rgba(32, 16, 17, 0.98);
+    --bg-card: #2A1A1E;
+    --bg-card-alpha: rgba(42, 26, 30, 0.95);
+    --bg-card-hover: #3A222A;
+    --bg-subtle: #301F20;
+    --bg-ghost: transparent;
+    --bg-ghost-hover: rgba(42, 26, 30, 0.50);
+
+    --border-window: rgba(255, 255, 255, 0.12);
+    --border-card: rgba(255, 255, 255, 0.12);
+    --border-card-hover: rgba(220, 26, 54, 0.65);
+
+    --accent: #DC1A36;
+    --accent-hover: #F02D4C;
+    --accent-dim: rgba(220, 26, 54, 0.48);
+    --accent-subtle: rgba(220, 26, 54, 0.20);
+
+    --text-primary: #FFF0F5;
+    --text-secondary: #E8C2D0;
+    --text-muted: #A68595;
+    --text-inverse: #FFFFFF;
+
+    --status-warning: #FFB86C;
+    --status-critical: #DC1A36;
+    --status-success: #8FBC8F;
+
+    --radius-window: 16px;
+    --radius-card: 10px;
+    --radius-button: 8px;
+    --font-primary: "JetBrains Mono Nerd Font";
+}

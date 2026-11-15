@@ -1,0 +1,308 @@
+/* userChrome.css — Floating Island Webview & Minimalist Serena Wine theme. */
+
+@import "palette.css";
+
+/* === SECTION: NATIVE CSS VARIABLE OVERRIDES === */
+:root {
+    --toolbar-bgcolor: var(--bg-window) !important;
+    --tab-selected-bgcolor: var(--bg-card) !important;
+    --lwt-selected-tab-background-color: var(--bg-card) !important;
+    --toolbar-field-background-color: var(--bg-card) !important;
+    --toolbar-field-color: var(--text-primary) !important;
+    --toolbar-field-border-color: var(--border-card) !important;
+    --toolbar-field-focus-background-color: var(--bg-subtle) !important;
+    --toolbar-field-focus-color: var(--text-primary) !important;
+    --toolbar-field-focus-border-color: var(--accent) !important;
+    --toolbar-color: var(--text-primary) !important;
+    --lwt-accent-color: var(--bg-window) !important;
+    --lwt-text-color: var(--text-primary) !important;
+
+    --arrowpanel-background: var(--bg-card) !important;
+    --arrowpanel-color: var(--text-primary) !important;
+    --arrowpanel-border-color: var(--border-card) !important;
+    --autocomplete-popup-background: var(--bg-card) !important;
+    --autocomplete-popup-color: var(--text-primary) !important;
+
+    --button-hover-bgcolor: var(--bg-card-hover) !important;
+    --button-active-bgcolor: var(--bg-subtle) !important;
+    --toolbarbutton-border-radius: var(--radius-button) !important;
+}
+
+/* === SECTION: MAIN TOOLBOX & WINDOW BASE === */
+#navigator-toolbox,
+#navigator-toolbox:-moz-lwtheme,
+#nav-bar,
+#nav-bar:-moz-lwtheme,
+#TabsToolbar,
+#TabsToolbar:-moz-lwtheme {
+    background-color: var(--bg-window) !important;
+    background-image: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Sunset Accent separator line between toolbars and floating island */
+#nav-bar {
+    border-bottom: 2px solid transparent !important;
+    border-image: linear-gradient(to right, #A3183D 0%, #E53262 25%, #FF7299 50%, #EAA2C6 75%, #BE7AA8 100%) 1 !important;
+}
+
+/* === SECTION: WINDOW CONTROLS & SPACERS === */
+/* NOTE: Remove window buttons and empty titlebar gap spacers */
+.titlebar-buttonbox-container,
+.titlebar-buttonbox,
+.titlebar-spacer {
+    display: none !important;
+}
+
+/* === SECTION: TABS BAR === */
+#TabsToolbar {
+    min-height: 38px !important;
+    padding-inline: 8px !important;
+}
+
+/* Remove default vertical dividers */
+.tabbrowser-tab::before,
+.tabbrowser-tab::after {
+    display: none !important;
+}
+
+.tabbrowser-tab {
+    padding-inline: 2px !important;
+    font-family: var(--font-primary), "Segoe UI", sans-serif !important;
+    font-size: 12px !important;
+}
+
+/* Inactive tabs */
+.tabbrowser-tab .tab-background {
+    border-radius: 8px !important;
+    margin-block: 4px !important;
+    background-color: transparent !important;
+    border: 1px solid transparent !important;
+    transition: background-color 0.15s ease, border-color 0.15s ease !important;
+    box-shadow: none !important;
+}
+
+.tabbrowser-tab .tab-label {
+    color: var(--text-muted) !important;
+    transition: color 0.15s ease !important;
+}
+
+/* Hovered tab */
+.tabbrowser-tab:hover .tab-background {
+    background-color: var(--bg-card-hover) !important;
+    border-color: var(--border-card) !important;
+}
+
+.tabbrowser-tab:hover .tab-label {
+    color: var(--text-primary) !important;
+}
+
+/* Active tab — clean bottom accent border on tab-background */
+.tabbrowser-tab[selected="true"] .tab-background {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-card) !important;
+    border-bottom: 2px solid var(--accent) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+.tabbrowser-tab[selected="true"] .tab-label {
+    color: var(--text-primary) !important;
+    font-weight: 600 !important;
+}
+
+/* Tab close button */
+.tab-close-button {
+    border-radius: 6px !important;
+    padding: 3px !important;
+    margin-inline-end: 2px !important;
+    transition: background-color 0.15s ease !important;
+}
+
+.tab-close-button:hover {
+    background-color: var(--accent) !important;
+    fill: var(--text-inverse) !important;
+}
+
+.tab-icon-overlay[soundplaying] {
+    fill: var(--accent) !important;
+}
+
+/* New tab button */
+#tabs-newtab-button,
+#TabsToolbar #new-tab-button {
+    border-radius: 8px !important;
+    margin-block: 4px !important;
+    transition: background-color 0.15s ease !important;
+}
+
+#tabs-newtab-button:hover,
+#TabsToolbar #new-tab-button:hover {
+    background-color: var(--bg-card-hover) !important;
+    fill: var(--accent) !important;
+}
+
+/* === SECTION: URL BAR (NAVBAR) === */
+#nav-bar {
+    padding: 3px 8px 5px 8px !important;
+}
+
+#urlbar-container {
+    padding-block: 2px !important;
+}
+
+#urlbar-background {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-card) !important;
+    border-radius: var(--radius-card) !important;
+    box-shadow: none !important;
+    transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+#urlbar[focused="true"] > #urlbar-background {
+    border-color: var(--accent) !important;
+    background-color: var(--bg-subtle) !important;
+    box-shadow: 0 0 0 1px var(--accent-border) !important;
+}
+
+/* Seamless dropdown when search results appear */
+#urlbar[open] > #urlbar-background {
+    border-radius: var(--radius-card) var(--radius-card) 0 0 !important;
+}
+
+#urlbar-input {
+    color: var(--text-primary) !important;
+    font-family: var(--font-primary), "Segoe UI", sans-serif !important;
+    font-size: 12.5px !important;
+}
+
+#urlbar-results {
+    font-family: var(--font-primary), "Segoe UI", sans-serif !important;
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-card) !important;
+    border-top: none !important;
+    border-radius: 0 0 var(--radius-card) var(--radius-card) !important;
+}
+
+.urlbarView-row[selected] {
+    background-color: var(--bg-card-hover) !important;
+    color: var(--text-primary) !important;
+}
+
+.urlbarView-row:hover:not([selected]) {
+    background-color: var(--bg-ghost-hover) !important;
+}
+
+#identity-icon,
+#tracking-protection-icon-container {
+    fill: var(--accent) !important;
+}
+
+/* Toolbar buttons */
+toolbarbutton.bookmark-item:not(.subviewbutton),
+#nav-bar toolbarbutton {
+    border-radius: var(--radius-button) !important;
+    transition: background-color 0.15s ease !important;
+}
+
+#nav-bar toolbarbutton:hover {
+    background-color: var(--bg-card-hover) !important;
+}
+
+/* === SECTION: FLOATING ISLAND WEBVIEW === */
+/* NOTE: Web content floats as a sleek card on top of Serena Wine window background */
+#browser {
+    background-color: var(--bg-window) !important;
+}
+
+#tabbrowser-tabbox,
+#tabbrowser-tabpanels {
+    padding: 8px !important;
+    background-color: var(--bg-window) !important;
+}
+
+.browserSidebarContainer,
+#tabbrowser-tabpanels .browserSidebarContainer {
+    border-radius: 12px !important;
+    border: 1px solid var(--border-card) !important;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.40) !important;
+    overflow: hidden !important;
+    clip-path: inset(0 round 12px) !important;
+    background-color: var(--bg-window) !important;
+}
+
+/* Disable floating island paddings in Fullscreen video mode */
+:root[inFullscreen] #tabbrowser-tabpanels,
+:root[inFullscreen] #tabbrowser-tabbox {
+    padding: 0 !important;
+}
+
+:root[inFullscreen] .browserSidebarContainer,
+:root[inFullscreen] #tabbrowser-tabpanels .browserSidebarContainer {
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    clip-path: none !important;
+}
+
+/* === SECTION: CONTEXT MENUS & POPUPS === */
+menupopup,
+panelmultiview {
+    --panel-background: var(--bg-card) !important;
+    --panel-color: var(--text-primary) !important;
+    --panel-border-color: var(--border-card) !important;
+    --panel-border-radius: var(--radius-card) !important;
+}
+
+menupopup > menuitem,
+menupopup > menu {
+    font-family: var(--font-primary), "Segoe UI", sans-serif !important;
+    font-size: 12px !important;
+    border-radius: 4px !important;
+    color: var(--text-primary) !important;
+}
+
+menupopup > menuitem:_moz-menuactive,
+menupopup > menu:_moz-menuactive,
+menupopup > menuitem:hover,
+menupopup > menu:hover {
+    background-color: var(--bg-card-hover) !important;
+    color: var(--text-primary) !important;
+}
+
+menuseparator {
+    border-color: var(--border-card) !important;
+    margin: 4px 6px !important;
+}
+
+/* === SECTION: FINDBAR & STATUSPANEL === */
+findbar {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-card) !important;
+    border-radius: var(--radius-card) !important;
+    color: var(--text-primary) !important;
+    padding: 4px 8px !important;
+    margin: 8px !important;
+}
+
+#statuspanel-label {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-card) !important;
+    border-radius: var(--radius-button) !important;
+    color: var(--text-secondary) !important;
+    font-family: var(--font-primary), "Segoe UI", sans-serif !important;
+    font-size: 11px !important;
+}
+
+/* === SECTION: SIDEBAR & SIDEBERY SUPPORT === */
+#sidebar-box {
+    background-color: var(--bg-window) !important;
+    border-right: 1px solid var(--border-window) !important;
+}
+
+#sidebar-header {
+    background-color: var(--bg-card) !important;
+    border-bottom: 1px solid var(--border-card) !important;
+    color: var(--text-primary) !important;
+    font-family: var(--font-primary), "Segoe UI", sans-serif !important;
+}

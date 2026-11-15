@@ -79,6 +79,8 @@ class BluetoothService:
     @staticmethod
     def get_connected_device_name() -> str:
         """Returns the name of the first connected Bluetooth device, or empty string."""
+        if not BluetoothService.is_enabled():
+            return ""
         if shutil.which("bluetoothctl"):
             try:
                 res = subprocess.run(
@@ -86,7 +88,7 @@ class BluetoothService:
                     capture_output=True,
                     text=True,
                     check=False,
-                    timeout=1.0
+                    timeout=0.4
                 )
                 if res.returncode == 0 and res.stdout.strip():
                     # Format: Device XX:XX:XX:XX:XX:XX DeviceName

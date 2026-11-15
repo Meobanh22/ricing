@@ -28,19 +28,26 @@ def get_cursor_pos():
     try:
         xdg = os.environ.get('XDG_RUNTIME_DIR', f'/run/user/{os.getuid()}')
         sig = os.environ.get('HYPRLAND_INSTANCE_SIGNATURE', '')
-        sock_path = f"{xdg}/hypr/{sig}/.socket.sock" if sig else ""
-        if not sock_path or not os.path.exists(sock_path):
-            socks = glob.glob(f"{xdg}/hypr/*/.socket.sock")
-            sock_path = socks[0] if socks else None
-        if sock_path:
-            s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-            s.settimeout(0.05)
-            s.connect(sock_path)
-            s.sendall(b"cursorpos")
-            res = s.recv(256).decode('utf-8', errors='ignore').strip()
-            s.close()
-            parts = res.split(',')
-            return int(parts[0].strip()), int(parts[1].strip())
+        sock_candidates = []
+        if sig:
+            sock_candidates.append(f"{xdg}/hypr/{sig}/.socket.real.sock")
+            sock_candidates.append(f"{xdg}/hypr/{sig}/.socket.sock")
+        sock_candidates.extend(glob.glob(f"{xdg}/hypr/*/.socket.real.sock"))
+        sock_candidates.extend(glob.glob(f"{xdg}/hypr/*/.socket.sock"))
+
+        for sock_path in sock_candidates:
+            if os.path.exists(sock_path):
+                try:
+                    s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+                    s.settimeout(0.04)
+                    s.connect(sock_path)
+                    s.sendall(b"cursorpos")
+                    res = s.recv(256).decode('utf-8', errors='ignore').strip()
+                    s.close()
+                    parts = res.split(',')
+                    return int(parts[0].strip()), int(parts[1].strip())
+                except Exception:
+                    continue
     except Exception:
         pass
     return None
@@ -151,11 +158,16 @@ class DraggablePopup:
             cx, cy = self.clamp_bounds(x, y)
         else:
             cx, cy = x, y
-        self.current_x = cx
-        self.current_y = cy
-        if HAS_LAYER_SHELL and GtkLayerShell.is_layer_window(self.window):
-            GtkLayerShell.set_margin(self.window, GtkLayerShell.Edge.LEFT, int(cx))
-            GtkLayerShell.set_margin(self.window, GtkLayerShell.Edge.TOP, int(cy))
+        ix, iy = int(cx), int(cy)
+        if ix != int(self.current_x) or iy != int(self.current_y):
+            self.current_x = cx
+            self.current_y = cy
+            if HAS_LAYER_SHELL and GtkLayerShell.is_layer_window(self.window):
+                GtkLayerShell.set_margin(self.window, GtkLayerShell.Edge.LEFT, ix)
+                GtkLayerShell.set_margin(self.window, GtkLayerShell.Edge.TOP, iy)
+        else:
+            self.current_x = cx
+            self.current_y = cy
         if save:
             self.save_position()
 
@@ -179,17 +191,11 @@ class DraggablePopup:
     def handle_press(self, event, is_inside=True):
         """
         Call in on_button_press.
-        Handles double-click to reset, or arms dragging if clicked inside draggable body.
+        Arms dragging if clicked inside draggable body.
         Returns True if handled.
         """
         if event.button != 1:
             return False
-
-        if event.type == Gdk.EventType._2BUTTON_PRESS:
-            self.reset_to_default()
-            self.drag_armed = False
-            self.is_dragging = False
-            return True
 
         if not is_inside:
             self.drag_armed = False
@@ -300,11 +306,6 @@ class DraggablePopup:
 
     def _on_header_press(self, widget, event):
         if event.button == 1:
-            if event.type == Gdk.EventType._2BUTTON_PRESS:
-                self.reset_to_default()
-                self.is_dragging = False
-                return True
-
             cur = get_cursor_pos()
             if cur:
                 self.is_dragging = True

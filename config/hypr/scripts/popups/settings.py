@@ -67,8 +67,11 @@ try:
         C_BG_WIN, C_BG_CARD, C_BG_CARD_HOVER, C_BG_SUBTLE,
         C_ACCENT, C_ACCENT_HOVER, C_TEXT_PRI, C_TEXT_SEC, C_TEXT_MUT, C_TEXT_INV,
         C_STATUS_WARN, C_STATUS_CRIT, C_STATUS_SUCC, C_RIBBON,
-        C_BG_WAYBAR, C_BORDER_3D, C_BG_CREAM
+        C_BG_WAYBAR, C_BORDER_3D, C_BG_CREAM,
+        C_POKEPUFF_PINK, SUNSET_STOPS
     )
+    C_SUNSET_PINK = SUNSET_STOPS[2][1]    # #FF7299 (sunset gradient 50% anime pink)
+    C_SUNSET_PASTEL = SUNSET_STOPS[3][1]  # #EAA2C6 (sunset gradient 75% pastel pink)
 except ImportError:
     C_BG_WIN = "#201011"
     C_BG_CARD = "#2A1A1E"
@@ -87,6 +90,9 @@ except ImportError:
     C_BG_WAYBAR = "#851733"
     C_BORDER_3D = "#4D0A1C"
     C_BG_CREAM = "rgba(255, 240, 245, 0.96)"
+    C_POKEPUFF_PINK = "#FF5C8A"
+    C_SUNSET_PINK = "#FF7299"
+    C_SUNSET_PASTEL = "#EAA2C6"
     def hex_to_rgba(hex_code, alpha=1.0):
         h = hex_code.strip().lstrip('#')
         if len(h) == 6:
@@ -95,8 +101,9 @@ except ImportError:
 
 # Tactile Anime Shadow & Shell Colors
 COLOR_BORDER_SHADOW = hex_to_rgba(C_BORDER_3D, 0.98)   # #4D0A1C tactile border
-COLOR_PINK_TOP = hex_to_rgba(C_TEXT_SEC, 1.0)          # #E8C2D0
-COLOR_PINK_BOT = hex_to_rgba(C_TEXT_MUT, 1.0)          # #A68595
+COLOR_PINK_TOP = hex_to_rgba(C_SUNSET_PINK, 1.0)       # #FF7299 vibrant anime pink from sunset gradient
+COLOR_PINK_BOT = hex_to_rgba(C_SUNSET_PASTEL, 1.0)     # #EAA2C6 soft pastel pink from sunset gradient
+COLOR_PINK_INSIDE = hex_to_rgba(C_SUNSET_PINK, 1.0)    # #FF7299 solid anime pink for inside body
 COLOR_PINK_3D_DARK = hex_to_rgba(C_BORDER_3D, 1.0)      # #4D0A1C darker 3D depth
 COLOR_PINK_3D_BOT  = hex_to_rgba(C_BG_WIN, 1.0)         # #201011 bottom 3D shade
 
@@ -722,60 +729,59 @@ class SettingsWindow(Gtk.Window):
         r_inner = 18.0
         cx_mid = x + w / 2.0
 
-        # 1. Base vertical gradient (peach-pink crown to rich rose base)
+        # 1. Base vertical gradient (Serena Sunset Pink: #FF7299 -> #EAA2C6)
         cr.save()
         front_cover_path(cr, x, y, w, h, r, r_inner)
         pat_base = cairo.LinearGradient(cx_mid, y, cx_mid, y + h)
-        pat_base.add_color_stop_rgba(0.00, 0.99, 0.76, 0.84, 1.0)
-        pat_base.add_color_stop_rgba(0.25, 0.97, 0.70, 0.79, 1.0)
-        pat_base.add_color_stop_rgba(0.70, 0.91, 0.56, 0.68, 1.0)
-        pat_base.add_color_stop_rgba(0.95, 0.83, 0.44, 0.58, 1.0)
-        pat_base.add_color_stop_rgba(1.00, 0.86, 0.49, 0.62, 1.0)
+        pat_base.add_color_stop_rgba(0.00, *COLOR_PINK_TOP)
+        pat_base.add_color_stop_rgba(1.00, *COLOR_PINK_BOT)
         cr.set_source(pat_base)
         cr.fill_preserve()
         cr.clip()
 
-        # 2. Horizontal cylindrical curvature (curves away on left and right flanks)
+        # 2. Horizontal Cylindrical Curvature (Toned down highlight, deeper flank shadows)
         pat_x = cairo.LinearGradient(x, y, x + w, y)
-        pat_x.add_color_stop_rgba(0.00, 0.0, 0.0, 0.0, 0.16)
-        pat_x.add_color_stop_rgba(0.12, 0.0, 0.0, 0.0, 0.04)
-        pat_x.add_color_stop_rgba(0.28, 1.0, 1.0, 1.0, 0.08)
-        pat_x.add_color_stop_rgba(0.44, 1.0, 1.0, 1.0, 0.22)
-        pat_x.add_color_stop_rgba(0.56, 1.0, 1.0, 1.0, 0.12)
-        pat_x.add_color_stop_rgba(0.80, 0.0, 0.0, 0.0, 0.02)
-        pat_x.add_color_stop_rgba(1.00, 0.0, 0.0, 0.0, 0.20)
+        pat_x.add_color_stop_rgba(0.00, 0.24, 0.03, 0.08, 0.25)
+        pat_x.add_color_stop_rgba(0.12, 0.00, 0.00, 0.00, 0.00)
+        pat_x.add_color_stop_rgba(0.36, 1.00, 1.00, 1.00, 0.14)  # Soft subtle sheen, not washed-out white
+        pat_x.add_color_stop_rgba(0.48, 1.00, 1.00, 1.00, 0.06)
+        pat_x.add_color_stop_rgba(0.65, 0.00, 0.00, 0.00, 0.00)
+        pat_x.add_color_stop_rgba(0.85, 0.25, 0.03, 0.08, 0.22)
+        pat_x.add_color_stop_rgba(1.00, 0.20, 0.02, 0.06, 0.42)
         cr.set_source(pat_x)
         cr.paint()
 
-        # 3. Radial Dome Bulge (convex center pillow elevation)
-        cx_dome, cy_dome = x + w * 0.46, y + h * 0.42
-        r_dome = math.hypot(w, h) * 0.55
-        pat_dome = cairo.RadialGradient(cx_dome, cy_dome, 10.0, cx_dome, cy_dome, r_dome)
-        pat_dome.add_color_stop_rgba(0.00, 1.0, 1.0, 1.0, 0.16)
-        pat_dome.add_color_stop_rgba(0.35, 1.0, 1.0, 1.0, 0.05)
-        pat_dome.add_color_stop_rgba(0.70, 0.0, 0.0, 0.0, 0.00)
-        pat_dome.add_color_stop_rgba(1.00, 0.20, 0.02, 0.08, 0.22)
+        # 3. Radial Pillow / Dome Bulge (Subtle soft center, gentle corner falloff)
+        cx_apex, cy_apex = x + w * 0.40, y + h * 0.38
+        r_dome = math.hypot(w * 0.65, h * 0.65)
+        pat_dome = cairo.RadialGradient(cx_apex, cy_apex, 15.0, cx_apex, cy_apex, r_dome)
+        pat_dome.add_color_stop_rgba(0.00, 1.0, 1.0, 1.0, 0.08)  # Gentle warm lift, preserves rich pink
+        pat_dome.add_color_stop_rgba(0.35, 1.0, 1.0, 1.0, 0.02)
+        pat_dome.add_color_stop_rgba(0.60, 0.0, 0.0, 0.0, 0.00)
+        pat_dome.add_color_stop_rgba(0.85, 0.25, 0.03, 0.08, 0.20)
+        pat_dome.add_color_stop_rgba(1.00, 0.18, 0.02, 0.06, 0.38)
         cr.set_source(pat_dome)
         cr.paint()
 
-        # 4. Top shoulder specular sheen
-        pat_top_sheen = cairo.LinearGradient(cx_mid, y, cx_mid, y + 35.0)
-        pat_top_sheen.add_color_stop_rgba(0.0, 1.0, 1.0, 1.0, 0.35)
-        pat_top_sheen.add_color_stop_rgba(1.0, 1.0, 1.0, 1.0, 0.0)
-        cr.rectangle(x, y, w, 35.0)
-        cr.set_source(pat_top_sheen)
+        # 4. Top shoulder curvature roll-over (Soft rim)
+        pat_top = cairo.LinearGradient(cx_mid, y, cx_mid, y + 36.0)
+        pat_top.add_color_stop_rgba(0.00, 1.0, 1.0, 1.0, 0.16)
+        pat_top.add_color_stop_rgba(0.60, 1.0, 1.0, 1.0, 0.04)
+        pat_top.add_color_stop_rgba(1.00, 1.0, 1.0, 1.0, 0.00)
+        cr.rectangle(x, y, w, 36.0)
+        cr.set_source(pat_top)
         cr.fill()
 
-        # 5. Bottom lip ambient shadow & subtle ground reflection
-        pat_bot_rim = cairo.LinearGradient(cx_mid, y + h - 28.0, cx_mid, y + h)
-        pat_bot_rim.add_color_stop_rgba(0.00, 0.0, 0.0, 0.0, 0.0)
-        pat_bot_rim.add_color_stop_rgba(0.75, 0.25, 0.02, 0.08, 0.18)
-        pat_bot_rim.add_color_stop_rgba(1.00, 1.0, 0.85, 0.90, 0.15)
-        cr.rectangle(x, y + h - 28.0, w, 28.0)
-        cr.set_source(pat_bot_rim)
+        # 5. Bottom lip ambient occlusion
+        pat_bot = cairo.LinearGradient(cx_mid, y + h - 45.0, cx_mid, y + h)
+        pat_bot.add_color_stop_rgba(0.00, 0.0, 0.0, 0.0, 0.00)
+        pat_bot.add_color_stop_rgba(0.80, 0.25, 0.03, 0.08, 0.28)
+        pat_bot.add_color_stop_rgba(1.00, 1.00, 0.85, 0.92, 0.12)
+        cr.rectangle(x, y + h - 45.0, w, 45.0)
+        cr.set_source(pat_bot)
         cr.fill()
 
-        # 6. Diagonal Ribbon with soft drop shadow underneath
+        # 6. Diagonal Ribbon following 3D curvature
         x1, y1 = x, y + h / 2.0
         x2, y2 = x + w, y
         dx = x2 - x1
@@ -788,8 +794,8 @@ class SettingsWindow(Gtk.Window):
         cr.save()
         cr.translate(x1, y1)
         cr.rotate(ang)
-        cr.rectangle(-40.0, -rh / 2.0 + 3.0, dist + 80.0, rh + 2.0)
-        cr.set_source_rgba(0.20, 0.02, 0.06, 0.28)
+        cr.rectangle(-40.0, -rh / 2.0 + 3.5, dist + 80.0, rh + 2.5)
+        cr.set_source_rgba(0.20, 0.02, 0.06, 0.32)
         cr.fill()
         cr.restore()
 
@@ -812,9 +818,18 @@ class SettingsWindow(Gtk.Window):
         for ey in [-rh / 2.0, rh / 2.0]:
             cr.move_to(-40.0, ey + (1.2 if ey < 0 else -1.2))
             cr.line_to(dist + 80.0, ey + (1.2 if ey < 0 else -1.2))
-            cr.set_source_rgba(1.0, 0.88, 0.65, 0.45)
+            cr.set_source_rgba(1.0, 0.88, 0.65, 0.50)
             cr.set_line_width(1.0)
             cr.stroke()
+
+        # Ribbon curvature highlight where it crosses the crest
+        pat_r_curv = cairo.LinearGradient(dist * 0.30, 0, dist * 0.70, 0)
+        pat_r_curv.add_color_stop_rgba(0.00, 1.0, 1.0, 1.0, 0.00)
+        pat_r_curv.add_color_stop_rgba(0.40, 1.0, 1.0, 1.0, 0.12)
+        pat_r_curv.add_color_stop_rgba(0.70, 1.0, 1.0, 1.0, 0.00)
+        cr.rectangle(-40.0, -rh / 2.0, dist + 80.0, rh)
+        cr.set_source(pat_r_curv)
+        cr.fill()
 
         cr.restore()  # unclip ribbon
 
@@ -824,27 +839,27 @@ class SettingsWindow(Gtk.Window):
         cr.save()
         cr.translate(1.5, 2.5)
         draw_ribbon_bow(cr, bx, by, ribbon_ang=ang, scale=1.0)
-        cr.set_source_rgba(0.15, 0.02, 0.05, 0.30)
+        cr.set_source_rgba(0.15, 0.02, 0.05, 0.28)
         cr.fill()
         cr.restore()
         draw_ribbon_bow(cr, bx, by, ribbon_ang=ang, scale=1.0)
 
         # Right clasp notch
         cr.rectangle(x + w - 5.0, y + 220.0, 5.0, 48.0)
-        cr.set_source_rgba(0.20, 0.04, 0.08, 0.8)
+        cr.set_source_rgba(0.20, 0.04, 0.08, 0.85)
         cr.fill()
 
         cr.restore()  # Unclip
 
-        # 8. Inner Chamfer / Molded Tactile Edge Highlight (inset 1.5px)
+        # 8. Molded 3D Inset Chamfer / Bevel Highlight
         cr.save()
         cr.set_line_width(1.6)
-        right_panel_path(cr, x + 1.5, y + 1.5, w - 3.0, h - 3.0, max(2.0, r - 1.5), max(2.0, r_inner - 1.5))
-        pat_inner = cairo.LinearGradient(cx_mid, y, cx_mid, y + h)
-        pat_inner.add_color_stop_rgba(0.0, 1.0, 1.0, 1.0, 0.55)
-        pat_inner.add_color_stop_rgba(0.4, 1.0, 0.9, 0.95, 0.25)
-        pat_inner.add_color_stop_rgba(0.8, 0.5, 0.1, 0.2, 0.15)
-        pat_inner.add_color_stop_rgba(1.0, 1.0, 0.85, 0.92, 0.30)
+        right_panel_path(cr, x + 1.8, y + 1.8, w - 3.6, h - 3.6, max(2.0, r - 1.8), max(2.0, r_inner - 1.8))
+        pat_inner = cairo.LinearGradient(x, y, x + w, y + h)
+        pat_inner.add_color_stop_rgba(0.00, 1.0, 1.0, 1.0, 0.35)
+        pat_inner.add_color_stop_rgba(0.45, 1.0, 0.9, 0.95, 0.18)
+        pat_inner.add_color_stop_rgba(0.75, 0.45, 0.06, 0.15, 0.20)
+        pat_inner.add_color_stop_rgba(1.00, 0.25, 0.03, 0.08, 0.35)
         cr.set_source(pat_inner)
         cr.stroke()
         cr.restore()
@@ -862,13 +877,10 @@ class SettingsWindow(Gtk.Window):
         cx_mid = lx + panel_w / 2.0
         t_wall = 9.5
 
-        # 1. Flat clean anime pastel casing base
+        # 1. Solid anime pink casing base
         cr.save()
         left_panel_path(cr, lx, top_y, panel_w, panel_h, corner_r, r_inner)
-        pat_lp = cairo.LinearGradient(cx_mid, top_y, cx_mid, bot_y)
-        pat_lp.add_color_stop_rgba(0.0, *COLOR_PINK_TOP)
-        pat_lp.add_color_stop_rgba(1.0, *COLOR_PINK_BOT)
-        cr.set_source(pat_lp)
+        cr.set_source_rgba(*COLOR_PINK_INSIDE)
         cr.fill()
         cr.restore()
 
@@ -909,13 +921,10 @@ class SettingsWindow(Gtk.Window):
         cx_mid = rx + panel_w / 2.0
         t_wall = 9.5
 
-        # 1. Flat clean anime pastel casing base
+        # 1. Solid anime pink casing base
         cr.save()
         right_panel_path(cr, rx, top_y, panel_w, panel_h, corner_r, r_inner)
-        pat_rp = cairo.LinearGradient(cx_mid, top_y, cx_mid, bot_y)
-        pat_rp.add_color_stop_rgba(0.0, *COLOR_PINK_TOP)
-        pat_rp.add_color_stop_rgba(1.0, *COLOR_PINK_BOT)
-        cr.set_source(pat_rp)
+        cr.set_source_rgba(*COLOR_PINK_INSIDE)
         cr.fill()
         cr.restore()
 
@@ -1647,10 +1656,6 @@ class SettingsWindow(Gtk.Window):
         rx = cx
 
         if event.button == 1:
-            if event.type == Gdk.EventType._2BUTTON_PRESS:
-                self.reset_window_pos()
-                return True
-
             if self.anim_state in ("opening", "closing"):
                 return True
 

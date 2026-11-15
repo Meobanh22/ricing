@@ -14,7 +14,7 @@ def get_output(cmd):
 def main():
     status = get_output(["playerctl", "status"])
     if not status or status == "None" or status == "Stopped":
-        print(json.dumps({"text": "", "tooltip": "No music playing", "class": "stopped"}, ensure_ascii=False))
+        print(json.dumps({"text": "", "tooltip": "", "class": "stopped"}, ensure_ascii=False))
         return
 
     raw_title = get_output(["playerctl", "metadata", "--format", "{{title}}"])
@@ -52,7 +52,7 @@ def main():
     # which uses GLib/Pango g_markup_escape_text to safely escape markup entities without double-escaping.
     print(json.dumps({
         "text": f"{icon} {title}",
-        "tooltip": tooltip,
+        "tooltip": "",
         "class": cls
     }, ensure_ascii=False))
 

@@ -56,13 +56,16 @@ def main():
                 notified_warning = False
                 notified_critical = False
             else:
-                if cap <= 15 and not notified_critical:
+                if cap <= 10 and not notified_critical:
                     PowerService.notify_low_battery(cap, level="critical")
                     notified_critical = True
                     notified_warning = True
-                elif cap <= 30 and not notified_warning:
+                elif cap <= 20 and not notified_warning:
                     PowerService.notify_low_battery(cap, level="warning")
                     notified_warning = True
+                elif cap > 22:
+                    notified_warning = False
+                    notified_critical = False
 
             time.sleep(30)
         except Exception:

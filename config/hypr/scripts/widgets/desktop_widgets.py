@@ -10,6 +10,7 @@ import datetime
 import calendar
 import threading
 import urllib.request
+import urllib.parse
 import json
 import subprocess
 import signal
@@ -148,10 +149,78 @@ WMO_MAP = {
     99: ("Thunderstorm", "󰖓", "󰖓"),
 }
 
+def get_user_location():
+    """
+    Get user coordinates (lat, lon, city_name).
+    1. Check user config file ~/.config/hypr/weather_location.json (if manually configured).
+    2. Check cached geolocation in ~/.cache/user_geo_location.json (valid for 24 hours).
+    3. Query IP geolocation API (http://ip-api.com/json with timeout=3s, or https://ipinfo.io/json).
+    4. Fallback to Hanoi, Vietnam (lat=21.0285, lon=105.8542).
+    """
+    user_conf = os.path.expanduser("~/.config/hypr/weather_location.json")
+    if os.path.exists(user_conf):
+        try:
+            with open(user_conf, "r", encoding="utf-8") as f:
+                cfg = json.load(f)
+                if "latitude" in cfg and "longitude" in cfg:
+                    return float(cfg["latitude"]), float(cfg["longitude"]), cfg.get("city", "Custom")
+        except Exception:
+            pass
+
+    geo_cache = os.path.expanduser("~/.cache/user_geo_location.json")
+    if os.path.exists(geo_cache):
+        try:
+            mtime = os.path.getmtime(geo_cache)
+            if time.time() - mtime < 86400:  # 24h cache
+                with open(geo_cache, "r", encoding="utf-8") as f:
+                    cdata = json.load(f)
+                    if "lat" in cdata and "lon" in cdata:
+                        return float(cdata["lat"]), float(cdata["lon"]), cdata.get("city", "Hanoi")
+        except Exception:
+            pass
+
+    # Query IP Geolocation API
+    try:
+        req = urllib.request.Request("http://ip-api.com/json", headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=3) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+            if data.get("status") == "success" and "lat" in data and "lon" in data:
+                lat = float(data["lat"])
+                lon = float(data["lon"])
+                city = data.get("city", "Hanoi")
+                try:
+                    with open(geo_cache, "w", encoding="utf-8") as f:
+                        json.dump({"lat": lat, "lon": lon, "city": city}, f)
+                except Exception:
+                    pass
+                return lat, lon, city
+    except Exception:
+        pass
+
+    try:
+        req = urllib.request.Request("https://ipinfo.io/json", headers={'User-Agent': 'curl/8.0'})
+        with urllib.request.urlopen(req, timeout=3) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+            if "loc" in data:
+                lat_str, lon_str = data["loc"].split(",")
+                lat = float(lat_str)
+                lon = float(lon_str)
+                city = data.get("city", "Hanoi")
+                try:
+                    with open(geo_cache, "w", encoding="utf-8") as f:
+                        json.dump({"lat": lat, "lon": lon, "city": city}, f)
+                except Exception:
+                    pass
+                return lat, lon, city
+    except Exception:
+        pass
+
+    return 21.0285, 105.8542, "Hanoi"
+
 def parse_open_meteo_forecast(data: dict):
     curr = data.get("current", {})
     hour = datetime.datetime.now().hour
-    is_day = 6 <= hour < 17
+    is_day = bool(curr.get("is_day", 1 if 6 <= hour < 18 else 0))
     code = curr.get("weather_code", 0)
     desc, ico_d, ico_n = WMO_MAP.get(code, ("Clear", "󰖙", "󰼱"))
     curr_icon = ico_d if is_day else ico_n
@@ -514,7 +583,7 @@ class ProfileCardWindow(Gtk.Window):
 
     def update_uptime_tick(self):
         try:
-            self.lbl_uptime_val.set_markup(f"<span font_family='Inter, Sans' font='12' weight='800' color='#FFF0F5'>{get_uptime_str()}</span>")
+            self.lbl_uptime_val.set_markup(f"<span font_family='Inter, Sans' font='13.5' weight='800' color='#FFF0F5'>{get_uptime_str()}</span>")
         except Exception:
             pass
         return True
@@ -548,17 +617,17 @@ class ProfileCardWindow(Gtk.Window):
         avatar_img = self.create_avatar_image(size=60)
         header_fixed.put(avatar_img, 6, 44)
 
-        text_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=1)
+        text_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         text_box.get_style_context().add_class("avatar-profile-text-box")
 
         lbl_name = Gtk.Label()
         lbl_name.get_style_context().add_class("avatar-profile-name")
-        lbl_name.set_markup("<span font_family='Inter, Sans' font='12' weight='800' color='#851733'>Serena</span>")
+        lbl_name.set_markup("<span font_family='Inter, Sans' font='14' weight='800' color='#851733'>Serena</span>")
         lbl_name.set_halign(Gtk.Align.START)
 
         lbl_sub = Gtk.Label()
         lbl_sub.get_style_context().add_class("avatar-profile-subtitle")
-        lbl_sub.set_markup(f"<span font_family='Inter, Sans' font='8.5' weight='700' color='{C_TEXT_MUT}'>pokemon performer</span>")
+        lbl_sub.set_markup(f"<span font_family='Inter, Sans' font='8' weight='700' color='{C_TEXT_MUT}'>pokemon performer</span>")
         lbl_sub.set_halign(Gtk.Align.START)
 
         text_box.pack_start(lbl_name, False, False, 0)
@@ -619,11 +688,11 @@ class ProfileCardWindow(Gtk.Window):
 
         l1_title = Gtk.Label()
         l1_title.get_style_context().add_class("sysinfo-sub-label")
-        l1_title.set_markup("<span font_family='Inter, Sans' font='9' weight='700' color='#4D0A1C'>desktop</span>")
+        l1_title.set_markup("<span font_family='Inter, Sans' font='8' weight='700' color='#4D0A1C'>desktop</span>")
 
         l1_val = Gtk.Label()
         l1_val.get_style_context().add_class("sysinfo-main-label")
-        l1_val.set_markup(f"<span font_family='Inter, Sans' font='12' weight='800' color='{C_BORDER_3D}'>hyprland</span>")
+        l1_val.set_markup(f"<span font_family='Inter, Sans' font='13.5' weight='800' color='{C_BORDER_3D}'>hyprland</span>")
 
         b1.pack_start(l1_title, False, False, 2)
         b1.pack_start(l1_val, False, False, 2)
@@ -635,11 +704,11 @@ class ProfileCardWindow(Gtk.Window):
 
         l2_title = Gtk.Label()
         l2_title.get_style_context().add_class("sysinfo-sub-label")
-        l2_title.set_markup("<span font_family='Inter, Sans' font='9' weight='700' color='#E8C2D0'>uptime</span>")
+        l2_title.set_markup("<span font_family='Inter, Sans' font='8' weight='700' color='#E8C2D0'>uptime</span>")
 
         self.lbl_uptime_val = Gtk.Label()
         self.lbl_uptime_val.get_style_context().add_class("sysinfo-main-label")
-        self.lbl_uptime_val.set_markup(f"<span font_family='Inter, Sans' font='12' weight='800' color='#FFF0F5'>{get_uptime_str()}</span>")
+        self.lbl_uptime_val.set_markup(f"<span font_family='Inter, Sans' font='13.5' weight='800' color='#FFF0F5'>{get_uptime_str()}</span>")
 
         b2.pack_start(l2_title, False, False, 2)
         b2.pack_start(self.lbl_uptime_val, False, False, 2)
@@ -914,19 +983,8 @@ class WeatherForecastWindow(Gtk.Window):
         self._fetching_weather = True
         self._last_weather_fetch = now
 
-        # Get coordinates from cache or default to Vietnam coordinates
-        lat, lon = 10.823, 106.63
-        cache_file = os.path.expanduser("~/.cache/open_meteo_cache.json")
-        if os.path.exists(cache_file):
-            try:
-                with open(cache_file, "r", encoding="utf-8") as f:
-                    cdata = json.load(f)
-                    fc = cdata.get("forecast", {})
-                    if "latitude" in fc and "longitude" in fc:
-                        lat = float(fc["latitude"])
-                        lon = float(fc["longitude"])
-            except Exception:
-                pass
+        # Resolve dynamic user location (auto-detect via IP or user config)
+        lat, lon, city = get_user_location()
 
         success = False
 
@@ -942,7 +1000,7 @@ class WeatherForecastWindow(Gtk.Window):
             with urllib.request.urlopen(req, timeout=6) as resp:
                 data = json.loads(resp.read().decode('utf-8'))
                 temp_c, icon, desc, forecast_list = parse_open_meteo_forecast(data)
-                GLib.idle_add(self._update_weather_ui_direct, temp_c, icon, forecast_list)
+                GLib.idle_add(self._update_weather_ui_direct, temp_c, icon, forecast_list, city, desc)
 
                 # Persist cache
                 try:
@@ -958,7 +1016,8 @@ class WeatherForecastWindow(Gtk.Window):
         # 2. Secondary fallback: wttr.in
         if not success:
             try:
-                url = "https://wttr.in/?format=j1"
+                target_loc = urllib.parse.quote(city) if city else ""
+                url = f"https://wttr.in/{target_loc}?format=j1"
                 req = urllib.request.Request(url, headers={'User-Agent': 'curl/8.0'})
                 with urllib.request.urlopen(req, timeout=6) as resp:
                     data = json.loads(resp.read().decode('utf-8'))
@@ -969,7 +1028,7 @@ class WeatherForecastWindow(Gtk.Window):
                     forecast_list = [parse_forecast_day(wd, i) for i, wd in enumerate(weather_days)]
                     hour = datetime.datetime.now().hour
                     icon = get_weather_icon(desc, hour)
-                    GLib.idle_add(self._update_weather_ui_direct, temp_c, icon, forecast_list)
+                    GLib.idle_add(self._update_weather_ui_direct, temp_c, icon, forecast_list, city, desc)
                     success = True
             except Exception as e:
                 print(f"[desktop_widgets] wttr.in fetch error: {e}", file=sys.stderr)
@@ -980,7 +1039,7 @@ class WeatherForecastWindow(Gtk.Window):
 
         self._fetching_weather = False
 
-    def _update_weather_ui_direct(self, temp_c, icon, forecast_list=None):
+    def _update_weather_ui_direct(self, temp_c, icon, forecast_list=None, city=None, desc=None):
         if hasattr(self, 'lbl_hero_icon'):
             self.lbl_hero_icon.set_markup(f"<span font='50' color='#851733'>{icon}</span>")
         if hasattr(self, 'tactile_temp'):
