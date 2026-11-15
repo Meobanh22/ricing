@@ -23,4 +23,6 @@ return {
     bg_waybar            = "rgba(851733f2)",
     border_waybar_3d     = "rgb(4D0A1C)",
     shadow_extrusion     = "rgb(4D0A1C)",
+    bg_tactile_cream     = "rgba(FFF0F5f5)",
+    pokepuff_pink        = "rgb(FF5C8A)",
 }

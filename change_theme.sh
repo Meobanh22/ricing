@@ -1,1 +1,0 @@
-scripts/change_theme.sh

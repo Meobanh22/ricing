@@ -28,4 +28,5 @@
     ribbon-blue:        #50A6FF;
     screen-cyan:        #87F0FF;
     bg-tactile-cream:   rgba(255, 240, 245, 0.96);
+    pokepuff-pink:      #FF5C8A;
 }

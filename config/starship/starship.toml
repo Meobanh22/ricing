@@ -78,5 +78,5 @@ style = "bg:#2A1A1E fg:#A68595"
 format = '[](#2A1A1E)[ 󱑂 $time ]($style)[](#2A1A1E)'
 
 [character]
-success_symbol = '[ ✿ ❯](bold #DC1A36) '
-error_symbol = '[ ✿ ✖](bold #F02D4C) '
+success_symbol = '[ ❯](bold #DC1A36) '
+error_symbol = '[ ✖](bold #F02D4C) '

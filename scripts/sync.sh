@@ -42,6 +42,12 @@ sync_push() {
         python3 "$BUILD_SCRIPT" || true
     fi
 
+    # Generate Poké Puff icons from theme tokens
+    POKEPUFF_SCRIPT="$REPO_ROOT/scripts/generate_pokepuffs.py"
+    if [ -f "$POKEPUFF_SCRIPT" ]; then
+        python3 "$POKEPUFF_SCRIPT" || true
+    fi
+
     # Create destination directories
     mkdir -p "$HOME/.config/hypr/scripts/popups"
     mkdir -p "$HOME/.config/hypr/scripts/widgets"
@@ -116,6 +122,12 @@ sync_push() {
         echo -e "  ${GREEN}✔ Fastfetch (config.jsonc, sylveon_chibi.txt)${NC}"
     fi
 
+    # Starship Prompt
+    if [ -f "$DOTFILES_DIR/starship/starship.toml" ]; then
+        cp -f "$DOTFILES_DIR/starship/starship.toml" "$HOME/.config/starship.toml"
+        echo -e "  ${GREEN}✔ Starship Prompt (starship.toml)${NC}"
+    fi
+
     # GTK-3.0 & GTK-4.0
     if [ -d "$DOTFILES_DIR/gtk-3.0" ]; then
         cp -rf "$DOTFILES_DIR/gtk-3.0/"* "$HOME/.config/gtk-3.0/"
@@ -141,6 +153,22 @@ sync_push() {
         echo -e "  ${GREEN}✔ Fcitx5 (config, profile, conf/)${NC}"
     fi
 
+    # Firefox UI Rice & user.js
+    if [ -d "$DOTFILES_DIR/firefox" ]; then
+        for MOZ_DIR in "$HOME/.config/mozilla/firefox" "$HOME/.mozilla/firefox"; do
+            if [ -d "$MOZ_DIR" ]; then
+                for PROFILE_DIR in "$MOZ_DIR"/*.default*; do
+                    if [ -d "$PROFILE_DIR" ]; then
+                        mkdir -p "$PROFILE_DIR/chrome"
+                        cp -rf "$DOTFILES_DIR/firefox/chrome/"* "$PROFILE_DIR/chrome/" 2>/dev/null || true
+                        cp -f "$DOTFILES_DIR/firefox/user.js" "$PROFILE_DIR/user.js" 2>/dev/null || true
+                    fi
+                done
+            fi
+        done
+        echo -e "  ${GREEN}✔ Firefox (userChrome.css, palette.css, user.js)${NC}"
+    fi
+
     # Theme tokens Single Source of Truth
     if [ -d "$DOTFILES_DIR/theme" ]; then
         mkdir -p "$HOME/.config/hypr/theme"
@@ -159,6 +187,16 @@ sync_push() {
     if [ -d "$ASSETS_DIR/wallpapers" ]; then
         cp -rn "$ASSETS_DIR/wallpapers/"* "$HOME/Pictures/wallpapers/" 2>/dev/null || true
         echo -e "  ${GREEN}✔ Wallpapers directory (~/Pictures/wallpapers/)${NC}"
+
+        # Ensure current wallpaper link/file exists for Hyprlock background
+        mkdir -p "$HOME/.config/hypr/wallpaper_effects"
+        if [ ! -f "$HOME/.config/hypr/wallpaper_effects/.wallpaper_current" ]; then
+            if [ -f "$HOME/Pictures/wallpapers/serena_fennekin_wallpaper_grass_fixed.png" ]; then
+                cp -f "$HOME/Pictures/wallpapers/serena_fennekin_wallpaper_grass_fixed.png" "$HOME/.config/hypr/wallpaper_effects/.wallpaper_current"
+            elif [ -f "$ASSETS_DIR/wallpapers/serena_fennekin_wallpaper_grass_fixed.png" ]; then
+                cp -f "$ASSETS_DIR/wallpapers/serena_fennekin_wallpaper_grass_fixed.png" "$HOME/.config/hypr/wallpaper_effects/.wallpaper_current"
+            fi
+        fi
     fi
 
     if [ -d "$ASSETS_DIR/avatars" ]; then
@@ -184,6 +222,13 @@ sync_push() {
         mkdir -p "$HOME/.config/hypr/assets/illustrations"
         cp -rn "$ASSETS_DIR/illustrations/"* "$HOME/.config/hypr/assets/illustrations/" 2>/dev/null || true
         echo -e "  ${GREEN}✔ Minimalist illustrations (~/.config/hypr/assets/illustrations/)${NC}"
+    fi
+
+    if [ -d "$ASSETS_DIR/icons" ]; then
+        mkdir -p "$HOME/.config/hypr/assets/icons"
+        cp -rf "$ASSETS_DIR/icons/"* "$HOME/.config/hypr/assets/icons/" 2>/dev/null || true
+        cp -rf "$ASSETS_DIR/icons/"* "$HOME/.config/hypr/assets/" 2>/dev/null || true
+        echo -e "  ${GREEN}✔ Vector icons (~/.config/hypr/assets/icons/)${NC}"
     fi
 
     # Reload Live Compositor & Services
@@ -218,8 +263,13 @@ sync_push() {
         if pgrep -f "desktop_widgets.py" &>/dev/null; then
             pkill -f "desktop_widgets.py" 2>/dev/null || true
             sleep 0.2
+            hyprctl dispatch exec "python3 $HOME/.config/hypr/scripts/widgets/desktop_widgets.py" &>/dev/null || \
             setsid -f python3 "$HOME/.config/hypr/scripts/widgets/desktop_widgets.py" >/dev/null 2>&1
             echo -e "  ${GREEN}✔ Desktop widgets reloaded!${NC}"
+        else
+            hyprctl dispatch exec "python3 $HOME/.config/hypr/scripts/widgets/desktop_widgets.py" &>/dev/null || \
+            setsid -f python3 "$HOME/.config/hypr/scripts/widgets/desktop_widgets.py" >/dev/null 2>&1
+            echo -e "  ${GREEN}✔ Desktop widgets started!${NC}"
         fi
 
         if pgrep -f "music_visualizer.py" &>/dev/null; then

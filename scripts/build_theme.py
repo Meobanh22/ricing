@@ -22,17 +22,141 @@ def main():
     with open(tokens_path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
-    colors = data["colors"]
-    gradients = data.get("gradients", {})
+    raw_colors = data.get("colors", {})
+    gradient_str = data.get("gradient") or data.get("gradients", {}).get("sunset", "linear-gradient(to bottom, #A3183D 0%, #E53262 25%, #FF7299 50%, #EAA2C6 75%, #BE7AA8 100%)")
     typo = data.get("typography", {})
     geo = data.get("geometry", {})
     hypr_base = os.path.join(root_dir, "config")
 
     print("Compiling design tokens from tokens.json")
 
-    # Gradient CSS definitions
-    grad_sunset = gradients.get("sunset", "linear-gradient(to bottom, #A3183D 0%, #E53262 25%, #FF7299 50%, #EAA2C6 75%, #BE7AA8 100%)")
-    grad_sunset_hover = gradients.get("sunset_hover", "linear-gradient(to bottom, #B52048 0%, #F04070 25%, #FF80A6 50%, #F2B2D2 75%, #CA8BB4 100%)")
+    def hex_to_rgba_str(h, alpha=1.0):
+        h = h.strip().lstrip('#')
+        if len(h) == 3:
+            h = ''.join(c * 2 for c in h)
+        r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+        if alpha >= 1.0:
+            return f"rgb({r}, {g}, {b})"
+        return f"rgba({r}, {g}, {b}, {alpha:.2f})"
+
+    def hex_to_hypr(h, alpha_hex="ff"):
+        h = h.strip().lstrip('#')
+        if len(h) == 3:
+            h = ''.join(c * 2 for c in h)
+        return f"rgba({h}{alpha_hex})"
+
+    def hex_to_hypr_rgb(h):
+        h = h.strip().lstrip('#')
+        if len(h) == 3:
+            h = ''.join(c * 2 for c in h)
+        return f"rgb({h.upper()})"
+
+    # Primitive color tokens (without semantic role names)
+    dark_wine   = raw_colors.get("dark_wine",   raw_colors.get("bg_window", "#201011"))
+    deep_wine   = raw_colors.get("deep_wine",   raw_colors.get("bg_card", "#2A1A1E"))
+    soft_wine   = raw_colors.get("soft_wine",   raw_colors.get("bg_subtle", "#301F20"))
+    light_wine  = raw_colors.get("light_wine",  raw_colors.get("bg_card_hover", "#3A222A"))
+    dark_ruby   = raw_colors.get("dark_ruby",   raw_colors.get("border_waybar_3d", "#4D0A1C"))
+    wine_red    = raw_colors.get("wine_red",    raw_colors.get("bg_waybar", "#851733"))
+    vivid_red   = raw_colors.get("vivid_red",   raw_colors.get("accent", "#DC1A36"))
+    light_red   = raw_colors.get("light_red",   raw_colors.get("accent_hover", "#F02D4C"))
+    vivid_pink  = raw_colors.get("vivid_pink",  raw_colors.get("pokepuff_pink", "#FF5C8A"))
+    soft_pink   = raw_colors.get("soft_pink",   raw_colors.get("text_secondary", "#E8C2D0"))
+    muted_pink  = raw_colors.get("muted_pink",  raw_colors.get("text_muted", "#A68595"))
+    cream_white = raw_colors.get("cream_white", raw_colors.get("text_primary", "#FFF0F5"))
+    pure_white  = raw_colors.get("pure_white",  raw_colors.get("text_inverse", "#FFFFFF"))
+    sky_blue    = raw_colors.get("sky_blue",    raw_colors.get("ribbon_blue", "#50A6FF"))
+    light_cyan  = raw_colors.get("light_cyan",  raw_colors.get("screen_cyan", "#87F0FF"))
+    warm_yellow = raw_colors.get("warm_yellow", raw_colors.get("status_warning", "#FFB86C"))
+    soft_green  = raw_colors.get("soft_green",  raw_colors.get("status_success", "#8FBC8F"))
+
+    # Map to complete semantic UI dictionary for Waybar, GTK, Hyprland, etc.
+    colors = {
+        "bg_window": dark_wine,
+        "bg_window_alpha": hex_to_rgba_str(dark_wine, 0.98),
+        "bg_window_hypr": hex_to_hypr(dark_wine, "fa"),
+        "bg_card": deep_wine,
+        "bg_card_alpha": hex_to_rgba_str(deep_wine, 0.95),
+        "bg_card_hypr": hex_to_hypr(deep_wine, "f2"),
+        "bg_card_hover": light_wine,
+        "bg_card_hover_alpha": hex_to_rgba_str(light_wine, 0.98),
+        "bg_card_hover_hypr": hex_to_hypr(light_wine, "fa"),
+        "bg_subtle": soft_wine,
+        "bg_subtle_alpha": hex_to_rgba_str(soft_wine, 0.95),
+        "bg_subtle_hypr": hex_to_hypr(soft_wine, "f2"),
+        "bg_ghost": "transparent",
+        "bg_ghost_hover": hex_to_rgba_str(deep_wine, 0.50),
+        "border_window": "rgba(255, 255, 255, 0.12)",
+        "border_window_hypr": "rgba(ffffff1f)",
+        "border_card": "rgba(255, 255, 255, 0.12)",
+        "border_card_hypr": "rgba(ffffff1f)",
+        "border_card_hover": hex_to_rgba_str(vivid_red, 0.65),
+        "border_card_hover_hypr": hex_to_hypr(vivid_red, "a6"),
+        "accent": vivid_red,
+        "accent_hypr": hex_to_hypr_rgb(vivid_red),
+        "accent_hover": light_red,
+        "accent_hover_hypr": hex_to_hypr_rgb(light_red),
+        "accent_dim": hex_to_rgba_str(vivid_red, 0.48),
+        "accent_subtle": hex_to_rgba_str(vivid_red, 0.20),
+        "accent_border": hex_to_rgba_str(vivid_red, 0.40),
+        "text_primary": cream_white,
+        "text_primary_hypr": hex_to_hypr_rgb(cream_white),
+        "text_secondary": soft_pink,
+        "text_secondary_hypr": hex_to_hypr_rgb(soft_pink),
+        "text_muted": muted_pink,
+        "text_muted_hypr": hex_to_hypr_rgb(muted_pink),
+        "text_inverse": pure_white,
+        "text_inverse_hypr": hex_to_hypr_rgb(pure_white),
+        "status_warning": warm_yellow,
+        "status_warning_hypr": hex_to_hypr_rgb(warm_yellow),
+        "status_critical": vivid_red,
+        "status_critical_hypr": hex_to_hypr_rgb(vivid_red),
+        "status_success": soft_green,
+        "status_success_hypr": hex_to_hypr_rgb(soft_green),
+        "ribbon_blue": sky_blue,
+        "ribbon_blue_alpha": hex_to_rgba_str(sky_blue, 0.95),
+        "ribbon_blue_hypr": hex_to_hypr_rgb(sky_blue),
+        "screen_cyan": light_cyan,
+        "screen_cyan_alpha": hex_to_rgba_str(light_cyan, 0.55),
+        "screen_cyan_hypr": hex_to_hypr_rgb(light_cyan),
+        "bg_waybar": wine_red,
+        "bg_waybar_hover": "#9C2241",
+        "bg_waybar_hypr": hex_to_hypr(wine_red, "f2"),
+        "border_waybar_3d": dark_ruby,
+        "border_waybar_3d_hover": "#610E24",
+        "border_waybar_3d_hypr": hex_to_hypr_rgb(dark_ruby),
+        "shadow_extrusion": dark_ruby,
+        "shadow_extrusion_hover": "#610E24",
+        "shadow_extrusion_hypr": hex_to_hypr_rgb(dark_ruby),
+        "border_tactile_white": "rgba(255, 255, 255, 0.65)",
+        "border_tactile_white_bright": "rgba(255, 255, 255, 0.90)",
+        "bg_tactile_cream": hex_to_rgba_str(cream_white, 0.96),
+        "bg_tactile_cream_hypr": hex_to_hypr(cream_white, "f5"),
+        "pokepuff_pink": vivid_pink,
+        "pokepuff_pink_hypr": hex_to_hypr_rgb(vivid_pink),
+        
+        # Color primitives
+        "dark_wine": dark_wine,
+        "deep_wine": deep_wine,
+        "soft_wine": soft_wine,
+        "light_wine": light_wine,
+        "dark_ruby": dark_ruby,
+        "wine_red": wine_red,
+        "vivid_red": vivid_red,
+        "light_red": light_red,
+        "vivid_pink": vivid_pink,
+        "soft_pink": soft_pink,
+        "muted_pink": muted_pink,
+        "cream_white": cream_white,
+        "pure_white": pure_white,
+        "sky_blue": sky_blue,
+        "light_cyan": light_cyan,
+        "warm_yellow": warm_yellow,
+        "soft_green": soft_green,
+    }
+
+    grad_sunset = gradient_str
+    grad_sunset_hover = gradient_str
 
     # 1. Waybar & GTK CSS palette
     waybar_palette = os.path.join(hypr_base, "waybar", "palette.css")
@@ -69,6 +193,7 @@ def main():
 @define-color ribbon_blue {colors['ribbon_blue']};
 @define-color screen_cyan {colors.get('screen_cyan', '#87F0FF')};
 @define-color bg_tactile_cream {colors.get('bg_tactile_cream', 'rgba(255, 240, 245, 0.96)')};
+@define-color pokepuff_pink {colors.get('pokepuff_pink', '#FF5C8A')};
 
 @define-color bg_waybar {colors.get('bg_waybar', '#851733')};
 @define-color bg_waybar_hover {colors.get('bg_waybar_hover', '#9C2241')};
@@ -129,6 +254,7 @@ def main():
 @define-color ribbon_blue {colors['ribbon_blue']};
 @define-color screen_cyan {colors.get('screen_cyan', '#87F0FF')};
 @define-color bg_tactile_cream {colors.get('bg_tactile_cream', 'rgba(255, 240, 245, 0.96)')};
+@define-color pokepuff_pink {colors.get('pokepuff_pink', '#FF5C8A')};
 
 @define-color bg_waybar {colors.get('bg_waybar', '#851733')};
 @define-color bg_waybar_hover {colors.get('bg_waybar_hover', '#9C2241')};
@@ -190,6 +316,8 @@ $screen_cyan          = {colors.get('screen_cyan_hypr', 'rgb(87F0FF)')}
 $bg_waybar            = {colors.get('bg_waybar_hypr', 'rgba(851733f2)')}
 $border_waybar_3d     = {colors.get('border_waybar_3d_hypr', 'rgb(4D0A1C)')}
 $shadow_extrusion     = {colors.get('shadow_extrusion_hypr', 'rgb(4D0A1C)')}
+$bg_tactile_cream     = {colors.get('bg_tactile_cream_hypr', 'rgba(FFF0F5f5)')}
+$pokepuff_pink        = {colors.get('pokepuff_pink_hypr', 'rgb(FF5C8A)')}
 """
     with open(hypr_palette, "w", encoding="utf-8") as f:
         f.write(hypr_content)
@@ -221,6 +349,8 @@ return {{
     bg_waybar            = "{colors.get('bg_waybar_hypr', 'rgba(851733f2)')}",
     border_waybar_3d     = "{colors.get('border_waybar_3d_hypr', 'rgb(4D0A1C)')}",
     shadow_extrusion     = "{colors.get('shadow_extrusion_hypr', 'rgb(4D0A1C)')}",
+    bg_tactile_cream     = "{colors.get('bg_tactile_cream_hypr', 'rgba(FFF0F5f5)')}",
+    pokepuff_pink        = "{colors.get('pokepuff_pink_hypr', 'rgb(FF5C8A)')}",
 }}
 """
     with open(hypr_lua, "w", encoding="utf-8") as f:
@@ -259,6 +389,7 @@ return {{
     ribbon-blue:        {colors['ribbon_blue']};
     screen-cyan:        {colors.get('screen_cyan', '#87F0FF')};
     bg-tactile-cream:   {colors.get('bg_tactile_cream', 'rgba(255, 240, 245, 0.96)')};
+    pokepuff-pink:      {colors.get('pokepuff_pink', '#FF5C8A')};
 }}
 """
     with open(rofi_palette, "w", encoding="utf-8") as f:
@@ -301,20 +432,20 @@ C_BG_WAYBAR_HOV = PALETTE.get("bg_waybar_hover", "#9C2241")
 C_BORDER_3D     = PALETTE.get("border_waybar_3d", "#4D0A1C")
 C_SHADOW_EXTR   = PALETTE.get("shadow_extrusion", "#4D0A1C")
 C_SHADOW_EXTR_H = PALETTE.get("shadow_extrusion_hover", "#610E24")
+C_POKEPUFF_PINK = PALETTE.get("pokepuff_pink", "#FF5C8A")
+C_SUNSET_PINK   = "{colors.get('vivid_pink', '#FF7299') if colors.get('vivid_pink') == '#FF7299' else '#FF7299'}"
+C_SUNSET_PASTEL = "#EAA2C6"
 
 # Gradient Design Tokens
-GRADIENTS = {json.dumps(gradients, indent=4, ensure_ascii=False)}
+GRADIENTS = {{
+    "sunset": "{grad_sunset}"
+}}
 SUNSET_STOPS = [
-    (float(p.replace('%', '')) / 100.0, c)
-    for p, c in GRADIENTS.get("sunset_stops", [
-        ["0%", "#A3183D"], ["25%", "#E53262"], ["50%", "#FF7299"], ["75%", "#EAA2C6"], ["100%", "#BE7AA8"]
-    ])
-]
-SUNSET_HOVER_STOPS = [
-    (float(p.replace('%', '')) / 100.0, c)
-    for p, c in GRADIENTS.get("sunset_hover_stops", [
-        ["0%", "#B52048"], ["25%", "#F04070"], ["50%", "#FF80A6"], ["75%", "#F2B2D2"], ["100%", "#CA8BB4"]
-    ])
+    (0.00, "#A3183D"),
+    (0.25, "#E53262"),
+    (0.50, "#FF7299"),
+    (0.75, "#EAA2C6"),
+    (1.00, "#BE7AA8")
 ]
 
 # Pre-computed Cairo RGBA tuples
@@ -328,6 +459,7 @@ ACCENT_RGBA           = hex_to_rgba(C_ACCENT, 1.0)
 ACCENT_HOVER_RGBA     = hex_to_rgba(C_ACCENT_HOVER, 1.0)
 ACCENT_DIM_RGBA       = hex_to_rgba(C_ACCENT, 0.48)
 ACCENT_SUBTLE_RGBA    = hex_to_rgba(C_ACCENT, 0.20)
+POKEPUFF_PINK_RGBA    = hex_to_rgba(C_POKEPUFF_PINK, 1.0)
 BORDER_WINDOW_RGBA    = (1.0, 1.0, 1.0, 0.12)
 BORDER_CARD_RGBA      = (1.0, 1.0, 1.0, 0.12)
 """
@@ -414,7 +546,7 @@ theme[upload_end]="{colors['accent']}"
             }
         },
         "display": {
-            "separator": " ✿ ",
+            "separator": " • ",
             "color": {
                 "keys": colors["accent"],
                 "title": colors["accent_hover"],
@@ -439,7 +571,7 @@ theme[upload_end]="{colors['accent']}"
         "modules": [
             {
                 "type": "title",
-                "format": "✿ {user-name-colored} @ {host-name-colored} ✿"
+                "format": "{user-name-colored} @ {host-name-colored}"
             },
             {
                 "type": "separator",
@@ -452,7 +584,8 @@ theme[upload_end]="{colors['accent']}"
             },
             {
                 "type": "host",
-                "key": "󰌢 Host"
+                "key": "󰌢 Host",
+                "format": "HP Pavilion x360"
             },
             {
                 "type": "uptime",
@@ -531,9 +664,9 @@ font_family JetBrainsMono Nerd Font
 bold_font auto
 italic_font auto
 bold_italic_font auto
-font_size 12.0
+font_size 11.5
 
-window_padding_width 12
+window_padding_width 8
 remember_window_size no
 initial_window_width 860
 initial_window_height 540
@@ -592,6 +725,61 @@ color15 {colors['text_inverse']}
     with open(kitty_path, "w", encoding="utf-8") as f:
         f.write(kitty_content)
     print("  ✔ Generated kitty/kitty.conf")
+
+    # 8. Firefox chrome/palette.css
+    firefox_chrome_dir = os.path.join(hypr_base, "firefox", "chrome")
+    os.makedirs(firefox_chrome_dir, exist_ok=True)
+    firefox_palette = os.path.join(firefox_chrome_dir, "palette.css")
+    firefox_palette_content = f"""/* palette.css — Color tokens for Firefox userChrome. */
+/* NOTE: Generated from tokens.json. Do not edit directly. */
+
+:root {{
+    --bg-window: {colors['bg_window']};
+    --bg-window-alpha: {colors['bg_window_alpha']};
+    --bg-card: {colors['bg_card']};
+    --bg-card-alpha: {colors['bg_card_alpha']};
+    --bg-card-hover: {colors['bg_card_hover']};
+    --bg-subtle: {colors['bg_subtle']};
+    --bg-ghost: {colors['bg_ghost']};
+    --bg-ghost-hover: {colors['bg_ghost_hover']};
+
+    --border-window: {colors['border_window']};
+    --border-card: {colors['border_card']};
+    --border-card-hover: {colors['border_card_hover']};
+
+    --accent: {colors['accent']};
+    --accent-hover: {colors['accent_hover']};
+    --accent-dim: {colors.get('accent_dim', colors['accent'])};
+    --accent-subtle: {colors.get('accent_subtle', 'rgba(220, 26, 54, 0.20)')};
+
+    --text-primary: {colors['text_primary']};
+    --text-secondary: {colors['text_secondary']};
+    --text-muted: {colors['text_muted']};
+    --text-inverse: {colors['text_inverse']};
+
+    --status-warning: {colors['status_warning']};
+    --status-critical: {colors['status_critical']};
+    --status-success: {colors['status_success']};
+
+    --radius-window: {geo.get('radius_window', 16)}px;
+    --radius-card: {geo.get('radius_card', 10)}px;
+    --radius-button: {geo.get('radius_button', 8)}px;
+    --font-primary: "{typo.get('font_primary', 'JetBrains Mono Nerd Font')}";
+}}
+"""
+    with open(firefox_palette, "w", encoding="utf-8") as f:
+        f.write(firefox_palette_content)
+    print("  ✔ Generated firefox/chrome/palette.css")
+
+    # Also update any live Firefox profiles if found
+    for mozilla_base in [os.path.expanduser("~/.config/mozilla/firefox"), os.path.expanduser("~/.mozilla/firefox")]:
+        if os.path.isdir(mozilla_base):
+            for entry in os.listdir(mozilla_base):
+                if entry.endswith(".default-release") or entry.endswith(".default"):
+                    profile_chrome = os.path.join(mozilla_base, entry, "chrome")
+                    os.makedirs(profile_chrome, exist_ok=True)
+                    with open(os.path.join(profile_chrome, "palette.css"), "w", encoding="utf-8") as f:
+                        f.write(firefox_palette_content)
 
     print("  ✔ Generated repository theme files")
 

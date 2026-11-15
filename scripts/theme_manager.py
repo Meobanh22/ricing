@@ -25,6 +25,7 @@ PRESETS = {
             "accent": "#DC1A36",
             "accent_hover": "#F02D4C",
             "ribbon_blue": "#50A6FF",
+            "screen_cyan": "#87F0FF",
             "text_primary": "#FFF0F5",
             "text_secondary": "#E8C2D0",
             "text_muted": "#A68595",
@@ -32,96 +33,9 @@ PRESETS = {
             "status_warning": "#FFB86C",
             "status_critical": "#DC1A36",
             "status_success": "#8FBC8F",
-        }
-    },
-    "sakura-pastel": {
-        "name": "Sakura Pastel",
-        "desc": "Soft Anime Sakura Pink & Sweet Rose",
-        "colors": {
-            "bg_window": "#241419",
-            "accent": "#FF6088",
-            "ribbon_blue": "#60A5FA",
-            "text_primary": "#FFF5F7",
-            "text_secondary": "#F7CAD7",
-            "text_muted": "#C49AA8",
-            "status_warning": "#FBBF24",
-            "status_critical": "#F43F5E",
-            "status_success": "#34D399",
-        }
-    },
-    "kalos-cyber": {
-        "name": "Kalos Cyber",
-        "desc": "Pokédex High-Tech Neon Red & Cyan Glow",
-        "colors": {
-            "bg_window": "#140C12",
-            "accent": "#FF1744",
-            "ribbon_blue": "#00E5FF",
-            "text_primary": "#F0FDF4",
-            "text_secondary": "#BDEDF3",
-            "text_muted": "#78909C",
-            "status_warning": "#FFA000",
-            "status_critical": "#FF1744",
-            "status_success": "#00E676",
-        }
-    },
-    "midnight-amethyst": {
-        "name": "Midnight Amethyst",
-        "desc": "Deep Twilight Violet & Lavender Ribbon",
-        "colors": {
-            "bg_window": "#16111D",
-            "accent": "#E040FB",
-            "ribbon_blue": "#7C4DFF",
-            "text_primary": "#FBF7FF",
-            "text_secondary": "#E2D4F0",
-            "text_muted": "#9E8EB3",
-            "status_warning": "#F59E0B",
-            "status_critical": "#EC4899",
-            "status_success": "#10B981",
-        }
-    },
-    "matcha-sage": {
-        "name": "Matcha Sage",
-        "desc": "Subdued Japanese Dark Tea & Fresh Sage",
-        "colors": {
-            "bg_window": "#121814",
-            "accent": "#4ADE80",
-            "ribbon_blue": "#38BDF8",
-            "text_primary": "#F2FBF5",
-            "text_secondary": "#C7E8D3",
-            "text_muted": "#8BA896",
-            "status_warning": "#FBBF24",
-            "status_critical": "#F43F5E",
-            "status_success": "#4ADE80",
-        }
-    },
-    "crimson-velvet": {
-        "name": "Crimson Velvet",
-        "desc": "Royal Velvet Ruby & Amber Gold",
-        "colors": {
-            "bg_window": "#1C0D11",
-            "accent": "#FF3366",
-            "ribbon_blue": "#F59E0B",
-            "text_primary": "#FFF1F3",
-            "text_secondary": "#F5CAD2",
-            "text_muted": "#B38690",
-            "status_warning": "#FCD34D",
-            "status_critical": "#FF3366",
-            "status_success": "#34D399",
-        }
-    },
-    "ocean-breeze": {
-        "name": "Ocean Breeze",
-        "desc": "Deep Indigo Ocean & Cyan Breeze",
-        "colors": {
-            "bg_window": "#0E1520",
-            "accent": "#06B6D4",
-            "ribbon_blue": "#F472B6",
-            "text_primary": "#F0F9FF",
-            "text_secondary": "#BAE6FD",
-            "text_muted": "#7899AC",
-            "status_warning": "#FBBF24",
-            "status_critical": "#EF4444",
-            "status_success": "#10B981",
+            "bg_waybar": "#851733",
+            "border_waybar_3d": "#4D0A1C",
+            "pokepuff_pink": "#FF5C8A",
         }
     }
 }
@@ -304,8 +218,8 @@ def sync_waybar_config(hypr_base: str, user_config: str, colors: dict):
   ],
 
   "custom/menu": {{
-    "format": "<span color='{accent}'>✿</span> <span color='{txt_pri}'><b>Apps</b></span>",
-    "tooltip": "Application Menu (Super + Space)",
+    "format": "<span color='{accent}'>󰙸</span> <span color='{txt_pri}'><b>Apps</b></span>",
+    "tooltip": false,
     "on-click": "~/.config/hypr/scripts/system/OpenApps.sh"
   }},
 
@@ -314,6 +228,7 @@ def sync_waybar_config(hypr_base: str, user_config: str, colors: dict):
     "all-outputs": true,
     "active-only": false,
     "format": "{{name}}",
+    "tooltip": false,
     "persistent-workspaces": {{
       "*": 5
     }}
@@ -324,6 +239,7 @@ def sync_waybar_config(hypr_base: str, user_config: str, colors: dict):
     "return-type": "json",
     "exec": "python3 ~/.config/hypr/scripts/system/get_media.py",
     "interval": 1,
+    "tooltip": false,
     "on-click": "bash ~/.config/hypr/scripts/popups/toggle_music.sh",
     "on-click-right": "playerctl play-pause",
     "on-click-middle": "playerctl next",
@@ -334,15 +250,14 @@ def sync_waybar_config(hypr_base: str, user_config: str, colors: dict):
     "format": "<span color='{accent}'></span> <span color='{txt_pri}'><b>{{0:%H:%M}}</b></span>  <span color='{accent}'>·</span>  <span color='{txt_sec}'>{{0:%d/%m}}</span>",
     "format-alt": "<span color='{accent}'></span> <span color='{txt_pri}'><b>{{0:%H:%M:%S}}</b></span>  <span color='{accent}'>·</span>  <span color='{txt_sec}'>{{0:%A, %d/%m/%Y}}</span>",
     "interval": 1,
-    "tooltip-format": "<tt><small>{{calendar}}</small></tt>",
-    "tooltip": "Calendar"
+    "tooltip": false
   }},
 
   "custom/ime": {{
     "exec": "~/.config/hypr/scripts/system/get_ime.sh",
     "interval": 1,
     "format": "{{}}",
-    "tooltip": "Input Method VIE / ENG (Ctrl + Shift or Super + Shift + Space)",
+    "tooltip": false,
     "on-click": "~/.config/hypr/scripts/system/toggle_vietnamese.sh"
   }},
 
@@ -357,7 +272,7 @@ def sync_waybar_config(hypr_base: str, user_config: str, colors: dict):
     }},
     "max-volume": 100,
     "scroll-step": 5,
-    "tooltip-format": "Volume: {{volume}}%\\n(Click: Pavucontrol | Right-click: Control Center)",
+    "tooltip": false,
     "on-click": "pavucontrol",
     "on-click-right": "~/.config/hypr/scripts/popups/toggle_control_center.sh"
   }},
@@ -366,36 +281,36 @@ def sync_waybar_config(hypr_base: str, user_config: str, colors: dict):
     "format-wifi": "<span color='{accent}'>󰖩</span> {{essid}}",
     "format-ethernet": "<span color='{accent}'>󰈀</span> Wired",
     "format-disconnected": "<span color='{txt_mut}'>󰖪</span> Offline",
-    "tooltip-format": "Wi-Fi: {{essid}} ({{signalStrength}}%)\\n(Click: Network Settings | Right-click: Control Center)",
-    "on-click": "nm-connection-editor",
+    "tooltip": false,
+    "on-click": "~/.config/hypr/scripts/popups/toggle_control_center.sh wifi",
     "on-click-right": "~/.config/hypr/scripts/popups/toggle_control_center.sh"
   }},
 
   "battery": {{
     "states": {{
       "good": 95,
-      "warning": 30,
-      "critical": 15
+      "warning": 20,
+      "critical": 10
     }},
     "format": "<span color='{accent}'>{{icon}}</span> {{capacity}}%",
     "format-charging": "<span color='{accent}'>󰂄</span> {{capacity}}%",
     "format-plugged": "<span color='{accent}'>󰚥</span> {{capacity}}%",
     "format-alt": "<span color='{accent}'>{{icon}}</span> {{time}}",
     "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
-    "tooltip-format": "Battery: {{capacity}}% ({{time}})\\n(Right-click: Control Center)",
+    "tooltip": false,
     "on-click-right": "~/.config/hypr/scripts/popups/toggle_control_center.sh"
   }},
 
   "custom/notification": {{
     "format": "<span color='{accent}'>󰂚</span>",
-    "tooltip": "Left-click: Control Center (Super + N)\\nRight-click: Settings (Super + P)",
+    "tooltip": false,
     "on-click": "~/.config/hypr/scripts/popups/toggle_control_center.sh",
     "on-click-right": "~/.config/hypr/scripts/popups/toggle_settings.sh"
   }},
 
   "custom/power": {{
-    "format": "󰐥",
-    "tooltip": "Power Menu (Click to open)",
+    "format": "<span color='{accent}'>󰐥</span>",
+    "tooltip": false,
     "on-click": "~/.config/hypr/scripts/system/Wlogout.sh"
   }}
 }}
@@ -536,6 +451,11 @@ return {{
     status_critical      = "{colors['status_critical_hypr']}",
     status_success       = "{colors['status_success_hypr']}",
     ribbon_blue          = "{colors['ribbon_blue_hypr']}",
+    screen_cyan          = "{colors.get('screen_cyan_hypr', 'rgb(87F0FF)')}",
+    bg_waybar            = "{colors.get('bg_waybar_hypr', 'rgba(851733f2)')}",
+    border_waybar_3d     = "{colors.get('border_waybar_3d_hypr', 'rgb(4D0A1C)')}",
+    shadow_extrusion     = "{colors.get('shadow_extrusion_hypr', 'rgb(4D0A1C)')}",
+    bg_tactile_cream     = "{colors.get('bg_tactile_cream_hypr', 'rgba(FFF0F5f5)')}",
 }}
 """
     for p in [os.path.join(hypr_base, "hypr", "palette.lua"), os.path.join(user_config, "hypr", "palette.lua")]:
@@ -563,6 +483,11 @@ $status_warning       = {colors['status_warning_hypr']}
 $status_critical      = {colors['status_critical_hypr']}
 $status_success       = {colors['status_success_hypr']}
 $ribbon_blue          = {colors['ribbon_blue_hypr']}
+$screen_cyan          = {colors.get('screen_cyan_hypr', 'rgb(87F0FF)')}
+$bg_waybar            = {colors.get('bg_waybar_hypr', 'rgba(851733f2)')}
+$border_waybar_3d     = {colors.get('border_waybar_3d_hypr', 'rgb(4D0A1C)')}
+$shadow_extrusion     = {colors.get('shadow_extrusion_hypr', 'rgb(4D0A1C)')}
+$bg_tactile_cream     = {colors.get('bg_tactile_cream_hypr', 'rgba(FFF0F5f5)')}
 """
     for p in [os.path.join(hypr_base, "hypr", "palette.conf"), os.path.join(user_config, "hypr", "palette.conf")]:
         os.makedirs(os.path.dirname(p), exist_ok=True)
@@ -663,9 +588,9 @@ font_family JetBrainsMono Nerd Font
 bold_font auto
 italic_font auto
 bold_italic_font auto
-font_size 12.0
+font_size 11.5
 
-window_padding_width 12
+window_padding_width 8
 remember_window_size no
 initial_window_width 860
 initial_window_height 540
@@ -813,6 +738,59 @@ theme[upload_end]="{colors['accent']}"
             f.write(btop_content)
     print("  ✔ [9/10] Synchronize btop monitor theme")
 
+    # 9b. Synchronize Firefox palette.css
+    firefox_palette_content = f"""/* palette.css — Color tokens for Firefox userChrome. */
+/* NOTE: Generated automatically by theme_manager.py. Do not edit directly. */
+
+:root {{
+    --bg-window: {colors['bg_window']};
+    --bg-window-alpha: {colors['bg_window_alpha']};
+    --bg-card: {colors['bg_card']};
+    --bg-card-alpha: {colors['bg_card_alpha']};
+    --bg-card-hover: {colors['bg_card_hover']};
+    --bg-subtle: {colors['bg_subtle']};
+    --bg-ghost: {colors['bg_ghost']};
+    --bg-ghost-hover: {colors['bg_ghost_hover']};
+
+    --border-window: {colors['border_window']};
+    --border-card: {colors['border_card']};
+    --border-card-hover: {colors['border_card_hover']};
+
+    --accent: {colors['accent']};
+    --accent-hover: {colors['accent_hover']};
+    --accent-dim: {colors['accent_dim']};
+    --accent-subtle: {colors['accent_subtle']};
+
+    --text-primary: {colors['text_primary']};
+    --text-secondary: {colors['text_secondary']};
+    --text-muted: {colors['text_muted']};
+    --text-inverse: {colors['text_inverse']};
+
+    --status-warning: {colors['status_warning']};
+    --status-critical: {colors['status_critical']};
+    --status-success: {colors['status_success']};
+
+    --radius-window: 16px;
+    --radius-card: 10px;
+    --radius-button: 8px;
+    --font-primary: "JetBrains Mono Nerd Font";
+}}
+"""
+    ff_repo_p = os.path.join(hypr_base, "firefox", "chrome", "palette.css")
+    os.makedirs(os.path.dirname(ff_repo_p), exist_ok=True)
+    with open(ff_repo_p, "w", encoding="utf-8") as f:
+        f.write(firefox_palette_content)
+
+    for mozilla_base in [os.path.expanduser("~/.config/mozilla/firefox"), os.path.expanduser("~/.mozilla/firefox")]:
+        if os.path.isdir(mozilla_base):
+            for entry in os.listdir(mozilla_base):
+                if entry.endswith(".default-release") or entry.endswith(".default"):
+                    profile_chrome = os.path.join(mozilla_base, entry, "chrome")
+                    os.makedirs(profile_chrome, exist_ok=True)
+                    with open(os.path.join(profile_chrome, "palette.css"), "w", encoding="utf-8") as f:
+                        f.write(firefox_palette_content)
+    print("  ✔ [9b/10] Synchronize Firefox palette.css")
+
     # 10. Reload Live Compositor & Apps
     print("\n\033[1;33m⚡ RELOADING LIVE USER INTERFACE (HOT-RELOAD)...⚡\033[0m")
     subprocess.run(["hyprctl", "reload"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -950,8 +928,8 @@ def run_rofi_menu():
 
 def main():
     parser = argparse.ArgumentParser(description="Serena Rice Theme & Palette Manager")
-    parser.add_argument("preset_pos", nargs="?", default=None, help="Quick preset name (e.g. serena-wine, sakura-pastel, kalos-cyber)")
-    parser.add_argument("--preset", "-p", type=str, help="Preset name (e.g. serena-wine, sakura-pastel, kalos-cyber, midnight-amethyst, matcha-sage, crimson-velvet, ocean-breeze)")
+    parser.add_argument("preset_pos", nargs="?", default=None, help="Theme preset name (serena-wine)")
+    parser.add_argument("--preset", "-p", type=str, help="Theme preset name (serena-wine)")
     parser.add_argument("--accent", "-a", type=str, help="Custom accent hex color (e.g. '#F02D4C')")
     parser.add_argument("--bg", "-b", type=str, help="Custom background hex color (e.g. '#201011')")
     parser.add_argument("--ribbon", "-r", type=str, help="Custom ribbon hex color (e.g. '#50A6FF')")

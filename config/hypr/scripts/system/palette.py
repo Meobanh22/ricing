@@ -17,10 +17,6 @@ PALETTE = {
     "bg_subtle_hypr": "rgba(301F20f2)",
     "bg_ghost": "transparent",
     "bg_ghost_hover": "rgba(42, 26, 30, 0.50)",
-    "bg_card_soft": "rgba(42, 26, 30, 0.40)",
-    "bg_card_subtle": "rgba(42, 26, 30, 0.70)",
-    "bg_action": "rgba(48, 31, 32, 0.90)",
-    "bg_action_hover": "rgba(58, 34, 42, 0.98)",
     "border_window": "rgba(255, 255, 255, 0.12)",
     "border_window_hypr": "rgba(ffffff1f)",
     "border_card": "rgba(255, 255, 255, 0.12)",
@@ -33,9 +29,7 @@ PALETTE = {
     "accent_hover_hypr": "rgb(F02D4C)",
     "accent_dim": "rgba(220, 26, 54, 0.48)",
     "accent_subtle": "rgba(220, 26, 54, 0.20)",
-    "accent_soft": "rgba(220, 26, 54, 0.12)",
     "accent_border": "rgba(220, 26, 54, 0.40)",
-    "accent_dash": "rgba(220, 26, 54, 0.45)",
     "text_primary": "#FFF0F5",
     "text_primary_hypr": "rgb(FFF0F5)",
     "text_secondary": "#E8C2D0",
@@ -67,7 +61,27 @@ PALETTE = {
     "shadow_extrusion_hypr": "rgb(4D0A1C)",
     "border_tactile_white": "rgba(255, 255, 255, 0.65)",
     "border_tactile_white_bright": "rgba(255, 255, 255, 0.90)",
-    "bg_tactile_cream": "rgba(255, 240, 245, 0.96)"
+    "bg_tactile_cream": "rgba(255, 240, 245, 0.96)",
+    "bg_tactile_cream_hypr": "rgba(FFF0F5f5)",
+    "pokepuff_pink": "#FF5C8A",
+    "pokepuff_pink_hypr": "rgb(FF5C8A)",
+    "dark_wine": "#201011",
+    "deep_wine": "#2A1A1E",
+    "soft_wine": "#301F20",
+    "light_wine": "#3A222A",
+    "dark_ruby": "#4D0A1C",
+    "wine_red": "#851733",
+    "vivid_red": "#DC1A36",
+    "light_red": "#F02D4C",
+    "vivid_pink": "#FF5C8A",
+    "soft_pink": "#E8C2D0",
+    "muted_pink": "#A68595",
+    "cream_white": "#FFF0F5",
+    "pure_white": "#FFFFFF",
+    "sky_blue": "#50A6FF",
+    "light_cyan": "#87F0FF",
+    "warm_yellow": "#FFB86C",
+    "soft_green": "#8FBC8F"
 }
 
 def hex_to_rgba(hex_code: str, alpha: float = 1.0):
@@ -98,68 +112,20 @@ C_BG_WAYBAR_HOV = PALETTE.get("bg_waybar_hover", "#9C2241")
 C_BORDER_3D     = PALETTE.get("border_waybar_3d", "#4D0A1C")
 C_SHADOW_EXTR   = PALETTE.get("shadow_extrusion", "#4D0A1C")
 C_SHADOW_EXTR_H = PALETTE.get("shadow_extrusion_hover", "#610E24")
+C_POKEPUFF_PINK = PALETTE.get("pokepuff_pink", "#FF5C8A")
+C_SUNSET_PINK   = "#FF7299"
+C_SUNSET_PASTEL = "#EAA2C6"
 
 # Gradient Design Tokens
 GRADIENTS = {
-    "sunset": "linear-gradient(to bottom, #A3183D 0%, #E53262 25%, #FF7299 50%, #EAA2C6 75%, #BE7AA8 100%)",
-    "sunset_hover": "linear-gradient(to bottom, #B52048 0%, #F04070 25%, #FF80A6 50%, #F2B2D2 75%, #CA8BB4 100%)",
-    "sunset_active": "linear-gradient(to bottom, #BA2246 0%, #FF3D71 25%, #FFCCD8 50%, #F0D5E7 75%, #C29BCA 100%)",
-    "sunset_stops": [
-        [
-            "0%",
-            "#A3183D"
-        ],
-        [
-            "25%",
-            "#E53262"
-        ],
-        [
-            "50%",
-            "#FF7299"
-        ],
-        [
-            "75%",
-            "#EAA2C6"
-        ],
-        [
-            "100%",
-            "#BE7AA8"
-        ]
-    ],
-    "sunset_hover_stops": [
-        [
-            "0%",
-            "#B52048"
-        ],
-        [
-            "25%",
-            "#F04070"
-        ],
-        [
-            "50%",
-            "#FF80A6"
-        ],
-        [
-            "75%",
-            "#F2B2D2"
-        ],
-        [
-            "100%",
-            "#CA8BB4"
-        ]
-    ]
+    "sunset": "linear-gradient(to bottom, #A3183D 0%, #E53262 25%, #FF7299 50%, #EAA2C6 75%, #BE7AA8 100%)"
 }
 SUNSET_STOPS = [
-    (float(p.replace('%', '')) / 100.0, c)
-    for p, c in GRADIENTS.get("sunset_stops", [
-        ["0%", "#A3183D"], ["25%", "#E53262"], ["50%", "#FF7299"], ["75%", "#EAA2C6"], ["100%", "#BE7AA8"]
-    ])
-]
-SUNSET_HOVER_STOPS = [
-    (float(p.replace('%', '')) / 100.0, c)
-    for p, c in GRADIENTS.get("sunset_hover_stops", [
-        ["0%", "#B52048"], ["25%", "#F04070"], ["50%", "#FF80A6"], ["75%", "#F2B2D2"], ["100%", "#CA8BB4"]
-    ])
+    (0.00, "#A3183D"),
+    (0.25, "#E53262"),
+    (0.50, "#FF7299"),
+    (0.75, "#EAA2C6"),
+    (1.00, "#BE7AA8")
 ]
 
 # Pre-computed Cairo RGBA tuples
@@ -173,5 +139,6 @@ ACCENT_RGBA           = hex_to_rgba(C_ACCENT, 1.0)
 ACCENT_HOVER_RGBA     = hex_to_rgba(C_ACCENT_HOVER, 1.0)
 ACCENT_DIM_RGBA       = hex_to_rgba(C_ACCENT, 0.48)
 ACCENT_SUBTLE_RGBA    = hex_to_rgba(C_ACCENT, 0.20)
+POKEPUFF_PINK_RGBA    = hex_to_rgba(C_POKEPUFF_PINK, 1.0)
 BORDER_WINDOW_RGBA    = (1.0, 1.0, 1.0, 0.12)
 BORDER_CARD_RGBA      = (1.0, 1.0, 1.0, 0.12)
