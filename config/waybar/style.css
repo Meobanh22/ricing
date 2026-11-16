@@ -110,6 +110,42 @@ window#waybar {
     box-shadow: none;
 }
 
+/* === SCREEN RECORDER === */
+#custom-recorder {
+    background-color: @accent;
+    color: @text_inverse;
+    border-style: solid;
+    border-color: @border_waybar_3d;
+    border-top-width: 1.8px;
+    border-left-width: 1.8px;
+    border-right-width: 1.8px;
+    border-bottom-width: 5.5px;
+    border-radius: 16px;
+    box-shadow: inset 0 0 0 2.8px @border_tactile_white;
+    padding: 3px 14px 4px 14px;
+    margin: 2px 4px 4px 4px;
+    font-size: 13px;
+    font-weight: 700;
+    animation: blink-rec 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite alternate;
+}
+
+#custom-recorder:hover {
+    background-color: @accent_hover;
+    border-color: @border_waybar_3d_hover;
+    box-shadow: inset 0 0 0 2.8px @border_tactile_white_bright;
+}
+
+@keyframes blink-rec {
+    0% {
+        background-color: @accent;
+        border-color: @border_waybar_3d;
+    }
+    100% {
+        background-color: @bg_waybar;
+        border-color: @border_waybar_3d;
+    }
+}
+
 /* === MEDIA === */
 #custom-media,
 #mpris {

@@ -121,3 +121,14 @@
     "on-click": "~/.config/hypr/scripts/system/Wlogout.sh"
   }
 }
+    "custom/recorder",
+  "custom/recorder": {
+    "format": "{}",
+    "return-type": "json",
+    "exec": "~/.config/hypr/scripts/system/recording_status.sh",
+    "interval": 1,
+    "tooltip": true,
+    "on-click": "~/.config/hypr/scripts/system/record_screen.sh",
+    "signal": 9
+  },
+

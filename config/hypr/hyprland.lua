@@ -343,3 +343,20 @@ end
 -- Mouse window dragging and resizing
 hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(),   { mouse = true })
 hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
+hl.window_rule({
+    name = "music-vis-rule",
+    match = { class = "^(music-vis|cava)$" },
+    tile = true,
+})
+
+hl.window_rule({
+    name = "music-window",
+    match = { class = "^(music-vis|kitty)$", title = "^Serena Music( Focus)?$" },
+    no_blur = true,
+    no_shadow = true,
+    border_size = 0,
+    opacity = "1.0 override 1.0 override 1.0 override",
+})
+
+hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("~/.config/hypr/scripts/system/record_screen.sh area media"))
+hl.bind(mainMod .. " + ALT + R",   hl.dsp.exec_cmd("~/.config/hypr/scripts/system/record_screen.sh full media"))
