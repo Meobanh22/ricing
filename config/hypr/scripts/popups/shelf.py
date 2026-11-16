@@ -28,7 +28,10 @@ for p in (SCRIPT_DIR, SCRIPTS_ROOT, SYSTEM_DIR):
     if p not in sys.path:
         sys.path.insert(0, p)
 
-from draggable_popup import DraggablePopup, get_cursor_pos, get_monitor_geometry
+from ui_core import (
+    DraggablePopup, get_cursor_pos, get_monitor_geometry,
+    clear_surface, draw_rounded_rect
+)
 
 # Color tokens & Cairo RGBA
 try:
@@ -194,18 +197,12 @@ class ShelfWindow(Gtk.Window):
 
     def on_window_draw(self, widget, cr):
         # Clear surface to transparent for CSS border rendering
-        cr.set_source_rgba(0, 0, 0, 0)
-        cr.set_operator(cairo.OPERATOR_CLEAR)
-        cr.paint()
-        cr.set_operator(cairo.OPERATOR_OVER)
+        clear_surface(cr)
         return False
 
     def on_popout_draw(self, widget, cr):
         # 1. Clear surface to transparent
-        cr.set_source_rgba(0, 0, 0, 0)
-        cr.set_operator(cairo.OPERATOR_CLEAR)
-        cr.paint()
-        cr.set_operator(cairo.OPERATOR_OVER)
+        clear_surface(cr)
 
         # 2. Draw rounded squircle for external floating popout card
         alloc = widget.get_allocation()
@@ -216,12 +213,7 @@ class ShelfWindow(Gtk.Window):
         y = pad
         r = 14.0
 
-        cr.new_sub_path()
-        cr.arc(x + w - r, y + r, r, -1.57079632679, 0)
-        cr.arc(x + w - r, y + h - r, r, 0, 1.57079632679)
-        cr.arc(x + r, y + h - r, r, 1.57079632679, 3.14159265359)
-        cr.arc(x + r, y + r, r, 3.14159265359, 4.71238898038)
-        cr.close_path()
+        draw_rounded_rect(cr, x, y, w, h, r)
 
         # Light cream card background
         cr.set_source_rgba(*hex_to_rgba(C_TEXT_PRI, 0.98))
@@ -236,10 +228,7 @@ class ShelfWindow(Gtk.Window):
 
     def on_lightbox_draw(self, widget, cr):
         # 1. Clear surface to transparent
-        cr.set_source_rgba(0, 0, 0, 0)
-        cr.set_operator(cairo.OPERATOR_CLEAR)
-        cr.paint()
-        cr.set_operator(cairo.OPERATOR_OVER)
+        clear_surface(cr)
 
         # 2. Draw rounded squircle for lightbox modal
         alloc = widget.get_allocation()
@@ -250,12 +239,7 @@ class ShelfWindow(Gtk.Window):
         y = pad
         r = 16.0
 
-        cr.new_sub_path()
-        cr.arc(x + w - r, y + r, r, -1.57079632679, 0)
-        cr.arc(x + w - r, y + h - r, r, 0, 1.57079632679)
-        cr.arc(x + r, y + h - r, r, 1.57079632679, 3.14159265359)
-        cr.arc(x + r, y + r, r, 3.14159265359, 4.71238898038)
-        cr.close_path()
+        draw_rounded_rect(cr, x, y, w, h, r)
 
         # Light cream background
         cr.set_source_rgba(*hex_to_rgba(C_TEXT_PRI, 0.98))

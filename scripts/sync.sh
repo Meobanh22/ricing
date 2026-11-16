@@ -53,6 +53,7 @@ sync_push() {
     mkdir -p "$HOME/.config/hypr/scripts/widgets"
     mkdir -p "$HOME/.config/hypr/scripts/services"
     mkdir -p "$HOME/.config/hypr/scripts/system"
+    mkdir -p "$HOME/.config/hypr/scripts/ui_core"
     mkdir -p "$HOME/.config/hypr/styles"
     mkdir -p "$HOME/.config/hypr/assets"
     mkdir -p "$HOME/.config/waybar"
@@ -81,7 +82,7 @@ sync_push() {
     # Hyprland (Native hyprland.lua engine, remove legacy hyprland.conf)
     cp -rf "$DOTFILES_DIR/hypr/"* "$HOME/.config/hypr/"
     rm -f "$HOME/.config/hypr/hyprland.conf"
-    chmod +x "$HOME/.config/hypr/scripts/popups/"* "$HOME/.config/hypr/scripts/widgets/"* "$HOME/.config/hypr/scripts/services/"* "$HOME/.config/hypr/scripts/system/"* 2>/dev/null || true
+    chmod +x "$HOME/.config/hypr/scripts/popups/"* "$HOME/.config/hypr/scripts/widgets/"* "$HOME/.config/hypr/scripts/services/"* "$HOME/.config/hypr/scripts/system/"* "$HOME/.config/hypr/scripts/ui_core/"* 2>/dev/null || true
     echo -e "  ${GREEN}✔ Hyprland (hyprland.lua, hyprlock.conf, scripts/)${NC}"
 
     # Waybar

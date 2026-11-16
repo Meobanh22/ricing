@@ -40,7 +40,13 @@ from services.audio import AudioService
 from services.brightness import BrightnessService
 from services.bluetooth import BluetoothService
 from services.power import PowerService
-from draggable_popup import DraggablePopup, get_cursor_pos, get_monitor_geometry
+from ui_core import (
+    DraggablePopup, get_cursor_pos, get_monitor_geometry,
+    draw_rounded_rect, clip_device_bounds, draw_anime_grooves,
+    draw_bow_mark, draw_bell_icon,
+    draw_curved_kerned, draw_curved_kerned_cached,
+    clear_surface
+)
 
 try:
     from palette import (
@@ -74,50 +80,8 @@ PID_FILE = "/tmp/control_center.pid"
 CACHE_FILE = os.path.expanduser("~/.cache/notifications.json")
 
 # ==============================================================================
-# 1. PURE CAIRO GEOMETRIC PATHS & HELPERS
+# 1. PURE CAIRO GEOMETRIC PATHS & HELPERS (ui_core imported)
 # ==============================================================================
-def clip_device_bounds(cr, x, y, w, h, r):
-    cr.new_sub_path()
-    cr.arc(x + r, y + r, r, math.pi, 1.5 * math.pi)
-    cr.arc(x + w - r, y + r, r, 1.5 * math.pi, 2 * math.pi)
-    cr.arc(x + w - r, y + h - r, r, 0, 0.5 * math.pi)
-    cr.arc(x + r, y + h - r, r, 0.5 * math.pi, math.pi)
-    cr.close_path()
-
-def draw_rounded_rect(cr, x, y, w, h, r):
-    cr.new_sub_path()
-    cr.arc(x + r, y + r, r, math.pi, 1.5 * math.pi)
-    cr.arc(x + w - r, y + r, r, 1.5 * math.pi, 2 * math.pi)
-    cr.arc(x + w - r, y + h - r, r, 0, 0.5 * math.pi)
-    cr.arc(x + r, y + h - r, r, 0.5 * math.pi, math.pi)
-    cr.close_path()
-
-C_GROOVE_FILL = hex_to_rgba(C_BG_WIN, 0.62)
-C_GROOVE_STROKE1 = hex_to_rgba(C_BG_WIN, 0.90)
-C_GROOVE_STROKE2 = hex_to_rgba(C_BORDER_3D, 0.85)
-C_GROOVE_STROKE3 = hex_to_rgba(C_TEXT_SEC, 0.25)
-
-def draw_anime_grooves(cr, cx, cy, grooves, a1, a2):
-    for (r_in, r_out) in grooves:
-        cr.save()
-        cr.new_sub_path()
-        cr.arc(cx, cy, r_out, a1, a2)
-        cr.arc_negative(cx, cy, r_in, a2, a1)
-        cr.close_path()
-        cr.set_source_rgba(*C_GROOVE_FILL); cr.fill()
-
-        cr.arc(cx, cy, r_out, a1, a2)
-        cr.set_source_rgba(*C_GROOVE_STROKE1)
-        cr.set_line_width(1.1); cr.stroke()
-
-        cr.arc(cx, cy, r_in, a1, a2)
-        cr.set_source_rgba(*C_GROOVE_STROKE2)
-        cr.set_line_width(1.0); cr.stroke()
-
-        cr.arc(cx, cy, r_out + 0.8, a1, a2)
-        cr.set_source_rgba(*C_GROOVE_STROKE3)
-        cr.set_line_width(0.7); cr.stroke()
-        cr.restore()
 
 def create_top_red_casing_path(cr, x_left, x_right, y_dark_top, cx, cy_top, r_dark, ang_dark_top_start, ang_dark_top_end, x_dark_cut, device_r, notch_d=2.0, trans=1.8, y_top=0.0):
     y_tl1_t = 48.0;  y_tl1_b = 52.0
@@ -224,106 +188,8 @@ def create_bottom_red_casing_path(cr, x_left, x_right, y_dark_bot, H_canvas, cx,
     cr.close_path()
 
 # ==============================================================================
-# 2. PROPORTIONALLY KERNED CURVED TEXT (Fixes overlapping/colliding letters)
+# 2. POKÉBALL DUAL SLIDER & INTERACTION
 # ==============================================================================
-def draw_curved_kerned(cr, text, cx, cy_top, r_text=62.0, font_desc="DejaVu Sans Bold 8.5", letter_spacing=1.6, color=(0x20/255.0, 0x10/255.0, 0x11/255.0)):
-    widths = []
-    for ch in text:
-        l = PangoCairo.create_layout(cr)
-        l.set_font_description(Pango.FontDescription(font_desc))
-        l.set_text(ch, -1)
-        ink, log = l.get_pixel_extents()
-        w = log.width if ch != ' ' else 6.0
-        widths.append(w + letter_spacing)
-    
-    total_arc = sum(widths)
-    total_ang = total_arc / r_text
-    start_ang = -math.pi / 2.0 - total_ang / 2.0
-    
-    curr_ang = start_ang
-    for i, ch in enumerate(text):
-        char_w = widths[i]
-        ang = curr_ang + (char_w / 2.0) / r_text
-        curr_ang += char_w / r_text
-        
-        x = cx + r_text * math.cos(ang)
-        y = cy_top + r_text * math.sin(ang)
-        cr.save()
-        cr.translate(x, y)
-        cr.rotate(ang + math.pi / 2.0)
-        l = PangoCairo.create_layout(cr)
-        l.set_font_description(Pango.FontDescription(font_desc))
-        l.set_text(ch, -1)
-        ink, log = l.get_pixel_extents()
-        cr.move_to(-log.width / 2.0, -log.height / 2.0)
-        cr.set_source_rgb(*color)
-        PangoCairo.show_layout(cr, l)
-        cr.restore()
-
-_CURVED_TEXT_SURFACES = {}
-def draw_curved_kerned_cached(cr, text, cx, cy_top, r_text=62.0, font_desc="DejaVu Sans Bold 8.5", letter_spacing=1.6, color=(0x20/255.0, 0x10/255.0, 0x11/255.0)):
-    key = (text, font_desc, r_text, letter_spacing, color)
-    entry = _CURVED_TEXT_SURFACES.get(key)
-    if entry is None:
-        ref_w = int(r_text * 2 + 60)
-        ref_h = int(r_text + 40)
-        rel_cx = ref_w / 2.0
-        rel_cy = float(ref_h - 10)
-        surf = cairo.ImageSurface(cairo.FORMAT_ARGB32, ref_w, ref_h)
-        scr = cairo.Context(surf)
-        draw_curved_kerned(scr, text, rel_cx, rel_cy, r_text, font_desc, letter_spacing, color)
-        entry = (surf, ref_w, ref_h, rel_cx, rel_cy)
-        _CURVED_TEXT_SURFACES[key] = entry
-    surf, ref_w, ref_h, rel_cx, rel_cy = entry
-    cr.save()
-    cr.set_source_surface(surf, cx - rel_cx, cy_top - rel_cy)
-    cr.paint()
-    cr.restore()
-
-def draw_bow_mark(ctx, cx, cy, size=24.0, color=(0xDC/255.0, 0x1A/255.0, 0x36/255.0)):
-    """Draws the solid minimal bow mark centered at (cx, cy)."""
-    scale = size / 24.0
-    ctx.save()
-    ctx.translate(cx, cy)
-    ctx.scale(scale, scale)
-    ctx.translate(-12.0, -12.0)
-    ctx.set_source_rgb(color[0], color[1], color[2])
-
-    # Left Wing
-    ctx.new_path()
-    ctx.move_to(8.9, 9.3)
-    ctx.curve_to(6.4, 6.1, 3.9, 5.1, 2.6, 6.2)
-    ctx.curve_to(1.4, 7.4, 1.4, 16.6, 2.6, 17.8)
-    ctx.curve_to(3.9, 18.9, 6.4, 17.9, 8.9, 14.7)
-    ctx.curve_to(8.5, 13.0, 8.5, 11.0, 8.9, 9.3)
-    ctx.close_path()
-    ctx.fill()
-
-    # Right Wing
-    ctx.new_path()
-    ctx.move_to(15.1, 9.3)
-    ctx.curve_to(17.6, 6.1, 20.1, 5.1, 21.4, 6.2)
-    ctx.curve_to(22.6, 7.4, 22.6, 16.6, 21.4, 17.8)
-    ctx.curve_to(20.1, 18.9, 17.6, 17.9, 15.1, 14.7)
-    ctx.curve_to(15.5, 13.0, 15.5, 11.0, 15.1, 9.3)
-    ctx.close_path()
-    ctx.fill()
-
-    # Center Knot
-    draw_rounded_rect(ctx, 10.1, 8.0, 3.8, 8.0, 1.6)
-    ctx.fill()
-
-    ctx.restore()
-
-def draw_bell_icon(ctx, cx, cy, font_size=20, color=None):
-    if color is None:
-        color = C_ACCENT
-    l = PangoCairo.create_layout(ctx)
-    l.set_font_description(Pango.FontDescription(f"JetBrains Mono Nerd Font Bold {font_size}"))
-    l.set_markup(f"<span color='{color}'>󰂚</span>", -1)
-    ink, log = l.get_pixel_extents()
-    ctx.move_to(cx - ink.x - ink.width / 2.0, cy - ink.y - ink.height / 2.0)
-    PangoCairo.show_layout(ctx, l)
 
 def draw_pokeball_dual_slider(cr, cx, cy, R=64.0, thickness=12.0, vol_val=0.35, bri_val=0.60, knob_style="round_knob", icon_color=None, accent_rgb=None, dark_color=None, pwr_bg=None):
     if icon_color is None:
@@ -2501,10 +2367,7 @@ class PokedexControlCenter(Gtk.Window):
 
     def on_draw(self, widget, cr):
         # 0. Clear canvas surface to transparent
-        cr.set_source_rgba(0, 0, 0, 0)
-        cr.set_operator(cairo.OPERATOR_CLEAR)
-        cr.paint()
-        cr.set_operator(cairo.OPERATOR_OVER)
+        clear_surface(cr)
         cr.set_antialias(cairo.ANTIALIAS_DEFAULT)
 
         cr.save()

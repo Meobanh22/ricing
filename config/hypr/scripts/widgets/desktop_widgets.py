@@ -41,6 +41,8 @@ for p in (SCRIPT_DIR, SCRIPTS_ROOT, SYSTEM_DIR):
     if p not in sys.path:
         sys.path.insert(0, p)
 
+from ui_core import clear_surface, draw_tactile_3d_text, resolve_asset
+
 def get_repo_root():
     curr = SCRIPT_DIR
     while curr and curr != "/":
@@ -327,10 +329,7 @@ def apply_global_css():
 
 def on_window_draw_clear(widget, cr):
     """Draw transparent RGBA surface without artifacts."""
-    cr.set_source_rgba(0, 0, 0, 0)
-    cr.set_operator(cairo.OPERATOR_CLEAR)
-    cr.paint()
-    cr.set_operator(cairo.OPERATOR_OVER)
+    clear_surface(cr)
     return False
 
 def get_uptime_str() -> str:
@@ -388,17 +387,8 @@ class ProfileCardWindow(Gtk.Window):
         self.build_ui()
 
     def find_asset_path(self, relative_path: str):
-        repo_root = get_repo_root()
-        paths = [
-            os.path.join(repo_root, relative_path),
-            os.path.expanduser(f"~/.config/hypr/{os.path.basename(relative_path)}"),
-            os.path.expanduser(f"~/.config/hypr/assets/{os.path.basename(relative_path)}"),
-            os.path.expanduser(f"~/custom/{relative_path}"),
-        ]
-        for p in paths:
-            if os.path.exists(p):
-                return p
-        return None
+        p = resolve_asset(relative_path)
+        return p if p else None
 
     def create_banner_image(self, w=220, h=72, r=12.0):
         banner_path = self.find_asset_path("assets/banners/serena_cover_banner.png")
@@ -771,48 +761,13 @@ class Tactile3DTemperatureWidget(Gtk.DrawingArea):
         start_x = -ink_rect.x + 4.0
         start_y = -ink_rect.y + 4.0
 
-        dark_color = hex_to_rgba(C_BORDER_3D)[:3]
-        wine_color = hex_to_rgba(C_BG_WAYBAR)[:3]
-        white_color = hex_to_rgba(C_TEXT_INV)[:3]
-
-        extrusion_h = 4.0
-        white_w = 4.6
-        dark_extra = 1.6
-        total_dark_w = white_w + dark_extra * 2.0
-
-        cr.set_line_join(cairo.LINE_JOIN_ROUND)
-        cr.set_line_cap(cairo.LINE_CAP_ROUND)
-
-        # Layer 1: Dark 3D extrusion downward (#4D0A1C)
-        steps = int(extrusion_h * 4)
-        for s in range(steps + 1):
-            dy = extrusion_h * (s / steps)
-            cr.save()
-            cr.translate(start_x, start_y + dy)
-            PangoCairo.layout_path(cr, layout)
-            cr.set_source_rgb(*dark_color)
-            cr.set_line_width(total_dark_w)
-            cr.stroke_preserve()
-            cr.fill()
-            cr.restore()
-
-        # Layer 2: White contour outline (#FFFFFF)
-        cr.save()
-        cr.translate(start_x, start_y)
-        PangoCairo.layout_path(cr, layout)
-        cr.set_source_rgb(*white_color)
-        cr.set_line_width(white_w)
-        cr.stroke_preserve()
-        cr.fill()
-        cr.restore()
-
-        # Layer 3: Wine red core fill (#851733)
-        cr.save()
-        cr.translate(start_x, start_y)
-        PangoCairo.layout_path(cr, layout)
-        cr.set_source_rgb(*wine_color)
-        cr.fill()
-        cr.restore()
+        draw_tactile_3d_text(
+            cr, layout, start_x, start_y,
+            core_color=C_BG_WAYBAR,
+            dark_color=C_BORDER_3D,
+            white_color=C_TEXT_INV,
+            extrusion_h=4.0, white_w=4.6, dark_extra=1.6
+        )
 
         return False
 
@@ -1113,48 +1068,13 @@ class Tactile3DMonthWidget(Gtk.DrawingArea):
         start_x = (w - ink.width) / 2.0 - ink.x
         start_y = (h - ink.height) / 2.0 - ink.y - 1.0
 
-        dark_color = hex_to_rgba(C_BORDER_3D)[:3]
-        wine_color = hex_to_rgba(C_BG_WAYBAR)[:3]
-        white_color = hex_to_rgba(C_TEXT_INV)[:3]
-
-        extrusion_h = 3.8
-        white_w = 4.2
-        dark_extra = 1.5
-        total_dark_w = white_w + dark_extra * 2.0
-
-        cr.set_line_join(cairo.LINE_JOIN_ROUND)
-        cr.set_line_cap(cairo.LINE_CAP_ROUND)
-
-        # Layer 1: Dark 3D extrusion downward (#4D0A1C)
-        steps = int(extrusion_h * 4)
-        for s in range(steps + 1):
-            dy = extrusion_h * (s / steps)
-            cr.save()
-            cr.translate(start_x, start_y + dy)
-            PangoCairo.layout_path(cr, layout)
-            cr.set_source_rgb(*dark_color)
-            cr.set_line_width(total_dark_w)
-            cr.stroke_preserve()
-            cr.fill()
-            cr.restore()
-
-        # Layer 2: White contour outline (#FFFFFF)
-        cr.save()
-        cr.translate(start_x, start_y)
-        PangoCairo.layout_path(cr, layout)
-        cr.set_source_rgb(*white_color)
-        cr.set_line_width(white_w)
-        cr.stroke_preserve()
-        cr.fill()
-        cr.restore()
-
-        # Layer 3: Wine red core fill (#851733)
-        cr.save()
-        cr.translate(start_x, start_y)
-        PangoCairo.layout_path(cr, layout)
-        cr.set_source_rgb(*wine_color)
-        cr.fill()
-        cr.restore()
+        draw_tactile_3d_text(
+            cr, layout, start_x, start_y,
+            core_color=C_BG_WAYBAR,
+            dark_color=C_BORDER_3D,
+            white_color=C_TEXT_INV,
+            extrusion_h=3.8, white_w=4.2, dark_extra=1.5
+        )
 
         return False
 

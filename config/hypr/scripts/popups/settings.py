@@ -43,7 +43,10 @@ from services.audio import AudioService
 from services.brightness import BrightnessService
 from services.bluetooth import BluetoothService
 from services.power import PowerService
-from draggable_popup import DraggablePopup, get_cursor_pos, get_monitor_geometry
+from ui_core import (
+    DraggablePopup, get_cursor_pos, get_monitor_geometry,
+    squircle, resolve_asset, clear_surface
+)
 
 PID_FILE = "/tmp/settings.pid"
 POSITION_CACHE = "/tmp/settings_pos.json"
@@ -112,14 +115,6 @@ COLOR_RIBBON_TOP = hex_to_rgba(C_ACCENT_HOVER, 1.0)    # #F02D4C
 COLOR_RIBBON_MID = hex_to_rgba(C_ACCENT, 1.0)          # #DC1A36
 COLOR_RIBBON_BOT = hex_to_rgba(C_BG_WAYBAR, 1.0)        # #851733
 
-
-def squircle(cr, x, y, w, h, r):
-    cr.new_sub_path()
-    cr.arc(x + w - r, y + r, r, -0.5 * math.pi, 0)
-    cr.arc(x + w - r, y + h - r, r, 0, 0.5 * math.pi)
-    cr.arc(x + r, y + h - r, r, 0.5 * math.pi, math.pi)
-    cr.arc(x + r, y + r, r, math.pi, 1.5 * math.pi)
-    cr.close_path()
 
 def left_panel_path(cr, x, y, w, h, r=22.0, r_inner=18.0):
     """Left wing with outer corners rounded (r) and inner corners near hinges rounded (r_inner)."""
@@ -432,13 +427,8 @@ class SettingsWindow(Gtk.Window):
 
     def load_assets(self):
         def find_asset(name):
-            p1 = os.path.join(ASSETS_DIR, name)
-            if os.path.exists(p1):
-                return p1
-            p2 = os.path.join(FALLBACK_ASSETS_DIR, name)
-            if os.path.exists(p2):
-                return p2
-            return None
+            p = resolve_asset(name)
+            return p if p else None
 
         self.asset_bow = None
         self.asset_heart = None
@@ -678,9 +668,7 @@ class SettingsWindow(Gtk.Window):
 
     # ---------------- DRAWING ----------------
     def on_draw(self, widget, cr):
-        cr.set_operator(cairo.OPERATOR_CLEAR)
-        cr.paint()
-        cr.set_operator(cairo.OPERATOR_OVER)
+        clear_surface(cr)
 
         alloc = widget.get_allocation()
         win_w = float(alloc.width)
