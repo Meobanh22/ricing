@@ -52,9 +52,8 @@ window#desktop-widgets-window {
     padding: 8px 10px 9px 10px;
 }
 
-/* Frame 1: Waybar Sunset Gradient Style (No white border) */
+/* Frame 1: Waybar Sunset Gradient Style (Inherits .gradient-sunset from palette.css) */
 .sysinfo-box-gradient {
-    background-image: linear-gradient(to bottom, #A3183D 0%, #E53262 25%, #FF7299 50%, #EAA2C6 75%, #BE7AA8 100%);
     border-style: solid;
     border-color: @border_waybar_3d;
     border-top-width: 1.5px;
@@ -69,7 +68,6 @@ window#desktop-widgets-window {
 }
 
 .sysinfo-box-gradient:hover {
-    background-image: linear-gradient(to bottom, #B52048 0%, #F04070 25%, #FF80A6 50%, #F2B2D2 75%, #CA8BB4 100%);
     border-color: @accent;
     box-shadow: none;
 }
@@ -135,7 +133,6 @@ window#desktop-widgets-window {
 }
 
 .tactile-hero-box {
-    background-image: linear-gradient(to bottom, #A3183D 0%, #E53262 25%, #FF7299 50%, #EAA2C6 75%, #BE7AA8 100%);
     border-style: solid;
     border-color: @border_waybar_3d;
     border-top-width: 1.8px;
@@ -150,7 +147,6 @@ window#desktop-widgets-window {
 }
 
 .tactile-hero-box:hover {
-    background-image: linear-gradient(to bottom, #B52048 0%, #F04070 25%, #FF80A6 50%, #F2B2D2 75%, #CA8BB4 100%);
     border-color: @accent;
 }
 

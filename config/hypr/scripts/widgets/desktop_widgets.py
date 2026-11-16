@@ -428,7 +428,7 @@ class ProfileCardWindow(Gtk.Window):
         for s in range(steps + 1):
             dy = 3.5 * (s / steps)
             rounded_rect(0, dy, w, h, r)
-            cr.set_source_rgb(77/255.0, 10/255.0, 28/255.0) # #4D0A1C
+            cr.set_source_rgb(*hex_to_rgba(C_BORDER_3D)[:3])
             cr.fill()
 
         # Clip and paint cover image
@@ -445,13 +445,13 @@ class ProfileCardWindow(Gtk.Window):
                 cr.save()
                 rounded_rect(0, 0, w, h, r)
                 cr.clip()
-                cr.set_source_rgb(133/255.0, 23/255.0, 51/255.0)
+                cr.set_source_rgb(*hex_to_rgba(C_BG_WAYBAR)[:3])
                 cr.paint()
                 cr.restore()
 
         # 3D frame border: clear, solid #4D0A1C outline all around
         rounded_rect(0, 0, w, h, r)
-        cr.set_source_rgba(77/255.0, 10/255.0, 28/255.0, 0.95)
+        cr.set_source_rgba(*hex_to_rgba(C_BORDER_3D, 0.95))
         cr.set_line_width(2.0)
         cr.stroke()
 
@@ -479,7 +479,7 @@ class ProfileCardWindow(Gtk.Window):
         for s in range(steps + 1):
             dy = 3.5 * (s / steps)
             cr.arc(cx, cy + dy, r, 0, 6.2831853)
-            cr.set_source_rgb(77/255.0, 10/255.0, 28/255.0) # #4D0A1C
+            cr.set_source_rgb(*hex_to_rgba(C_BORDER_3D)[:3])
             cr.fill()
 
         # Clip and paint avatar image
@@ -494,12 +494,12 @@ class ProfileCardWindow(Gtk.Window):
                 cr.restore()
             except Exception:
                 cr.arc(cx, cy, r, 0, 6.2831853)
-                cr.set_source_rgb(133/255.0, 23/255.0, 51/255.0)
+                cr.set_source_rgb(*hex_to_rgba(C_BG_WAYBAR)[:3])
                 cr.fill()
 
         # 3D frame border: solid, crisp circular contour
         cr.arc(cx, cy, r, 0, 6.2831853)
-        cr.set_source_rgba(77/255.0, 10/255.0, 28/255.0, 0.95)
+        cr.set_source_rgba(*hex_to_rgba(C_BORDER_3D, 0.95))
         cr.set_line_width(2.2)
         cr.stroke()
 
@@ -521,7 +521,7 @@ class ProfileCardWindow(Gtk.Window):
         for s in range(steps + 1):
             dy = 3.6 * (s / steps)
             cr.arc(cx, cy + dy, r, 0, 6.2831853)
-            cr.set_source_rgb(77/255.0, 10/255.0, 28/255.0) # #4D0A1C
+            cr.set_source_rgb(*hex_to_rgba(C_BORDER_3D)[:3])
             cr.fill()
 
         cr.save()
@@ -529,7 +529,7 @@ class ProfileCardWindow(Gtk.Window):
         cr.clip()
 
         # Bottom half: White / cream
-        cr.set_source_rgb(255/255.0, 248/255.0, 250/255.0)
+        cr.set_source_rgb(*hex_to_rgba(C_TEXT_PRI)[:3])
         cr.paint()
 
         # Top half: Serena Red gradient
@@ -549,32 +549,32 @@ class ProfileCardWindow(Gtk.Window):
         cr.restore()
 
         # Middle belt: dark wine
-        cr.set_source_rgb(77/255.0, 10/255.0, 28/255.0)
+        cr.set_source_rgb(*hex_to_rgba(C_BORDER_3D)[:3])
         cr.rectangle(cx - r, cy - 2.5, r * 2, 5.0)
         cr.fill()
 
         # Center Pokeball Button
         cr.arc(cx, cy, 9.0, 0, 6.2831853)
-        cr.set_source_rgb(77/255.0, 10/255.0, 28/255.0)
+        cr.set_source_rgb(*hex_to_rgba(C_BORDER_3D)[:3])
         cr.fill()
 
         cr.arc(cx, cy, 6.5, 0, 6.2831853)
-        cr.set_source_rgb(1.0, 1.0, 1.0)
+        cr.set_source_rgb(*hex_to_rgba(C_TEXT_INV)[:3])
         cr.fill()
 
         cr.arc(cx, cy, 3.5, 0, 6.2831853)
-        cr.set_source_rgb(77/255.0, 10/255.0, 28/255.0)
+        cr.set_source_rgb(*hex_to_rgba(C_BORDER_3D)[:3])
         cr.fill()
 
         cr.arc(cx, cy, 2.5, 0, 6.2831853)
-        cr.set_source_rgb(1.0, 1.0, 1.0)
+        cr.set_source_rgb(*hex_to_rgba(C_TEXT_INV)[:3])
         cr.fill()
 
         cr.restore()
 
         # Outer ring: crisp solid #4D0A1C contour
         cr.arc(cx, cy, r, 0, 6.2831853)
-        cr.set_source_rgba(77/255.0, 10/255.0, 28/255.0, 0.95)
+        cr.set_source_rgba(*hex_to_rgba(C_BORDER_3D, 0.95))
         cr.set_line_width(2.0)
         cr.stroke()
 
@@ -583,7 +583,7 @@ class ProfileCardWindow(Gtk.Window):
 
     def update_uptime_tick(self):
         try:
-            self.lbl_uptime_val.set_markup(f"<span font_family='Inter, Sans' font='13.5' weight='800' color='#FFF0F5'>{get_uptime_str()}</span>")
+            self.lbl_uptime_val.set_markup(f"<span font_family='Inter, Sans' font='13.5' weight='800' color='{C_TEXT_PRI}'>{get_uptime_str()}</span>")
         except Exception:
             pass
         return True
@@ -622,7 +622,7 @@ class ProfileCardWindow(Gtk.Window):
 
         lbl_name = Gtk.Label()
         lbl_name.get_style_context().add_class("avatar-profile-name")
-        lbl_name.set_markup("<span font_family='Inter, Sans' font='14' weight='800' color='#851733'>Serena</span>")
+        lbl_name.set_markup(f"<span font_family='Inter, Sans' font='14' weight='800' color='{C_BG_WAYBAR}'>Serena</span>")
         lbl_name.set_halign(Gtk.Align.START)
 
         lbl_sub = Gtk.Label()
@@ -685,10 +685,11 @@ class ProfileCardWindow(Gtk.Window):
         # Box 1: Desktop / Hyprland (Waybar Sunset Gradient Style)
         b1 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
         b1.get_style_context().add_class("sysinfo-box-gradient")
+        b1.get_style_context().add_class("gradient-sunset")
 
         l1_title = Gtk.Label()
         l1_title.get_style_context().add_class("sysinfo-sub-label")
-        l1_title.set_markup("<span font_family='Inter, Sans' font='8' weight='700' color='#4D0A1C'>desktop</span>")
+        l1_title.set_markup(f"<span font_family='Inter, Sans' font='8' weight='700' color='{C_BORDER_3D}'>desktop</span>")
 
         l1_val = Gtk.Label()
         l1_val.get_style_context().add_class("sysinfo-main-label")
@@ -704,11 +705,11 @@ class ProfileCardWindow(Gtk.Window):
 
         l2_title = Gtk.Label()
         l2_title.get_style_context().add_class("sysinfo-sub-label")
-        l2_title.set_markup("<span font_family='Inter, Sans' font='8' weight='700' color='#E8C2D0'>uptime</span>")
+        l2_title.set_markup(f"<span font_family='Inter, Sans' font='8' weight='700' color='{C_TEXT_SEC}'>uptime</span>")
 
         self.lbl_uptime_val = Gtk.Label()
         self.lbl_uptime_val.get_style_context().add_class("sysinfo-main-label")
-        self.lbl_uptime_val.set_markup(f"<span font_family='Inter, Sans' font='13.5' weight='800' color='#FFF0F5'>{get_uptime_str()}</span>")
+        self.lbl_uptime_val.set_markup(f"<span font_family='Inter, Sans' font='13.5' weight='800' color='{C_TEXT_PRI}'>{get_uptime_str()}</span>")
 
         b2.pack_start(l2_title, False, False, 2)
         b2.pack_start(self.lbl_uptime_val, False, False, 2)
@@ -770,9 +771,9 @@ class Tactile3DTemperatureWidget(Gtk.DrawingArea):
         start_x = -ink_rect.x + 4.0
         start_y = -ink_rect.y + 4.0
 
-        dark_color = hex_to_rgba("#4D0A1C")[:3]
-        wine_color = hex_to_rgba("#851733")[:3]
-        white_color = (1.0, 1.0, 1.0)
+        dark_color = hex_to_rgba(C_BORDER_3D)[:3]
+        wine_color = hex_to_rgba(C_BG_WAYBAR)[:3]
+        white_color = hex_to_rgba(C_TEXT_INV)[:3]
 
         extrusion_h = 4.0
         white_w = 4.6
@@ -874,6 +875,7 @@ class WeatherForecastWindow(Gtk.Window):
         # Row 1: Hero Temperature 3D Tactile Sub-Card (Sunset Gradient)
         hero_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
         hero_box.get_style_context().add_class("tactile-hero-box")
+        hero_box.get_style_context().add_class("gradient-sunset")
 
         # Top Row inside Hero Box:
         # Left: "WEATHER" title
@@ -883,15 +885,15 @@ class WeatherForecastWindow(Gtk.Window):
 
         self.lbl_title = Gtk.Label()
         self.lbl_title.get_style_context().add_class("weather-hero-title")
-        self.lbl_title.set_markup(f"<span font='9.5' weight='800' color='#851733'>WEATHER</span>")
+        self.lbl_title.set_markup(f"<span font='9.5' weight='800' color='{C_BG_WAYBAR}'>WEATHER</span>")
         self.lbl_title.set_halign(Gtk.Align.START)
         self.lbl_title.set_valign(Gtk.Align.CENTER)
         top_row.pack_start(self.lbl_title, False, False, 0)
 
-        # Weather Icon in Top-Right (Clean icon, enlarged to 50px & shifted left with #851733)
+        # Weather Icon in Top-Right
         self.lbl_hero_icon = Gtk.Label()
         self.lbl_hero_icon.get_style_context().add_class("weather-hero-icon")
-        self.lbl_hero_icon.set_markup(f"<span font='50' color='#851733'>󰼱</span>")
+        self.lbl_hero_icon.set_markup(f"<span font='50' color='{C_BG_WAYBAR}'>󰼱</span>")
         self.lbl_hero_icon.set_halign(Gtk.Align.END)
         self.lbl_hero_icon.set_valign(Gtk.Align.CENTER)
         top_row.pack_end(self.lbl_hero_icon, False, False, 0)
@@ -918,15 +920,15 @@ class WeatherForecastWindow(Gtk.Window):
 
             lbl_day = Gtk.Label()
             lbl_day.get_style_context().add_class("forecast-col-day")
-            lbl_day.set_markup(f"<span font='9.5' weight='700' color='#851733'>---</span>")
+            lbl_day.set_markup(f"<span font='9.5' weight='700' color='{C_BG_WAYBAR}'>---</span>")
 
             lbl_ico = Gtk.Label()
             lbl_ico.get_style_context().add_class("forecast-col-icon")
-            lbl_ico.set_markup(f"<span font='16' color='#851733'>󰖙</span>")
+            lbl_ico.set_markup(f"<span font='16' color='{C_BG_WAYBAR}'>󰖙</span>")
 
             lbl_temp = Gtk.Label()
             lbl_temp.get_style_context().add_class("forecast-col-temp")
-            lbl_temp.set_markup(f"<span font='9' color='#851733'>--° --°</span>")
+            lbl_temp.set_markup(f"<span font='9' color='{C_BG_WAYBAR}'>--° --°</span>")
 
             col.pack_start(lbl_day, False, False, 0)
             col.pack_start(lbl_ico, False, False, 1)
@@ -1041,7 +1043,7 @@ class WeatherForecastWindow(Gtk.Window):
 
     def _update_weather_ui_direct(self, temp_c, icon, forecast_list=None, city=None, desc=None):
         if hasattr(self, 'lbl_hero_icon'):
-            self.lbl_hero_icon.set_markup(f"<span font='50' color='#851733'>{icon}</span>")
+            self.lbl_hero_icon.set_markup(f"<span font='50' color='{C_BG_WAYBAR}'>{icon}</span>")
         if hasattr(self, 'tactile_temp'):
             self.tactile_temp.set_temperature(temp_c, "°C")
 
@@ -1049,8 +1051,8 @@ class WeatherForecastWindow(Gtk.Window):
             for idx, item_data in enumerate(forecast_list):
                 if idx < len(self.forecast_items):
                     lbl_day, lbl_ico, lbl_temp = self.forecast_items[idx]
-                    lbl_day.set_markup(f"<span font='9.5' weight='700' color='#851733'>{item_data['day']}</span>")
-                    lbl_ico.set_markup(f"<span font='16' color='#851733'>{item_data['icon']}</span>")
+                    lbl_day.set_markup(f"<span font='9.5' weight='700' color='{C_BG_WAYBAR}'>{item_data['day']}</span>")
+                    lbl_ico.set_markup(f"<span font='16' color='{C_BG_WAYBAR}'>{item_data['icon']}</span>")
                     lbl_temp.set_markup(
                         f"<span font='9' weight='700' color='{C_BG_WAYBAR}'>{item_data['max']}°</span> "
                         f"<span font='8.5' color='{C_TEXT_MUT}'>{item_data['min']}°</span>"
@@ -1111,9 +1113,9 @@ class Tactile3DMonthWidget(Gtk.DrawingArea):
         start_x = (w - ink.width) / 2.0 - ink.x
         start_y = (h - ink.height) / 2.0 - ink.y - 1.0
 
-        dark_color = hex_to_rgba("#4D0A1C")[:3]
-        wine_color = hex_to_rgba("#851733")[:3]
-        white_color = (1.0, 1.0, 1.0)
+        dark_color = hex_to_rgba(C_BORDER_3D)[:3]
+        wine_color = hex_to_rgba(C_BG_WAYBAR)[:3]
+        white_color = hex_to_rgba(C_TEXT_INV)[:3]
 
         extrusion_h = 3.8
         white_w = 4.2
@@ -1221,7 +1223,7 @@ class DesktopCalendarWindow(Gtk.Window):
         title_event.connect("button-press-event", self.on_reset_today)
         lbl_title = Gtk.Label()
         lbl_title.get_style_context().add_class("calendar-hero-title")
-        lbl_title.set_markup("<span font='9.5' weight='800' color='#851733'>CALENDAR</span>")
+        lbl_title.set_markup(f"<span font='9.5' weight='800' color='{C_BG_WAYBAR}'>CALENDAR</span>")
         lbl_title.set_halign(Gtk.Align.START)
         lbl_title.set_valign(Gtk.Align.CENTER)
         title_event.add(lbl_title)
@@ -1229,7 +1231,7 @@ class DesktopCalendarWindow(Gtk.Window):
 
         self.lbl_year = Gtk.Label()
         self.lbl_year.get_style_context().add_class("calendar-hero-title")
-        self.lbl_year.set_markup(f"<span font='10' weight='800' color='#851733'>{self._view_year}</span>")
+        self.lbl_year.set_markup(f"<span font='10' weight='800' color='{C_BG_WAYBAR}'>{self._view_year}</span>")
         self.lbl_year.set_halign(Gtk.Align.END)
         self.lbl_year.set_valign(Gtk.Align.CENTER)
         top_row.pack_end(self.lbl_year, False, False, 0)
@@ -1243,7 +1245,7 @@ class DesktopCalendarWindow(Gtk.Window):
         btn_prev.set_visible_window(False)
         btn_prev.get_style_context().add_class("calendar-nav-btn")
         lbl_prev = Gtk.Label()
-        lbl_prev.set_markup("<span font='13' weight='900' color='#851733'>❮</span>")
+        lbl_prev.set_markup(f"<span font='13' weight='900' color='{C_BG_WAYBAR}'>❮</span>")
         btn_prev.add(lbl_prev)
         btn_prev.connect("button-press-event", self.on_prev_month)
 
@@ -1259,7 +1261,7 @@ class DesktopCalendarWindow(Gtk.Window):
         btn_next.set_visible_window(False)
         btn_next.get_style_context().add_class("calendar-nav-btn")
         lbl_next = Gtk.Label()
-        lbl_next.set_markup("<span font='13' weight='900' color='#851733'>❯</span>")
+        lbl_next.set_markup(f"<span font='13' weight='900' color='{C_BG_WAYBAR}'>❯</span>")
         btn_next.add(lbl_next)
         btn_next.connect("button-press-event", self.on_next_month)
 
@@ -1292,7 +1294,7 @@ class DesktopCalendarWindow(Gtk.Window):
     def update_month_title(self):
         month_str = MONTHS_EN[self._view_month - 1]
         self.tactile_month.set_month(month_str)
-        self.lbl_year.set_markup(f"<span font='10' weight='800' color='#851733'>{self._view_year}</span>")
+        self.lbl_year.set_markup(f"<span font='10' weight='800' color='{C_BG_WAYBAR}'>{self._view_year}</span>")
 
     def rebuild_calendar_grid(self):
         for child in self.cal_grid.get_children():

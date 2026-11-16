@@ -149,7 +149,6 @@ window#waybar {
 /* === MEDIA === */
 #custom-media,
 #mpris {
-    background-image: linear-gradient(to bottom, #A3183D 0%, #E53262 25%, #FF7299 50%, #EAA2C6 75%, #BE7AA8 100%);
     color: @border_waybar_3d;
     border-style: solid;
     border-color: @border_waybar_3d;
@@ -169,7 +168,6 @@ window#waybar {
 
 #custom-media:hover,
 #mpris:hover {
-    background-image: linear-gradient(to bottom, #B52048 0%, #F04070 25%, #FF80A6 50%, #F2B2D2 75%, #CA8BB4 100%);
     border-color: @border_waybar_3d_hover;
     box-shadow: none;
     color: @border_waybar_3d;
@@ -264,7 +262,7 @@ window#waybar {
 #custom-notification:hover,
 #custom-power:hover {
     background-color: rgba(255, 240, 245, 0.18);
-    color: #FFFFFF;
+    color: @text_inverse;
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
 }
 

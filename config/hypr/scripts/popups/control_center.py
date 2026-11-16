@@ -315,7 +315,9 @@ def draw_bow_mark(ctx, cx, cy, size=24.0, color=(0xDC/255.0, 0x1A/255.0, 0x36/25
 
     ctx.restore()
 
-def draw_bell_icon(ctx, cx, cy, font_size=20, color="#DC1A36"):
+def draw_bell_icon(ctx, cx, cy, font_size=20, color=None):
+    if color is None:
+        color = C_ACCENT
     l = PangoCairo.create_layout(ctx)
     l.set_font_description(Pango.FontDescription(f"JetBrains Mono Nerd Font Bold {font_size}"))
     l.set_markup(f"<span color='{color}'>󰂚</span>", -1)
@@ -323,7 +325,15 @@ def draw_bell_icon(ctx, cx, cy, font_size=20, color="#DC1A36"):
     ctx.move_to(cx - ink.x - ink.width / 2.0, cy - ink.y - ink.height / 2.0)
     PangoCairo.show_layout(ctx, l)
 
-def draw_pokeball_dual_slider(cr, cx, cy, R=64.0, thickness=12.0, vol_val=0.35, bri_val=0.60, knob_style="round_knob", icon_color="#DC1A36", accent_rgb=(0xDC/255.0, 0x1A/255.0, 0x36/255.0), dark_color=(0x20/255.0, 0x10/255.0, 0x11/255.0), pwr_bg=(0x20/255.0, 0x10/255.0, 0x11/255.0)):
+def draw_pokeball_dual_slider(cr, cx, cy, R=64.0, thickness=12.0, vol_val=0.35, bri_val=0.60, knob_style="round_knob", icon_color=None, accent_rgb=None, dark_color=None, pwr_bg=None):
+    if icon_color is None:
+        icon_color = C_ACCENT
+    if accent_rgb is None:
+        accent_rgb = hex_to_rgba(C_ACCENT)[:3]
+    if dark_color is None:
+        dark_color = hex_to_rgba(C_BG_WIN)[:3]
+    if pwr_bg is None:
+        pwr_bg = hex_to_rgba(C_BG_WIN)[:3]
     gap_ang = math.radians(16.0)
     
     # 1. TOP ARC: VOLUME (Sweeps Left -> Top -> Right)
@@ -471,8 +481,8 @@ def get_badge_info(app_name):
     elif "steam" in app_lower:
         return "#1b2838", "󰓓"
     elif "terminal" in app_lower or "alacritty" in app_lower or "kitty" in app_lower:
-        return "#DC1A36", "󰆍"
-    return "#DC1A36", "󰒓"
+        return C_ACCENT, "󰆍"
+    return C_ACCENT, "󰒓"
 
 # ==============================================================================
 # 3. POKÉDEX GTK APPLICATION WITH SLIDING ANIMATION & CLOSED STATE

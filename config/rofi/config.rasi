@@ -11,7 +11,7 @@
 window {
     height: 480px;
     border: 2px 2px 6px 2px;
-    border-color: #4D0A1C;
+    border-color: @border-waybar-3d;
     border-radius: 18px;
     background-color: @bg-tactile-cream;
     padding: 16px;
@@ -26,7 +26,7 @@ inputbar {
     children: [prompt, entry];
     background-color: rgba(255, 255, 255, 0.85);
     border: 1.5px 1.5px 3.5px 1.5px;
-    border-color: #4D0A1C;
+    border-color: @border-waybar-3d;
     border-radius: 11px;
     padding: 6px 12px;
 }
@@ -34,7 +34,7 @@ inputbar {
 prompt {
     background-color: @accent;
     padding: 6px 14px;
-    text-color: #FFFFFF;
+    text-color: @text-inverse;
     border-radius: 8px;
     margin: 0px 8px 0px 0px;
     font-weight: bold;
@@ -42,9 +42,9 @@ prompt {
 
 entry {
     padding: 6px;
-    text-color: #851733;
+    text-color: @bg-waybar;
     placeholder: "Search applications...";
-    placeholder-color: #A68595;
+    placeholder-color: @text-muted;
     font-weight: 600;
 }
 
@@ -61,7 +61,7 @@ listview {
 element {
     padding: 8px 12px;
     background-color: rgba(255, 255, 255, 0.50);
-    text-color: #851733;
+    text-color: @bg-waybar;
     border-radius: 10px;
     border: 1px 1px 2px 1px;
     border-color: transparent;
@@ -74,7 +74,7 @@ element alternate.normal,
 element alternate.urgent,
 element alternate.active {
     background-color: rgba(255, 255, 255, 0.50);
-    text-color: #851733;
+    text-color: @bg-waybar;
     border-color: transparent;
 }
 
@@ -93,22 +93,22 @@ element-text {
 }
 
 element selected.normal, element selected {
-    background-color: #FFFFFF;
+    background-color: @text-inverse;
     border: 1.5px 1.5px 3.5px 1.5px;
-    border-color: #4D0A1C;
+    border-color: @border-waybar-3d;
     text-color: @accent;
 }
 
 element selected.urgent {
-    background-color: #FFFFFF;
+    background-color: @text-inverse;
     border: 1.5px 1.5px 3.5px 1.5px;
     border-color: @accent;
     text-color: @accent;
 }
 
 element selected.active {
-    background-color: #FFFFFF;
+    background-color: @text-inverse;
     border: 1.5px 1.5px 3.5px 1.5px;
-    border-color: #4D0A1C;
+    border-color: @border-waybar-3d;
     text-color: @accent;
 }

@@ -24,6 +24,7 @@ def main():
 
     raw_colors = data.get("colors", {})
     gradient_str = data.get("gradient") or data.get("gradients", {}).get("sunset", "linear-gradient(to bottom, #A3183D 0%, #E53262 25%, #FF7299 50%, #EAA2C6 75%, #BE7AA8 100%)")
+    gradient_hover_str = data.get("gradient_hover") or data.get("gradients", {}).get("sunset_hover", "linear-gradient(to bottom, #B52048 0%, #F04070 25%, #FF80A6 50%, #F2B2D2 75%, #CA8BB4 100%)")
     typo = data.get("typography", {})
     geo = data.get("geometry", {})
     hypr_base = os.path.join(root_dir, "config")
@@ -156,7 +157,7 @@ def main():
     }
 
     grad_sunset = gradient_str
-    grad_sunset_hover = gradient_str
+    grad_sunset_hover = gradient_hover_str
 
     # 1. Waybar & GTK CSS palette
     waybar_palette = os.path.join(hypr_base, "waybar", "palette.css")
@@ -205,11 +206,15 @@ def main():
 @define-color border_tactile_white_bright {colors.get('border_tactile_white_bright', 'rgba(255, 255, 255, 0.90)')};
 
 /* === GRADIENTS === */
-.gradient-sunset {{
+.gradient-sunset,
+#custom-media,
+#mpris {{
     background-image: {grad_sunset};
 }}
 .gradient-sunset:hover,
-.gradient-sunset-hover {{
+.gradient-sunset-hover,
+#custom-media:hover,
+#mpris:hover {{
     background-image: {grad_sunset_hover};
 }}
 """
@@ -390,6 +395,9 @@ return {{
     screen-cyan:        {colors.get('screen_cyan', '#87F0FF')};
     bg-tactile-cream:   {colors.get('bg_tactile_cream', 'rgba(255, 240, 245, 0.96)')};
     pokepuff-pink:      {colors.get('pokepuff_pink', '#FF5C8A')};
+    bg-waybar:          {colors.get('bg_waybar', '#851733')};
+    border-waybar-3d:   {colors.get('border_waybar_3d', '#4D0A1C')};
+    shadow-extrusion:   {colors.get('shadow_extrusion', '#4D0A1C')};
 }}
 """
     with open(rofi_palette, "w", encoding="utf-8") as f:

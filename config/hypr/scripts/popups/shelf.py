@@ -418,7 +418,7 @@ class ShelfWindow(Gtk.Window):
         # Tab: Clipboard
         self.btn_tab_clip = Gtk.Button()
         self.lbl_tab_clip = Gtk.Label()
-        self.lbl_tab_clip.set_markup(f"<span font='12' color='#FFFFFF'>󰅌</span>   <span color='#FFFFFF'><b>Clipboard</b></span>")
+        self.lbl_tab_clip.set_markup(f"<span font='12' color='{C_TEXT_INV}'>󰅌</span>   <span color='{C_TEXT_INV}'><b>Clipboard</b></span>")
         self.btn_tab_clip.add(self.lbl_tab_clip)
         self.btn_tab_clip.get_style_context().add_class("tab-btn")
         self.btn_tab_clip.connect("clicked", lambda w: self.switch_tab("clip"))
@@ -1686,7 +1686,7 @@ class ShelfWindow(Gtk.Window):
         if tab_name == "clip":
             self.btn_tab_clip.get_style_context().add_class("active")
             self.btn_tab_shelf.get_style_context().remove_class("active")
-            self.lbl_tab_clip.set_markup(f"<span font='12' color='#FFFFFF'>󰅌</span>   <span color='#FFFFFF'><b>Clipboard</b></span>")
+            self.lbl_tab_clip.set_markup(f"<span font='12' color='{C_TEXT_INV}'>󰅌</span>   <span color='{C_TEXT_INV}'><b>Clipboard</b></span>")
             self.update_shelf_badge()
             self.btn_stash_clip.hide()
             self.stack.set_visible_child_name("clip")
@@ -1708,7 +1708,7 @@ class ShelfWindow(Gtk.Window):
             except Exception:
                 count = 0
         if self.active_tab == "shelf":
-            txt = f"<span font='12' color='#FFFFFF'>󰏖</span>   <span color='#FFFFFF'><b>Shelf ({count})</b></span>" if count > 0 else f"<span font='12' color='#FFFFFF'>󰏖</span>   <span color='#FFFFFF'><b>Shelf</b></span>"
+            txt = f"<span font='12' color='{C_TEXT_INV}'>󰏖</span>   <span color='{C_TEXT_INV}'><b>Shelf ({count})</b></span>" if count > 0 else f"<span font='12' color='{C_TEXT_INV}'>󰏖</span>   <span color='{C_TEXT_INV}'><b>Shelf</b></span>"
         else:
             txt = f"<span font='12' color='{C_ACCENT}'>󰏖</span>   <span color='{C_RUBY_PRI}'>Shelf ({count})</span>" if count > 0 else f"<span font='12' color='{C_ACCENT}'>󰏖</span>   <span color='{C_RUBY_PRI}'>Shelf</span>"
         self.lbl_tab_shelf.set_markup(txt)

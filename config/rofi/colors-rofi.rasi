@@ -29,4 +29,7 @@
     screen-cyan:        #87F0FF;
     bg-tactile-cream:   rgba(255, 240, 245, 0.96);
     pokepuff-pink:      #FF5C8A;
+    bg-waybar:          #851733;
+    border-waybar-3d:   #4D0A1C;
+    shadow-extrusion:   #4D0A1C;
 }

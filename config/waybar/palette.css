@@ -43,10 +43,14 @@
 @define-color border_tactile_white_bright rgba(255, 255, 255, 0.90);
 
 /* === GRADIENTS === */
-.gradient-sunset {
+.gradient-sunset,
+#custom-media,
+#mpris {
     background-image: linear-gradient(to bottom, #A3183D 0%, #E53262 25%, #FF7299 50%, #EAA2C6 75%, #BE7AA8 100%);
 }
 .gradient-sunset:hover,
-.gradient-sunset-hover {
-    background-image: linear-gradient(to bottom, #A3183D 0%, #E53262 25%, #FF7299 50%, #EAA2C6 75%, #BE7AA8 100%);
+.gradient-sunset-hover,
+#custom-media:hover,
+#mpris:hover {
+    background-image: linear-gradient(to bottom, #B52048 0%, #F04070 25%, #FF80A6 50%, #F2B2D2 75%, #CA8BB4 100%);
 }
