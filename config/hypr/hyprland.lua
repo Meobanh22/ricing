@@ -201,6 +201,21 @@ hl.window_rule({
 })
 
 hl.window_rule({
+    name = "music-vis-rule",
+    match = { class = "^(music-vis|cava)$" },
+    tile = true,
+})
+
+hl.window_rule({
+    name = "music-window",
+    match = { class = "^(music-vis|kitty)$", title = "^Serena Music( Focus)?$" },
+    no_blur = true,
+    no_shadow = true,
+    border_size = 0,
+    opacity = "1.0 override 1.0 override 1.0 override",
+})
+
+hl.window_rule({
     name = "settings-rule",
     match = { class = "^(settings)$" },
     float = true,
@@ -312,10 +327,12 @@ hl.bind("CTRL + SHIFT + ESCAPE",        hl.dsp.exec_cmd("kitty --class task-mana
 hl.bind(mainMod .. " + L",         hl.dsp.exec_cmd("hyprlock"))
 hl.bind("Print",                   hl.dsp.exec_cmd("~/.config/hypr/scripts/system/screenshot.sh area"))
 hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("~/.config/hypr/scripts/system/screenshot.sh area"))
+hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("~/.config/hypr/scripts/system/record_screen.sh area media"))
+hl.bind(mainMod .. " + ALT + R",   hl.dsp.exec_cmd("~/.config/hypr/scripts/system/record_screen.sh full media"))
 hl.bind(mainMod .. " + W",         hl.dsp.exec_cmd("python3 ~/.config/hypr/scripts/system/wallpaper_switcher.py next"))
 
--- Input Method Toggle
-hl.bind(mainMod .. " + SHIFT + SPACE", hl.dsp.exec_cmd("~/.config/hypr/scripts/system/toggle_vietnamese.sh"))
+-- Input Method Toggle (Ngó Sen)
+hl.bind("CTRL + SHIFT + SPACE", hl.dsp.exec_cmd("~/.config/hypr/scripts/system/toggle_vietnamese.sh"))
 
 -- Multimedia keys (Volume & Brightness - capped at 100%)
 hl.bind("XF86AudioRaiseVolume",  hl.dsp.exec_cmd("wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 5%+"),   { locked = true, repeating = true })
@@ -343,20 +360,3 @@ end
 -- Mouse window dragging and resizing
 hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(),   { mouse = true })
 hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
-hl.window_rule({
-    name = "music-vis-rule",
-    match = { class = "^(music-vis|cava)$" },
-    tile = true,
-})
-
-hl.window_rule({
-    name = "music-window",
-    match = { class = "^(music-vis|kitty)$", title = "^Serena Music( Focus)?$" },
-    no_blur = true,
-    no_shadow = true,
-    border_size = 0,
-    opacity = "1.0 override 1.0 override 1.0 override",
-})
-
-hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("~/.config/hypr/scripts/system/record_screen.sh area media"))
-hl.bind(mainMod .. " + ALT + R",   hl.dsp.exec_cmd("~/.config/hypr/scripts/system/record_screen.sh full media"))

@@ -10,12 +10,6 @@ EnumerateWithTriggerKeys=True
 EnumerateSkipFirst=False
 
 [Hotkey/TriggerKeys]
-0=Control+Shift
-1=Shift+Control
-2=Control+Shift_L
-3=Shift+Control_L
-4=Control+Shift_R
-5=Shift+Control_R
 
 [Hotkey/EnumerateForwardKeys]
 
