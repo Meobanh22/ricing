@@ -18,5 +18,8 @@ Thumbs.db
 experiments/
 archive/
 .vscode/
+backups/
+*.bak
+dev_tools/**/backups/
 
 

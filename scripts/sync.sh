@@ -300,7 +300,7 @@ sync_pull() {
         for item in hyprland.lua palette.lua palette.conf hyprlock.conf hypridle.conf serena_lock_avatar.png; do
             [ -f "$HOME/.config/hypr/$item" ] && cp -f "$HOME/.config/hypr/$item" "$DOTFILES_DIR/hypr/"
         done
-        for dir in styles scripts assets; do
+        for dir in styles scripts; do
             [ -d "$HOME/.config/hypr/$dir" ] && cp -rf "$HOME/.config/hypr/$dir" "$DOTFILES_DIR/hypr/"
         done
         if [ -d "$HOME/.config/hypr/theme" ]; then
@@ -413,7 +413,7 @@ sync_pull() {
 # === DIFF: COMPARE REPO AND SYSTEM ===
 sync_diff() {
     echo -e "${YELLOW}🔍 Comparing differences between Repo and ~/.config...${NC}\n"
-    diff -rq -x 'UserConfigs' -x 'UserScripts' -x 'animations' -x 'configs' -x 'Monitor_Profiles' -x 'wallust' -x 'wallpaper_effects' -x 'v2.3.20' -x 'hyprland.conf' -x '__pycache__' "$DOTFILES_DIR/hypr" "$HOME/.config/hypr" 2>/dev/null || true
+    diff -rq -x 'UserConfigs' -x 'UserScripts' -x 'animations' -x 'configs' -x 'Monitor_Profiles' -x 'wallust' -x 'wallpaper_effects' -x 'v2.3.20' -x 'hyprland.conf' -x '__pycache__' -x 'theme' -x 'assets' "$DOTFILES_DIR/hypr" "$HOME/.config/hypr" 2>/dev/null || true
     diff -rq "$DOTFILES_DIR/waybar" "$HOME/.config/waybar" 2>/dev/null || true
     diff -rq "$DOTFILES_DIR/rofi" "$HOME/.config/rofi" 2>/dev/null || true
     diff -rq "$DOTFILES_DIR/kitty" "$HOME/.config/kitty" 2>/dev/null || true
@@ -427,8 +427,8 @@ sync_diff() {
         diff -u <(sed "s|\\\$HOME|$HOME|g" "$DOTFILES_DIR/gtk-3.0/bookmarks") "$HOME/.config/gtk-3.0/bookmarks" || true
     fi
     diff -rq "$DOTFILES_DIR/gtk-4.0" "$HOME/.config/gtk-4.0" 2>/dev/null || true
-    diff -rq "$DOTFILES_DIR/Thunar" "$HOME/.config/Thunar" 2>/dev/null || true
-    diff -rq "$DOTFILES_DIR/fcitx5" "$HOME/.config/fcitx5" 2>/dev/null || true
+    diff -rq -x 'accels.scm' "$DOTFILES_DIR/Thunar" "$HOME/.config/Thunar" 2>/dev/null || true
+    diff -rq -x 'cached_layouts' -x '*.bak' "$DOTFILES_DIR/fcitx5" "$HOME/.config/fcitx5" 2>/dev/null || true
     diff -rq "$DOTFILES_DIR/swappy" "$HOME/.config/swappy" 2>/dev/null || true
     diff -rq "$DOTFILES_DIR/theme" "$HOME/.config/hypr/theme" 2>/dev/null || true
     echo -e "\n${GREEN}✔ Diff scan completed!${NC}"
