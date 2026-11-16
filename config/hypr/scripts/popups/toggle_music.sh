@@ -1,30 +1,17 @@
 #!/usr/bin/env bash
-# toggle_music.sh — Toggle music visualizer window.
+# toggle_music.sh — Toggle Terminal Music Visualizer & Synced Lyrics.
 
-SCRIPT_PATH="$HOME/.config/hypr/scripts/popups/music_visualizer.py"
-if [ ! -f "$SCRIPT_PATH" ]; then
-    SCRIPT_PATH="$(dirname "$0")/music_visualizer.py"
-fi
-PID_FILE="/tmp/music_visualizer.pid"
-
-# 1. Quick check via PID file
-if [ -f "$PID_FILE" ]; then
-    PID=$(cat "$PID_FILE" 2>/dev/null)
-    if [ -n "$PID" ] && kill -0 "$PID" 2>/dev/null; then
-        kill -15 "$PID" 2>/dev/null
-        rm -f "$PID_FILE"
-        exit 0
-    fi
+# 1. If running inside interactive terminal, run directly in-place
+if [ -t 0 ] && [ -t 1 ]; then
+    exec music "$@"
 fi
 
-# Fallback: if PID file is stale, use pkill
-if pgrep -f "music_visualizer.py" > /dev/null 2>&1; then
-    pkill -f "music_visualizer.py" 2>/dev/null || true
-    rm -f "$PID_FILE"
+# 2. If running from GUI shortcut (Super+M) or Waybar:
+# Toggle Kitty terminal running music with class 'music-vis'
+if pgrep -f "kitty --class music-vis" >/dev/null 2>&1; then
+    pkill -f "kitty --class music-vis" 2>/dev/null || true
     exit 0
 fi
 
-# 2. Launch in background
-rm -f "$PID_FILE"
-setsid python3 "$SCRIPT_PATH" </dev/null >/dev/null 2>&1 &
+kitty --class music-vis --override window_padding_width=0 -T 'Serena Music' music &
 exit 0

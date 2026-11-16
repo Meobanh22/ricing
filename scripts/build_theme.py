@@ -528,6 +528,67 @@ theme[upload_end]="{colors['accent']}"
         f.write(btop_content)
     print("  ✔ Generated btop/themes/obsidian-wine.theme")
 
+    # 5b. Cava config (Terminal Music Visualizer)
+    cava_dir = os.path.join(hypr_base, "cava")
+    os.makedirs(cava_dir, exist_ok=True)
+    cava_path = os.path.join(cava_dir, "config")
+    cava_content = f"""## Configuration file for CAVA — Serena Wine Sunset Theme
+
+[general]
+live-config = 1
+framerate = 60
+autosens = 1
+sensitivity = 100
+bars = 0
+bar_width = 2
+bar_spacing = 1
+center_align = 1
+max_height = 100
+lower_cutoff_freq = 50
+higher_cutoff_freq = 12000
+sleep_timer = 0
+
+[input]
+method = pipewire
+source = auto
+
+[output]
+method = noncurses
+channels = mono
+orientation = bottom
+
+[color]
+background = default
+gradient = 1
+gradient_color_1 = '{dark_ruby}'
+gradient_color_2 = '{wine_red}'
+gradient_color_3 = '#A3183D'
+gradient_color_4 = '{vivid_red}'
+gradient_color_5 = '#E53262'
+gradient_color_6 = '{vivid_pink}'
+gradient_color_7 = '#FF7299'
+gradient_color_8 = '{sky_blue}'
+
+[smoothing]
+monstercat = 0
+waves = 0
+noise_reduction = 65
+
+[eq]
+1 = 1.0
+2 = 1.1
+3 = 1.3
+4 = 1.6
+5 = 2.0
+"""
+    with open(cava_path, "w", encoding="utf-8") as f:
+        f.write(cava_content)
+    user_cava_dir = os.path.expanduser("~/.config/cava")
+    os.makedirs(user_cava_dir, exist_ok=True)
+    with open(os.path.join(user_cava_dir, "config"), "w", encoding="utf-8") as f:
+        f.write(cava_content)
+    print("  ✔ Generated cava/config")
+
     # 6. Fastfetch config.jsonc
     fastfetch_dir = os.path.join(root_dir, "fastfetch")
     if not os.path.exists(fastfetch_dir):
@@ -672,6 +733,8 @@ initial_window_width 860
 initial_window_height 540
 background_opacity 0.94
 dynamic_background_opacity yes
+allow_remote_control password
+remote_control_password "" music_control.py
 confirm_os_window_close 0
 enable_audio_bell no
 linux_display_server auto

@@ -61,6 +61,7 @@ sync_push() {
     mkdir -p "$HOME/.config/wlogout"
     mkdir -p "$HOME/.config/swaync"
     mkdir -p "$HOME/.config/btop/themes"
+    mkdir -p "$HOME/.config/cava"
     mkdir -p "$HOME/.config/fastfetch"
     mkdir -p "$HOME/.config/gtk-3.0"
     mkdir -p "$HOME/.config/gtk-4.0"
@@ -115,6 +116,13 @@ sync_push() {
     # Btop
     cp -rf "$DOTFILES_DIR/btop/"* "$HOME/.config/btop/"
     echo -e "  ${GREEN}✔ Btop (btop.conf, obsidian-wine.theme)${NC}"
+
+    # Cava
+    if [ -d "$DOTFILES_DIR/cava" ]; then
+        mkdir -p "$HOME/.config/cava"
+        cp -rf "$DOTFILES_DIR/cava/"* "$HOME/.config/cava/"
+        echo -e "  ${GREEN}✔ Cava Audio Visualizer (config)${NC}"
+    fi
 
     # Fastfetch
     if [ -d "$DOTFILES_DIR/fastfetch" ]; then
@@ -272,13 +280,6 @@ sync_push() {
             echo -e "  ${GREEN}✔ Desktop widgets started!${NC}"
         fi
 
-        if pgrep -f "music_visualizer.py" &>/dev/null; then
-            pkill -f "music_visualizer.py" 2>/dev/null || true
-            sleep 0.2
-            setsid -f python3 "$HOME/.config/hypr/scripts/popups/music_visualizer.py" >/dev/null 2>&1
-            echo -e "  ${GREEN}✔ Music visualizer reloaded!${NC}"
-        fi
-
         hyprctl setcursor sylveon-custom 24 &>/dev/null || true
 
         gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' 2>/dev/null || true
@@ -363,6 +364,13 @@ sync_pull() {
         echo -e "  ${GREEN}✔ Pulled ~/.config/btop/ -> repo${NC}"
     fi
 
+    # Cava
+    if [ -d "$HOME/.config/cava" ]; then
+        mkdir -p "$DOTFILES_DIR/cava"
+        cp -rf "$HOME/.config/cava/"* "$DOTFILES_DIR/cava/"
+        echo -e "  ${GREEN}✔ Pulled ~/.config/cava/ -> repo${NC}"
+    fi
+
     # Fastfetch
     if [ -d "$HOME/.config/fastfetch" ]; then
         mkdir -p "$DOTFILES_DIR/fastfetch"
@@ -412,6 +420,7 @@ sync_diff() {
     diff -rq "$DOTFILES_DIR/wlogout" "$HOME/.config/wlogout" 2>/dev/null || true
     diff -rq "$DOTFILES_DIR/swaync" "$HOME/.config/swaync" 2>/dev/null || true
     diff -rq "$DOTFILES_DIR/btop" "$HOME/.config/btop" 2>/dev/null || true
+    diff -rq "$DOTFILES_DIR/cava" "$HOME/.config/cava" 2>/dev/null || true
     diff -rq "$DOTFILES_DIR/fastfetch" "$HOME/.config/fastfetch" 2>/dev/null || true
     diff -rq -x 'bookmarks' "$DOTFILES_DIR/gtk-3.0" "$HOME/.config/gtk-3.0" 2>/dev/null || true
     if [ -f "$DOTFILES_DIR/gtk-3.0/bookmarks" ] && [ -f "$HOME/.config/gtk-3.0/bookmarks" ]; then
