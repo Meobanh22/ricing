@@ -46,8 +46,7 @@ from ui_core import (
     draw_rounded_rect, clip_device_bounds, draw_anime_grooves,
     draw_bow_mark, draw_bell_icon,
     draw_curved_kerned, draw_curved_kerned_cached,
-    clear_surface,
-    draw_pokeball_dual_slider, format_relative_time, get_badge_info
+    clear_surface
 )
 
 try:
@@ -190,7 +189,169 @@ def create_bottom_red_casing_path(cr, x_left, x_right, y_dark_bot, H_canvas, cx,
     cr.close_path()
 
 # ==============================================================================
-# 2. POKÉDEX GTK APPLICATION WITH SLIDING ANIMATION & CLOSED STATE
+# 2. POKÉBALL DUAL SLIDER & NOTIFICATION HELPERS (Control Center Specific)
+# ==============================================================================
+def draw_pokeball_dual_slider(cr, cx, cy, R=64.0, thickness=12.0, vol_val=0.35, bri_val=0.60, knob_style="round_knob", icon_color=None, accent_rgb=None, dark_color=None, pwr_bg=None):
+    if icon_color is None:
+        icon_color = C_ACCENT
+    if accent_rgb is None:
+        accent_rgb = hex_to_rgba(C_ACCENT)[:3]
+    if dark_color is None:
+        dark_color = hex_to_rgba(C_BG_WIN)[:3]
+    if pwr_bg is None:
+        pwr_bg = hex_to_rgba(C_BG_WIN)[:3]
+    gap_ang = math.radians(16.0)
+    
+    # 1. TOP ARC: VOLUME (Sweeps Left -> Top -> Right)
+    ang_vol_start = math.pi + gap_ang
+    ang_vol_end = 2 * math.pi - gap_ang
+    ang_vol_span = ang_vol_end - ang_vol_start
+    ang_vol_thumb = ang_vol_start + vol_val * ang_vol_span
+
+    cr.save()
+    cr.set_line_width(thickness)
+    cr.set_line_cap(cairo.LINE_CAP_ROUND)
+    cr.new_sub_path()
+    cr.arc(cx, cy, R, ang_vol_start, ang_vol_end)
+    cr.set_source_rgb(*dark_color)
+    cr.stroke()
+
+    if vol_val > 0.01:
+        cr.new_sub_path()
+        cr.arc(cx, cy, R, ang_vol_start, ang_vol_thumb)
+        cr.set_source_rgb(*accent_rgb)
+        cr.stroke()
+
+    if knob_style == "round_knob":
+        tx = cx + R * math.cos(ang_vol_thumb)
+        ty = cy + R * math.sin(ang_vol_thumb)
+        cr.new_path()
+        cr.arc(tx, ty, thickness * 0.62, 0, 2 * math.pi)
+        cr.set_source_rgb(1.0, 1.0, 1.0); cr.fill_preserve()
+        cr.set_source_rgb(*accent_rgb); cr.set_line_width(2.0); cr.stroke()
+    cr.restore()
+
+    # 2. BOTTOM ARC: BRIGHTNESS (Sweeps Left -> Bottom -> Right)
+    ang_bri_start = math.pi - gap_ang
+    ang_bri_end = gap_ang
+    ang_bri_span = (math.pi - 2 * gap_ang)
+    ang_bri_thumb = ang_bri_start - bri_val * ang_bri_span
+
+    cr.save()
+    cr.set_line_width(thickness)
+    cr.set_line_cap(cairo.LINE_CAP_ROUND)
+    cr.new_sub_path()
+    cr.arc_negative(cx, cy, R, ang_bri_start, ang_bri_end)
+    cr.set_source_rgb(*dark_color)
+    cr.stroke()
+
+    if bri_val > 0.01:
+        cr.new_sub_path()
+        cr.arc_negative(cx, cy, R, ang_bri_start, ang_bri_thumb)
+        cr.set_source_rgb(*accent_rgb)
+        cr.stroke()
+
+    if knob_style == "round_knob":
+        bx = cx + R * math.cos(ang_bri_thumb)
+        by = cy + R * math.sin(ang_bri_thumb)
+        cr.new_path()
+        cr.arc(bx, by, thickness * 0.62, 0, 2 * math.pi)
+        cr.set_source_rgb(1.0, 1.0, 1.0); cr.fill_preserve()
+        cr.set_source_rgb(*accent_rgb); cr.set_line_width(2.0); cr.stroke()
+    cr.restore()
+
+    # 3. HORIZONTAL EQUATORIAL SEAMS
+    r_out = R + thickness / 2.0 + 3.0
+    r_btn_outer = 22.0
+
+    cr.save()
+    cr.set_line_width(2.8)
+    cr.set_source_rgb(*dark_color)
+    cr.new_sub_path()
+    cr.move_to(cx - r_out, cy); cr.line_to(cx - r_btn_outer, cy); cr.stroke()
+    cr.new_sub_path()
+    cr.move_to(cx + r_btn_outer, cy); cr.line_to(cx + r_out, cy); cr.stroke()
+    cr.restore()
+
+    # 4. CENTER POWER BUTTON
+    cr.save()
+    cr.new_sub_path()
+    cr.arc(cx, cy, r_btn_outer, 0, 2 * math.pi)
+    cr.set_source_rgb(*pwr_bg); cr.fill_preserve()
+    cr.set_source_rgba(0x3A/255.0, 0x22/255.0, 0x2A/255.0, 0.9); cr.set_line_width(1.5); cr.stroke()
+
+    r_pwr = 7.0
+    ang_gap = math.radians(35.0)
+    ang_s = -math.pi / 2.0 + ang_gap
+    ang_e = 1.5 * math.pi - ang_gap
+
+    cr.set_line_width(2.0)
+    cr.set_line_cap(cairo.LINE_CAP_ROUND)
+    cr.new_sub_path()
+    cr.arc(cx, cy, r_pwr, ang_s, ang_e)
+    cr.set_source_rgb(*accent_rgb); cr.stroke()
+
+    cr.new_sub_path()
+    cr.move_to(cx, cy - r_pwr - 2.5)
+    cr.line_to(cx, cy - 1.0)
+    cr.stroke()
+    cr.restore()
+
+    # 5. ICONS
+    vx = cx - 38.0
+    vy = cy - 23.0
+    bx = cx - 38.0
+    by = cy + 23.0
+
+    cr.save()
+    l_v = PangoCairo.create_layout(cr)
+    l_v.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 13.5"))
+    l_v.set_markup(f"<span color='{icon_color}'>󰕾</span>", -1)
+    ink_v, log_v = l_v.get_pixel_extents()
+    cr.move_to(vx - ink_v.x - ink_v.width / 2.0, vy - ink_v.y - ink_v.height / 2.0)
+    PangoCairo.show_layout(cr, l_v)
+
+    l_b = PangoCairo.create_layout(cr)
+    l_b.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 13.5"))
+    l_b.set_markup(f"<span color='{icon_color}'>󰃠</span>", -1)
+    ink_b, log_b = l_b.get_pixel_extents()
+    cr.move_to(bx - ink_b.x - ink_b.width / 2.0, by - ink_b.y - ink_b.height / 2.0)
+    PangoCairo.show_layout(cr, l_b)
+    cr.restore()
+
+def format_relative_time(timestamp):
+    if not timestamp:
+        return "just now"
+    now = time.time()
+    diff = max(0, int(now - timestamp))
+    if diff < 60:
+        return "just now"
+    elif diff < 3600:
+        mins = diff // 60
+        return f"{mins}m ago"
+    elif diff < 86400:
+        hours = diff // 3600
+        return f"{hours}h ago"
+    else:
+        days = diff // 86400
+        return f"{days}d ago"
+
+def get_badge_info(app_name):
+    app_lower = app_name.lower()
+    if "discord" in app_lower:
+        return "#5865F2", "󰙯"
+    elif "firefox" in app_lower or "browser" in app_lower:
+        return "#FF7139", "󰈹"
+    elif "spotify" in app_lower or "music" in app_lower:
+        return "#1ED760", "󰓇"
+    elif "steam" in app_lower:
+        return "#1b2838", "󰓓"
+    elif "terminal" in app_lower or "alacritty" in app_lower or "kitty" in app_lower:
+        return C_ACCENT, "󰆍"
+    return C_ACCENT, "󰒓"
+
+# ==============================================================================
+# 3. POKÉDEX GTK APPLICATION WITH SLIDING ANIMATION & CLOSED STATE
 # ==============================================================================
 class PokedexControlCenter(Gtk.Window):
     def __init__(self):

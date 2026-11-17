@@ -240,7 +240,7 @@ def sync_waybar_config(hypr_base: str, user_config: str, colors: dict):
     "exec": "python3 ~/.config/hypr/scripts/system/get_media.py",
     "interval": 1,
     "tooltip": false,
-    "on-click": "bash ~/.config/hypr/scripts/popups/toggle_music.sh",
+    "on-click": "bash ~/.config/hypr/scripts/terminal/toggle_music.sh",
     "on-click-right": "playerctl play-pause",
     "on-click-middle": "playerctl next",
     "escape": true

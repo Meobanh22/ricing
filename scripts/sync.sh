@@ -50,11 +50,11 @@ sync_push() {
 
     # Create destination directories
     mkdir -p "$HOME/.config/hypr/scripts/popups"
+    mkdir -p "$HOME/.config/hypr/scripts/terminal"
     mkdir -p "$HOME/.config/hypr/scripts/widgets"
     mkdir -p "$HOME/.config/hypr/scripts/services"
     mkdir -p "$HOME/.config/hypr/scripts/system"
     mkdir -p "$HOME/.config/hypr/scripts/ui_core"
-    mkdir -p "$HOME/.config/hypr/scripts/ui_core/components"
     mkdir -p "$HOME/.config/hypr/styles"
     mkdir -p "$HOME/.config/hypr/assets"
     mkdir -p "$HOME/.config/waybar"
@@ -76,14 +76,16 @@ sync_push() {
     # Synchronize tracked configurations
     echo -e "${YELLOW}📦 [1/4] Synchronizing configuration files...${NC}"
 
-    # Clean up obsolete flat scripts and dashboard from previous layout
+    # Clean up obsolete flat scripts and relocated services
     rm -f "$HOME/.config/hypr/scripts/"*.py "$HOME/.config/hypr/scripts/"*.sh "$HOME/.config/hypr/scripts/"*.bak 2>/dev/null || true
+    rm -f "$HOME/.config/hypr/scripts/services/music"*.py 2>/dev/null || true
+    rm -rf "$HOME/.config/hypr/scripts/ui_core/components" 2>/dev/null || true
     rm -f "$HOME/.config/hypr/styles/dashboard.css" 2>/dev/null || true
 
     # Hyprland (Native hyprland.lua engine, remove legacy hyprland.conf)
     cp -rf "$DOTFILES_DIR/hypr/"* "$HOME/.config/hypr/"
     rm -f "$HOME/.config/hypr/hyprland.conf"
-    chmod +x "$HOME/.config/hypr/scripts/popups/"* "$HOME/.config/hypr/scripts/widgets/"* "$HOME/.config/hypr/scripts/services/"* "$HOME/.config/hypr/scripts/system/"* "$HOME/.config/hypr/scripts/ui_core/"* 2>/dev/null || true
+    chmod +x "$HOME/.config/hypr/scripts/popups/"* "$HOME/.config/hypr/scripts/terminal/"* "$HOME/.config/hypr/scripts/widgets/"* "$HOME/.config/hypr/scripts/services/"* "$HOME/.config/hypr/scripts/system/"* "$HOME/.config/hypr/scripts/ui_core/"* 2>/dev/null || true
     echo -e "  ${GREEN}✔ Hyprland (hyprland.lua, hyprlock.conf, scripts/)${NC}"
 
     # Waybar

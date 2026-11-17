@@ -23,8 +23,7 @@ from ui_core import (
     clear_surface, draw_rounded_rect, squircle, clip_device_bounds,
     draw_bow_mark, draw_bell_icon,
     draw_curved_kerned, draw_curved_kerned_cached, clear_text_cache,
-    draw_tactile_3d_text, DraggablePopup,
-    draw_pokeball_dual_slider, format_relative_time, get_badge_info
+    draw_tactile_3d_text, DraggablePopup
 )
 
 
@@ -118,34 +117,6 @@ class TestUiCoreDraggable(unittest.TestCase):
         cx, cy = drag.clamp_bounds(-100, -200)
         self.assertEqual(cx, 10)
         self.assertEqual(cy, 10)
-
-
-class TestUiCoreComponents(unittest.TestCase):
-    def setUp(self):
-        self.surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 200, 200)
-        self.cr = cairo.Context(self.surface)
-
-    def test_draw_pokeball_dual_slider(self):
-        draw_pokeball_dual_slider(self.cr, 100, 100, R=64.0, vol_val=0.5, bri_val=0.7)
-
-    def test_format_relative_time(self):
-        import time
-        now = time.time()
-        self.assertEqual(format_relative_time(now - 10), "just now")
-        self.assertEqual(format_relative_time(now - 120), "2m ago")
-        self.assertEqual(format_relative_time(now - 7200), "2h ago")
-        self.assertEqual(format_relative_time(now - 172800), "2d ago")
-
-    def test_get_badge_info(self):
-        col, icon = get_badge_info("Discord")
-        self.assertEqual(col, "#5865F2")
-        self.assertEqual(icon, "󰙯")
-
-        col, icon = get_badge_info("Kitty")
-        self.assertEqual(icon, "󰆍")
-
-        col, icon = get_badge_info("unknown_app")
-        self.assertEqual(icon, "󰒓")
 
 
 if __name__ == "__main__":

@@ -14,7 +14,7 @@ from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location(
-    "serena_music", ROOT / "config/hypr/scripts/services/music.py"
+    "serena_music", ROOT / "config/hypr/scripts/terminal/music.py"
 )
 music = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(music)
