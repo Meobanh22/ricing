@@ -54,6 +54,7 @@ sync_push() {
     mkdir -p "$HOME/.config/hypr/scripts/services"
     mkdir -p "$HOME/.config/hypr/scripts/system"
     mkdir -p "$HOME/.config/hypr/scripts/ui_core"
+    mkdir -p "$HOME/.config/hypr/scripts/ui_core/components"
     mkdir -p "$HOME/.config/hypr/styles"
     mkdir -p "$HOME/.config/hypr/assets"
     mkdir -p "$HOME/.config/waybar"

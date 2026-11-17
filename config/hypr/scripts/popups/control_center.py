@@ -40,12 +40,14 @@ from services.audio import AudioService
 from services.brightness import BrightnessService
 from services.bluetooth import BluetoothService
 from services.power import PowerService
+from services.wifi import WifiService
 from ui_core import (
     DraggablePopup, get_cursor_pos, get_monitor_geometry,
     draw_rounded_rect, clip_device_bounds, draw_anime_grooves,
     draw_bow_mark, draw_bell_icon,
     draw_curved_kerned, draw_curved_kerned_cached,
-    clear_surface
+    clear_surface,
+    draw_pokeball_dual_slider, format_relative_time, get_badge_info
 )
 
 try:
@@ -188,170 +190,7 @@ def create_bottom_red_casing_path(cr, x_left, x_right, y_dark_bot, H_canvas, cx,
     cr.close_path()
 
 # ==============================================================================
-# 2. POKÉBALL DUAL SLIDER & INTERACTION
-# ==============================================================================
-
-def draw_pokeball_dual_slider(cr, cx, cy, R=64.0, thickness=12.0, vol_val=0.35, bri_val=0.60, knob_style="round_knob", icon_color=None, accent_rgb=None, dark_color=None, pwr_bg=None):
-    if icon_color is None:
-        icon_color = C_ACCENT
-    if accent_rgb is None:
-        accent_rgb = hex_to_rgba(C_ACCENT)[:3]
-    if dark_color is None:
-        dark_color = hex_to_rgba(C_BG_WIN)[:3]
-    if pwr_bg is None:
-        pwr_bg = hex_to_rgba(C_BG_WIN)[:3]
-    gap_ang = math.radians(16.0)
-    
-    # 1. TOP ARC: VOLUME (Sweeps Left -> Top -> Right)
-    ang_vol_start = math.pi + gap_ang
-    ang_vol_end = 2 * math.pi - gap_ang
-    ang_vol_span = ang_vol_end - ang_vol_start
-    ang_vol_thumb = ang_vol_start + vol_val * ang_vol_span
-
-    cr.save()
-    cr.set_line_width(thickness)
-    cr.set_line_cap(cairo.LINE_CAP_ROUND)
-    cr.new_sub_path()
-    cr.arc(cx, cy, R, ang_vol_start, ang_vol_end)
-    cr.set_source_rgb(*dark_color) # Token bg_window
-    cr.stroke()
-
-    if vol_val > 0.01:
-        cr.new_sub_path()
-        cr.arc(cx, cy, R, ang_vol_start, ang_vol_thumb)
-        cr.set_source_rgb(*accent_rgb)
-        cr.stroke()
-
-    if knob_style == "round_knob":
-        tx = cx + R * math.cos(ang_vol_thumb)
-        ty = cy + R * math.sin(ang_vol_thumb)
-        cr.new_path()
-        cr.arc(tx, ty, thickness * 0.62, 0, 2 * math.pi)
-        cr.set_source_rgb(1.0, 1.0, 1.0); cr.fill_preserve()
-        cr.set_source_rgb(*accent_rgb); cr.set_line_width(2.0); cr.stroke()
-    cr.restore()
-
-    # 2. BOTTOM ARC: BRIGHTNESS (Sweeps Left -> Bottom -> Right)
-    ang_bri_start = math.pi - gap_ang
-    ang_bri_end = gap_ang
-    ang_bri_span = (math.pi - 2 * gap_ang)
-    ang_bri_thumb = ang_bri_start - bri_val * ang_bri_span
-
-    cr.save()
-    cr.set_line_width(thickness)
-    cr.set_line_cap(cairo.LINE_CAP_ROUND)
-    cr.new_sub_path()
-    cr.arc_negative(cx, cy, R, ang_bri_start, ang_bri_end)
-    cr.set_source_rgb(*dark_color) # Token bg_window
-    cr.stroke()
-
-    if bri_val > 0.01:
-        cr.new_sub_path()
-        cr.arc_negative(cx, cy, R, ang_bri_start, ang_bri_thumb)
-        cr.set_source_rgb(*accent_rgb)
-        cr.stroke()
-
-    if knob_style == "round_knob":
-        bx = cx + R * math.cos(ang_bri_thumb)
-        by = cy + R * math.sin(ang_bri_thumb)
-        cr.new_path()
-        cr.arc(bx, by, thickness * 0.62, 0, 2 * math.pi)
-        cr.set_source_rgb(1.0, 1.0, 1.0); cr.fill_preserve()
-        cr.set_source_rgb(*accent_rgb); cr.set_line_width(2.0); cr.stroke()
-    cr.restore()
-
-    # 3. HORIZONTAL EQUATORIAL SEAMS
-    r_out = R + thickness / 2.0 + 3.0
-    r_btn_outer = 22.0
-
-    cr.save()
-    cr.set_line_width(2.8)
-    cr.set_source_rgb(*dark_color)
-    cr.new_sub_path()
-    cr.move_to(cx - r_out, cy); cr.line_to(cx - r_btn_outer, cy); cr.stroke()
-    cr.new_sub_path()
-    cr.move_to(cx + r_btn_outer, cy); cr.line_to(cx + r_out, cy); cr.stroke()
-    cr.restore()
-
-    # 4. CENTER POWER BUTTON (0.0px Offset, pure geometric vector)
-    cr.save()
-    cr.new_sub_path()
-    cr.arc(cx, cy, r_btn_outer, 0, 2 * math.pi)
-    cr.set_source_rgb(*pwr_bg); cr.fill_preserve()
-    cr.set_source_rgba(0x3A/255.0, 0x22/255.0, 0x2A/255.0, 0.9); cr.set_line_width(1.5); cr.stroke()
-
-    r_pwr = 7.0
-    ang_gap = math.radians(35.0)
-    ang_s = -math.pi / 2.0 + ang_gap
-    ang_e = 1.5 * math.pi - ang_gap
-
-    cr.set_line_width(2.0)
-    cr.set_line_cap(cairo.LINE_CAP_ROUND)
-    cr.new_sub_path()
-    cr.arc(cx, cy, r_pwr, ang_s, ang_e)
-    cr.set_source_rgb(*accent_rgb); cr.stroke()
-
-    cr.new_sub_path()
-    cr.move_to(cx, cy - r_pwr - 2.5)
-    cr.line_to(cx, cy - 1.0)
-    cr.stroke()
-    cr.restore()
-
-    # 5. ICONS NESTLED INSIDE THE LEFT CAVITY - PHƯƠNG ÁN B
-    vx = cx - 38.0
-    vy = cy - 23.0
-    bx = cx - 38.0
-    by = cy + 23.0
-
-    cr.save()
-    l_v = PangoCairo.create_layout(cr)
-    l_v.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 13.5"))
-    l_v.set_markup(f"<span color='{icon_color}'>󰕾</span>", -1)
-    ink_v, log_v = l_v.get_pixel_extents()
-    cr.move_to(vx - ink_v.x - ink_v.width / 2.0, vy - ink_v.y - ink_v.height / 2.0)
-    PangoCairo.show_layout(cr, l_v)
-
-    l_b = PangoCairo.create_layout(cr)
-    l_b.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 13.5"))
-    l_b.set_markup(f"<span color='{icon_color}'>󰃠</span>", -1)
-    ink_b, log_b = l_b.get_pixel_extents()
-    cr.move_to(bx - ink_b.x - ink_b.width / 2.0, by - ink_b.y - ink_b.height / 2.0)
-    PangoCairo.show_layout(cr, l_b)
-    cr.restore()
-
-def format_relative_time(timestamp):
-    if not timestamp:
-        return "just now"
-    now = time.time()
-    diff = max(0, int(now - timestamp))
-    if diff < 60:
-        return "just now"
-    elif diff < 3600:
-        mins = diff // 60
-        return f"{mins}m ago"
-    elif diff < 86400:
-        hours = diff // 3600
-        return f"{hours}h ago"
-    else:
-        days = diff // 86400
-        return f"{days}d ago"
-
-def get_badge_info(app_name):
-    app_lower = app_name.lower()
-    if "discord" in app_lower:
-        return "#5865F2", "󰙯"
-    elif "firefox" in app_lower or "browser" in app_lower:
-        return "#FF7139", "󰈹"
-    elif "spotify" in app_lower or "music" in app_lower:
-        return "#1ED760", "󰓇"
-    elif "steam" in app_lower:
-        return "#1b2838", "󰓓"
-    elif "terminal" in app_lower or "alacritty" in app_lower or "kitty" in app_lower:
-        return C_ACCENT, "󰆍"
-    return C_ACCENT, "󰒓"
-
-# ==============================================================================
-# 3. POKÉDEX GTK APPLICATION WITH SLIDING ANIMATION & CLOSED STATE
+# 2. POKÉDEX GTK APPLICATION WITH SLIDING ANIMATION & CLOSED STATE
 # ==============================================================================
 class PokedexControlCenter(Gtk.Window):
     def __init__(self):
@@ -810,40 +649,6 @@ class PokedexControlCenter(Gtk.Window):
                 self.notif_page_idx = 0
         self.queue_draw()
 
-    @staticmethod
-    def _parse_wifi_lines(output, saved_set):
-        net_map = {}
-        for line in output.strip().split("\n"):
-            if not line:
-                continue
-            parts = line.replace(r"\:", "__COLON__").split(":")
-            parts = [p.replace("__COLON__", ":") for p in parts]
-            if len(parts) >= 4:
-                in_use = (parts[0].strip() == "*")
-                ssid = parts[1].strip()
-                try:
-                    signal = int(parts[2])
-                except ValueError:
-                    signal = 0
-                security = parts[3].strip()
-
-                if not ssid or ssid == "--":
-                    continue
-
-                if ssid not in net_map or in_use or signal > net_map[ssid]["signal"]:
-                    net_map[ssid] = {
-                        "ssid": ssid,
-                        "in_use": in_use,
-                        "signal": signal,
-                        "security": security,
-                        "saved": (ssid in saved_set)
-                    }
-
-        return sorted(
-            net_map.values(),
-            key=lambda x: (not x["in_use"], not x["saved"], -x["signal"])
-        )
-
     def scan_wifi_networks(self, fast=True):
         if not self.wifi_radio_enabled or self.wifi_scanning:
             return
@@ -852,66 +657,28 @@ class PokedexControlCenter(Gtk.Window):
             self.wifi_status_msg = "Scanning networks..."
             self.queue_draw()
 
-        def worker():
-            nets = []
-            radio_on = True
-            try:
-                radio_res = subprocess.run(["nmcli", "radio", "wifi"], capture_output=True, text=True, timeout=2)
-                radio_on = radio_res.stdout.strip().lower() == "enabled"
+        def on_initial(nets, radio_on):
+            def apply_initial():
+                self.wifi_networks = nets
+                self.wifi_radio_enabled = radio_on
+                self._bake_content()
+                self.queue_draw()
+            GLib.idle_add(apply_initial)
 
-                saved = set()
-                res = subprocess.run(["nmcli", "-t", "-f", "NAME,TYPE", "connection", "show"],
-                                     capture_output=True, text=True, timeout=3)
-                for line in res.stdout.strip().split("\n"):
-                    if not line:
-                        continue
-                    parts = line.replace(r"\:", "__COLON__").split(":")
-                    parts = [p.replace("__COLON__", ":") for p in parts]
-                    if len(parts) >= 2 and parts[1] == "802-11-wireless":
-                        saved.add(parts[0])
-
-                # 1. Quick initial scan from cache
-                res_fast = subprocess.run(["nmcli", "-t", "-f", "IN-USE,SSID,SIGNAL,SECURITY", "dev", "wifi", "list"],
-                                          capture_output=True, text=True, timeout=4)
-                nets_initial = self._parse_wifi_lines(res_fast.stdout, saved)
-                if nets_initial:
-                    def apply_initial():
-                        self.wifi_networks = nets_initial
-                        self.wifi_radio_enabled = radio_on
-                        self._bake_content()
-                    self.queue_draw()
-                    GLib.idle_add(apply_initial)
-
-                # 2. Hardware rescan if requested or if initial list is sparse
-                if radio_on and (not fast or len(nets_initial) <= 1):
-                    try:
-                        subprocess.run(["nmcli", "dev", "wifi", "rescan"], capture_output=True, timeout=3)
-                        time.sleep(1.2)
-                    except Exception:
-                        pass
-                    res_full = subprocess.run(["nmcli", "-t", "-f", "IN-USE,SSID,SIGNAL,SECURITY", "dev", "wifi", "list"],
-                                              capture_output=True, text=True, timeout=4)
-                    nets_full = self._parse_wifi_lines(res_full.stdout, saved)
-                    nets = nets_full if nets_full else nets_initial
-                else:
-                    nets = nets_initial
-            except Exception:
-                pass
-
+        def on_complete(nets, radio_on):
             def apply_final():
                 self.wifi_networks = nets
                 self.wifi_scanning = False
                 self.wifi_status_msg = ""
                 self.wifi_radio_enabled = radio_on
-                txt, wifi_ssid = self.get_wifi_status()
+                txt, wifi_ssid = WifiService.get_status()
                 self.wifi_ssid = wifi_ssid
                 self.wifi_text = txt
                 self._bake_content()
                 self.queue_draw()
-
             GLib.idle_add(apply_final)
 
-        threading.Thread(target=worker, daemon=True).start()
+        WifiService.scan_networks_async(fast=fast, on_initial=on_initial, on_complete=on_complete)
 
     def connect_to_network(self, ssid, password=None):
         if self.wifi_connecting:
@@ -920,31 +687,7 @@ class PokedexControlCenter(Gtk.Window):
         self.wifi_status_msg = f"Connecting to {ssid}..."
         self.queue_draw()
 
-        def worker():
-            success = False
-            err_msg = ""
-            try:
-                if password is not None:
-                    res = subprocess.run(
-                        ["nmcli", "dev", "wifi", "connect", ssid, "password", password],
-                        capture_output=True, text=True, timeout=25
-                    )
-                else:
-                    res = subprocess.run(
-                        ["nmcli", "con", "up", "id", ssid],
-                        capture_output=True, text=True, timeout=15
-                    )
-                    if res.returncode != 0:
-                        res = subprocess.run(
-                            ["nmcli", "dev", "wifi", "connect", ssid],
-                            capture_output=True, text=True, timeout=15
-                        )
-                success = (res.returncode == 0)
-                if not success:
-                    err_msg = res.stderr.strip() or "Connection failed"
-            except Exception as e:
-                err_msg = str(e)
-
+        def on_complete(success, err_msg):
             def apply_result():
                 self.wifi_connecting = False
                 if success:
@@ -957,31 +700,24 @@ class PokedexControlCenter(Gtk.Window):
                 else:
                     self.wifi_status_msg = f"Failed: {err_msg[:20]}"
                 self.queue_draw()
-
             GLib.idle_add(apply_result)
 
-        threading.Thread(target=worker, daemon=True).start()
+        WifiService.connect_async(ssid, password=password, on_complete=on_complete)
 
     def disconnect_wifi(self):
         self.wifi_status_msg = "Disconnecting..."
         self.queue_draw()
 
-        def worker():
-            try:
-                subprocess.run(["nmcli", "dev", "disconnect", "wlan0"], capture_output=True, timeout=5)
-            except Exception:
-                pass
-
+        def on_complete(success):
             def apply_disc():
                 self.wifi_status_msg = "Disconnected"
                 self.wifi_ssid = ""
                 self.wifi_text = "Disconnected"
                 GLib.timeout_add(1000, self.scan_wifi_networks)
                 self.queue_draw()
-
             GLib.idle_add(apply_disc)
 
-        threading.Thread(target=worker, daemon=True).start()
+        WifiService.disconnect_async(on_complete=on_complete)
 
     def toggle_wifi_radio(self):
         curr = self.wifi_radio_enabled
@@ -999,11 +735,7 @@ class PokedexControlCenter(Gtk.Window):
         self.queue_draw()
 
         def worker():
-            try:
-                state_str = "on" if new_state else "off"
-                subprocess.run(["nmcli", "radio", "wifi", state_str], capture_output=True, timeout=5)
-            except Exception:
-                pass
+            WifiService.set_radio(new_state)
             if new_state:
                 time.sleep(1.0)
                 self.scan_wifi_networks(fast=False)
@@ -1035,32 +767,16 @@ class PokedexControlCenter(Gtk.Window):
     def get_ime_status(self):
         try:
             out = subprocess.check_output(["fcitx5-remote", "-n"], stderr=subprocess.DEVNULL).decode().strip()
-            if "unikey" in out.lower() or "bamboo" in out.lower():
+            if "unikey" in out.lower() or "bamboo" in out.lower() or "ngosen" in out.lower():
                 return "Vietnamese"
             return "English"
         except Exception:
             return "English"
 
     def get_wifi_status(self):
-        try:
-            radio_res = subprocess.run(["nmcli", "radio", "wifi"], capture_output=True, text=True, timeout=0.3)
-            if radio_res.returncode == 0 and radio_res.stdout.strip().lower() != "enabled":
-                self.wifi_radio_enabled = False
-                return ("Disabled", "")
-            self.wifi_radio_enabled = True
-            out = subprocess.check_output(
-                ["nmcli", "-t", "-f", "DEVICE,TYPE,STATE,CONNECTION", "dev"], 
-                stderr=subprocess.DEVNULL,
-                timeout=0.3
-            ).decode()
-            for line in out.splitlines():
-                parts = line.split(":")
-                if len(parts) >= 4 and parts[1] == "wifi" and parts[2] == "connected":
-                    ssid = parts[3].strip()
-                    return ("Connected", ssid if ssid else "Connected")
-            return ("Disconnected", "")
-        except Exception:
-            return ("Disconnected", "")
+        txt, ssid = WifiService.get_status()
+        self.wifi_radio_enabled = (txt != "Disabled")
+        return txt, ssid
 
     def async_refresh_status(self):
         try:
