@@ -151,35 +151,49 @@ WMO_MAP = {
     99: ("Thunderstorm", "󰖓", "󰖓"),
 }
 
-def get_user_location():
+def get_user_location(force_refresh=False):
     """
     Get user coordinates (lat, lon, city_name).
     1. Check user config file ~/.config/hypr/weather_location.json (if manually configured).
-    2. Check cached geolocation in ~/.cache/user_geo_location.json (valid for 24 hours).
-    3. Query IP geolocation API (http://ip-api.com/json with timeout=3s, or https://ipinfo.io/json).
+    2. Check cached geolocation in ~/.cache/user_geo_location.json (valid for 1 hour).
+    3. Query IP geolocation API with VPN / timezone sanity checking.
     4. Fallback to Hanoi, Vietnam (lat=21.0285, lon=105.8542).
     """
-    user_conf = os.path.expanduser("~/.config/hypr/weather_location.json")
-    if os.path.exists(user_conf):
-        try:
-            with open(user_conf, "r", encoding="utf-8") as f:
-                cfg = json.load(f)
-                if "latitude" in cfg and "longitude" in cfg:
-                    return float(cfg["latitude"]), float(cfg["longitude"]), cfg.get("city", "Custom")
-        except Exception:
-            pass
+    repo_root = get_repo_root()
+    candidate_confs = [
+        os.path.expanduser("~/.config/hypr/weather_location.json"),
+        os.path.join(repo_root, "config", "hypr", "weather_location.json") if repo_root else "",
+    ]
+    cfg = None
+    for user_conf in candidate_confs:
+        if user_conf and os.path.exists(user_conf):
+            try:
+                with open(user_conf, "r", encoding="utf-8") as f:
+                    cfg = json.load(f)
+                    break
+            except Exception:
+                pass
+
+    if cfg and isinstance(cfg, dict):
+        # If user explicitly disabled auto-detect or provided fixed coordinates
+        if not cfg.get("auto_detect", True):
+            if "latitude" in cfg and "longitude" in cfg:
+                return float(cfg["latitude"]), float(cfg["longitude"]), cfg.get("city", "Hanoi")
 
     geo_cache = os.path.expanduser("~/.cache/user_geo_location.json")
-    if os.path.exists(geo_cache):
+    if not force_refresh and os.path.exists(geo_cache):
         try:
             mtime = os.path.getmtime(geo_cache)
-            if time.time() - mtime < 86400:  # 24h cache
+            if time.time() - mtime < 3600:  # 1h cache
                 with open(geo_cache, "r", encoding="utf-8") as f:
                     cdata = json.load(f)
                     if "lat" in cdata and "lon" in cdata:
                         return float(cdata["lat"]), float(cdata["lon"]), cdata.get("city", "Hanoi")
         except Exception:
             pass
+
+    # Detect local system UTC offset to detect VPN mismatches
+    local_offset = -time.timezone if (time.localtime().tm_isdst == 0) else -time.altzone
 
     # Query IP Geolocation API
     try:
@@ -190,12 +204,21 @@ def get_user_location():
                 lat = float(data["lat"])
                 lon = float(data["lon"])
                 city = data.get("city", "Hanoi")
-                try:
-                    with open(geo_cache, "w", encoding="utf-8") as f:
-                        json.dump({"lat": lat, "lon": lon, "city": city}, f)
-                except Exception:
-                    pass
-                return lat, lon, city
+
+                # VPN check: if local system is in Vietnam/UTC+7, but IP location is foreign (e.g. Japan/US)
+                ip_tz = data.get("timezone", "")
+                is_vpn = False
+                if abs(local_offset - 25200) < 1800:
+                    if not (ip_tz.startswith("Asia/Ho_Chi_Minh") or ip_tz.startswith("Asia/Bangkok") or data.get("countryCode") == "VN"):
+                        is_vpn = True
+
+                if not is_vpn:
+                    try:
+                        with open(geo_cache, "w", encoding="utf-8") as f:
+                            json.dump({"lat": lat, "lon": lon, "city": city}, f)
+                    except Exception:
+                        pass
+                    return lat, lon, city
     except Exception:
         pass
 
@@ -208,14 +231,18 @@ def get_user_location():
                 lat = float(lat_str)
                 lon = float(lon_str)
                 city = data.get("city", "Hanoi")
-                try:
-                    with open(geo_cache, "w", encoding="utf-8") as f:
-                        json.dump({"lat": lat, "lon": lon, "city": city}, f)
-                except Exception:
-                    pass
-                return lat, lon, city
+                if data.get("country") == "VN" or abs(local_offset - 25200) > 1800:
+                    try:
+                        with open(geo_cache, "w", encoding="utf-8") as f:
+                            json.dump({"lat": lat, "lon": lon, "city": city}, f)
+                    except Exception:
+                        pass
+                    return lat, lon, city
     except Exception:
         pass
+
+    if cfg and "latitude" in cfg and "longitude" in cfg:
+        return float(cfg["latitude"]), float(cfg["longitude"]), cfg.get("city", "Hanoi")
 
     return 21.0285, 105.8542, "Hanoi"
 
@@ -922,7 +949,7 @@ class WeatherForecastWindow(Gtk.Window):
 
     def on_weather_card_clicked(self, widget, event):
         if event.button == 1:
-            threading.Thread(target=self.fetch_weather_async, daemon=True).start()
+            threading.Thread(target=self.fetch_weather_async, args=(True,), daemon=True).start()
             return True
         return False
 
@@ -930,18 +957,18 @@ class WeatherForecastWindow(Gtk.Window):
         threading.Thread(target=self.fetch_weather_async, daemon=True).start()
         return True
 
-    def fetch_weather_async(self):
+    def fetch_weather_async(self, force_refresh=False):
         if self._fetching_weather:
             return
         now = time.time()
-        if now - self._last_weather_fetch < 5:
+        if now - self._last_weather_fetch < 5 and not force_refresh:
             return
 
         self._fetching_weather = True
         self._last_weather_fetch = now
 
         # Resolve dynamic user location (auto-detect via IP or user config)
-        lat, lon, city = get_user_location()
+        lat, lon, city = get_user_location(force_refresh=force_refresh)
 
         success = False
 
@@ -1135,6 +1162,7 @@ class DesktopCalendarWindow(Gtk.Window):
         # Row 1: Hero Month/Year Header (Sunset Gradient with 3D Month & Prev/Next buttons)
         hero_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
         hero_box.get_style_context().add_class("tactile-hero-box")
+        hero_box.get_style_context().add_class("gradient-sunset")
 
         # Top row: CALENDAR on left, Year on right
         top_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
@@ -1341,6 +1369,10 @@ def main():
     avatar_win.show_all()
     weather_win.show_all()
     calendar_win.show_all()
+
+    # Reclaim startup allocations from GTK/Cairo initialization
+    import gc
+    gc.collect()
 
     Gtk.main()
 
