@@ -4,21 +4,28 @@ import subprocess
 import json
 import html
 
-def get_output(cmd):
-    try:
-        res = subprocess.run(cmd, capture_output=True, text=True, errors="replace", timeout=1)
-        return res.stdout.strip()
-    except Exception:
-        return ""
-
 def main():
-    status = get_output(["playerctl", "status"])
-    if not status or status == "None" or status == "Stopped":
+    try:
+        res = subprocess.run(
+            ["playerctl", "metadata", "--format", "{{status}}\t{{title}}\t{{artist}}"],
+            capture_output=True, text=True, errors="replace", timeout=1
+        )
+        line = res.stdout.strip()
+    except Exception:
+        line = ""
+
+    if not line:
         print(json.dumps({"text": "", "tooltip": "", "class": "stopped"}, ensure_ascii=False))
         return
 
-    raw_title = get_output(["playerctl", "metadata", "--format", "{{title}}"])
-    raw_artist = get_output(["playerctl", "metadata", "--format", "{{artist}}"])
+    parts = line.split("\t")
+    status = parts[0] if len(parts) > 0 else "Stopped"
+    raw_title = parts[1] if len(parts) > 1 else ""
+    raw_artist = parts[2] if len(parts) > 2 else ""
+
+    if not status or status == "Stopped" or (not raw_title and status != "Playing"):
+        print(json.dumps({"text": "", "tooltip": "", "class": "stopped"}, ensure_ascii=False))
+        return
 
     # Unescape HTML entities from browser MPRIS (e.g. &amp;, &#39;, &#x27;)
     if raw_title:
@@ -33,20 +40,15 @@ def main():
     else:
         title = "Playing" if status == "Playing" else "Paused"
 
-    artist = raw_artist if raw_artist else ""
-
     if status == "Playing":
         icon = ""
         cls = "playing"
-        tooltip = f"{artist} - {raw_title}" if artist and raw_title else (raw_title or title)
     elif status == "Paused":
         icon = "󰐎"
         cls = "paused"
-        tooltip = f"Paused: {artist} - {raw_title}" if artist and raw_title else f"Paused: {raw_title or title}"
     else:
-        icon = ""
-        cls = "stopped"
-        tooltip = "No music playing"
+        print(json.dumps({"text": "", "tooltip": "", "class": "stopped"}, ensure_ascii=False))
+        return
 
     # NOTE: Output raw unescaped text because Waybar's custom module has "escape": true,
     # which uses GLib/Pango g_markup_escape_text to safely escape markup entities without double-escaping.

@@ -47,7 +47,7 @@
     "return-type": "json",
     "exec": "~/.config/hypr/scripts/system/recording_status.sh",
     "interval": 1,
-    "tooltip": true,
+    "tooltip": false,
     "on-click": "~/.config/hypr/scripts/system/record_screen.sh",
     "signal": 9
   },
@@ -61,6 +61,7 @@
     "on-click": "bash ~/.config/hypr/scripts/terminal/toggle_music.sh",
     "on-click-right": "playerctl play-pause",
     "on-click-middle": "playerctl next",
+    "signal": 7,
     "escape": true
   },
 
@@ -76,7 +77,7 @@
     "interval": 1,
     "format": "{}",
     "return-type": "json",
-    "tooltip": true,
+    "tooltip": false,
     "on-click": "~/.config/hypr/scripts/system/toggle_vietnamese.sh",
     "signal": 8
   },

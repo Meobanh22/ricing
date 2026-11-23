@@ -173,18 +173,21 @@ window#waybar {
     color: @border_waybar_3d;
 }
 
-#custom-media.playing {
+#custom-media.playing,
+#mpris.playing {
     color: @border_waybar_3d;
     border-color: @accent;
     border-bottom-color: @border_waybar_3d;
     box-shadow: none;
 }
 
-#custom-media.paused {
+#custom-media.paused,
+#mpris.paused {
     color: @bg_waybar;
 }
 
-#custom-media.stopped {
+#custom-media.stopped,
+#mpris.stopped {
     padding: 3px 14px 4px 14px;
     color: @border_waybar_3d;
 }
