@@ -11,12 +11,13 @@ import cairo
 import socket
 import glob
 import signal
+import concurrent.futures
 
 import gi
 gi.require_version('Gtk', '3.0')
 gi.require_version('Gdk', '3.0')
 gi.require_version('GtkLayerShell', '0.1')
-from gi.repository import Gtk, Gdk, GLib, GtkLayerShell, Pango, GdkPixbuf
+from gi.repository import Gtk, Gdk, GLib, GtkLayerShell, Pango, GdkPixbuf, GLibUnix
 
 # Ensure script dir and system dir are in sys.path before loading palette
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -170,6 +171,13 @@ class ShelfWindow(Gtk.Window):
         self.popout_timer = None
         self.current_popout_target = None
         self.lightbox_win = None
+        self._thumb_cache = {}
+        self._raw_clips_cache = None
+        self._raw_clips_mtime = 0
+        self.search_debounce_timer = None
+        self._thread_pool = concurrent.futures.ThreadPoolExecutor(max_workers=2, thread_name_prefix="shelf_worker")
+        self._clip_thumb_cache = {}
+        self._clip_raw_cache = {}
 
         # Ensure daemon is running
         self.ensure_cliphist_daemon()
@@ -194,6 +202,133 @@ class ShelfWindow(Gtk.Window):
         # Timers: hotkey mode check & cliphist db watcher
         GLib.timeout_add(150, self.check_mode_change)
         GLib.timeout_add(300, self.check_cliphist_update)
+
+        # Signal handling for instantaneous toggle
+        GLibUnix.signal_add(GLib.PRIORITY_DEFAULT, signal.SIGUSR1, self.on_sigusr1)
+
+    def get_scaled_pixbuf(self, fpath: str, max_w: int, max_h: int):
+        """Fast-decode thumbnail directly at target scale with mtime caching."""
+        if not fpath or not os.path.exists(fpath):
+            return None
+        try:
+            mtime = os.path.getmtime(fpath)
+            key = (fpath, mtime, max_w, max_h)
+            if key in self._thumb_cache:
+                return self._thumb_cache[key]
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(fpath, max_w, max_h, True)
+            if len(self._thumb_cache) > 120:
+                self._thumb_cache.clear()
+            self._thumb_cache[key] = pixbuf
+            return pixbuf
+        except Exception:
+            return None
+
+    def load_clip_thumbnail_async(self, item, max_w: int, max_h: int, img_widget):
+        """
+        Loads clip thumbnail asynchronously.
+        If cached or pinned, sets the pixbuf immediately.
+        Otherwise, decodes via background worker thread and updates UI on main thread.
+        """
+        if not item:
+            return
+
+        # 1. Pinned clip with file on disk
+        if item.get("img_path") and os.path.exists(item["img_path"]):
+            card_pixbuf = self.get_scaled_pixbuf(item["img_path"], max_w, max_h)
+            if card_pixbuf:
+                img_widget.set_from_pixbuf(card_pixbuf)
+                return
+
+        clip_id = item.get("id")
+        cache_key = (clip_id, max_w, max_h)
+
+        # 2. In-memory thumbnail cache hit
+        if clip_id and cache_key in self._clip_thumb_cache:
+            pb = self._clip_thumb_cache[cache_key]
+            if pb:
+                img_widget.set_from_pixbuf(pb)
+                return
+
+        # 3. Check if raw image bytes are already cached in memory
+        raw_bytes = self._clip_raw_cache.get(clip_id) if clip_id else None
+        if raw_bytes:
+            try:
+                loader = GdkPixbuf.PixbufLoader()
+                loader.write(raw_bytes)
+                loader.close()
+                pixbuf = loader.get_pixbuf()
+                if pixbuf:
+                    orig_w = pixbuf.get_width()
+                    orig_h = pixbuf.get_height()
+                    ratio = min(max_w / orig_w, max_h / orig_h)
+                    scaled = pixbuf.scale_simple(max(1, int(orig_w * ratio)), max(1, int(orig_h * ratio)), GdkPixbuf.InterpType.BILINEAR)
+                    if clip_id:
+                        self._clip_thumb_cache[cache_key] = scaled
+                    img_widget.set_from_pixbuf(scaled)
+                    return
+            except Exception:
+                pass
+
+        # 4. Async decode via ThreadPoolExecutor
+        raw_line = item.get("raw", "")
+        if not raw_line:
+            return
+
+        # Track which clip this image widget expects
+        img_widget._target_clip_id = clip_id
+
+        def _bg_decode():
+            try:
+                p = subprocess.Popen(["cliphist", "decode"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+                out_bytes, _ = p.communicate(input=raw_line.encode("utf-8"), timeout=1.5)
+                if not out_bytes:
+                    return None, None
+                loader = GdkPixbuf.PixbufLoader()
+                loader.write(out_bytes)
+                loader.close()
+                pixbuf = loader.get_pixbuf()
+                scaled = None
+                if pixbuf:
+                    orig_w = pixbuf.get_width()
+                    orig_h = pixbuf.get_height()
+                    ratio = min(max_w / orig_w, max_h / orig_h)
+                    scaled = pixbuf.scale_simple(max(1, int(orig_w * ratio)), max(1, int(orig_h * ratio)), GdkPixbuf.InterpType.BILINEAR)
+                return out_bytes, scaled
+            except Exception:
+                return None, None
+
+        def _on_done(future):
+            try:
+                out_bytes, scaled = future.result()
+                if out_bytes and clip_id:
+                    self._clip_raw_cache[clip_id] = out_bytes
+                    if len(self._clip_raw_cache) > 40:
+                        for k in list(self._clip_raw_cache.keys())[:15]:
+                            del self._clip_raw_cache[k]
+                if scaled and clip_id:
+                    self._clip_thumb_cache[cache_key] = scaled
+                    if len(self._clip_thumb_cache) > 80:
+                        for k in list(self._clip_thumb_cache.keys())[:30]:
+                            del self._clip_thumb_cache[k]
+
+                def _apply_ui():
+                    try:
+                        if not img_widget.in_destruction() and getattr(img_widget, '_target_clip_id', None) == clip_id:
+                            if scaled:
+                                img_widget.set_from_pixbuf(scaled)
+                    except Exception:
+                        pass
+                    return False
+
+                GLib.idle_add(_apply_ui)
+            except Exception:
+                pass
+
+        try:
+            future = self._thread_pool.submit(_bg_decode)
+            future.add_done_callback(_on_done)
+        except Exception:
+            pass
 
     def on_window_draw(self, widget, cr):
         # Clear surface to transparent for CSS border rendering
@@ -356,8 +491,14 @@ class ShelfWindow(Gtk.Window):
                     if item.get("img_path") and os.path.exists(item["img_path"]):
                         shutil.copy2(item["img_path"], pin_img_path)
                     else:
-                        p = subprocess.Popen(["cliphist", "decode"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-                        img_data, _ = p.communicate(input=item["raw"].encode("utf-8"), timeout=1.5)
+                        clip_id = item.get("id")
+                        if clip_id and clip_id in self._clip_raw_cache:
+                            img_data = self._clip_raw_cache[clip_id]
+                        else:
+                            p = subprocess.Popen(["cliphist", "decode"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+                            img_data, _ = p.communicate(input=item["raw"].encode("utf-8"), timeout=1.5)
+                            if clip_id and img_data:
+                                self._clip_raw_cache[clip_id] = img_data
                         with open(pin_img_path, "wb") as f:
                             f.write(img_data)
                     new_pin["img_path"] = pin_img_path
@@ -429,7 +570,6 @@ class ShelfWindow(Gtk.Window):
         pill.set_halign(Gtk.Align.CENTER)
         pill.set_size_request(38, 4)
         self.drag_handle_box.pack_start(pill, True, True, 0)
-        self.drag_handle_box.set_tooltip_text("Drag header to move · Double-click to center")
         header_hbox.pack_start(self.drag_handle_box, True, True, 4)
 
         # Right actions
@@ -441,7 +581,6 @@ class ShelfWindow(Gtk.Window):
         self.lbl_stash.set_markup(f"<span font='11' color='{C_ACCENT}'>󰅍</span>  <span color='{C_RUBY_PRI}'>Stash</span>")
         self.btn_stash_clip.add(self.lbl_stash)
         self.btn_stash_clip.get_style_context().add_class("action-btn")
-        self.btn_stash_clip.set_tooltip_text("Save current clipboard content into shelf")
         self.btn_stash_clip.connect("clicked", self.on_stash_clipboard_clicked)
         self.header_actions_box.pack_start(self.btn_stash_clip, False, False, 0)
 
@@ -451,7 +590,6 @@ class ShelfWindow(Gtk.Window):
         self.lbl_clear.set_markup(f"<span font='12' color='{C_ACCENT}'>󰆴</span>")
         self.btn_clear_all.add(self.lbl_clear)
         self.btn_clear_all.get_style_context().add_class("action-btn")
-        self.btn_clear_all.set_tooltip_text("Clear all items")
         self.btn_clear_all.connect("clicked", self.on_clear_clicked)
         self.header_actions_box.pack_start(self.btn_clear_all, False, False, 0)
 
@@ -461,7 +599,6 @@ class ShelfWindow(Gtk.Window):
         lbl_close.set_markup(f"<span font='12' color='{C_RUBY_PRI}'>✕</span>")
         btn_close.add(lbl_close)
         btn_close.get_style_context().add_class("btn-close")
-        btn_close.set_tooltip_text("Close (Esc)")
         btn_close.connect("clicked", lambda w: self.close_window())
         self.header_actions_box.pack_end(btn_close, False, False, 0)
 
@@ -541,7 +678,7 @@ class ShelfWindow(Gtk.Window):
         self.clip_search.set_placeholder_text("Search clips...")
         self.clip_search.get_style_context().add_class("search-entry")
         self.clip_search.set_margin_bottom(8)
-        self.clip_search.connect("search-changed", lambda e: self.refresh_clipboard())
+        self.clip_search.connect("search-changed", self.on_search_changed)
         vbox.pack_start(self.clip_search, False, False, 0)
 
         # Stack for switching between Empty State and Content State
@@ -594,13 +731,64 @@ class ShelfWindow(Gtk.Window):
 
         return vbox
 
+    def on_search_changed(self, entry):
+        if self.search_debounce_timer is not None:
+            try:
+                GLib.source_remove(self.search_debounce_timer)
+            except Exception:
+                pass
+            self.search_debounce_timer = None
+        self.search_debounce_timer = GLib.timeout_add(150, self._apply_search_filter)
+
+    def _apply_search_filter(self):
+        self.search_debounce_timer = None
+        self.refresh_clipboard()
+        return False
+
+    def _get_raw_clips(self):
+        """Fetch raw cliphist lines, caching in memory if CLIPHIST_DB mtime hasn't changed."""
+        current_mtime = 0
+        if os.path.exists(CLIPHIST_DB):
+            try:
+                current_mtime = os.path.getmtime(CLIPHIST_DB)
+            except Exception:
+                current_mtime = 0
+
+        if self._raw_clips_cache is not None and current_mtime == self._raw_clips_mtime and current_mtime > 0:
+            return self._raw_clips_cache
+
+        clips = []
+        try:
+            res = subprocess.run(["cliphist", "list"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+            if res.returncode == 0 and res.stdout:
+                stdout_text = res.stdout.decode("utf-8", errors="replace")
+                for line in stdout_text.strip().split("\n"):
+                    if not line.strip():
+                        continue
+                    parts = line.split("\t", 1)
+                    clip_id = parts[0]
+                    preview = parts[1] if len(parts) > 1 else ""
+                    is_image = "binary data" in preview.lower() or "[[ binary data" in preview.lower()
+                    clips.append({
+                        "id": clip_id,
+                        "raw": line,
+                        "preview": preview,
+                        "is_image": is_image,
+                        "is_pinned": False
+                    })
+        except Exception:
+            pass
+
+        self._raw_clips_cache = clips
+        self._raw_clips_mtime = current_mtime
+        return clips
+
     def refresh_clipboard(self):
         self.hide_popout()
         for child in self.clip_flow.get_children():
             self.clip_flow.remove(child)
 
         query = self.clip_search.get_text().strip().lower()
-        clips = []
         seen_text_previews = set()
 
         # 1. Load pinned clips at top of list
@@ -618,42 +806,28 @@ class ShelfWindow(Gtk.Window):
                     continue
             filtered_pins.append(p_item)
 
-        try:
-            res = subprocess.run(["cliphist", "list"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-            if res.returncode == 0 and res.stdout:
-                stdout_text = res.stdout.decode("utf-8", errors="replace")
-                for line in stdout_text.strip().split("\n"):
-                    if not line.strip():
-                        continue
-                    parts = line.split("\t", 1)
-                    clip_id = parts[0]
-                    preview = parts[1] if len(parts) > 1 else ""
+        # 2. Filter raw clips from RAM cache
+        raw_clips = self._get_raw_clips()
+        clips = []
+        for item in raw_clips:
+            preview = item["preview"]
+            is_image = item["is_image"]
 
-                    is_image = "binary data" in preview.lower() or "[[ binary data" in preview.lower()
+            # Deduplicate exact text entries only
+            if not is_image:
+                norm_preview = preview.strip()
+                if norm_preview in seen_text_previews:
+                    continue
+                seen_text_previews.add(norm_preview)
 
-                    # Deduplicate exact text entries only
-                    if not is_image:
-                        norm_preview = preview.strip()
-                        if norm_preview in seen_text_previews:
-                            continue
-                        seen_text_previews.add(norm_preview)
+            if query and query not in preview.lower():
+                continue
 
-                    if query and query not in preview.lower():
-                        continue
+            # Skip if already displayed in pinned section
+            if self.is_item_pinned(item, pins):
+                continue
 
-                    # Skip if already displayed in pinned section
-                    if self.is_item_pinned({"id": clip_id, "is_image": is_image, "raw": line, "preview": preview}, pins):
-                        continue
-
-                    clips.append({
-                        "id": clip_id,
-                        "raw": line,
-                        "preview": preview,
-                        "is_image": is_image,
-                        "is_pinned": False
-                    })
-        except Exception:
-            pass
+            clips.append(item)
 
         all_clips = filtered_pins + clips
 
@@ -703,10 +877,8 @@ class ShelfWindow(Gtk.Window):
         if item.get("is_pinned"):
             btn_pin.get_style_context().add_class("pinned")
             lbl_p.set_markup(f"<span font='10.5' color='{C_ACCENT}'>󰤲</span>")
-            btn_pin.set_tooltip_text("Unpin clip")
         else:
             lbl_p.set_markup(f"<span font='10.5' color='{C_ACCENT}'>󰤱</span>")
-            btn_pin.set_tooltip_text("Pin clip to top")
         btn_pin.add(lbl_p)
         btn_pin.connect("clicked", lambda b: self.toggle_pin_clip(item))
         btn_pin.connect("enter-notify-event", lambda w, e: self.hide_popout())
@@ -720,7 +892,6 @@ class ShelfWindow(Gtk.Window):
             lbl_z = Gtk.Label()
             lbl_z.set_markup(f"<span font='9.5' color='{C_ACCENT}'>󰍉</span>")
             btn_zoom.add(lbl_z)
-            btn_zoom.set_tooltip_text("Zoom image full-size")
             btn_zoom.connect("clicked", lambda b: self.open_image_lightbox(item, is_shelf=False))
             btn_zoom.connect("enter-notify-event", lambda w, e: self.hide_popout())
             right_hdr.pack_start(btn_zoom, False, False, 0)
@@ -733,7 +904,6 @@ class ShelfWindow(Gtk.Window):
         lbl_x = Gtk.Label()
         lbl_x.set_markup(f"<span font='9.5' color='{C_RUBY_PRI}'>✕</span>")
         btn_del.add(lbl_x)
-        btn_del.set_tooltip_text("Delete")
         btn_del.connect("clicked", lambda b: self.delete_clip(item))
         btn_del.connect("enter-notify-event", lambda w, e: self.hide_popout())
         right_hdr.pack_end(btn_del, False, False, 2)
@@ -743,30 +913,11 @@ class ShelfWindow(Gtk.Window):
 
         # Content: Image thumbnail or Text snippet
         if item["is_image"]:
-            try:
-                if item.get("img_path") and os.path.exists(item["img_path"]):
-                    pixbuf = GdkPixbuf.Pixbuf.new_from_file(item["img_path"])
-                else:
-                    p = subprocess.Popen(["cliphist", "decode"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-                    img_data, _ = p.communicate(input=item["raw"].encode("utf-8"), timeout=1.0)
-                    loader = GdkPixbuf.PixbufLoader()
-                    loader.write(img_data)
-                    loader.close()
-                    pixbuf = loader.get_pixbuf()
-
-                orig_w = pixbuf.get_width()
-                orig_h = pixbuf.get_height()
-                ratio = min(175 / orig_w, 90 / orig_h)
-                scaled_w = max(1, int(orig_w * ratio))
-                scaled_h = max(1, int(orig_h * ratio))
-                card_pixbuf = pixbuf.scale_simple(scaled_w, scaled_h, GdkPixbuf.InterpType.BILINEAR)
-                img = Gtk.Image.new_from_pixbuf(card_pixbuf)
-                img.set_halign(Gtk.Align.CENTER)
-                vbox.pack_start(img, False, False, 2)
-            except Exception:
-                lbl_fallback = Gtk.Label(label="[Image Preview]")
-                lbl_fallback.get_style_context().add_class("chip-text")
-                vbox.pack_start(lbl_fallback, False, False, 0)
+            img = Gtk.Image()
+            img.set_halign(Gtk.Align.CENTER)
+            img.set_size_request(175, 80)
+            vbox.pack_start(img, False, False, 2)
+            self.load_clip_thumbnail_async(item, 175, 90, img)
         else:
             clean_txt = (item.get("full_text") or item.get("preview") or "").strip()
             lbl_txt = Gtk.Label()
@@ -963,7 +1114,6 @@ class ShelfWindow(Gtk.Window):
             lbl_z = Gtk.Label()
             lbl_z.set_markup(f"<span font='9.5' color='{C_ACCENT}'>󰍉</span>")
             btn_zoom.add(lbl_z)
-            btn_zoom.set_tooltip_text("Zoom image full-size")
             btn_zoom.connect("clicked", lambda b: self.open_image_lightbox(fpath, is_shelf=True))
             btn_zoom.connect("enter-notify-event", lambda w, e: self.hide_popout())
             right_hdr.pack_start(btn_zoom, False, False, 0)
@@ -975,7 +1125,6 @@ class ShelfWindow(Gtk.Window):
         lbl_x = Gtk.Label()
         lbl_x.set_markup(f"<span font='9.5' color='{C_RUBY_PRI}'>✕</span>")
         btn_del.add(lbl_x)
-        btn_del.set_tooltip_text("Remove")
         btn_del.connect("clicked", lambda b: self.remove_shelf_file(fpath))
         btn_del.connect("enter-notify-event", lambda w, e: self.hide_popout())
         right_hdr.pack_end(btn_del, False, False, 2)
@@ -991,16 +1140,13 @@ class ShelfWindow(Gtk.Window):
 
         if is_image:
             try:
-                pixbuf = GdkPixbuf.Pixbuf.new_from_file(fpath)
-                orig_w = pixbuf.get_width()
-                orig_h = pixbuf.get_height()
-                ratio = min(175 / orig_w, 80 / orig_h)
-                scaled_w = max(1, int(orig_w * ratio))
-                scaled_h = max(1, int(orig_h * ratio))
-                card_pixbuf = pixbuf.scale_simple(scaled_w, scaled_h, GdkPixbuf.InterpType.BILINEAR)
-                img = Gtk.Image.new_from_pixbuf(card_pixbuf)
-                img.set_halign(Gtk.Align.CENTER)
-                preview_box.pack_start(img, True, True, 0)
+                card_pixbuf = self.get_scaled_pixbuf(fpath, 175, 80)
+                if card_pixbuf:
+                    img = Gtk.Image.new_from_pixbuf(card_pixbuf)
+                    img.set_halign(Gtk.Align.CENTER)
+                    preview_box.pack_start(img, True, True, 0)
+                else:
+                    raise ValueError("Cannot load")
             except Exception:
                 lbl_fb = Gtk.Label(label="[Image]")
                 lbl_fb.get_style_context().add_class("chip-text")
@@ -1166,36 +1312,17 @@ class ShelfWindow(Gtk.Window):
                 top_row.pack_start(lbl_type, False, False, 0)
                 vbox.pack_start(top_row, False, False, 0)
 
-                # Decode high-res image
-                try:
-                    if item.get("img_path") and os.path.exists(item["img_path"]):
-                        pixbuf = GdkPixbuf.Pixbuf.new_from_file(item["img_path"])
-                    else:
-                        p = subprocess.Popen(["cliphist", "decode"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-                        img_data, _ = p.communicate(input=item["raw"].encode("utf-8"), timeout=1.0)
-                        loader = GdkPixbuf.PixbufLoader()
-                        loader.write(img_data)
-                        loader.close()
-                        pixbuf = loader.get_pixbuf()
+                img = Gtk.Image()
+                img.set_halign(Gtk.Align.CENTER)
+                img.set_size_request(230, 130)
+                vbox.pack_start(img, False, False, 2)
+                self.load_clip_thumbnail_async(item, 230, 130, img)
 
-                    orig_w = pixbuf.get_width()
-                    orig_h = pixbuf.get_height()
-                    ratio = min(230 / orig_w, 130 / orig_h)
-                    scaled_w = max(1, int(orig_w * ratio))
-                    scaled_h = max(1, int(orig_h * ratio))
-                    card_pixbuf = pixbuf.scale_simple(scaled_w, scaled_h, GdkPixbuf.InterpType.BILINEAR)
-                    img = Gtk.Image.new_from_pixbuf(card_pixbuf)
-                    img.set_halign(Gtk.Align.CENTER)
-                    vbox.pack_start(img, False, False, 2)
-
-                    lbl_meta = Gtk.Label()
-                    lbl_meta.set_markup(f"<span font='9.5' color='{C_RUBY_MUT}'>{orig_w}×{orig_h} · PNG Image</span>")
-                    lbl_meta.set_halign(Gtk.Align.START)
-                    lbl_meta.set_margin_start(8)
-                    vbox.pack_start(lbl_meta, False, False, 0)
-                except Exception:
-                    lbl_err = Gtk.Label(label="[Image Preview]")
-                    vbox.pack_start(lbl_err, False, False, 0)
+                lbl_meta = Gtk.Label()
+                lbl_meta.set_markup(f"<span font='9.5' color='{C_RUBY_MUT}'>PNG Image</span>")
+                lbl_meta.set_halign(Gtk.Align.START)
+                lbl_meta.set_margin_start(8)
+                vbox.pack_start(lbl_meta, False, False, 0)
             else:
                 lbl_type.set_markup(f"<span font='10.5' color='{C_ACCENT}'>󰈙</span>  <span font='10' color='{C_RUBY_PRI}'><b>Text Preview</b></span>")
                 top_row.pack_start(lbl_type, False, False, 0)
@@ -1244,19 +1371,14 @@ class ShelfWindow(Gtk.Window):
 
             if is_image:
                 try:
-                    pixbuf = GdkPixbuf.Pixbuf.new_from_file(fpath)
-                    orig_w = pixbuf.get_width()
-                    orig_h = pixbuf.get_height()
-                    ratio = min(230 / orig_w, 130 / orig_h)
-                    scaled_w = max(1, int(orig_w * ratio))
-                    scaled_h = max(1, int(orig_h * ratio))
-                    card_pixbuf = pixbuf.scale_simple(scaled_w, scaled_h, GdkPixbuf.InterpType.BILINEAR)
-                    img = Gtk.Image.new_from_pixbuf(card_pixbuf)
-                    img.set_halign(Gtk.Align.CENTER)
-                    vbox.pack_start(img, False, False, 2)
+                    card_pixbuf = self.get_scaled_pixbuf(fpath, 230, 130)
+                    if card_pixbuf:
+                        img = Gtk.Image.new_from_pixbuf(card_pixbuf)
+                        img.set_halign(Gtk.Align.CENTER)
+                        vbox.pack_start(img, False, False, 2)
 
                     lbl_meta = Gtk.Label()
-                    lbl_meta.set_markup(f"<span font='9.5' color='{C_RUBY_MUT}'>{orig_w}×{orig_h} · {size_str}</span>")
+                    lbl_meta.set_markup(f"<span font='9.5' color='{C_RUBY_MUT}'>{size_str}</span>")
                     lbl_meta.set_halign(Gtk.Align.START)
                     lbl_meta.set_margin_start(8)
                     vbox.pack_start(lbl_meta, False, False, 0)
@@ -1358,12 +1480,19 @@ class ShelfWindow(Gtk.Window):
                     raw_bytes = open(item_or_fpath["img_path"], "rb").read()
                     pixbuf = GdkPixbuf.Pixbuf.new_from_file(item_or_fpath["img_path"])
                 else:
-                    p = subprocess.Popen(["cliphist", "decode"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-                    raw_bytes, _ = p.communicate(input=item_or_fpath["raw"].encode("utf-8"), timeout=1.5)
-                    loader = GdkPixbuf.PixbufLoader()
-                    loader.write(raw_bytes)
-                    loader.close()
-                    pixbuf = loader.get_pixbuf()
+                    clip_id = item_or_fpath.get("id") if isinstance(item_or_fpath, dict) else None
+                    if clip_id and clip_id in self._clip_raw_cache:
+                        raw_bytes = self._clip_raw_cache[clip_id]
+                    else:
+                        p = subprocess.Popen(["cliphist", "decode"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+                        raw_bytes, _ = p.communicate(input=item_or_fpath["raw"].encode("utf-8"), timeout=1.5)
+                        if clip_id and raw_bytes:
+                            self._clip_raw_cache[clip_id] = raw_bytes
+                    if raw_bytes:
+                        loader = GdkPixbuf.PixbufLoader()
+                        loader.write(raw_bytes)
+                        loader.close()
+                        pixbuf = loader.get_pixbuf()
             except Exception:
                 pass
         else:
@@ -1470,8 +1599,14 @@ class ShelfWindow(Gtk.Window):
                         p2 = subprocess.Popen(["wl-copy", "--type", "image/png"], stdin=subprocess.PIPE)
                         p2.communicate(input=img_bytes)
                     else:
-                        p = subprocess.Popen(["cliphist", "decode"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-                        out, _ = p.communicate(input=item["raw"].encode("utf-8", errors="replace"))
+                        clip_id = item.get("id")
+                        if clip_id and clip_id in self._clip_raw_cache:
+                            out = self._clip_raw_cache[clip_id]
+                        else:
+                            p = subprocess.Popen(["cliphist", "decode"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+                            out, _ = p.communicate(input=item["raw"].encode("utf-8", errors="replace"))
+                            if clip_id and out:
+                                self._clip_raw_cache[clip_id] = out
                         p2 = subprocess.Popen(["wl-copy", "--type", "image/png"], stdin=subprocess.PIPE)
                         p2.communicate(input=out)
                 else:
@@ -1518,6 +1653,13 @@ class ShelfWindow(Gtk.Window):
             if item.get("raw"):
                 p = subprocess.Popen(["cliphist", "delete"], stdin=subprocess.PIPE, stderr=subprocess.DEVNULL)
                 p.communicate(input=item["raw"].encode("utf-8"))
+            clip_id = item.get("id")
+            if clip_id:
+                self._clip_raw_cache.pop(clip_id, None)
+                for k in list(self._clip_thumb_cache.keys()):
+                    if k[0] == clip_id:
+                        del self._clip_thumb_cache[k]
+            self._raw_clips_cache = None
             self.refresh_clipboard()
         except Exception:
             pass
@@ -1653,6 +1795,9 @@ class ShelfWindow(Gtk.Window):
         self.hide_popout()
         if self.active_tab == "clip":
             subprocess.run(["cliphist", "wipe"], stderr=subprocess.DEVNULL)
+            self._raw_clips_cache = None
+            self._clip_thumb_cache.clear()
+            self._clip_raw_cache.clear()
             self.refresh_clipboard()
         else:
             try:
@@ -1707,7 +1852,10 @@ class ShelfWindow(Gtk.Window):
                 mtime = os.path.getmtime(CLIPHIST_DB)
                 if mtime > self.last_clip_mtime:
                     self.last_clip_mtime = mtime
-                    if self.active_tab == "clip":
+                    self._raw_clips_cache = None
+                    self._clip_thumb_cache.clear()
+                    self._clip_raw_cache.clear()
+                    if self.get_visible() and self.active_tab == "clip":
                         self.refresh_clipboard()
             except Exception:
                 pass
@@ -1727,6 +1875,36 @@ class ShelfWindow(Gtk.Window):
                 pass
         return True
 
+    def on_sigusr1(self, *args):
+        target_mode = "clip"
+        if os.path.exists(MODE_FILE):
+            try:
+                with open(MODE_FILE, "r") as f:
+                    target_mode = f.read().strip()
+            except Exception:
+                target_mode = "clip"
+
+        if self.get_visible():
+            if target_mode == self.active_tab:
+                self.close_window()
+            else:
+                self.switch_tab(target_mode)
+        else:
+            self.show_window(target_mode)
+        return True
+
+    def show_window(self, mode=None):
+        target = mode or self.active_tab
+        self.switch_tab(target)
+        if target == "clip":
+            self.refresh_clipboard()
+        else:
+            self.refresh_shelf()
+        self.show_all()
+        self.present()
+        if target == "clip":
+            GLib.idle_add(self.clip_search.grab_focus)
+
     def on_key_press(self, widget, event):
         if event.keyval == Gdk.KEY_Escape:
             if self.lightbox_win:
@@ -1742,9 +1920,28 @@ class ShelfWindow(Gtk.Window):
         if self.lightbox_win:
             self.lightbox_win.destroy()
             self.lightbox_win = None
+        self.clip_search.set_text("")
+        self.hide()
+
+    def quit_permanently(self):
+        self.hide_popout()
+        if self.lightbox_win:
+            self.lightbox_win.destroy()
+            self.lightbox_win = None
         self.destroy()
 
     def on_destroy(self, widget):
+        if hasattr(self, '_thread_pool') and self._thread_pool:
+            try:
+                self._thread_pool.shutdown(wait=False, cancel_futures=True)
+            except Exception:
+                pass
+        if self.search_debounce_timer is not None:
+            try:
+                GLib.source_remove(self.search_debounce_timer)
+            except Exception:
+                pass
+            self.search_debounce_timer = None
         self.hide_popout()
         if hasattr(self, 'popout_win') and self.popout_win:
             try:
@@ -1774,16 +1971,13 @@ class ShelfWindow(Gtk.Window):
 
 
 def main():
-    def sig_handler(signum, frame):
-        GLib.idle_add(Gtk.main_quit)
-
-    signal.signal(signal.SIGTERM, sig_handler)
-    signal.signal(signal.SIGINT, sig_handler)
-
+    daemon_mode = False
     mode = "clip"
-    if len(sys.argv) > 1:
-        arg = sys.argv[1].lower()
-        if "shelf" in arg or "stash" in arg or "drop" in arg:
+    for arg in sys.argv[1:]:
+        a = arg.lower()
+        if "--daemon" in a or "-d" == a or "--hidden" in a:
+            daemon_mode = True
+        elif "shelf" in a or "stash" in a or "drop" in a:
             mode = "shelf"
 
     try:
@@ -1796,8 +1990,22 @@ def main():
         win = ShelfWindow(initial_tab=mode)
         with open(PID_FILE, "w") as f:
             f.write(str(os.getpid()))
-        win.show_all()
-        win.switch_tab(mode)
+
+        def sig_handler(signum, frame):
+            GLib.idle_add(win.quit_permanently)
+
+        signal.signal(signal.SIGTERM, sig_handler)
+        signal.signal(signal.SIGINT, sig_handler)
+
+        if daemon_mode:
+            win.show_all()
+            win.hide()
+        else:
+            win.show_all()
+            win.switch_tab(mode)
+            if mode == "clip":
+                GLib.idle_add(win.clip_search.grab_focus)
+
         Gtk.main()
     except Exception as e:
         print(f"Error starting shelf: {e}", file=sys.stderr)

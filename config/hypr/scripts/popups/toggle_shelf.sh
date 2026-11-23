@@ -34,21 +34,11 @@ if [ -z "$SHELF_PID" ]; then
     fi
 fi
 
-# If process is running: toggle close or switch active tab
+# If process is running: send SIGUSR1 to toggle show/hide/tab instantly
 if [ -n "$SHELF_PID" ]; then
-    CURRENT_MODE="clip"
-    [ -f "$MODE_FILE" ] && CURRENT_MODE=$(cat "$MODE_FILE" 2>/dev/null)
-
-    if [ "$CURRENT_MODE" == "$TARGET_MODE" ]; then
-        # Same mode requested -> close window (Toggle Close)
-        kill -15 "$SHELF_PID" 2>/dev/null
-        rm -f "$PID_FILE" "$MODE_FILE"
-        exit 0
-    else
-        # Different tab requested -> switch immediately
-        echo "$TARGET_MODE" > "$MODE_FILE"
-        exit 0
-    fi
+    echo "$TARGET_MODE" > "$MODE_FILE"
+    kill -USR1 "$SHELF_PID" 2>/dev/null
+    exit 0
 fi
 
 # Ensure cliphist daemon is watching clipboard
@@ -59,6 +49,6 @@ pgrep -f "cliphist store" > /dev/null 2>&1 || {
 
 # 2. Launch in background with selected tab
 echo "$TARGET_MODE" > "$MODE_FILE"
-python3 "$SCRIPT_PATH" "$TARGET_MODE" &
+setsid python3 "$SCRIPT_PATH" "$TARGET_MODE" </dev/null >/dev/null 2>&1 &
 exit 0
 
