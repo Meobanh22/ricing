@@ -16,7 +16,8 @@ class StageSpotlight:
     def rgb(color):
         return tuple(int(color[index:index + 2], 16) / 255 for index in (1, 3, 5))
 
-    def beam(self, context, apex, target, top_width, bottom_width, strength):
+    def beam(self, context, apex, target, top_width, bottom_width, strength,
+             concentration=3.2):
         # Mesh alpha fades across the cone and at its lower end. This provides
         # soft edges without blurring a full-screen image on every music frame.
         mesh = cairo.MeshPattern()
@@ -37,7 +38,7 @@ class StageSpotlight:
                         mesh.move_to(*point)
                     else:
                         mesh.line_to(*point)
-                    core = math.exp(-u * u * 3.2)
+                    core = math.exp(-u * u * concentration)
                     edge_fade = max(0, min(1, 1 - (t - 0.85) / 0.15))
                     alpha = strength * core * (0.7 + 0.3 * t) * edge_fade
                     color = tuple(a + (b - a) * core for a, b in zip(self.pink, self.cream))
@@ -72,8 +73,11 @@ class StageSpotlight:
         for apex_x, target_x, offset in ((120, 400, 28), (380, 620, -6),
                                           (680, 820, -24), (1240, 1100, -24),
                                           (1540, 1300, -6), (1800, 1520, 28)):
-            self.beam(context, (apex_x, -45), (target_x, floor + offset), 24, 125, 0.10)
-            self.pool(context, target_x, floor + offset, 155, 45, 0.065)
+            # Broaden the auxiliary cones toward the floor, including their
+            # soft shoulders so the visible light is not confined to a thin core.
+            self.beam(context, (apex_x, -45), (target_x, floor + offset),
+                      24, 165, 0.10, concentration=1.8)
+            self.pool(context, target_x, floor + offset, 195, 50, 0.065)
         self.beam(context, (960, -45), (960, floor + 44), 40, 330, 0.24)
         self.pool(context, 960, floor + 44, 410, 110, 0.18)
         return surface

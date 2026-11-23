@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Serena Music
+GenericName=Music Player
+Comment=Local music library, lyrics and audio visualizer
+Exec=music-player
+Icon=audio-x-generic
+Terminal=false
+Categories=AudioVideo;Audio;Player;
+StartupWMClass=music-vis

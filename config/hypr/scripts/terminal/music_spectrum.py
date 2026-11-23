@@ -13,7 +13,8 @@ import cairo
 
 from music_lyrics import Image, image_command, pixel_size
 
-MAX_CANVAS_HEIGHT = 256
+MAX_CANVAS_WIDTH = 720
+MAX_CANVAS_HEIGHT = 160
 
 
 class SpectrumCanvas:
@@ -24,7 +25,8 @@ class SpectrumCanvas:
         self.image_id = ((os.getpid() & 0xFFFFFF) << 4) | 5
         self.shown = False
         self.last_scene = None
-        self.file_transport = not bool(os.environ.get('SSH_CONNECTION'))
+        # Stream transport with fast in-memory zlib avoids ~104 MiB/s temp file churn to /tmp
+        self.file_transport = bool(os.environ.get('KITTY_FILE_TRANSPORT', '0') == '1')
         self.buffers = None
         self.pending = []
         self.bar_cache = OrderedDict()
@@ -113,7 +115,7 @@ class SpectrumCanvas:
         if cols <= 0 or canvas_rows <= 0 or not bars:
             return self.clear()
         cell_width, cell_height = cell_dimensions or pixel_size(cols, rows)
-        width = max(1, round(cols * cell_width))
+        width = min(MAX_CANVAS_WIDTH, max(1, round(cols * cell_width)))
         # Kitty scales this continuous gradient to the requested rows. Bounding
         # the source height keeps large windows within the animation budget.
         height = min(MAX_CANVAS_HEIGHT, max(1, round(canvas_rows * cell_height)))

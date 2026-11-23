@@ -7,6 +7,7 @@ import time
 import json
 import re
 import select
+import socket
 import shutil
 import signal
 import termios
@@ -311,7 +312,7 @@ def init_terminal():
         tty.setcbreak(sys.stdin.fileno())
     # Enter alternate buffer, hide cursor, clear screen
     terminal_active = True
-    sys.stdout.write("\x1b[?1049h\x1b[?25l\x1b[2J")
+    sys.stdout.write("\x1b[?2026l\x1b[?1049h\x1b[?25l\x1b[2J")
     sys.stdout.flush()
 
 def cleanup_terminal():
@@ -320,7 +321,7 @@ def cleanup_terminal():
         return
     terminal_active = False
     # Show cursor, leave alternate buffer, reset styles
-    sys.stdout.write("\x1b[?25h\x1b[?1049l\x1b[0m\n")
+    sys.stdout.write("\x1b[?2026l\x1b[?25h\x1b[?1049l\x1b[0m\n")
     sys.stdout.flush()
     if old_termios and sys.stdin.isatty():
         try:
@@ -706,9 +707,157 @@ noise_reduction = 70
             time.sleep(0.5)
     config_dir.cleanup()
 
+
+# === HYPRLAND VISIBILITY WATCHER ===
+class HyprlandVisibilityWatcher:
+    """Monitors active workspaces via Hyprland IPC to pause visualizer rendering when off-screen."""
+
+    def __init__(self):
+        self.sig = os.environ.get("HYPRLAND_INSTANCE_SIGNATURE")
+        uid = os.getuid()
+        runtime_dir = os.environ.get("XDG_RUNTIME_DIR", f"/run/user/{uid}")
+        if self.sig:
+            self.cmd_socket_path = os.path.join(runtime_dir, "hypr", self.sig, ".socket.sock")
+            self.event_socket_path = os.path.join(runtime_dir, "hypr", self.sig, ".socket2.sock")
+        else:
+            self.cmd_socket_path = None
+            self.event_socket_path = None
+        self.event_sock = None
+        self.window_address = None
+        self.window_workspace_id = None
+        self.active_workspaces = set()
+        self.last_full_check = 0.0
+        self.is_visible = True
+        self._init_connection()
+
+    def _init_connection(self):
+        if not self.event_socket_path or not os.path.exists(self.event_socket_path):
+            return
+        try:
+            self.event_sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            self.event_sock.connect(self.event_socket_path)
+            self.event_sock.setblocking(False)
+            self.refresh_full()
+        except Exception:
+            self.event_sock = None
+            self.is_visible = True
+
+    def query_hyprland(self, cmd: str):
+        if not self.cmd_socket_path or not os.path.exists(self.cmd_socket_path):
+            return None
+        try:
+            with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as s:
+                s.settimeout(0.3)
+                s.connect(self.cmd_socket_path)
+                s.sendall(cmd.encode("utf-8"))
+                data = b""
+                while True:
+                    chunk = s.recv(8192)
+                    if not chunk:
+                        break
+                    data += chunk
+                return json.loads(data.decode("utf-8", errors="ignore"))
+        except Exception:
+            return None
+
+    def refresh_full(self):
+        self.last_full_check = time.monotonic()
+        if not self.cmd_socket_path:
+            self.is_visible = True
+            return
+
+        monitors = self.query_hyprland("j/monitors")
+        if monitors and isinstance(monitors, list):
+            self.active_workspaces = {
+                m.get("activeWorkspace", {}).get("id")
+                for m in monitors
+                if "activeWorkspace" in m and "id" in m["activeWorkspace"]
+            }
+            for m in monitors:
+                sp = m.get("specialWorkspace", {}).get("id")
+                if sp:
+                    self.active_workspaces.add(sp)
+
+        clients = self.query_hyprland("j/clients")
+        if clients and isinstance(clients, list):
+            my_pid = os.getpid()
+            pids = {my_pid}
+            p = my_pid
+            while p > 1:
+                try:
+                    with open(f"/proc/{p}/stat", "r") as f:
+                        ppid = int(f.read().split()[3])
+                        p = ppid
+                        pids.add(p)
+                except Exception:
+                    break
+
+            for c in clients:
+                cls = c.get("class", "")
+                title = c.get("title", "")
+                in_title = c.get("initialTitle", "")
+                if c.get("pid") in pids or cls == "music-vis" or in_title == "Serena Music" or "Serena Music" in title:
+                    self.window_address = c.get("address")
+                    self.window_workspace_id = c.get("workspace", {}).get("id")
+                    if c.get("pinned", False):
+                        self.is_visible = True
+                        return
+                    break
+
+        if self.window_workspace_id is not None and self.active_workspaces:
+            self.is_visible = (self.window_workspace_id in self.active_workspaces)
+        else:
+            self.is_visible = True
+
+    def handle_events(self):
+        if not self.event_sock:
+            return
+        needs_refresh = False
+        try:
+            while True:
+                data = self.event_sock.recv(4096)
+                if not data:
+                    break
+                text = data.decode("utf-8", errors="ignore")
+                for line in text.split("\n"):
+                    if not line:
+                        continue
+                    if ">>" in line:
+                        event, _ = line.split(">>", 1)
+                        if event in ("workspace", "workspacev2", "focusedmon", "movewindow", "movewindowv2", "fullscreen"):
+                            needs_refresh = True
+        except (BlockingIOError, InterruptedError):
+            pass
+        except Exception:
+            try:
+                self.event_sock.close()
+            except Exception:
+                pass
+            self.event_sock = None
+
+        if needs_refresh or (time.monotonic() - self.last_full_check > 5.0):
+            self.refresh_full()
+
+    def get_socket_fd(self):
+        return self.event_sock
+
+    def close(self):
+        if self.event_sock:
+            try:
+                self.event_sock.close()
+            except Exception:
+                pass
+            self.event_sock = None
+
+    def __del__(self):
+        self.close()
+
+
 # === LYRICS APPLICATION ===
 class LyricsApp:
-    def __init__(self):
+    def __init__(self, local_player=None):
+        self.local_player = local_player
+        self.mode_requested = None
         self.running = True
         self.sync_offset = 0.0  # seconds
 
@@ -752,8 +901,10 @@ class LyricsApp:
         self.focus_mode = MusicFocus(enabled=bool(os.environ.get('WAYLAND_DISPLAY'))
                                     and self.scaled_lyrics and LyricsCanvas is not None and SpectrumCanvas is not None)
         self.focus_frame_size = None
+        self.graphics_frame_size = None
         self.idle_backdrop = IdleBackdrop(C_BG_WIN, enabled=self.scaled_lyrics, native=True, normal_opacity=0.94)
         self.terminal_input = TerminalInput()
+        self.visibility_watcher = HyprlandVisibilityWatcher()
 
         # Start CAVA thread
         self.cava_thread = threading.Thread(target=cava_worker, daemon=True)
@@ -761,10 +912,19 @@ class LyricsApp:
 
     def update_mpris(self):
         try:
-            cmd = ['playerctl', 'metadata', '--format',
-                   '{{status}}\t{{position}}\t{{mpris:length}}\t{{title}}\t{{artist}}\t{{album}}\t{{xesam:url}}']
-            out = subprocess.check_output(cmd, text=True, stderr=subprocess.DEVNULL, timeout=1).rstrip('\r\n')
-            parts = out.split('\t')
+            if self.local_player is not None:
+                with self.local_player.lock:
+                    player = self.local_player
+                    track = player.track
+                    parts = [player.status, str(round(player.position * 1_000_000)),
+                             str(round(player.duration * 1_000_000)),
+                             track.title if track else '', track.artist if track else '',
+                             track.album if track else '', track.path.as_uri() if track else '']
+            else:
+                cmd = ['playerctl', 'metadata', '--format',
+                       '{{status}}\t{{position}}\t{{mpris:length}}\t{{title}}\t{{artist}}\t{{album}}\t{{xesam:url}}']
+                out = subprocess.check_output(cmd, text=True, stderr=subprocess.DEVNULL, timeout=1).rstrip('\r\n')
+                parts = out.split('\t')
             if len(parts) < 4:
                 return
             raw_pos = float(parts[1]) if parts[1].replace('.', '', 1).isdigit() else 0.0
@@ -799,6 +959,14 @@ class LyricsApp:
             if raw_len > 0 or track_key != self.current_track_key:
                 self.length = raw_len / 1_000_000.0
             self.sync_playback(parts[0], raw_pos / 1_000_000.0, track_key)
+            if self.local_player is not None:
+                # The owned engine reports its actual clock, including deliberate
+                # seeks; it does not need the external-player rewind heuristic.
+                self.position = raw_pos / 1_000_000.0
+                self.last_sync_time = time.monotonic()
+                self.clock_correction = 0.0
+                self.position_is_estimated = False
+                self.pending_rewind = None
         except Exception:
             self.status = "No Player"
             return
@@ -960,6 +1128,7 @@ class LyricsApp:
             self.focus_mode.update(lyric_lines, index, self.current_track_key,
                                    self.bars, SPECTRUM_GAIN, GRADIENT_STOPS)
             if self.focus_mode.ready:
+                self.graphics_frame_size = None
                 # The overlay draws the foreground above all desktop surfaces.
                 # Clear Kitty's copy so it cannot show through the dim layer.
                 frame = [self.idle_backdrop.update()]
@@ -980,10 +1149,15 @@ class LyricsApp:
         # Clear before drawing: erasing a lower row of Kitty's enlarged text
         # would erase the whole glyph. All lyric and spectrum regions stay apart.
         frame = ["\x1b[?2026h", self.idle_backdrop.update()]
-        frame.extend(f"\x1b[{row + 1};1H\x1b[K" for row in range(rows))
         # Use one scale for the waveform even while lyrics load or are missing.
         lyric_top, lyric_rows, spectrum_start = visualizer_regions(rows)
         use_canvas = self.lyrics_canvas is not None and rows >= 12 and cols >= 24 and bool(lyric_lines)
+        graphics_only = self.spectrum_canvas is not None and (use_canvas or not any((previous, current, upcoming)))
+        # Image placements replace themselves. Erasing every terminal row at
+        # 60 FPS only adds terminal work while both regions use graphics.
+        if not graphics_only or self.graphics_frame_size != (cols, rows):
+            frame.extend(f"\x1b[{row + 1};1H\x1b[K" for row in range(rows))
+        self.graphics_frame_size = (cols, rows) if graphics_only else None
         if use_canvas:
             spectrum_start, image_frame = self.lyrics_canvas.render(lyric_lines, index, cols, rows, self.current_track_key)
             frame.append(image_frame)
@@ -1088,18 +1262,34 @@ class LyricsApp:
         return lines
 
     def handle_key(self, key):
-        if key in ('q', 'Q', '\x03'):  # 'q' or Ctrl+C
+        if key in ('\t', 'v', 'V') and self.local_player is not None:
+            self.mode_requested = 'library'
             self.running = False
+        elif key in ('q', 'Q', '\x03'):  # 'q' or Ctrl+C
+            self.running = False
+            if self.local_player is not None:
+                self.local_player.exit_requested = True
         elif key in ('d', 'D'):
             self.focus_mode.toggle()
             self.idle_backdrop.forced = self.focus_mode.active
             self.idle_backdrop.interact()
         elif key == ' ':
-            subprocess.run(['playerctl', 'play-pause'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            if self.local_player is not None:
+                self.local_player.toggle()
+            else:
+                subprocess.run(['playerctl', 'play-pause'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         elif key in ('n', 'N'):
-            subprocess.run(['playerctl', 'next'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            if self.local_player is not None:
+                self.local_player.next()
+            else:
+                subprocess.run(['playerctl', 'next'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         elif key in ('p', 'P'):
-            subprocess.run(['playerctl', 'previous'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            if self.local_player is not None:
+                self.local_player.previous()
+            else:
+                subprocess.run(['playerctl', 'previous'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        elif key in ('h', 'l') and self.local_player is not None:
+            self.local_player.seek(-5 if key == 'h' else 5)
         elif key == '\x1b[D' or key == '-':  # Delay lyrics by 0.5s.
             self.sync_offset -= 0.5
             save_sync_offset(self.sync_track_key, self.sync_offset)
@@ -1118,26 +1308,54 @@ class LyricsApp:
             sys.stdout.flush()
             last_mpris_poll = 0
             next_frame = 0
-            while self.running:
+            was_hidden = False
+            while self.running and not (self.local_player is not None and self.local_player.exit_requested):
                 now = time.monotonic()
-                if now - last_mpris_poll > 0.4 and (self.mpris_thread is None or not self.mpris_thread.is_alive()):
+                is_playing = (self.status == "Playing")
+                is_visible = self.visibility_watcher.is_visible
+
+                # Throttle MPRIS updates when hidden or paused
+                mpris_interval = 0.4 if (is_playing and is_visible) else 1.5
+                if now - last_mpris_poll > mpris_interval and (self.mpris_thread is None or not self.mpris_thread.is_alive()):
                     self.mpris_thread = threading.Thread(target=self.update_mpris, daemon=True)
                     self.mpris_thread.start()
                     last_mpris_poll = now
 
-                if now >= next_frame:
-                    self.render()
-                    interval = 1 / RENDER_FPS
-                    next_frame = (next_frame or now) + interval
-                    finished = time.monotonic()
-                    if next_frame <= finished:
-                        next_frame += (math.floor((finished - next_frame) / interval) + 1) * interval
-                frame_wait = max(0.0, next_frame - time.monotonic())
+                if is_visible:
+                    if was_hidden:
+                        # Synchronize immediately upon becoming visible again
+                        was_hidden = False
+                        next_frame = 0
+                        self.last_frame_time = time.monotonic()
+                        if self.mpris_thread is None or not self.mpris_thread.is_alive():
+                            self.mpris_thread = threading.Thread(target=self.update_mpris, daemon=True)
+                            self.mpris_thread.start()
+
+                    if now >= next_frame:
+                        self.render()
+                        fps = RENDER_FPS if is_playing else 10
+                        interval = 1 / fps
+                        next_frame = (next_frame or now) + interval
+                        finished = time.monotonic()
+                        if next_frame <= finished:
+                            next_frame += (math.floor((finished - next_frame) / interval) + 1) * interval
+                    frame_wait = max(0.0, next_frame - time.monotonic())
+                else:
+                    was_hidden = True
+                    # Pause rendering completely when off-screen; sleep in select until woken by socket2 or input
+                    frame_wait = 0.25
+
                 inputs = [sys.stdin]
                 focus_connection = self.focus_mode.connection
                 if focus_connection is not None:
                     inputs.append(focus_connection)
+                hypr_sock = self.visibility_watcher.get_socket_fd()
+                if hypr_sock is not None:
+                    inputs.append(hypr_sock)
+
                 readable = select.select(inputs, [], [], frame_wait)[0]
+                if hypr_sock is not None and hypr_sock in readable:
+                    self.visibility_watcher.handle_events()
                 if sys.stdin in readable:
                     data = os.read(sys.stdin.fileno(), 4096)
                     if not data:
@@ -1147,11 +1365,16 @@ class LyricsApp:
                         self.idle_backdrop.interact()
                     for key in keys:
                         self.handle_key(key)
+                        if not self.running:
+                            break
                 if focus_connection is not None and focus_connection in readable:
                     for key in self.focus_mode.read_keys():
                         self.idle_backdrop.interact()
                         self.handle_key(key)
+                        if not self.running:
+                            break
         finally:
+            self.visibility_watcher.close()
             self.focus_mode.close()
             cava_active = False
             if cava_proc:
@@ -1160,6 +1383,8 @@ class LyricsApp:
                 except OSError:
                     pass
             self.cava_thread.join(timeout=2)
+            if self.mpris_thread is not None:
+                self.mpris_thread.join(timeout=1.2)
             if self.lyrics_canvas is not None:
                 sys.stdout.write(self.lyrics_canvas.clear())
             if self.spectrum_canvas is not None:
@@ -1168,10 +1393,20 @@ class LyricsApp:
             cleanup_terminal()
 
 
+def run_visualizer(player):
+    global cava_active, cava_proc, cava_raw_targets
+    cava_active = True
+    cava_proc = None
+    cava_raw_targets = [0.0] * NUM_BARS
+    app = LyricsApp(local_player=player)
+    app.run()
+    return app.mode_requested
+
+
 if __name__ == "__main__":
-    if not sys.stdin.isatty() or not sys.stdout.isatty():
+    if (not sys.stdin.isatty() or not sys.stdout.isatty()) and not any(
+            flag in sys.argv for flag in ('--headless', '--help', '-h')):
         sys.exit("Music requires an interactive terminal.")
     signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGTERM, signal_handler)
-    app = LyricsApp()
-    app.run()
+    from music_player import main
+    sys.exit(main(visualizer=run_visualizer) or 0)

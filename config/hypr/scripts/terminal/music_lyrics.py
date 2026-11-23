@@ -26,12 +26,13 @@ try:
 except ImportError:
     Image = None
 
-TRANSITION_SECONDS = 0.32
+TRANSITION_SECONDS = 0.48
 
 
 def smoothstep(value):
     value = max(0.0, min(1.0, value))
-    return value * value * (3 - 2 * value)
+    # Zero velocity and acceleration at both ends soften the line handover.
+    return value * value * value * (value * (value * 6 - 15) + 10)
 
 
 def pixel_size(cols, rows):
@@ -118,11 +119,36 @@ class LyricsCanvas:
             colors.append(tuple(int(color[index:index + 2], 16) / 255 for index in (1, 3, 5)))
         context.set_source_rgba(*(a + (b - a) * amount for a, b in zip(*colors)), alpha)
 
+    @lru_cache(maxsize=16)
+    def line_masks(self, text, width, font_pixels, pixel_scale):
+        layout = self.layout(text, width, font_pixels)
+        text_height = layout.get_pixel_size()[1]
+        ink, _ = layout.get_pixel_extents()
+        masks = []
+        # Rasterize once so fractional motion and scaling stay smooth.
+        # Two alpha masks let the foreground color change without rebuilding glyphs.
+        for outline in (True, False):
+            surface = cairo.ImageSurface(cairo.FORMAT_A8, max(1, ink.width + 16) * pixel_scale,
+                                         max(1, ink.height + 16) * pixel_scale)
+            surface.set_device_scale(pixel_scale, pixel_scale)
+            painter = cairo.Context(surface)
+            painter.translate(8 - ink.x, 8 - ink.y)
+            PangoCairo.layout_path(painter, layout)
+            painter.set_source_rgba(1, 1, 1, 1)
+            if outline:
+                painter.set_line_join(cairo.LINE_JOIN_ROUND)
+                painter.set_line_width(3)
+                painter.stroke_preserve()
+            painter.fill()
+            masks.append(surface)
+        return masks, text_height, ink.x - 8, ink.y - 8
+
     def draw_line(self, context, text, focus, center_y, width, height, font_pixels):
         if not text:
             return
-        layout = self.layout(text, width - 32, font_pixels)
-        _, text_height = layout.get_pixel_size()
+        pixel_scale = max(1, round(context.get_target().get_device_scale()[0]))
+        (outline, glyphs), text_height, mask_x, mask_y = self.line_masks(
+            text, width - 32, font_pixels, pixel_scale)
         # Keep line breaks fixed while the preview grows into the active line.
         scale = 0.56 + 0.44 * focus
         scale = min(scale, height * 0.45 / max(1, text_height))
@@ -135,13 +161,10 @@ class LyricsCanvas:
         context.translate((width - (width - 32) * scale) / 2, y)
         context.scale(scale, scale)
         # A narrow wine outline keeps the letters readable over bright wallpaper.
-        PangoCairo.layout_path(context, layout)
         self.color(context, 'bg_window', 'bg_window', 0, alpha)
-        context.set_line_join(cairo.LINE_JOIN_ROUND)
-        context.set_line_width(3.0 / scale)
-        context.stroke_preserve()
+        context.mask_surface(outline, mask_x, mask_y)
         self.color(context, 'text_secondary', 'text_inverse', focus, alpha)
-        context.fill()
+        context.mask_surface(glyphs, mask_x, mask_y)
         context.restore()
 
     def draw_surface(self, lines, scroll, width, height, cell_height, pixel_scale=1):

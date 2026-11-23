@@ -258,7 +258,8 @@ def run_overlay(fd, parent_pid):
             return False
 
         def key(self, _, event):
-            special = {Gdk.KEY_Escape: 'd', Gdk.KEY_Left: '\x1b[D', Gdk.KEY_Right: '\x1b[C'}
+            special = {Gdk.KEY_Escape: 'd', Gdk.KEY_Left: '\x1b[D', Gdk.KEY_Right: '\x1b[C',
+                       Gdk.KEY_Tab: '\t', Gdk.KEY_ISO_Left_Tab: '\t'}
             if event.state & Gdk.ModifierType.CONTROL_MASK:
                 value = '\x03' if event.keyval in (Gdk.KEY_c, Gdk.KEY_C) else ''
             elif event.state & (Gdk.ModifierType.MOD1_MASK | Gdk.ModifierType.SUPER_MASK):

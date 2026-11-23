@@ -9,7 +9,7 @@ import tempfile
 import unittest
 import urllib.parse
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -30,6 +30,30 @@ class SpectrumTests(unittest.TestCase):
             app = music.LyricsApp()
         app.lyrics_canvas = None
         return app
+
+    def test_graphics_frames_clear_stale_text_only_on_mode_or_size_changes(self):
+        app = self.make_app()
+        app.spectrum_canvas = Mock()
+        app.spectrum_canvas.render.return_value = ''
+        output = io.StringIO()
+        with patch.object(music.shutil, 'get_terminal_size', return_value=(80, 24)) as size, \
+             patch.object(music.sys, 'stdout', output):
+            app.render()
+            self.assertIn('\x1b[K', output.getvalue())
+            output.seek(0)
+            output.truncate()
+            app.render()
+            self.assertNotIn('\x1b[K', output.getvalue())
+            size.return_value = (100, 30)
+            output.seek(0)
+            output.truncate()
+            app.render()
+            self.assertIn('\x1b[K', output.getvalue())
+            app.spectrum_canvas = None
+            output.seek(0)
+            output.truncate()
+            app.render()
+            self.assertIn('\x1b[K', output.getvalue())
 
     def test_spectrum_fills_width_after_resize(self):
         app = self.make_app()
@@ -684,6 +708,16 @@ class SpectrumCanvasTests(unittest.TestCase):
             canvas.paint_cached(context, [height] * 3, 8, 160, 100)
         self.assertLessEqual(canvas.bar_cache_bytes, canvas.bar_cache_limit)
 
+    def test_default_transport_uses_inline_compressed_stream_without_temp_files(self):
+        canvas = music.SpectrumCanvas(music.GRADIENT_STOPS)
+        self.assertFalse(canvas.file_transport)
+        self.addCleanup(canvas.clear)
+        command = canvas.render([30] * 3, 80, 24, 15, cell_dimensions=(9, 20))
+        self.assertIn('o=z,', command)
+        self.assertNotIn('t=t,', command)
+        self.assertIsNone(canvas.buffers)
+        self.assertEqual(len(canvas.pending), 0)
+
     def test_local_transport_is_bounded_and_releases_temporary_frames(self):
         from pathlib import Path
         canvas = music.SpectrumCanvas(music.GRADIENT_STOPS)
@@ -763,7 +797,8 @@ class LyricsCanvasTests(unittest.TestCase):
         canvas = self.make_canvas()
         self.assertEqual(canvas.set_target(0, "track", 100), 0)
         self.assertEqual(canvas.set_target(1, "track", 101), 0)
-        middle = canvas.scroll_at(101.16)
+        import music_lyrics
+        middle = canvas.scroll_at(101 + music_lyrics.TRANSITION_SECONDS / 2)
         self.assertAlmostEqual(middle, 0.5)
         self.assertEqual(canvas.scroll_at(102), 1)
         self.assertEqual(canvas.set_target(8, "track", 103), 8)
@@ -797,6 +832,33 @@ class LyricsCanvasTests(unittest.TestCase):
         self.assertEqual(unchanged, '')
         self.assertIn(f"i={canvas.image_id}", canvas.clear())
         self.assertEqual(canvas.clear(), '')
+
+
+class VisibilityWatcherTests(unittest.TestCase):
+    def test_watcher_defaults_to_visible_without_hyprland(self):
+        with patch.dict(music.os.environ, {}, clear=True):
+            watcher = music.HyprlandVisibilityWatcher()
+            self.assertTrue(watcher.is_visible)
+            self.assertIsNone(watcher.get_socket_fd())
+            watcher.close()
+
+    def test_watcher_detects_hidden_and_visible_workspaces(self):
+        with patch.dict(music.os.environ, {"HYPRLAND_INSTANCE_SIGNATURE": "fake_sig", "XDG_RUNTIME_DIR": "/tmp"}):
+            with patch.object(music.socket.socket, "connect", return_value=None), \
+                 patch.object(music.os.path, "exists", return_value=True):
+                watcher = music.HyprlandVisibilityWatcher()
+                
+                # Mock monitors on workspace 1, window on workspace 3 -> hidden
+                watcher.active_workspaces = {1}
+                watcher.window_workspace_id = 3
+                watcher.is_visible = (watcher.window_workspace_id in watcher.active_workspaces)
+                self.assertFalse(watcher.is_visible)
+
+                # Monitor switches to workspace 3 -> visible
+                watcher.active_workspaces = {3}
+                watcher.is_visible = (watcher.window_workspace_id in watcher.active_workspaces)
+                self.assertTrue(watcher.is_visible)
+                watcher.close()
 
 
 if __name__ == "__main__":
