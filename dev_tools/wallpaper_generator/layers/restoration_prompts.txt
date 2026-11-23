@@ -1,0 +1,9 @@
+Built-in image_gen was used for the extraction guide and clean background plate.
+Final character RGB comes directly from serena_fennekin_original.jpg, composited with ImageMagick by restore_original_characters.pl.
+
+EXTRACTION GUIDE PROMPT
+Use case: background-extraction.
+Remove ONLY the background from this original anime illustration. Return Serena and Fennekin together as a clean cutout on a genuinely transparent background. Preserve the complete original character artwork with its exact existing facial features, pupils, eye highlights, small angular nose, simple hand/finger crease lines, original blue ribbon, cel-shading colors, tail shape and toe contours. Keep the original full wide canvas, original character positions and original relative scale; do not center or rearrange them. Include both outstretched arms, the hand at each side, the hat, all hair tips, the complete visible Fennekin including its tail, ears, muzzle and dangling legs, and the clothing cropped naturally at the bottom edge just as in the original. Remove all sky, hills, city, tower, grass, flowers, stars and floating lights, including every background gap between arms, legs, ears, hair and tail. Fine clean antialiased edges. This is foreground extraction, preserving the input's drawing rather than redrawing or beautifying it. No color correction or added details.
+
+CLEAN BACKGROUND PLATE PROMPT
+Remove the two foreground characters from this wallpaper and fill the areas behind them with a natural continuation of the existing landscape. Return ONLY the clean background plate, without any people, creatures, clothing or character outlines. Preserve the existing pink-peach sunset sky, clouds, small sun at left, distant hills, trees, short green lawn, small white daisies and their current drawing style and colors. Maintain the original full wide canvas and horizon level. Reconstruct the hidden sky and meadow consistently. No new objects, text or watermark.
