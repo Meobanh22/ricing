@@ -470,6 +470,9 @@ class HyprlandAppTracker:
         self.last_cursor_pos = None
         self.last_activity_time = time.monotonic()
         self.is_afk = False
+        self.last_afk_check = 0.0
+        self.cached_tabs = {}
+        self.last_tabs_fetch = 0.0
 
         self.sig = os.environ.get("HYPRLAND_INSTANCE_SIGNATURE")
         uid = os.getuid()
@@ -495,12 +498,24 @@ class HyprlandAppTracker:
 
     def _is_screen_locked(self) -> bool:
         try:
-            res = subprocess.run(["pidof", "hyprlock"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            return res.returncode == 0
+            for entry in os.scandir('/proc'):
+                if entry.name.isdigit():
+                    try:
+                        with open(os.path.join(entry.path, 'comm'), 'r') as f:
+                            if f.read().strip() == 'hyprlock':
+                                return True
+                    except (OSError, IOError):
+                        continue
+            return False
         except Exception:
             return False
 
-    def _check_afk(self):
+    def _check_afk(self, force=False):
+        now = time.monotonic()
+        if not force and (now - self.last_afk_check) < 15.0:
+            return
+        self.last_afk_check = now
+
         if self._is_screen_locked():
             self.is_afk = True
             return
@@ -511,9 +526,9 @@ class HyprlandAppTracker:
             if len(pos) == 2:
                 if self.last_cursor_pos != pos:
                     self.last_cursor_pos = pos
-                    self.last_activity_time = time.monotonic()
+                    self.last_activity_time = now
                     self.is_afk = False
-                elif (time.monotonic() - self.last_activity_time) > IDLE_TIMEOUT_SECONDS:
+                elif (now - self.last_activity_time) > IDLE_TIMEOUT_SECONDS:
                     self.is_afk = True
         except Exception:
             pass
@@ -527,9 +542,12 @@ class HyprlandAppTracker:
             today_str = datetime.date.today().isoformat()
             url = ""
             if is_browser_app(self.current_class):
-                tabs = FirefoxTabResolver.get_open_tabs()
+                now_m = time.monotonic()
+                if (now_m - self.last_tabs_fetch > 30.0) or (self.current_title not in self.cached_tabs):
+                    self.cached_tabs = FirefoxTabResolver.get_open_tabs()
+                    self.last_tabs_fetch = now_m
                 clean_t = clean_window_title(self.current_title, self.current_class)
-                url = tabs.get(clean_t) or tabs.get(self.current_title) or FirefoxTabResolver.guess_url_from_title(clean_t)
+                url = self.cached_tabs.get(clean_t) or self.cached_tabs.get(self.current_title) or FirefoxTabResolver.guess_url_from_title(clean_t)
             self.db.record_usage(self.boot_id, today_str, self.current_class, self.current_title, elapsed, url=url)
 
     def _connect_socket(self):
