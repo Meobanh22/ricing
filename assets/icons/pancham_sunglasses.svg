@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- Pancham's Red Wide-Frame Performance Sunglasses (Minimal Matte Cel) -->
+  <g stroke="#4D0A1C" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round">
+    <!-- Side Hinges / Temples -->
+    <path d="M 10 40 L 4 37 C 2 36, 2 44, 4 45 L 10 44" fill="#DC1A36"/>
+    <path d="M 90 40 L 96 37 C 98 36, 98 44, 96 45 L 90 44" fill="#DC1A36"/>
+
+    <!-- Main Outer Frame (Chunky Anime Silhouette) -->
+    <path d="M 8 36 C 18 34, 38 34, 46 38 C 48 39, 52 39, 54 38 C 62 34, 82 34, 92 36 C 95 36.5, 96 40, 95 44 L 88 64 C 86 68, 80 70, 75 70 C 65 70, 58 64, 55 56 C 53 50, 47 50, 45 56 C 42 64, 35 70, 25 70 C 20 70, 14 68, 12 64 L 5 44 C 4 40, 5 36.5, 8 36 Z"
+          fill="#DC1A36"/>
+
+    <!-- Left Lens (Tinted Dark Obsidian) -->
+    <path d="M 14 41 C 24 39, 38 39, 44 43 C 44 48, 41 57, 39 61 C 36 65, 30 65, 26 65 C 21 65, 17 62, 16 57 L 13 45 C 12 42, 13 41, 14 41 Z"
+          fill="#201011" stroke="#4D0A1C" stroke-width="2.4"/>
+
+    <!-- Right Lens (Tinted Dark Obsidian) -->
+    <path d="M 86 41 C 76 39, 62 39, 56 43 C 56 48, 59 57, 61 61 C 64 65, 70 65, 74 65 C 79 65, 83 62, 84 57 L 87 45 C 88 42, 87 41, 86 41 Z"
+          fill="#201011" stroke="#4D0A1C" stroke-width="2.4"/>
+  </g>
+
+  <!-- Left Lens Glare Lines (White Anime Reflection) -->
+  <path d="M 21 44 L 16 56" stroke="#FFF0F5" stroke-width="2.2" stroke-linecap="round" opacity="0.9"/>
+  <path d="M 27 44 L 21 59" stroke="#FFF0F5" stroke-width="2.2" stroke-linecap="round" opacity="0.9"/>
+
+  <!-- Right Lens Glare Lines -->
+  <path d="M 63 44 L 58 56" stroke="#FFF0F5" stroke-width="2.2" stroke-linecap="round" opacity="0.9"/>
+  <path d="M 69 44 L 63 59" stroke="#FFF0F5" stroke-width="2.2" stroke-linecap="round" opacity="0.9"/>
+
+  <!-- Top Frame Highlight Accent -->
+  <path d="M 15 36 C 25 35, 38 35, 44 38" stroke="#F02D4C" stroke-width="2.0" stroke-linecap="round" fill="none"/>
+  <path d="M 85 36 C 75 35, 62 35, 56 38" stroke="#F02D4C" stroke-width="2.0" stroke-linecap="round" fill="none"/>
+</svg>
