@@ -81,9 +81,10 @@ hl.on("hyprland.start", function ()
     hl.exec_cmd("gnome-keyring-daemon --start --components=secrets,pkcs11,ssh")
     hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP GNOME_KEYRING_CONTROL SSH_AUTH_SOCK")
 
-    -- 9. Clipboard watcher (cliphist for text & images)
+    -- 9. Clipboard watcher (cliphist for text & images) & pre-warmed shelf daemon
     hl.exec_cmd("wl-paste --type text --watch cliphist store &")
     hl.exec_cmd("wl-paste --type image --watch cliphist store &")
+    hl.exec_cmd("python3 ~/.config/hypr/scripts/popups/shelf.py --daemon &")
 
     -- 10. Low battery alert daemon
     hl.exec_cmd("python3 ~/.config/hypr/scripts/services/battery_alert.py &")
@@ -108,7 +109,7 @@ hl.config({
         sensitivity = 0,
     },
     cursor = {
-        no_hardware_cursors = true,
+        no_hardware_cursors = false,
         enable_hyprcursor = true,
         sync_gsettings_theme = true,
     },
@@ -161,6 +162,10 @@ hl.config({
         disable_splash_rendering = true,
         background_color         = "rgb(0c0608)",
     },
+
+    xwayland = {
+        force_zero_scaling = true,
+    },
 })
 
 -- === ANIMATIONS ===
@@ -175,7 +180,7 @@ hl.animation({ leaf = "windows",     enabled = true, speed = 4,  bezier = "wind"
 hl.animation({ leaf = "windowsIn",   enabled = true, speed = 4,  bezier = "winIn",   style = "popin 75%" })
 hl.animation({ leaf = "windowsOut",  enabled = true, speed = 4,  bezier = "winOut",  style = "popin 75%" })
 hl.animation({ leaf = "border",      enabled = true, speed = 8,  bezier = "default" })
-hl.animation({ leaf = "borderangle", enabled = true, speed = 30, bezier = "default", style = "loop" })
+hl.animation({ leaf = "borderangle", enabled = false })
 hl.animation({ leaf = "fade",        enabled = true, speed = 4,  bezier = "default" })
 hl.animation({ leaf = "workspaces",  enabled = true, speed = 5,  bezier = "wind",    style = "slide" })
 hl.animation({ leaf = "layersIn",    enabled = true, speed = 2,  bezier = "default", style = "fade" })

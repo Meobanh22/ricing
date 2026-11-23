@@ -34,3 +34,9 @@ user_pref("widget.dmabuf.wayland_drm_backend.enabled", true);
 // 8. Background tab throttling & power efficiency
 user_pref("dom.timeout.enable_budget_timer_throttling", true);
 user_pref("dom.ipc.processPriorityManager.enabled", true);
+
+// 9. Memory management & background tab unloading (reduces RAM usage)
+user_pref("browser.tabs.unloadOnLowMemory", true);
+user_pref("browser.low_commit_space_threshold_mb", 1024);
+user_pref("browser.cache.memory.capacity", 65536);
+

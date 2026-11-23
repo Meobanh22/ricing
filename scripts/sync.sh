@@ -250,10 +250,10 @@ sync_push() {
         echo -e "  ${GREEN}✔ Hyprland reloaded!${NC}"
 
         if pgrep -x "waybar" &>/dev/null; then
-            pkill -SIGUSR2 waybar 2>/dev/null || (pkill -x waybar && sleep 0.3 && nohup waybar >/dev/null 2>&1 & disown)
+            pkill -SIGUSR2 waybar 2>/dev/null || (pkill -x waybar && sleep 0.3 && hyprctl dispatch exec waybar &>/dev/null)
             echo -e "  ${GREEN}✔ Waybar reloaded!${NC}"
         else
-            nohup waybar >/dev/null 2>&1 & disown
+            hyprctl dispatch exec waybar &>/dev/null || (nohup waybar >/dev/null 2>&1 & disown)
             echo -e "  ${GREEN}✔ Waybar started!${NC}"
         fi
 
