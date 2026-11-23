@@ -75,6 +75,7 @@ try:
     )
     C_SUNSET_PINK = SUNSET_STOPS[2][1]    # #FF7299 (sunset gradient 50% anime pink)
     C_SUNSET_PASTEL = SUNSET_STOPS[3][1]  # #EAA2C6 (sunset gradient 75% pastel pink)
+    C_SUNSET_ROSE = SUNSET_STOPS[0][1]    # #A3183D (sunset gradient 0% anime rose)
 except ImportError:
     C_BG_WIN = "#201011"
     C_BG_CARD = "#2A1A1E"
@@ -96,6 +97,7 @@ except ImportError:
     C_POKEPUFF_PINK = "#FF5C8A"
     C_SUNSET_PINK = "#FF7299"
     C_SUNSET_PASTEL = "#EAA2C6"
+    C_SUNSET_ROSE = "#A3183D"
     def hex_to_rgba(hex_code, alpha=1.0):
         h = hex_code.strip().lstrip('#')
         if len(h) == 6:
@@ -106,7 +108,8 @@ except ImportError:
 COLOR_BORDER_SHADOW = hex_to_rgba(C_BORDER_3D, 0.98)   # #4D0A1C tactile border
 COLOR_PINK_TOP = hex_to_rgba(C_SUNSET_PINK, 1.0)       # #FF7299 vibrant anime pink from sunset gradient
 COLOR_PINK_BOT = hex_to_rgba(C_SUNSET_PASTEL, 1.0)     # #EAA2C6 soft pastel pink from sunset gradient
-COLOR_PINK_INSIDE = hex_to_rgba(C_SUNSET_PINK, 1.0)    # #FF7299 solid anime pink for inside body
+COLOR_PINK_INSIDE = hex_to_rgba(C_TEXT_SEC, 1.0)       # #E8C2D0 soft anime pink from tokens.json (soft_pink)
+COLOR_PINK_ROSE = hex_to_rgba(C_SUNSET_ROSE, 1.0)       # #A3183D clean anime rose shadow
 COLOR_PINK_3D_DARK = hex_to_rgba(C_BORDER_3D, 1.0)      # #4D0A1C darker 3D depth
 COLOR_PINK_3D_BOT  = hex_to_rgba(C_BG_WIN, 1.0)         # #201011 bottom 3D shade
 
@@ -716,6 +719,7 @@ class SettingsWindow(Gtk.Window):
         r = 22.0
         r_inner = 18.0
         cx_mid = x + w / 2.0
+        sr, sg, sb = COLOR_PINK_ROSE[0], COLOR_PINK_ROSE[1], COLOR_PINK_ROSE[2]
 
         # 1. Base vertical gradient (Serena Sunset Pink: #FF7299 -> #EAA2C6)
         cr.save()
@@ -727,45 +731,54 @@ class SettingsWindow(Gtk.Window):
         cr.fill_preserve()
         cr.clip()
 
-        # 2. Horizontal Cylindrical Curvature (Toned down highlight, deeper flank shadows)
+        # 2. Horizontal Cylindrical Curvature (Pure anime rose shading & smooth cylinder sheen)
         pat_x = cairo.LinearGradient(x, y, x + w, y)
-        pat_x.add_color_stop_rgba(0.00, 0.24, 0.03, 0.08, 0.25)
-        pat_x.add_color_stop_rgba(0.12, 0.00, 0.00, 0.00, 0.00)
-        pat_x.add_color_stop_rgba(0.36, 1.00, 1.00, 1.00, 0.14)  # Soft subtle sheen, not washed-out white
-        pat_x.add_color_stop_rgba(0.48, 1.00, 1.00, 1.00, 0.06)
-        pat_x.add_color_stop_rgba(0.65, 0.00, 0.00, 0.00, 0.00)
-        pat_x.add_color_stop_rgba(0.85, 0.25, 0.03, 0.08, 0.22)
-        pat_x.add_color_stop_rgba(1.00, 0.20, 0.02, 0.06, 0.42)
+        pat_x.add_color_stop_rgba(0.00, sr, sg, sb, 0.14)
+        pat_x.add_color_stop_rgba(0.08, 0.0, 0.0, 0.0, 0.00)
+        pat_x.add_color_stop_rgba(0.32, 1.0, 1.0, 1.0, 0.16)
+        pat_x.add_color_stop_rgba(0.48, 1.0, 1.0, 1.0, 0.07)
+        pat_x.add_color_stop_rgba(0.70, 0.0, 0.0, 0.0, 0.00)
+        pat_x.add_color_stop_rgba(0.86, sr, sg, sb, 0.16)
+        pat_x.add_color_stop_rgba(1.00, sr, sg, sb, 0.32)
         cr.set_source(pat_x)
         cr.paint()
 
-        # 3. Radial Pillow / Dome Bulge (Subtle soft center, gentle corner falloff)
-        cx_apex, cy_apex = x + w * 0.40, y + h * 0.38
-        r_dome = math.hypot(w * 0.65, h * 0.65)
-        pat_dome = cairo.RadialGradient(cx_apex, cy_apex, 15.0, cx_apex, cy_apex, r_dome)
-        pat_dome.add_color_stop_rgba(0.00, 1.0, 1.0, 1.0, 0.08)  # Gentle warm lift, preserves rich pink
-        pat_dome.add_color_stop_rgba(0.35, 1.0, 1.0, 1.0, 0.02)
-        pat_dome.add_color_stop_rgba(0.60, 0.0, 0.0, 0.0, 0.00)
-        pat_dome.add_color_stop_rgba(0.85, 0.25, 0.03, 0.08, 0.20)
-        pat_dome.add_color_stop_rgba(1.00, 0.18, 0.02, 0.06, 0.38)
-        cr.set_source(pat_dome)
-        cr.paint()
+        # 3. Specular Highlight Streak along right curved shoulder (Anime reflection from Image 1)
+        pat_streak = cairo.LinearGradient(x + w * 0.82, y, x + w * 0.95, y)
+        pat_streak.add_color_stop_rgba(0.00, 1.0, 1.0, 1.0, 0.00)
+        pat_streak.add_color_stop_rgba(0.50, 1.0, 1.0, 1.0, 0.38)
+        pat_streak.add_color_stop_rgba(1.00, 1.0, 1.0, 1.0, 0.00)
+        cr.rectangle(x + w * 0.80, y, w * 0.20, h)
+        cr.set_source(pat_streak)
+        cr.fill()
+
+        # Specular corner arc at bottom-right (matching Image 1 corner reflection)
+        cr.save()
+        cr.set_line_width(2.8)
+        cr.arc(x + w - r, y + h - r, r - 3.2, 0.0, 0.5 * math.pi)
+        pat_corner = cairo.LinearGradient(x + w - r, y + h, x + w, y + h - r)
+        pat_corner.add_color_stop_rgba(0.0, 1.0, 1.0, 1.0, 0.00)
+        pat_corner.add_color_stop_rgba(0.5, 1.0, 1.0, 1.0, 0.45)
+        pat_corner.add_color_stop_rgba(1.0, 1.0, 1.0, 1.0, 0.00)
+        cr.set_source(pat_corner)
+        cr.stroke()
+        cr.restore()
 
         # 4. Top shoulder curvature roll-over (Soft rim)
-        pat_top = cairo.LinearGradient(cx_mid, y, cx_mid, y + 36.0)
-        pat_top.add_color_stop_rgba(0.00, 1.0, 1.0, 1.0, 0.16)
-        pat_top.add_color_stop_rgba(0.60, 1.0, 1.0, 1.0, 0.04)
+        pat_top = cairo.LinearGradient(cx_mid, y, cx_mid, y + 32.0)
+        pat_top.add_color_stop_rgba(0.00, 1.0, 1.0, 1.0, 0.22)
+        pat_top.add_color_stop_rgba(0.60, 1.0, 1.0, 1.0, 0.06)
         pat_top.add_color_stop_rgba(1.00, 1.0, 1.0, 1.0, 0.00)
-        cr.rectangle(x, y, w, 36.0)
+        cr.rectangle(x, y, w, 32.0)
         cr.set_source(pat_top)
         cr.fill()
 
-        # 5. Bottom lip ambient occlusion
-        pat_bot = cairo.LinearGradient(cx_mid, y + h - 45.0, cx_mid, y + h)
+        # 5. Bottom lip ambient occlusion (Rich rose shade + soft ground lift)
+        pat_bot = cairo.LinearGradient(cx_mid, y + h - 38.0, cx_mid, y + h)
         pat_bot.add_color_stop_rgba(0.00, 0.0, 0.0, 0.0, 0.00)
-        pat_bot.add_color_stop_rgba(0.80, 0.25, 0.03, 0.08, 0.28)
-        pat_bot.add_color_stop_rgba(1.00, 1.00, 0.85, 0.92, 0.12)
-        cr.rectangle(x, y + h - 45.0, w, 45.0)
+        pat_bot.add_color_stop_rgba(0.80, sr, sg, sb, 0.18)
+        pat_bot.add_color_stop_rgba(1.00, 1.00, 0.90, 0.95, 0.15)
+        cr.rectangle(x, y + h - 38.0, w, 38.0)
         cr.set_source(pat_bot)
         cr.fill()
 
@@ -778,12 +791,12 @@ class SettingsWindow(Gtk.Window):
         ang = math.atan2(dy, dx)
         rh = 34.0
 
-        # Drop shadow under ribbon
+        # Drop shadow under ribbon (anime rose shadow)
         cr.save()
         cr.translate(x1, y1)
         cr.rotate(ang)
-        cr.rectangle(-40.0, -rh / 2.0 + 3.5, dist + 80.0, rh + 2.5)
-        cr.set_source_rgba(0.20, 0.02, 0.06, 0.32)
+        cr.rectangle(-40.0, -rh / 2.0 + 3.0, dist + 80.0, rh + 2.0)
+        cr.set_source_rgba(sr, sg, sb, 0.26)
         cr.fill()
         cr.restore()
 
@@ -810,10 +823,10 @@ class SettingsWindow(Gtk.Window):
             cr.set_line_width(1.0)
             cr.stroke()
 
-        # Ribbon curvature highlight where it crosses the crest
-        pat_r_curv = cairo.LinearGradient(dist * 0.30, 0, dist * 0.70, 0)
+        # Ribbon curvature highlight where it crosses the cylinder
+        pat_r_curv = cairo.LinearGradient(dist * 0.25, 0, dist * 0.65, 0)
         pat_r_curv.add_color_stop_rgba(0.00, 1.0, 1.0, 1.0, 0.00)
-        pat_r_curv.add_color_stop_rgba(0.40, 1.0, 1.0, 1.0, 0.12)
+        pat_r_curv.add_color_stop_rgba(0.40, 1.0, 1.0, 1.0, 0.16)
         pat_r_curv.add_color_stop_rgba(0.70, 1.0, 1.0, 1.0, 0.00)
         cr.rectangle(-40.0, -rh / 2.0, dist + 80.0, rh)
         cr.set_source(pat_r_curv)
@@ -827,7 +840,7 @@ class SettingsWindow(Gtk.Window):
         cr.save()
         cr.translate(1.5, 2.5)
         draw_ribbon_bow(cr, bx, by, ribbon_ang=ang, scale=1.0)
-        cr.set_source_rgba(0.15, 0.02, 0.05, 0.28)
+        cr.set_source_rgba(sr, sg, sb, 0.25)
         cr.fill()
         cr.restore()
         draw_ribbon_bow(cr, bx, by, ribbon_ang=ang, scale=1.0)
@@ -844,10 +857,10 @@ class SettingsWindow(Gtk.Window):
         cr.set_line_width(1.6)
         right_panel_path(cr, x + 1.8, y + 1.8, w - 3.6, h - 3.6, max(2.0, r - 1.8), max(2.0, r_inner - 1.8))
         pat_inner = cairo.LinearGradient(x, y, x + w, y + h)
-        pat_inner.add_color_stop_rgba(0.00, 1.0, 1.0, 1.0, 0.35)
-        pat_inner.add_color_stop_rgba(0.45, 1.0, 0.9, 0.95, 0.18)
-        pat_inner.add_color_stop_rgba(0.75, 0.45, 0.06, 0.15, 0.20)
-        pat_inner.add_color_stop_rgba(1.00, 0.25, 0.03, 0.08, 0.35)
+        pat_inner.add_color_stop_rgba(0.00, 1.0, 1.0, 1.0, 0.40)
+        pat_inner.add_color_stop_rgba(0.45, 1.0, 0.95, 0.98, 0.20)
+        pat_inner.add_color_stop_rgba(0.75, sr, sg, sb, 0.12)
+        pat_inner.add_color_stop_rgba(1.00, sr, sg, sb, 0.24)
         cr.set_source(pat_inner)
         cr.stroke()
         cr.restore()
