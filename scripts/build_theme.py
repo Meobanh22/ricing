@@ -3,7 +3,16 @@
 
 import json
 import os
+import re
 import sys
+
+
+def parse_gradient_stops(gradient_str, fallback):
+    """Extract (offset_float, '#HEX') pairs from a CSS linear-gradient string."""
+    matches = re.findall(r'(#[0-9A-Fa-f]{6})\s+(\d+(?:\.\d+)?)%', gradient_str or "")
+    if not matches:
+        return fallback
+    return [(float(pct) / 100.0, hex_col.upper()) for hex_col, pct in matches]
 
 def main():
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -158,6 +167,19 @@ def main():
 
     grad_sunset = gradient_str
     grad_sunset_hover = gradient_hover_str
+    sunset_stops = parse_gradient_stops(
+        grad_sunset,
+        [
+            (0.00, "#A3183D"),
+            (0.25, "#E53262"),
+            (0.50, "#FF7299"),
+            (0.75, "#EAA2C6"),
+            (1.00, "#BE7AA8"),
+        ],
+    )
+    sunset_pink = sunset_stops[2][1] if len(sunset_stops) > 2 else "#FF7299"
+    sunset_pastel = sunset_stops[3][1] if len(sunset_stops) > 3 else "#EAA2C6"
+    sunset_stops_repr = ",\n    ".join(f'({pos:.2f}, "{col}")' for pos, col in sunset_stops)
 
     # 1. Waybar & GTK CSS palette
     waybar_palette = os.path.join(hypr_base, "waybar", "palette.css")
@@ -296,8 +318,20 @@ def main():
     print("  ✔ Generated gtk-3.0, gtk-4.0, swaync, wlogout palette.css")
 
     # 2. Hyprland palette.conf
+    font_primary = typo.get("font_primary", "JetBrains Mono Nerd Font")
+    font_stack = typo.get("font_stack", '"JetBrains Mono Nerd Font", "FiraCode Nerd Font", "Segoe UI", sans-serif')
+    base_size = int(typo.get("base_size", 13))
+    radius_window = int(geo.get("radius_window", 16))
+    radius_card = int(geo.get("radius_card", 10))
+    radius_button = int(geo.get("radius_button", 8))
+    radius_badge = int(geo.get("radius_badge", 4))
+    radius_scrollbar = int(geo.get("radius_scrollbar", 4))
+    width_control_center = int(geo.get("width_control_center", 315))
+    width_shelf = int(geo.get("width_shelf", 464))
+    width_rofi = int(geo.get("width_rofi", 640))
+
     hypr_palette = os.path.join(hypr_base, "hypr", "palette.conf")
-    hypr_content = f"""# palette.conf — Color tokens for Hyprland.
+    hypr_content = f"""# palette.conf — Color, typography and geometry tokens for Hyprland.
 # NOTE: Generated from tokens.json. Do not edit directly.
 
 $bg_window            = {colors['bg_window_hypr']}
@@ -323,13 +357,18 @@ $border_waybar_3d     = {colors.get('border_waybar_3d_hypr', 'rgb(4D0A1C)')}
 $shadow_extrusion     = {colors.get('shadow_extrusion_hypr', 'rgb(4D0A1C)')}
 $bg_tactile_cream     = {colors.get('bg_tactile_cream_hypr', 'rgba(FFF0F5f5)')}
 $pokepuff_pink        = {colors.get('pokepuff_pink_hypr', 'rgb(FF5C8A)')}
+
+$font_primary         = {font_primary}
+$radius_window        = {radius_window}
+$radius_card          = {radius_card}
+$radius_button        = {radius_button}
 """
     with open(hypr_palette, "w", encoding="utf-8") as f:
         f.write(hypr_content)
     print("  ✔ Generated hypr/palette.conf")
 
     hypr_lua = os.path.join(hypr_base, "hypr", "palette.lua")
-    hypr_lua_content = f"""-- palette.lua — Color tokens for Hyprland (Lua engine).
+    hypr_lua_content = f"""-- palette.lua — Color, typography and geometry tokens for Hyprland (Lua engine).
 -- NOTE: Generated from tokens.json. Do not edit directly.
 
 return {{
@@ -356,6 +395,13 @@ return {{
     shadow_extrusion     = "{colors.get('shadow_extrusion_hypr', 'rgb(4D0A1C)')}",
     bg_tactile_cream     = "{colors.get('bg_tactile_cream_hypr', 'rgba(FFF0F5f5)')}",
     pokepuff_pink        = "{colors.get('pokepuff_pink_hypr', 'rgb(FF5C8A)')}",
+    font_primary         = "{font_primary}",
+    radius_window        = {radius_window},
+    radius_card          = {radius_card},
+    radius_button        = {radius_button},
+    width_control_center = {width_control_center},
+    width_shelf          = {width_shelf},
+    width_rofi           = {width_rofi},
 }}
 """
     with open(hypr_lua, "w", encoding="utf-8") as f:
@@ -364,7 +410,7 @@ return {{
 
     # 3. Rofi colors-rofi.rasi
     rofi_palette = os.path.join(hypr_base, "rofi", "colors-rofi.rasi")
-    rofi_content = f"""/* colors-rofi.rasi — Color tokens for Rofi. */
+    rofi_content = f"""/* colors-rofi.rasi — Color, typography and geometry tokens for Rofi. */
 /* NOTE: Generated from tokens.json. Do not edit directly. */
 
 * {{
@@ -398,6 +444,12 @@ return {{
     bg-waybar:          {colors.get('bg_waybar', '#851733')};
     border-waybar-3d:   {colors.get('border_waybar_3d', '#4D0A1C')};
     shadow-extrusion:   {colors.get('shadow_extrusion', '#4D0A1C')};
+
+    font-primary:       "{font_primary} {base_size}";
+    width-rofi:         {width_rofi}px;
+    radius-window:      {radius_window}px;
+    radius-card:        {radius_card}px;
+    radius-button:      {radius_button}px;
 }}
 """
     with open(rofi_palette, "w", encoding="utf-8") as f:
@@ -411,12 +463,32 @@ return {{
 # NOTE: Generated automatically. Do not edit directly.
 
 PALETTE = {json.dumps(colors, indent=4, ensure_ascii=False)}
+TYPOGRAPHY = {json.dumps(typo, indent=4, ensure_ascii=False)}
+GEOMETRY = {json.dumps(geo, indent=4, ensure_ascii=False)}
 
 def hex_to_rgba(hex_code: str, alpha: float = 1.0):
     h = hex_code.strip().lstrip('#')
     if len(h) == 3:
         h = ''.join(c * 2 for c in h)
     return (int(h[0:2], 16) / 255.0, int(h[2:4], 16) / 255.0, int(h[4:6], 16) / 255.0, float(alpha))
+
+# Typography & Geometry constants
+FONT_PRIMARY         = TYPOGRAPHY.get("font_primary", "JetBrains Mono Nerd Font")
+FONT_STACK           = TYPOGRAPHY.get("font_stack", {json.dumps(font_stack)})
+FONT_BASE_SIZE       = int(TYPOGRAPHY.get("base_size", 13))
+FONT_HEADING_SIZE    = int(TYPOGRAPHY.get("heading_size", 14))
+FONT_CAPTION_SIZE    = int(TYPOGRAPHY.get("caption_size", 11))
+FONT_MICRO_SIZE      = int(TYPOGRAPHY.get("micro_size", 10))
+FONT_HERO_SIZE       = int(TYPOGRAPHY.get("hero_size", 54))
+
+RADIUS_WINDOW        = int(GEOMETRY.get("radius_window", 16))
+RADIUS_CARD          = int(GEOMETRY.get("radius_card", 10))
+RADIUS_BUTTON        = int(GEOMETRY.get("radius_button", 8))
+RADIUS_BADGE         = int(GEOMETRY.get("radius_badge", 4))
+RADIUS_SCROLLBAR     = int(GEOMETRY.get("radius_scrollbar", 4))
+WIDTH_CONTROL_CENTER = int(GEOMETRY.get("width_control_center", 315))
+WIDTH_SHELF          = int(GEOMETRY.get("width_shelf", 464))
+WIDTH_ROFI           = int(GEOMETRY.get("width_rofi", 640))
 
 # Color hex constants
 C_BG_WIN        = PALETTE.get("bg_window", "#201011")
@@ -441,19 +513,15 @@ C_BORDER_3D     = PALETTE.get("border_waybar_3d", "#4D0A1C")
 C_SHADOW_EXTR   = PALETTE.get("shadow_extrusion", "#4D0A1C")
 C_SHADOW_EXTR_H = PALETTE.get("shadow_extrusion_hover", "#610E24")
 C_POKEPUFF_PINK = PALETTE.get("pokepuff_pink", "#FF5C8A")
-C_SUNSET_PINK   = "{colors.get('vivid_pink', '#FF7299') if colors.get('vivid_pink') == '#FF7299' else '#FF7299'}"
-C_SUNSET_PASTEL = "#EAA2C6"
+C_SUNSET_PINK   = "{sunset_pink}"
+C_SUNSET_PASTEL = "{sunset_pastel}"
 
 # Gradient Design Tokens
 GRADIENTS = {{
     "sunset": "{grad_sunset}"
 }}
 SUNSET_STOPS = [
-    (0.00, "#A3183D"),
-    (0.25, "#E53262"),
-    (0.50, "#FF7299"),
-    (0.75, "#EAA2C6"),
-    (1.00, "#BE7AA8")
+    {sunset_stops_repr}
 ]
 
 # Pre-computed Cairo RGBA tuples
@@ -653,8 +721,7 @@ noise_reduction = 65
             },
             {
                 "type": "host",
-                "key": "󰌢 Host",
-                "format": "HP Pavilion x360"
+                "key": "󰌢 Host"
             },
             {
                 "type": "uptime",
@@ -671,7 +738,7 @@ noise_reduction = 65
             {
                 "type": "cpu",
                 "key": " CPU",
-                "format": "Intel i5-1135G7 ({4}) @ {7}"
+                "format": "{1} ({4})"
             },
             {
                 "type": "gpu",

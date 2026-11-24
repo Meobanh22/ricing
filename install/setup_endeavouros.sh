@@ -138,41 +138,17 @@ $AUR_HELPER -S --needed --noconfirm "${AUR_PACKAGES[@]}" || true
 
 echo -e "  ${GREEN}✔ All packages installed successfully!${NC}\n"
 
-# === DIRECTORY INITIALIZATION ===
-echo -e "${YELLOW}📁 [2/5] Creating user config directories...${NC}"
-mkdir -p "$HOME/.config/hypr/scripts/popups" "$HOME/.config/hypr/scripts/widgets" "$HOME/.config/hypr/scripts/services" "$HOME/.config/hypr/scripts/system"
-mkdir -p "$HOME/.config/hypr/styles"
-mkdir -p "$HOME/.config/hypr/assets"
-mkdir -p "$HOME/.config/waybar"
-mkdir -p "$HOME/.config/rofi"
-mkdir -p "$HOME/.config/kitty"
-mkdir -p "$HOME/.config/wlogout"
-mkdir -p "$HOME/.config/swaync"
-mkdir -p "$HOME/.config/btop/themes"
-mkdir -p "$HOME/.config/fastfetch"
-mkdir -p "$HOME/.config/gtk-3.0"
-mkdir -p "$HOME/.config/gtk-4.0"
-mkdir -p "$HOME/.config/Thunar"
-mkdir -p "$HOME/.config/fcitx5/conf"
-mkdir -p "$HOME/.icons"
-mkdir -p "$HOME/.local/share/icons"
-mkdir -p "$HOME/Pictures/wallpapers"
-mkdir -p "$HOME/Pictures/Screenshots"
-echo -e "  ${GREEN}✔ User directories initialized!${NC}\n"
-
-# === CURSOR INSTALLATION ===
-echo -e "${YELLOW}🖱️  [3/5] Installing Sylveon Custom cursor theme...${NC}"
+# === DIRECTORY & CURSOR INSTALLATION ===
+echo -e "${YELLOW}📁 [2/4] Installing Sylveon Custom cursor theme...${NC}"
+mkdir -p "$HOME/.icons/default" "$HOME/.local/share/icons" "$HOME/Pictures/Screenshots"
 CURSOR_SRC="$REPO_ROOT/assets/cursors/sylveon-custom"
 if [ -d "$CURSOR_SRC" ]; then
-    cp -rf "$CURSOR_SRC" "$HOME/.icons/"
-    cp -rf "$CURSOR_SRC" "$HOME/.local/share/icons/"
     sudo cp -rf "$CURSOR_SRC" /usr/share/icons/ 2>/dev/null || true
-    echo -e "  ${GREEN}✔ Installed Sylveon Dual Theme (Hyprcursor native + Xcursor)!${NC}"
+    echo -e "  ${GREEN}✔ Installed Sylveon Dual Theme to /usr/share/icons/${NC}"
 else
     echo -e "  ${RED}✖ Cursor directory not found: $CURSOR_SRC${NC}"
 fi
 
-mkdir -p "$HOME/.icons/default"
 cat > "$HOME/.icons/default/index.theme" << 'CURSOR_EOF'
 [Icon Theme]
 Name=Default
@@ -180,63 +156,24 @@ Comment=Default Cursor Theme
 Inherits=sylveon-custom
 CURSOR_EOF
 
-# === CONFIG SYNCHRONIZATION ===
-echo -e "\n${YELLOW}⚙️  [4/5] Deploying dotfiles to ~/.config/...${NC}"
-DOTFILES_DIR="$REPO_ROOT/config"
-
-# Hyprland (Native Lua Engine)
-cp -rf "$DOTFILES_DIR/hypr/"* "$HOME/.config/hypr/"
-rm -f "$HOME/.config/hypr/hyprland.conf"
-chmod +x "$HOME/.config/hypr/scripts/popups/"* "$HOME/.config/hypr/scripts/widgets/"* "$HOME/.config/hypr/scripts/services/"* "$HOME/.config/hypr/scripts/system/"* 2>/dev/null || true
-
-# Deploy other components
-cp -rf "$DOTFILES_DIR/waybar/"* "$HOME/.config/waybar/"
-cp -rf "$DOTFILES_DIR/rofi/"* "$HOME/.config/rofi/"
-cp -rf "$DOTFILES_DIR/kitty/"* "$HOME/.config/kitty/"
-cp -rf "$DOTFILES_DIR/wlogout/"* "$HOME/.config/wlogout/"
-cp -rf "$DOTFILES_DIR/swaync/"* "$HOME/.config/swaync/"
-cp -rf "$DOTFILES_DIR/btop/"* "$HOME/.config/btop/"
-cp -rf "$DOTFILES_DIR/fastfetch/"* "$HOME/.config/fastfetch/"
-cp -rf "$DOTFILES_DIR/gtk-3.0/"* "$HOME/.config/gtk-3.0/"
-cp -rf "$DOTFILES_DIR/gtk-4.0/"* "$HOME/.config/gtk-4.0/"
-cp -rf "$DOTFILES_DIR/Thunar/"* "$HOME/.config/Thunar/"
-cp -rf "$DOTFILES_DIR/fcitx5/"* "$HOME/.config/fcitx5/"
-cp -rf "$DOTFILES_DIR/swappy/"* "$HOME/.config/swappy/" 2>/dev/null || true
-mkdir -p "$HOME/.config/hypr/theme"
-cp -rf "$DOTFILES_DIR/theme/"* "$HOME/.config/hypr/theme/" 2>/dev/null || true
-
-# GTK bookmarks path template
-if [ -f "$HOME/.config/gtk-3.0/bookmarks" ]; then
-    sed -i "s|\\\$HOME|$HOME|g" "$HOME/.config/gtk-3.0/bookmarks"
-fi
-
-# Wallpapers & Avatars & Desktop Widget Assets
-cp -rn "$REPO_ROOT/assets/wallpapers/"* "$HOME/Pictures/wallpapers/" 2>/dev/null || true
-cp -rn "$REPO_ROOT/assets/avatars/"* "$HOME/.config/hypr/assets/" 2>/dev/null || true
-mkdir -p "$HOME/.config/hypr/assets/pokemon" "$HOME/.config/hypr/assets/banners"
-cp -rn "$REPO_ROOT/assets/pokemon/"* "$HOME/.config/hypr/assets/pokemon/" 2>/dev/null || true
-cp -rn "$REPO_ROOT/assets/pokemon/"* "$HOME/.config/hypr/assets/" 2>/dev/null || true
-cp -rn "$REPO_ROOT/assets/banners/"* "$HOME/.config/hypr/assets/banners/" 2>/dev/null || true
-cp -rn "$REPO_ROOT/assets/banners/"* "$HOME/.config/hypr/assets/" 2>/dev/null || true
-
-echo -e "  ${GREEN}✔ Deployed all 14 configuration components to ~/.config/!${NC}\n"
+# === CONFIG & ASSETS SYNCHRONIZATION ===
+echo -e "\n${YELLOW}⚙️  [3/4] Deploying dotfiles, theme tokens & assets via sync.sh...${NC}"
+bash "$REPO_ROOT/sync.sh" --no-reload
 
 # === THEME & SERVICES ACTIVATION ===
-echo -e "${YELLOW}🎨 [5/5] Activating theme & system services...${NC}"
-
-# Compile and set default theme
-python3 "$REPO_ROOT/scripts/theme_manager.py" "serena-wine" 2>/dev/null || true
+echo -e "${YELLOW}🎨 [4/4] Activating system services & autologin...${NC}"
 
 # Enable services
 systemctl --user enable --now pipewire pipewire-pulse wireplumber 2>/dev/null || true
 sudo systemctl enable --now bluetooth.service 2>/dev/null || true
 
 # TTY1 autologin & Hyprland autostart with Hyprlock screen
+TARGET_USER="${SUDO_USER:-$USER}"
 sudo mkdir -p /etc/systemd/system/getty@tty1.service.d/
-cat << 'AUTOLOGIN_EOF' | sudo tee /etc/systemd/system/getty@tty1.service.d/autologin.conf > /dev/null
+cat << AUTOLOGIN_EOF | sudo tee /etc/systemd/system/getty@tty1.service.d/autologin.conf > /dev/null
 [Service]
 ExecStart=
-ExecStart=-/usr/bin/agetty -o '-p -f -- \\u' --noclear --autologin meobanh %I $TERM
+ExecStart=-/usr/bin/agetty -o '-p -f -- \\u' --noclear --autologin $TARGET_USER %I \$TERM
 Type=idle
 AUTOLOGIN_EOF
 sudo systemctl daemon-reload 2>/dev/null || true

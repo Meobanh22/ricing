@@ -132,7 +132,7 @@ hl.config({
     },
 
     decoration = {
-        rounding = 16,
+        rounding = palette.radius_window or 16,
 
         active_opacity     = 0.96,
         inactive_opacity   = 0.88,

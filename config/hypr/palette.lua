@@ -1,4 +1,4 @@
--- palette.lua — Color tokens for Hyprland (Lua engine).
+-- palette.lua — Color, typography and geometry tokens for Hyprland (Lua engine).
 -- NOTE: Generated from tokens.json. Do not edit directly.
 
 return {
@@ -25,4 +25,11 @@ return {
     shadow_extrusion     = "rgb(4D0A1C)",
     bg_tactile_cream     = "rgba(FFF0F5f5)",
     pokepuff_pink        = "rgb(FF5C8A)",
+    font_primary         = "JetBrains Mono Nerd Font",
+    radius_window        = 16,
+    radius_card          = 10,
+    radius_button        = 8,
+    width_control_center = 315,
+    width_shelf          = 464,
+    width_rofi           = 640,
 }

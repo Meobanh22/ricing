@@ -6,6 +6,7 @@ set -e
 THEME_NAME="spotlight"
 THEME_SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 THEME_DEST="/usr/share/plymouth/themes/$THEME_NAME"
+TARGET_USER="${SUDO_USER:-$USER}"
 
 echo "=== INSTALLING PLYMOUTH SPOTLIGHT THEME ==="
 
@@ -45,7 +46,7 @@ fi
 
 # 5. Allow passwordless sudo for plymouth quit during handover
 echo "🔑 [5/7] Configuring sudoers permission for seamless Hyprlock quit..."
-echo "meobanh ALL=(ALL) NOPASSWD: /usr/bin/plymouth" | sudo tee /etc/sudoers.d/99-plymouth >/dev/null
+echo "$TARGET_USER ALL=(ALL) NOPASSWD: /usr/bin/plymouth" | sudo tee /etc/sudoers.d/99-plymouth >/dev/null
 sudo chmod 0440 /etc/sudoers.d/99-plymouth
 
 # 6. Configure systemd: seamless boot handover & completely silent fast shutdown
@@ -96,10 +97,10 @@ EOF
 
 # 6e. Silence TTY1 login completely (no corner terminal artifacts)
 sudo mkdir -p /etc/systemd/system/getty@tty1.service.d
-cat << 'EOF' | sudo tee /etc/systemd/system/getty@tty1.service.d/autologin.conf >/dev/null
+cat << EOF | sudo tee /etc/systemd/system/getty@tty1.service.d/autologin.conf >/dev/null
 [Service]
 ExecStart=
-ExecStart=-/usr/bin/agetty -o '-p -f -- \u' --skip-login --nonewline --noissue --nohints --nohostname --noclear --noreset --autologin meobanh %I $TERM
+ExecStart=-/usr/bin/agetty -o '-p -f -- \\u' --skip-login --nonewline --noissue --nohints --nohostname --noclear --noreset --autologin $TARGET_USER %I \$TERM
 TTYVTDisallocate=no
 Type=idle
 StandardInput=tty

@@ -1,4 +1,4 @@
-/* colors-rofi.rasi — Color tokens for Rofi. */
+/* colors-rofi.rasi — Color, typography and geometry tokens for Rofi. */
 /* NOTE: Generated from tokens.json. Do not edit directly. */
 
 * {
@@ -32,4 +32,10 @@
     bg-waybar:          #851733;
     border-waybar-3d:   #4D0A1C;
     shadow-extrusion:   #4D0A1C;
+
+    font-primary:       "JetBrains Mono Nerd Font 13";
+    width-rofi:         640px;
+    radius-window:      16px;
+    radius-card:        10px;
+    radius-button:      8px;
 }

@@ -47,8 +47,7 @@
     },
     {
       "type": "host",
-      "key": "󰌢 Host",
-      "format": "HP Pavilion x360"
+      "key": "󰌢 Host"
     },
     {
       "type": "uptime",
@@ -65,7 +64,7 @@
     {
       "type": "cpu",
       "key": " CPU",
-      "format": "Intel i5-1135G7 ({4}) @ {7}"
+      "format": "{1} ({4})"
     },
     {
       "type": "gpu",

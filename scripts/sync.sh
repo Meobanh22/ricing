@@ -34,6 +34,7 @@ NC='\033[0m'
 
 # === PUSH: REPO -> SYSTEM (~/.config) ===
 sync_push() {
+    local no_reload="${1:-false}"
     echo -e "${PINK}=== SYNCHRONIZING CONFIG: REPO -> SYSTEM (~/.config) ===${NC}\n"
 
     # Compile Single Source of Truth tokens (tokens.json)
@@ -140,6 +141,23 @@ sync_push() {
         echo -e "  ${GREEN}✔ Starship Prompt (starship.toml)${NC}"
     fi
 
+    # Desktop Entries & Local Music Launchers
+    if [ -d "$DOTFILES_DIR/applications" ]; then
+        mkdir -p "$HOME/.local/share/applications"
+        cp -rf "$DOTFILES_DIR/applications/"* "$HOME/.local/share/applications/"
+        command -v update-desktop-database &>/dev/null && update-desktop-database "$HOME/.local/share/applications" 2>/dev/null || true
+        echo -e "  ${GREEN}✔ Desktop entries (~/.local/share/applications/)${NC}"
+    fi
+    mkdir -p "$HOME/.local/bin"
+    cat > "$HOME/.local/bin/music" << 'MUSIC_EOF'
+#!/usr/bin/env bash
+# music — Terminal Music Visualizer & Synced Lyrics
+exec python3 "$HOME/.config/hypr/scripts/terminal/music.py" "$@"
+MUSIC_EOF
+    chmod +x "$HOME/.local/bin/music"
+    ln -sf "$HOME/.config/hypr/scripts/terminal/open_music_player.sh" "$HOME/.local/bin/music-player"
+    echo -e "  ${GREEN}✔ Music launchers (~/.local/bin/music, music-player)${NC}"
+
     # GTK-3.0 & GTK-4.0
     if [ -d "$DOTFILES_DIR/gtk-3.0" ]; then
         cp -rf "$DOTFILES_DIR/gtk-3.0/"* "$HOME/.config/gtk-3.0/"
@@ -244,8 +262,12 @@ sync_push() {
     fi
 
     # Reload Live Compositor & Services
-    echo -e "\n${YELLOW}⚡ [3/4] Live reloading compositor & interface services...${NC}"
-    if [ "$XDG_CURRENT_DESKTOP" = "Hyprland" ] || pgrep -x "Hyprland" &>/dev/null; then
+    if [ "$no_reload" = "true" ]; then
+        echo -e "\n${YELLOW}⚡ [3/4] Skipping live reload (--no-reload).${NC}"
+    else
+        echo -e "\n${YELLOW}⚡ [3/4] Live reloading compositor & interface services...${NC}"
+    fi
+    if [ "$no_reload" != "true" ] && { [ "$XDG_CURRENT_DESKTOP" = "Hyprland" ] || pgrep -x "Hyprland" &>/dev/null; }; then
         hyprctl reload &>/dev/null || true
         echo -e "  ${GREEN}✔ Hyprland reloaded!${NC}"
 
@@ -368,11 +390,25 @@ sync_pull() {
         echo -e "  ${GREEN}✔ Pulled ~/.config/btop/ -> repo${NC}"
     fi
 
-    # Cava
-    if [ -d "$HOME/.config/cava" ]; then
+    # Cava (sync only managed config, ignore built-in shaders/themes)
+    if [ -f "$HOME/.config/cava/config" ]; then
         mkdir -p "$DOTFILES_DIR/cava"
-        cp -rf "$HOME/.config/cava/"* "$DOTFILES_DIR/cava/"
-        echo -e "  ${GREEN}✔ Pulled ~/.config/cava/ -> repo${NC}"
+        cp -f "$HOME/.config/cava/config" "$DOTFILES_DIR/cava/config"
+        echo -e "  ${GREEN}✔ Pulled ~/.config/cava/config -> repo${NC}"
+    fi
+
+    # Starship Prompt
+    if [ -f "$HOME/.config/starship.toml" ]; then
+        mkdir -p "$DOTFILES_DIR/starship"
+        cp -f "$HOME/.config/starship.toml" "$DOTFILES_DIR/starship/starship.toml"
+        echo -e "  ${GREEN}✔ Pulled ~/.config/starship.toml -> repo${NC}"
+    fi
+
+    # Desktop Entries
+    if [ -f "$HOME/.local/share/applications/serena-player.desktop" ]; then
+        mkdir -p "$DOTFILES_DIR/applications"
+        cp -f "$HOME/.local/share/applications/serena-player.desktop" "$DOTFILES_DIR/applications/serena-player.desktop"
+        echo -e "  ${GREEN}✔ Pulled serena-player.desktop -> repo${NC}"
     fi
 
     # Fastfetch
@@ -408,6 +444,7 @@ sync_pull() {
     if [ -d "$HOME/.config/fcitx5" ]; then
         mkdir -p "$DOTFILES_DIR/fcitx5"
         cp -rf "$HOME/.config/fcitx5/"* "$DOTFILES_DIR/fcitx5/"
+        rm -f "$DOTFILES_DIR/fcitx5/conf/ngosen-app-rules.conf" "$DOTFILES_DIR/fcitx5/cached_layouts" "$DOTFILES_DIR/fcitx5/"*.bak 2>/dev/null || true
         echo -e "  ${GREEN}✔ Pulled ~/.config/fcitx5/ -> repo${NC}"
     fi
 
@@ -424,17 +461,35 @@ sync_diff() {
     diff -rq "$DOTFILES_DIR/wlogout" "$HOME/.config/wlogout" 2>/dev/null || true
     diff -rq "$DOTFILES_DIR/swaync" "$HOME/.config/swaync" 2>/dev/null || true
     diff -rq "$DOTFILES_DIR/btop" "$HOME/.config/btop" 2>/dev/null || true
-    diff -rq "$DOTFILES_DIR/cava" "$HOME/.config/cava" 2>/dev/null || true
+    diff -rq -x 'shaders' -x 'themes' "$DOTFILES_DIR/cava" "$HOME/.config/cava" 2>/dev/null || true
     diff -rq "$DOTFILES_DIR/fastfetch" "$HOME/.config/fastfetch" 2>/dev/null || true
+    if [ -f "$DOTFILES_DIR/starship/starship.toml" ] || [ -f "$HOME/.config/starship.toml" ]; then
+        diff -u "$DOTFILES_DIR/starship/starship.toml" "$HOME/.config/starship.toml" 2>/dev/null || true
+    fi
+    if [ -f "$DOTFILES_DIR/applications/serena-player.desktop" ] || [ -f "$HOME/.local/share/applications/serena-player.desktop" ]; then
+        diff -u "$DOTFILES_DIR/applications/serena-player.desktop" "$HOME/.local/share/applications/serena-player.desktop" 2>/dev/null || true
+    fi
     diff -rq -x 'bookmarks' "$DOTFILES_DIR/gtk-3.0" "$HOME/.config/gtk-3.0" 2>/dev/null || true
     if [ -f "$DOTFILES_DIR/gtk-3.0/bookmarks" ] && [ -f "$HOME/.config/gtk-3.0/bookmarks" ]; then
         diff -u <(sed "s|\\\$HOME|$HOME|g" "$DOTFILES_DIR/gtk-3.0/bookmarks") "$HOME/.config/gtk-3.0/bookmarks" || true
     fi
     diff -rq "$DOTFILES_DIR/gtk-4.0" "$HOME/.config/gtk-4.0" 2>/dev/null || true
     diff -rq -x 'accels.scm' "$DOTFILES_DIR/Thunar" "$HOME/.config/Thunar" 2>/dev/null || true
-    diff -rq -x 'cached_layouts' -x '*.bak' "$DOTFILES_DIR/fcitx5" "$HOME/.config/fcitx5" 2>/dev/null || true
+    diff -rq -x 'cached_layouts' -x '*.bak' -x 'ngosen-app-rules.conf' "$DOTFILES_DIR/fcitx5" "$HOME/.config/fcitx5" 2>/dev/null || true
     diff -rq "$DOTFILES_DIR/swappy" "$HOME/.config/swappy" 2>/dev/null || true
     diff -rq "$DOTFILES_DIR/theme" "$HOME/.config/hypr/theme" 2>/dev/null || true
+    for MOZ_DIR in "$HOME/.config/mozilla/firefox" "$HOME/.mozilla/firefox"; do
+        if [ -d "$MOZ_DIR" ]; then
+            for PROFILE_DIR in "$MOZ_DIR"/*.default*; do
+                if [ -d "$PROFILE_DIR" ]; then
+                    diff -u "$DOTFILES_DIR/firefox/user.js" "$PROFILE_DIR/user.js" 2>/dev/null || true
+                    for f in palette.css userChrome.css userContent.css; do
+                        diff -u "$DOTFILES_DIR/firefox/chrome/$f" "$PROFILE_DIR/chrome/$f" 2>/dev/null || true
+                    done
+                fi
+            done
+        fi
+    done
     echo -e "\n${GREEN}✔ Diff scan completed!${NC}"
 }
 
@@ -446,14 +501,18 @@ case "$1" in
     --diff|-d|diff)
         sync_diff
         ;;
+    --no-reload)
+        sync_push true
+        ;;
     --help|-h|help)
         echo -e "${PINK}Usage:${NC} $0 [options]"
         echo -e "  ${GREEN}(no flags)${NC}      : Push configs from Repo -> ~/.config and reload live"
+        echo -e "  ${GREEN}--no-reload${NC}     : Push configs from Repo -> ~/.config without reloading services"
         echo -e "  ${YELLOW}--pull / pull${NC}  : Pull changes from ~/.config -> Repo"
         echo -e "  ${BLUE}--diff / diff${NC}  : Compare differences between Repo and ~/.config"
         echo -e "  ${CYAN}--help / help${NC}  : Show this help message"
         ;;
     *)
-        sync_push
+        sync_push false
         ;;
 esac

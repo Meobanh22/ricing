@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 generate_theme.py — Sequential Stage Light Boot Progress Theme.
-Generates 90 progressive frames tuned for a graceful ~6.5s theatrical stage warm-up.
+Generates 45 progressive frames tuned for a graceful ~6.0s theatrical stage warm-up.
 Auxiliary spotlights spaced apart in a wide stage arc with proper alpha compositing.
 """
 
@@ -230,7 +230,7 @@ def render_frame_for_progress(progress):
     return img
 
 def main():
-    print("Generating 90 Paced Stage Light Progress Frames...")
+    print("Generating 45 Paced Stage Light Progress Frames...")
 
     # Static background
     bg_static = Image.new("RGBA", (W, H), BG_COLOR)

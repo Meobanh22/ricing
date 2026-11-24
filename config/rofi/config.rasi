@@ -3,9 +3,9 @@
 @import "colors-rofi.rasi"
 
 * {
-    font: "JetBrains Mono Nerd Font 13";
+    font: @font-primary;
     background-color: transparent;
-    width: 640px;
+    width: @width-rofi;
 }
 
 window {
@@ -35,7 +35,7 @@ prompt {
     background-color: @accent;
     padding: 6px 14px;
     text-color: @text-inverse;
-    border-radius: 8px;
+    border-radius: @radius-button;
     margin: 0px 8px 0px 0px;
     font-weight: bold;
 }
@@ -62,7 +62,7 @@ element {
     padding: 8px 12px;
     background-color: rgba(255, 255, 255, 0.50);
     text-color: @bg-waybar;
-    border-radius: 10px;
+    border-radius: @radius-card;
     border: 1px 1px 2px 1px;
     border-color: transparent;
 }

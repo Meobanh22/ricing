@@ -8,6 +8,8 @@
     "config/hypr/scripts/popups",
     "config/hypr/scripts/services",
     "config/hypr/scripts/system",
+    "config/hypr/scripts/terminal",
+    "config/hypr/scripts/ui_core",
     "config/hypr/scripts/widgets",
     "scripts"
   ],

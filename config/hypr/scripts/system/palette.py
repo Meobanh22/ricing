@@ -83,12 +83,49 @@ PALETTE = {
     "warm_yellow": "#FFB86C",
     "soft_green": "#8FBC8F"
 }
+TYPOGRAPHY = {
+    "font_primary": "JetBrains Mono Nerd Font",
+    "font_stack": "\"JetBrains Mono Nerd Font\", \"FiraCode Nerd Font\", \"Segoe UI\", sans-serif",
+    "base_size": 13,
+    "heading_size": 14,
+    "caption_size": 11,
+    "micro_size": 10,
+    "hero_size": 54
+}
+GEOMETRY = {
+    "radius_window": 16,
+    "radius_card": 10,
+    "radius_button": 8,
+    "radius_badge": 4,
+    "radius_scrollbar": 4,
+    "width_control_center": 315,
+    "width_shelf": 464,
+    "width_rofi": 640
+}
 
 def hex_to_rgba(hex_code: str, alpha: float = 1.0):
     h = hex_code.strip().lstrip('#')
     if len(h) == 3:
         h = ''.join(c * 2 for c in h)
     return (int(h[0:2], 16) / 255.0, int(h[2:4], 16) / 255.0, int(h[4:6], 16) / 255.0, float(alpha))
+
+# Typography & Geometry constants
+FONT_PRIMARY         = TYPOGRAPHY.get("font_primary", "JetBrains Mono Nerd Font")
+FONT_STACK           = TYPOGRAPHY.get("font_stack", "\"JetBrains Mono Nerd Font\", \"FiraCode Nerd Font\", \"Segoe UI\", sans-serif")
+FONT_BASE_SIZE       = int(TYPOGRAPHY.get("base_size", 13))
+FONT_HEADING_SIZE    = int(TYPOGRAPHY.get("heading_size", 14))
+FONT_CAPTION_SIZE    = int(TYPOGRAPHY.get("caption_size", 11))
+FONT_MICRO_SIZE      = int(TYPOGRAPHY.get("micro_size", 10))
+FONT_HERO_SIZE       = int(TYPOGRAPHY.get("hero_size", 54))
+
+RADIUS_WINDOW        = int(GEOMETRY.get("radius_window", 16))
+RADIUS_CARD          = int(GEOMETRY.get("radius_card", 10))
+RADIUS_BUTTON        = int(GEOMETRY.get("radius_button", 8))
+RADIUS_BADGE         = int(GEOMETRY.get("radius_badge", 4))
+RADIUS_SCROLLBAR     = int(GEOMETRY.get("radius_scrollbar", 4))
+WIDTH_CONTROL_CENTER = int(GEOMETRY.get("width_control_center", 315))
+WIDTH_SHELF          = int(GEOMETRY.get("width_shelf", 464))
+WIDTH_ROFI           = int(GEOMETRY.get("width_rofi", 640))
 
 # Color hex constants
 C_BG_WIN        = PALETTE.get("bg_window", "#201011")
