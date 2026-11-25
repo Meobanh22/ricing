@@ -41,7 +41,7 @@ window#desktop-widgets-window {
 .desktop-widget-card:hover,
 .desktop-widget-card.card-hover {
     background-color: @pure_white;
-    border-color: @vivid_red;
+    border-color: @dark_ruby_hover;
 }
 
 .widget-avatar-card {
@@ -68,7 +68,7 @@ window#desktop-widgets-window {
 }
 
 .sysinfo-box-gradient:hover {
-    border-color: @vivid_red;
+    border-color: @dark_ruby_hover;
     box-shadow: none;
 }
 
@@ -90,8 +90,8 @@ window#desktop-widgets-window {
 
 .sysinfo-box-solid:hover {
     background-color: @wine_red_hover;
-    border-color: @vivid_red;
-    box-shadow: inset 0 0 0 2px @pure_white_65;
+    border-color: @dark_ruby_hover;
+    box-shadow: inset 0 0 0 2px @pure_white_90;
 }
 
 .sysinfo-sub-label {
@@ -147,7 +147,7 @@ window#desktop-widgets-window {
 }
 
 .tactile-hero-box:hover {
-    border-color: @vivid_red;
+    border-color: @dark_ruby_hover;
 }
 
 .weather-hero-top-row {
@@ -230,7 +230,7 @@ window#desktop-widgets-window {
 
 .tactile-col-box:hover {
     background-color: @pure_white;
-    border-color: @vivid_red;
+    border-color: @dark_ruby_hover;
 }
 
 .forecast-col-day {
@@ -298,7 +298,7 @@ window#desktop-widgets-window {
 
 .tactile-calendar-box:hover {
     background-color: @pure_white;
-    border-color: @vivid_red;
+    border-color: @dark_ruby_hover;
 }
 
 .calendar-day-header {

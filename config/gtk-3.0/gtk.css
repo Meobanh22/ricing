@@ -4,33 +4,54 @@
 @define-color border_subtle @pure_white_12;
 
 /* Standard GTK theme variables override */
-@define-color theme_bg_color @dark_wine_98;
+@define-color theme_bg_color @plum_slate_98;
 @define-color theme_fg_color @cream_white;
-@define-color theme_base_color @dark_wine_98;
+@define-color theme_base_color @plum_slate_98;
 @define-color theme_text_color @cream_white;
 @define-color theme_selected_bg_color @vivid_red;
 @define-color theme_selected_fg_color @pure_white;
+@define-color theme_unfocused_bg_color @plum_slate_98;
+@define-color theme_unfocused_base_color @plum_slate_98;
+@define-color theme_unfocused_fg_color @soft_pink;
+@define-color theme_unfocused_text_color @soft_pink;
+@define-color theme_unfocused_selected_bg_color alpha(@vivid_red, 0.70);
+@define-color theme_unfocused_selected_fg_color @pure_white;
 @define-color insensitive_bg_color @soft_wine_95;
 @define-color insensitive_fg_color @muted_pink;
+@define-color insensitive_base_color @soft_wine_95;
 @define-color borders @pure_white_12;
-@define-color content_view_bg @dark_wine_98;
+@define-color unfocused_borders @pure_white_12;
+@define-color content_view_bg @plum_slate_98;
+@define-color text_view_bg @plum_slate_98;
 
 * {
     font-family: "JetBrains Mono Nerd Font", "FiraCode Nerd Font", "Segoe UI", sans-serif;
     outline: none;
 }
 
-/* 1. Universal Windows, Viewports & Backgrounds */
+/* === UNIVERSAL WINDOWS, DIALOGS & VIEWPORTS === */
 window,
 window.background,
 .background,
+dialog,
+messagedialog,
+filechooser,
+assistant,
 viewport,
-scrolledwindow {
-    background-color: @dark_wine_98;
+scrolledwindow,
+stack,
+textview,
+textview text {
+    background-color: @plum_slate_98;
     color: @cream_white;
 }
 
-/* 2. Global Button Styling (Eliminate default GTK grey backgrounds) */
+frame > border,
+.frame {
+    border-color: @pure_white_12;
+}
+
+/* === BUTTONS & COMBOBOXES === */
 button {
     background-image: none;
     background-color: @deep_wine_95;
@@ -53,6 +74,12 @@ button:active {
     color: @pure_white;
 }
 
+button:disabled {
+    background-color: @soft_wine_95;
+    color: @muted_pink;
+    border-color: @pure_white_12;
+}
+
 button.flat {
     background-color: transparent;
     border: none;
@@ -62,13 +89,41 @@ button.flat:hover {
     background-color: @light_wine_98;
 }
 
-/* 3. Headerbars & Titlebars */
+button.suggested-action {
+    background-color: @vivid_red;
+    color: @pure_white;
+    border-color: @vivid_red;
+}
+
+button.suggested-action:hover {
+    background-color: @light_red;
+}
+
+button.destructive-action {
+    background-color: @wine_red;
+    color: @pure_white;
+    border-color: @vivid_red;
+}
+
+button.destructive-action:hover {
+    background-color: @vivid_red;
+}
+
+/* === HEADERBARS & ACTIONBARS === */
 headerbar,
-.titlebar {
+.titlebar,
+actionbar,
+actionbar > revealer > box {
     background-color: @dark_wine_98;
     border-bottom: 1px solid @pure_white_12;
     color: @cream_white;
     box-shadow: none;
+}
+
+actionbar,
+actionbar > revealer > box {
+    border-bottom: none;
+    border-top: 1px solid @pure_white_12;
 }
 
 headerbar label.title {
@@ -97,14 +152,18 @@ windowcontrols button:hover {
     color: @cream_white;
 }
 
-/* 4. Thunar & File Manager Specifics */
+/* === SIDEBARS, LISTS & FILE MANAGERS === */
 .sidebar,
 .sidebar treeview,
 .sidebar .view,
+placessidebar,
+placessidebar list,
+stacksidebar,
+stacksidebar list,
 ThunarWindow .sidebar,
 ThunarWindow .sidebar .view,
 scrolledwindow.sidebar {
-    background-color: @deep_wine_95;
+    background-color: @dark_wine_98;
     color: @soft_pink;
     border-right: 1px solid @pure_white_12;
 }
@@ -112,7 +171,7 @@ scrolledwindow.sidebar {
 .sidebar treeview:hover,
 .sidebar .view:hover,
 ThunarWindow .sidebar treeview:hover {
-    background-color: @deep_wine_95;
+    background-color: @dark_wine_98;
 }
 
 .sidebar row:selected,
@@ -123,6 +182,10 @@ ThunarWindow .sidebar treeview:hover {
 .sidebar treeview:selected:focus:hover,
 .sidebar .view:selected,
 .sidebar .view:selected:hover,
+placessidebar row:selected,
+placessidebar row:selected:hover,
+stacksidebar row:selected,
+stacksidebar row:selected:hover,
 ThunarWindow .sidebar row:selected,
 ThunarWindow .sidebar row:selected:hover {
     background-color: @vivid_red;
@@ -132,27 +195,61 @@ ThunarWindow .sidebar row:selected:hover {
 
 .sidebar row:selected:backdrop,
 .sidebar treeview:selected:backdrop,
-.sidebar .view:selected:backdrop {
+.sidebar .view:selected:backdrop,
+placessidebar row:selected:backdrop,
+stacksidebar row:selected:backdrop {
     background-color: alpha(@vivid_red, 0.70);
     color: @pure_white;
     border-radius: 8px;
 }
 
-/* Thunar Splitter / Paned Separator */
+list,
+listbox,
+flowbox {
+    background-color: @plum_slate_98;
+    color: @cream_white;
+}
+
+list row,
+listbox row,
+flowboxchild,
+placessidebar row,
+stacksidebar row {
+    color: @soft_pink;
+    border-radius: 8px;
+}
+
+list row:hover,
+listbox row:hover,
+flowboxchild:hover,
+placessidebar row:hover,
+stacksidebar row:hover {
+    background-color: @light_wine_98;
+    color: @cream_white;
+}
+
+list row:selected,
+listbox row:selected,
+flowboxchild:selected {
+    background-color: @vivid_red;
+    color: @pure_white;
+}
+
+/* Splitter / Paned Separator */
 paned > separator {
     background-color: @pure_white_12;
     min-width: 1px;
     min-height: 1px;
 }
 
-/* Thunar Icon View & List View */
+/* Icon View & List View */
 /* NOTE: Do not style :hover on .view or treeview.view; in GTK3 it matches the whole viewport and hides :selected items. */
 exo-icon-view,
 ThunarIconView,
 .view,
 treeview.view,
 iconview {
-    background-color: @dark_wine_98;
+    background-color: @plum_slate_98;
     color: @cream_white;
 }
 
@@ -193,7 +290,7 @@ rubberband {
     border-radius: 4px;
 }
 
-/* Thunar Column Header (Name, Size, Type) */
+/* Treeview Column Header */
 treeview header button,
 treeview header button:hover {
     background-image: none;
@@ -206,9 +303,11 @@ treeview header button:hover {
     border-radius: 0;
 }
 
-/* 5. Toolbars & Navigation */
+/* === TOOLBARS & NAVIGATION === */
 toolbar,
 .toolbar,
+.primary-toolbar,
+.inline-toolbar,
 .path-bar-box,
 ThunarLocationButtons {
     background-color: @dark_wine_98;
@@ -218,6 +317,7 @@ ThunarLocationButtons {
 }
 
 toolbar button,
+.toolbar button,
 .path-bar-box button {
     background-color: @deep_wine_95;
     color: @soft_pink;
@@ -228,6 +328,7 @@ toolbar button,
 }
 
 toolbar button:hover,
+.toolbar button:hover,
 .path-bar-box button:hover {
     background-color: @light_wine_98;
     color: @cream_white;
@@ -235,15 +336,18 @@ toolbar button:hover,
 
 toolbar button:checked,
 toolbar button:active,
+.toolbar button:checked,
+.toolbar button:active,
 .path-bar-box button:checked,
 .path-bar-box button:active {
     background-color: @vivid_red;
     color: @pure_white;
 }
 
-/* 6. Text Entries */
+/* === TEXT ENTRIES & SPINBUTTONS === */
 entry,
-searchentry {
+searchentry,
+spinbutton {
     background-image: none;
     background-color: @deep_wine_95;
     color: @cream_white;
@@ -254,22 +358,112 @@ searchentry {
     box-shadow: none;
 }
 
+spinbutton {
+    padding: 0;
+}
+
+spinbutton entry {
+    border: none;
+    background-color: transparent;
+}
+
+spinbutton button {
+    background-color: @soft_wine_95;
+    border: none;
+    border-left: 1px solid @pure_white_12;
+    border-radius: 0;
+    padding: 2px 6px;
+}
+
+spinbutton button:hover {
+    background-color: @light_wine_98;
+}
+
 entry:focus,
-searchentry:focus {
+searchentry:focus,
+spinbutton:focus-within {
     border: 1px solid @vivid_red;
     background-color: @deep_wine_95;
 }
 
-/* 7. Image Viewers (EOG - Eye of GNOME) */
+/* === SWITCHES, CHECKBOXES, RADIOS, SCALES & PROGRESSBARS === */
+switch {
+    background-color: @soft_wine_95;
+    border: 1px solid @pure_white_12;
+    border-radius: 14px;
+    color: @muted_pink;
+}
+
+switch:checked {
+    background-color: @vivid_red;
+    border-color: @vivid_red;
+    color: @pure_white;
+}
+
+switch slider {
+    background-color: @cream_white;
+    border-radius: 50%;
+    min-width: 18px;
+    min-height: 18px;
+    margin: 2px;
+}
+
+checkbutton check,
+radiobutton radio {
+    background-image: none;
+    background-color: @soft_wine_95;
+    border: 1px solid @muted_pink;
+    color: @pure_white;
+    min-width: 16px;
+    min-height: 16px;
+}
+
+checkbutton check {
+    border-radius: 4px;
+}
+
+radiobutton radio {
+    border-radius: 50%;
+}
+
+checkbutton check:checked,
+radiobutton radio:checked {
+    background-color: @vivid_red;
+    border-color: @vivid_red;
+}
+
+scale trough,
+progressbar trough {
+    background-color: @soft_wine_95;
+    border: 1px solid @pure_white_12;
+    border-radius: 4px;
+    min-height: 6px;
+}
+
+scale highlight,
+progressbar progress {
+    background-color: @vivid_red;
+    border-radius: 4px;
+}
+
+scale slider {
+    background-color: @cream_white;
+    border: 2px solid @vivid_red;
+    border-radius: 50%;
+    min-width: 14px;
+    min-height: 14px;
+}
+
+/* === IMAGE VIEWERS (EOG) === */
 EogWindow,
 EogScrollView,
 EogScrollView.view,
 .eog-scroll-view {
-    background-color: @dark_wine_98;
+    background-color: @plum_slate_98;
     color: @cream_white;
 }
 
-/* 8. Menus, Popovers & Menubar */
+/* === MENUS, POPOVERS, TOOLTIPS & INFOBARS === */
 menubar,
 .menubar {
     background-color: @dark_wine_98;
@@ -288,17 +482,22 @@ menubar > menuitem:hover {
 
 menu,
 .menu,
+.context-menu,
 popover,
-popover.background {
+popover.background,
+tooltip,
+tooltip.background {
     background-color: @deep_wine_95;
     border: 1px solid @pure_white_12;
     border-radius: 10px;
     padding: 6px;
+    color: @cream_white;
     box-shadow: none;
 }
 
 menuitem,
-.menuitem {
+.menuitem,
+modelbutton {
     color: @soft_pink;
     border-radius: 8px;
     padding: 6px 12px;
@@ -306,9 +505,37 @@ menuitem,
 }
 
 menuitem:hover,
-.menuitem:hover {
+.menuitem:hover,
+modelbutton:hover {
     background-color: @vivid_red;
     color: @pure_white;
+}
+
+infobar {
+    background-color: @deep_wine_95;
+    border-bottom: 1px solid @pure_white_12;
+    color: @cream_white;
+}
+
+calendar {
+    background-color: @deep_wine_95;
+    border: 1px solid @pure_white_12;
+    color: @cream_white;
+}
+
+calendar:selected {
+    background-color: @vivid_red;
+    color: @pure_white;
+    border-radius: 6px;
+}
+
+expander title {
+    color: @cream_white;
+    border-radius: 6px;
+}
+
+expander title:hover {
+    background-color: @light_wine_98;
 }
 
 separator {
@@ -317,8 +544,13 @@ separator {
     margin: 4px 0;
 }
 
-/* 9. Notebooks & Statusbars */
+/* === NOTEBOOKS & STATUSBARS === */
 notebook,
+notebook > stack {
+    background-color: @plum_slate_98;
+    border: none;
+}
+
 notebook > header {
     background-color: @dark_wine_98;
     border: none;
@@ -332,8 +564,13 @@ notebook > header tab {
     padding: 6px 12px;
 }
 
+notebook > header tab:hover {
+    background-color: @light_wine_98;
+    color: @cream_white;
+}
+
 notebook > header tab:checked {
-    background-color: @dark_wine_98;
+    background-color: @plum_slate_98;
     color: @cream_white;
     border-bottom: 2px solid @vivid_red;
 }

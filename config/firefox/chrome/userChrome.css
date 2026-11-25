@@ -228,7 +228,7 @@ toolbarbutton.bookmark-item:not(.subviewbutton),
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.40) !important;
     overflow: hidden !important;
     clip-path: inset(0 round 12px) !important;
-    background-color: var(--dark-wine) !important;
+    background-color: var(--plum-slate) !important;
 }
 
 /* Disable floating island paddings in Fullscreen video mode */

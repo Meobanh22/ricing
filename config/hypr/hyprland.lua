@@ -332,8 +332,8 @@ hl.bind("CTRL + SHIFT + ESCAPE",        hl.dsp.exec_cmd("kitty --class task-mana
 hl.bind(mainMod .. " + L",         hl.dsp.exec_cmd("hyprlock"))
 hl.bind("Print",                   hl.dsp.exec_cmd("~/.config/hypr/scripts/system/screenshot.sh area"))
 hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("~/.config/hypr/scripts/system/screenshot.sh area"))
+hl.bind(mainMod .. " + R",         hl.dsp.exec_cmd("~/.config/hypr/scripts/system/record_screen.sh full media"))
 hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("~/.config/hypr/scripts/system/record_screen.sh area media"))
-hl.bind(mainMod .. " + ALT + R",   hl.dsp.exec_cmd("~/.config/hypr/scripts/system/record_screen.sh full media"))
 hl.bind(mainMod .. " + W",         hl.dsp.exec_cmd("python3 ~/.config/hypr/scripts/system/wallpaper_switcher.py next"))
 
 -- Input Method Toggle (Ngó Sen)

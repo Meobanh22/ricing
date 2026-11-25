@@ -6,7 +6,7 @@
 @-moz-document url("about:newtab"), url("about:home"), url-prefix("about:newtab"), url-prefix("about:home"), url("about:blank") {
     /* Native Activity Stream CSS Variables Override */
     :root {
-        --newtab-background-color: var(--dark-wine) !important;
+        --newtab-background-color: var(--plum-slate) !important;
         --newtab-background-color-secondary: var(--deep-wine) !important;
         --newtab-element-hover-color: var(--light-wine) !important;
         --newtab-element-active-color: var(--soft-wine) !important;
@@ -23,7 +23,7 @@
     body,
     #root,
     .activity-stream {
-        background-color: var(--dark-wine) !important;
+        background-color: var(--plum-slate) !important;
         color: var(--cream-white) !important;
     }
 

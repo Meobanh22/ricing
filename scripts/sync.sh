@@ -49,6 +49,12 @@ sync_push() {
         python3 "$POKEPUFF_SCRIPT" || true
     fi
 
+    # Generate Serena Wine red folder icon theme
+    ICON_THEME_SCRIPT="$REPO_ROOT/scripts/generate_icon_theme.py"
+    if [ -f "$ICON_THEME_SCRIPT" ]; then
+        python3 "$ICON_THEME_SCRIPT" || true
+    fi
+
     # Create destination directories
     mkdir -p "$HOME/.config/hypr/scripts/popups"
     mkdir -p "$HOME/.config/hypr/scripts/terminal"
@@ -309,6 +315,7 @@ MUSIC_EOF
         hyprctl setcursor sylveon-custom 24 &>/dev/null || true
 
         gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' 2>/dev/null || true
+        gsettings set org.gnome.desktop.interface icon-theme 'serena-wine' 2>/dev/null || true
         gsettings set org.gnome.desktop.interface font-name 'JetBrains Mono 11' 2>/dev/null || true
         echo -e "  ${GREEN}✔ GTK theme & dark mode refreshed (gsettings)${NC}"
     fi

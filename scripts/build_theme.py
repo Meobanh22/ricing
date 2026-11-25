@@ -75,6 +75,7 @@ def main():
     deep_wine = raw_colors.get("deep_wine", "#2A1A1E")
     soft_wine = raw_colors.get("soft_wine", "#301F20")
     light_wine = raw_colors.get("light_wine", "#3A222A")
+    plum_slate = raw_colors.get("plum_slate", "#241C20")
     dark_ruby = raw_colors.get("dark_ruby", "#4D0A1C")
     wine_red = raw_colors.get("wine_red", "#851733")
     vivid_red = raw_colors.get("vivid_red", "#DC1A36")
@@ -98,6 +99,7 @@ def main():
         "deep_wine": deep_wine,
         "soft_wine": soft_wine,
         "light_wine": light_wine,
+        "plum_slate": plum_slate,
         "dark_ruby": dark_ruby,
         "dark_ruby_hover": dark_ruby_hover,
         "wine_red": wine_red,
@@ -118,6 +120,8 @@ def main():
         "deep_wine_50": hex_to_rgba_str(deep_wine, 0.50),
         "soft_wine_95": hex_to_rgba_str(soft_wine, 0.95),
         "light_wine_98": hex_to_rgba_str(light_wine, 0.98),
+        "plum_slate_98": hex_to_rgba_str(plum_slate, 0.98),
+        "plum_slate_95": hex_to_rgba_str(plum_slate, 0.95),
         "vivid_red_65": hex_to_rgba_str(vivid_red, 0.65),
         "vivid_red_48": hex_to_rgba_str(vivid_red, 0.48),
         "vivid_red_40": hex_to_rgba_str(vivid_red, 0.40),
@@ -135,6 +139,7 @@ def main():
         "deep_wine": hex_to_hypr_rgb(deep_wine),
         "soft_wine": hex_to_hypr_rgb(soft_wine),
         "light_wine": hex_to_hypr_rgb(light_wine),
+        "plum_slate": hex_to_hypr_rgb(plum_slate),
         "dark_ruby": hex_to_hypr_rgb(dark_ruby),
         "wine_red": hex_to_hypr_rgb(wine_red),
         "vivid_red": hex_to_hypr_rgb(vivid_red),
@@ -178,6 +183,7 @@ def main():
 @define-color deep_wine {palette['deep_wine']};
 @define-color soft_wine {palette['soft_wine']};
 @define-color light_wine {palette['light_wine']};
+@define-color plum_slate {palette['plum_slate']};
 @define-color dark_ruby {palette['dark_ruby']};
 @define-color dark_ruby_hover {palette['dark_ruby_hover']};
 @define-color wine_red {palette['wine_red']};
@@ -199,6 +205,8 @@ def main():
 @define-color deep_wine_50 {palette['deep_wine_50']};
 @define-color soft_wine_95 {palette['soft_wine_95']};
 @define-color light_wine_98 {palette['light_wine_98']};
+@define-color plum_slate_98 {palette['plum_slate_98']};
+@define-color plum_slate_95 {palette['plum_slate_95']};
 @define-color cream_white_96 {palette['cream_white_96']};
 @define-color pure_white_12 {palette['pure_white_12']};
 @define-color pure_white_65 {palette['pure_white_65']};
@@ -448,6 +456,7 @@ DARK_WINE       = PALETTE.get("dark_wine", "#201011")
 DEEP_WINE       = PALETTE.get("deep_wine", "#2A1A1E")
 SOFT_WINE       = PALETTE.get("soft_wine", "#301F20")
 LIGHT_WINE      = PALETTE.get("light_wine", "#3A222A")
+PLUM_SLATE      = PALETTE.get("plum_slate", "#241C20")
 DARK_RUBY       = PALETTE.get("dark_ruby", "#4D0A1C")
 DARK_RUBY_HOVER = PALETTE.get("dark_ruby_hover", "#610E24")
 WINE_RED        = PALETTE.get("wine_red", "#851733")
@@ -778,6 +787,9 @@ color15 {pure_white}
     --soft-wine-95: {palette['soft_wine_95']};
     --light-wine: {palette['light_wine']};
     --light-wine-98: {palette['light_wine_98']};
+    --plum-slate: {palette['plum_slate']};
+    --plum-slate-98: {palette['plum_slate_98']};
+    --plum-slate-95: {palette['plum_slate_95']};
     --dark-ruby: {palette['dark_ruby']};
     --wine-red: {palette['wine_red']};
     --vivid-red: {palette['vivid_red']};

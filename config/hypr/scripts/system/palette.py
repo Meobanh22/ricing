@@ -7,6 +7,7 @@ PALETTE = {
     "deep_wine": "#2A1A1E",
     "soft_wine": "#301F20",
     "light_wine": "#3A222A",
+    "plum_slate": "#241C20",
     "dark_ruby": "#4D0A1C",
     "dark_ruby_hover": "#610E24",
     "wine_red": "#851733",
@@ -27,6 +28,8 @@ PALETTE = {
     "deep_wine_50": "rgba(42, 26, 30, 0.50)",
     "soft_wine_95": "rgba(48, 31, 32, 0.95)",
     "light_wine_98": "rgba(58, 34, 42, 0.98)",
+    "plum_slate_98": "rgba(36, 28, 32, 0.98)",
+    "plum_slate_95": "rgba(36, 28, 32, 0.95)",
     "vivid_red_65": "rgba(220, 26, 54, 0.65)",
     "vivid_red_48": "rgba(220, 26, 54, 0.48)",
     "vivid_red_40": "rgba(220, 26, 54, 0.40)",
@@ -89,6 +92,7 @@ DARK_WINE       = PALETTE.get("dark_wine", "#201011")
 DEEP_WINE       = PALETTE.get("deep_wine", "#2A1A1E")
 SOFT_WINE       = PALETTE.get("soft_wine", "#301F20")
 LIGHT_WINE      = PALETTE.get("light_wine", "#3A222A")
+PLUM_SLATE      = PALETTE.get("plum_slate", "#241C20")
 DARK_RUBY       = PALETTE.get("dark_ruby", "#4D0A1C")
 DARK_RUBY_HOVER = PALETTE.get("dark_ruby_hover", "#610E24")
 WINE_RED        = PALETTE.get("wine_red", "#851733")

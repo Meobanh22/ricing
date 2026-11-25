@@ -20,6 +20,7 @@ PRESETS = {
             "deep_wine": "#2A1A1E",
             "soft_wine": "#301F20",
             "light_wine": "#3A222A",
+            "plum_slate": "#241C20",
             "dark_ruby": "#4D0A1C",
             "wine_red": "#851733",
             "vivid_red": "#DC1A36",

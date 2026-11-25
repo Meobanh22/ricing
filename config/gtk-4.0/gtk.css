@@ -1,24 +1,39 @@
 /* gtk.css — GTK 4 color and widget stylesheet. */
 @import "palette.css";
 
-/* Libadwaita / GTK4 Variables */
-@define-color window_bg_color @dark_wine_98;
+/* === LIBADWAITA & GTK4 VARIABLES === */
+@define-color window_bg_color @plum_slate_98;
 @define-color window_fg_color @cream_white;
-@define-color view_bg_color @dark_wine_98;
+@define-color view_bg_color @plum_slate_98;
 @define-color view_fg_color @cream_white;
 @define-color headerbar_bg_color @dark_wine_98;
 @define-color headerbar_fg_color @cream_white;
 @define-color headerbar_border_color @pure_white_12;
+@define-color headerbar_backdrop_color @dark_wine_98;
+@define-color headerbar_shade_color @pure_white_12;
+@define-color sidebar_bg_color @dark_wine_98;
+@define-color sidebar_fg_color @soft_pink;
+@define-color sidebar_backdrop_color @dark_wine_98;
+@define-color sidebar_border_color @pure_white_12;
+@define-color secondary_sidebar_bg_color @dark_wine_98;
+@define-color secondary_sidebar_fg_color @soft_pink;
+@define-color secondary_sidebar_backdrop_color @dark_wine_98;
 @define-color card_bg_color @deep_wine_95;
 @define-color card_fg_color @cream_white;
+@define-color card_shade_color @pure_white_12;
 @define-color card_border_color @pure_white_12;
 @define-color accent_color @vivid_red;
 @define-color accent_bg_color @vivid_red;
 @define-color accent_fg_color @pure_white;
 @define-color popover_bg_color @deep_wine_95;
 @define-color popover_fg_color @cream_white;
-@define-color dialog_bg_color @dark_wine_98;
+@define-color popover_shade_color @pure_white_12;
+@define-color dialog_bg_color @plum_slate_98;
 @define-color dialog_fg_color @cream_white;
+@define-color toast_bg_color @deep_wine_95;
+@define-color toast_fg_color @cream_white;
+@define-color shade_color @pure_white_12;
+@define-color border_color @pure_white_12;
 
 * {
     font-family: "JetBrains Mono Nerd Font", "FiraCode Nerd Font", "Segoe UI", sans-serif;
@@ -26,9 +41,17 @@
     box-shadow: none;
 }
 
+/* === WINDOWS, DIALOGS & VIEWPORTS === */
 window,
-.background {
-    background-color: @dark_wine_98;
+.background,
+dialog,
+alertdialog,
+viewport,
+scrolledwindow,
+stack,
+textview,
+textview text {
+    background-color: @plum_slate_98;
     color: @cream_white;
 }
 
@@ -37,15 +60,23 @@ window.loupe,
 .loupe-image-view,
 picture-view,
 canvas {
-    background-color: @dark_wine_98;
+    background-color: @plum_slate_98;
 }
 
+/* === HEADERBARS, ACTIONBARS & BANNERS === */
 headerbar {
     background-color: @dark_wine_98;
     border-bottom: 1px solid @pure_white_12;
     color: @cream_white;
 }
 
+actionbar > revealer > box {
+    background-color: @dark_wine_98;
+    border-top: 1px solid @pure_white_12;
+    color: @cream_white;
+}
+
+/* === BUTTONS & DROPDOWNS === */
 button {
     background-image: none;
     background-color: @deep_wine_95;
@@ -61,6 +92,21 @@ button:hover {
     color: @cream_white;
 }
 
+button:checked,
+button:active {
+    background-color: @vivid_red;
+    color: @pure_white;
+}
+
+button.flat {
+    background-color: transparent;
+    border: none;
+}
+
+button.flat:hover {
+    background-color: @light_wine_98;
+}
+
 button.suggested-action {
     background-color: @vivid_red;
     color: @pure_white;
@@ -70,11 +116,23 @@ button.suggested-action:hover {
     background-color: @light_red;
 }
 
+dropdown > button {
+    background-color: @deep_wine_95;
+    border: 1px solid @pure_white_12;
+    color: @cream_white;
+}
+
+/* === SIDEBARS, LISTS & TABLES === */
 .navigation-sidebar,
 listview.navigation-sidebar {
-    background-color: @deep_wine_95;
+    background-color: @dark_wine_98;
     color: @soft_pink;
     border-right: 1px solid @pure_white_12;
+}
+
+.navigation-sidebar row:hover {
+    background-color: @light_wine_98;
+    color: @cream_white;
 }
 
 .navigation-sidebar row:selected {
@@ -82,7 +140,35 @@ listview.navigation-sidebar {
     color: @pure_white;
 }
 
-entry {
+listview,
+columnview,
+listbox {
+    background-color: @plum_slate_98;
+    color: @cream_white;
+}
+
+listbox.boxed-list {
+    background-color: @deep_wine_95;
+    border: 1px solid @pure_white_12;
+    border-radius: 10px;
+}
+
+listview row:hover,
+columnview row:hover,
+listbox row:hover {
+    background-color: @light_wine_98;
+}
+
+listview row:selected,
+columnview row:selected,
+listbox row:selected {
+    background-color: @vivid_red;
+    color: @pure_white;
+}
+
+/* === ENTRIES & SPINBUTTONS === */
+entry,
+spinbutton {
     background-image: none;
     background-color: @deep_wine_95;
     color: @cream_white;
@@ -91,17 +177,118 @@ entry {
     caret-color: @vivid_red;
 }
 
-entry:focus {
+entry:focus,
+spinbutton:focus-within {
     border: 1px solid @vivid_red;
 }
 
-popover contents {
+spinbutton > text {
+    background-color: transparent;
+    color: @cream_white;
+}
+
+spinbutton > button {
+    background-color: @soft_wine_95;
+    border: none;
+    border-left: 1px solid @pure_white_12;
+    border-radius: 0;
+}
+
+/* === SWITCHES, CHECKBOXES, RADIOS, SCALES & PROGRESSBARS === */
+switch {
+    background-color: @soft_wine_95;
+    border: 1px solid @pure_white_12;
+    border-radius: 14px;
+}
+
+switch:checked {
+    background-color: @vivid_red;
+    border-color: @vivid_red;
+}
+
+switch > slider {
+    background-color: @cream_white;
+    border-radius: 50%;
+}
+
+checkbutton > check,
+radiobutton > radio {
+    background-color: @soft_wine_95;
+    border: 1px solid @muted_pink;
+    color: @pure_white;
+}
+
+checkbutton > check:checked,
+radiobutton > radio:checked {
+    background-color: @vivid_red;
+    border-color: @vivid_red;
+}
+
+scale > trough,
+progressbar > trough {
+    background-color: @soft_wine_95;
+    border: 1px solid @pure_white_12;
+    border-radius: 4px;
+}
+
+scale > trough > highlight,
+progressbar > trough > progress {
+    background-color: @vivid_red;
+    border-radius: 4px;
+}
+
+scale > trough > slider {
+    background-color: @cream_white;
+    border: 2px solid @vivid_red;
+    border-radius: 50%;
+}
+
+/* === POPOVERS, TABS, TOOLTIPS & TOASTS === */
+popover > contents,
+popover.menu > contents,
+tooltip {
     background-color: @deep_wine_95;
     border: 1px solid @pure_white_12;
     border-radius: 10px;
     color: @soft_pink;
 }
 
+popover.menu modelbutton {
+    color: @soft_pink;
+    border-radius: 8px;
+}
+
+popover.menu modelbutton:hover {
+    background-color: @vivid_red;
+    color: @pure_white;
+}
+
+tabbar,
+notebook > header {
+    background-color: @dark_wine_98;
+    border-bottom: 1px solid @pure_white_12;
+}
+
+tabbar tab,
+notebook > header tab {
+    background-color: @deep_wine_95;
+    color: @soft_pink;
+    border-radius: 8px;
+}
+
+tabbar tab:selected,
+notebook > header tab:checked {
+    background-color: @light_wine_98;
+    color: @cream_white;
+}
+
+toast {
+    background-color: @deep_wine_95;
+    border: 1px solid @pure_white_12;
+    color: @cream_white;
+}
+
+/* === SCROLLBARS === */
 scrollbar {
     background-color: transparent;
     margin-right: 8px;

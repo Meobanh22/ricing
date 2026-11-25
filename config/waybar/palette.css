@@ -5,6 +5,7 @@
 @define-color deep_wine #2A1A1E;
 @define-color soft_wine #301F20;
 @define-color light_wine #3A222A;
+@define-color plum_slate #241C20;
 @define-color dark_ruby #4D0A1C;
 @define-color dark_ruby_hover #610E24;
 @define-color wine_red #851733;
@@ -26,6 +27,8 @@
 @define-color deep_wine_50 rgba(42, 26, 30, 0.50);
 @define-color soft_wine_95 rgba(48, 31, 32, 0.95);
 @define-color light_wine_98 rgba(58, 34, 42, 0.98);
+@define-color plum_slate_98 rgba(36, 28, 32, 0.98);
+@define-color plum_slate_95 rgba(36, 28, 32, 0.95);
 @define-color cream_white_96 rgba(255, 240, 245, 0.96);
 @define-color pure_white_12 rgba(255, 255, 255, 0.12);
 @define-color pure_white_65 rgba(255, 255, 255, 0.65);

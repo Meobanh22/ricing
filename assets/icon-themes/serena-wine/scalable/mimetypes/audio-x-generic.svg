@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="note-grad" x1="20%" y1="10%" x2="85%" y2="95%">
+      <stop offset="0%" stop-color="#FF5C8A"/>
+      <stop offset="45%" stop-color="#F02D4C"/>
+      <stop offset="100%" stop-color="#DC1A36"/>
+    </linearGradient>
+    <path id="music-note-shape" d="
+      M 46 27
+      Q 46 21, 52 19.5
+      L 100 9
+      Q 108 7.5, 108 16
+      L 108 85
+      C 108 96.5, 97 106, 84 106
+      C 72.5 106, 64 99, 64 89.5
+      C 64 79.5, 73.5 71, 86 71
+      C 90.8 71, 95 72.3, 98 74.5
+      L 98 34
+      L 56 43
+      L 56 97
+      C 56 108.5, 45 118, 32 118
+      C 20.5 118, 12 111, 12 101.5
+      C 12 91.5, 21.5 83, 34 83
+      C 38.8 83, 43 84.3, 46 86.5
+      Z"/>
+  </defs>
+
+  <!-- 3D cel-shaded depth shadow -->
+  <use href="#music-note-shape" y="5" fill="#4D0A1C"/>
+  <use href="#music-note-shape" y="2.5" fill="#851733"/>
+
+  <!-- Main music note body -->
+  <use href="#music-note-shape" fill="url(#note-grad)" stroke="#4D0A1C" stroke-width="3" stroke-linejoin="round"/>
+
+  <!-- Subtle top beam & notehead cel highlights -->
+  <path d="M 51 24.5 L 101 14" stroke="#E8C2D0" stroke-width="2.8" stroke-linecap="round" opacity="0.6"/>
+  <ellipse cx="29" cy="95" rx="5.5" ry="2.6" transform="rotate(-22 29 95)" fill="#E8C2D0" opacity="0.45"/>
+  <ellipse cx="81" cy="83" rx="5.5" ry="2.6" transform="rotate(-22 81 83)" fill="#E8C2D0" opacity="0.45"/>
+</svg>
