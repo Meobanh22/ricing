@@ -108,7 +108,7 @@ class Player:
         self.current = saved.get('current') if saved.get('current') in self.order else None
         self.position = max(0, float(saved.get('position', 0))) if self.current else 0
         self.duration = self.track.duration if self.track else 0
-        self.volume = max(0, min(100, float(saved.get('volume', 65))))
+        self.volume = max(0, min(100, float(saved.get('volume', 100))))
         self.loop = saved.get('loop', 'All')
         if self.loop not in ('None', 'All', 'Track'):
             self.loop = 'All'

@@ -474,6 +474,37 @@ def select_lyrics(records, candidates, duration=None):
     return max(ranked, key=lambda entry: entry[0])[1] if ranked else None
 
 
+def local_lrc_path(media_url):
+    if not media_url:
+        return None
+    parsed = urllib.parse.urlparse(media_url)
+    if parsed.scheme not in ("", "file"):
+        return None
+    raw_path = urllib.parse.unquote(parsed.path)
+    if not raw_path:
+        return None
+    path = Path(raw_path)
+    if not path.is_absolute():
+        return None
+    lrc = path.with_suffix(".lrc")
+    return lrc if lrc.is_file() else None
+
+
+def load_local_lyrics(media_url):
+    lrc = local_lrc_path(media_url)
+    if lrc is None:
+        return None
+    try:
+        text = lrc.read_text(encoding="utf-8-sig")
+    except OSError:
+        return None
+    lines, _ = parse_lyrics(text)
+    if lines:
+        return {"syncedLyrics": text, "plainLyrics": "\n".join(line for _, line in lines if line)}
+    plain = text.strip()
+    return {"syncedLyrics": None, "plainLyrics": plain} if plain else None
+
+
 def lyrics_cache_path(title, artist, duration=None):
     identity = json.dumps([unicodedata.normalize("NFC", title).casefold(),
                            unicodedata.normalize("NFC", artist).casefold(),
@@ -977,7 +1008,7 @@ class LyricsApp:
             self.sync_offset = load_sync_offset(self.sync_track_key)
         if self.title and (track_changed or lookup_key != self.last_lyrics_lookup_key):
             self.last_lyrics_lookup_key = lookup_key
-            self.load_lyrics_async(self.title, self.artist, self.length)
+            self.load_lyrics_async(self.title, self.artist, self.length, self.media_url)
 
     def confirm_rewind(self, status, reported_position, now):
         """Require a progressing new timeline before accepting a backward jump."""
@@ -1038,8 +1069,9 @@ class LyricsApp:
         self.last_sync_time = now
         self.last_position_report = reported_position
 
-    def load_lyrics_async(self, title, artist, length):
+    def load_lyrics_async(self, title, artist, length, media_url=None):
         request = object()
+        url = self.media_url if media_url is None else media_url
         self.lyrics_request = request
         self.loading_lyrics = True
         self.synced_lyrics = []
@@ -1051,7 +1083,7 @@ class LyricsApp:
 
         def worker():
             try:
-                data = fetch_lrclib(title, artist, length)
+                data = load_local_lyrics(url) or fetch_lrclib(title, artist, length)
                 lines, cues = parse_lyrics_record(data) if data else ([], {})
                 plain = [line.strip() for line in (data.get("plainLyrics") or "").splitlines()
                          if line.strip()] if data else []

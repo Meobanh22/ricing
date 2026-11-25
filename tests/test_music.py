@@ -691,6 +691,25 @@ class LyricsLookupTests(unittest.TestCase):
                     self.assertIsNone(music.fetch_lrclib(self.title, self.artist, 268))
             self.assertFalse(list(Path(folder).glob("*.json")))
 
+    def test_local_lrc_sidecar_loads_without_calling_lrclib(self):
+        with tempfile.TemporaryDirectory() as folder:
+            audio = Path(folder) / "Artist - Song.m4a"
+            audio.write_bytes(b"")
+            lrc = Path(folder) / "Artist - Song.lrc"
+            lrc.write_text("[00:01.00] First line\n[00:05.50] Second line\n", encoding="utf-8")
+            with patch.object(music.subprocess, "Popen"), patch.object(music.threading, "Thread") as thread:
+                app = music.LyricsApp()
+                app.lyrics_canvas = None
+                app.media_url = audio.as_uri()
+                app.load_lyrics_async("Song", "Artist", 120)
+                worker = thread.call_args.kwargs["target"]
+            with patch.object(music, "fetch_lrclib") as remote:
+                worker()
+            remote.assert_not_called()
+            self.assertTrue(app.lyrics_found)
+            self.assertTrue(app.is_synced)
+            self.assertEqual(app.synced_lyrics, [(1.0, "First line"), (5.5, "Second line")])
+
 
 @unittest.skipIf(music.SpectrumCanvas is None, "Cairo/Pango is unavailable")
 class SpectrumCanvasTests(unittest.TestCase):

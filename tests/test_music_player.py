@@ -108,6 +108,9 @@ class LocalPlayerTests(unittest.TestCase):
         self.assertEqual(p.current, last)
         self.assertEqual(p.status, 'Playing')
 
+    def test_default_startup_volume_is_100(self):
+        self.assertEqual(self.player.volume, 100)
+
     def test_media_metadata_identifies_the_exact_local_file(self):
         p = self.player
         p.play(str(self.tracks[1].path))
