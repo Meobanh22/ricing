@@ -161,9 +161,9 @@ class LyricsCanvas:
         context.translate((width - (width - 32) * scale) / 2, y)
         context.scale(scale, scale)
         # A narrow wine outline keeps the letters readable over bright wallpaper.
-        self.color(context, 'bg_window', 'bg_window', 0, alpha)
+        self.color(context, 'dark_wine', 'dark_wine', 0, alpha)
         context.mask_surface(outline, mask_x, mask_y)
-        self.color(context, 'text_secondary', 'text_inverse', focus, alpha)
+        self.color(context, 'soft_pink', 'pure_white', focus, alpha)
         context.mask_surface(glyphs, mask_x, mask_y)
         context.restore()
 

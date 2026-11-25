@@ -25,9 +25,9 @@ window#desktop-widgets-window {
 }
 
 .desktop-widget-card {
-    background-color: @bg_tactile_cream;
+    background-color: @cream_white_96;
     border-style: solid;
-    border-color: @border_waybar_3d;
+    border-color: @dark_ruby;
     border-top-width: 2px;
     border-left-width: 2px;
     border-right-width: 2px;
@@ -40,8 +40,8 @@ window#desktop-widgets-window {
 
 .desktop-widget-card:hover,
 .desktop-widget-card.card-hover {
-    background-color: @text_inverse;
-    border-color: @accent;
+    background-color: @pure_white;
+    border-color: @vivid_red;
 }
 
 .widget-avatar-card {
@@ -55,7 +55,7 @@ window#desktop-widgets-window {
 /* Frame 1: Waybar Sunset Gradient Style (Inherits .gradient-sunset from palette.css) */
 .sysinfo-box-gradient {
     border-style: solid;
-    border-color: @border_waybar_3d;
+    border-color: @dark_ruby;
     border-top-width: 1.5px;
     border-left-width: 1.5px;
     border-right-width: 1.5px;
@@ -68,30 +68,30 @@ window#desktop-widgets-window {
 }
 
 .sysinfo-box-gradient:hover {
-    border-color: @accent;
+    border-color: @vivid_red;
     box-shadow: none;
 }
 
 /* Frame 2: Waybar Classic Ruby Wine Style (With crisp white tactile border) */
 .sysinfo-box-solid {
-    background-color: @bg_waybar;
+    background-color: @wine_red;
     border-style: solid;
-    border-color: @border_waybar_3d;
+    border-color: @dark_ruby;
     border-top-width: 1.5px;
     border-left-width: 1.5px;
     border-right-width: 1.5px;
     border-bottom-width: 4px;
     border-radius: 12px;
-    box-shadow: inset 0 0 0 2px @border_tactile_white;
+    box-shadow: inset 0 0 0 2px @pure_white_65;
     padding: 6px 4px 7px 4px;
     margin: 1px 2px 3px 2px;
     transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
 .sysinfo-box-solid:hover {
-    background-color: @bg_waybar_hover;
-    border-color: @accent;
-    box-shadow: inset 0 0 0 2px @border_tactile_white;
+    background-color: @wine_red_hover;
+    border-color: @vivid_red;
+    box-shadow: inset 0 0 0 2px @pure_white_65;
 }
 
 .sysinfo-sub-label {
@@ -106,7 +106,7 @@ window#desktop-widgets-window {
 }
 
 .avatar-profile-name {
-    color: @bg_waybar;
+    color: @wine_red;
     font-size: 14px;
     font-weight: 800;
     margin: 0;
@@ -114,7 +114,7 @@ window#desktop-widgets-window {
 }
 
 .avatar-profile-subtitle {
-    color: @text_muted;
+    color: @muted_pink;
     font-size: 8px;
     font-weight: 700;
     margin-top: -3px;
@@ -122,7 +122,7 @@ window#desktop-widgets-window {
 }
 
 .avatar-team-title {
-    color: @bg_waybar;
+    color: @wine_red;
     font-size: 9px;
     font-weight: 800;
     letter-spacing: 0.10em;
@@ -134,7 +134,7 @@ window#desktop-widgets-window {
 
 .tactile-hero-box {
     border-style: solid;
-    border-color: @border_waybar_3d;
+    border-color: @dark_ruby;
     border-top-width: 1.8px;
     border-left-width: 1.8px;
     border-right-width: 1.8px;
@@ -147,7 +147,7 @@ window#desktop-widgets-window {
 }
 
 .tactile-hero-box:hover {
-    border-color: @accent;
+    border-color: @vivid_red;
 }
 
 .weather-hero-top-row {
@@ -158,12 +158,12 @@ window#desktop-widgets-window {
     font-size: 10px;
     font-weight: 800;
     letter-spacing: 0.12em;
-    color: @bg_waybar;
+    color: @wine_red;
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.70);
 }
 
 .weather-hero-icon {
-    color: @bg_waybar;
+    color: @wine_red;
     font-size: 50px;
     margin-right: 16px;
     margin-top: -2px;
@@ -172,41 +172,41 @@ window#desktop-widgets-window {
 }
 
 .weather-hero-temp {
-    color: @bg_waybar;
+    color: @wine_red;
     font-size: 44px;
     font-weight: 800;
     letter-spacing: -0.03em;
     text-shadow: 
-        -2px -2px 0 @text_inverse,
-         2px -2px 0 @text_inverse,
-        -2px  2px 0 @text_inverse,
-         2px  2px 0 @text_inverse,
-        -2px  0   0 @text_inverse,
-         2px  0   0 @text_inverse,
-         0   -2px 0 @text_inverse,
-         0    2px 0 @text_inverse,
-        -1.5px -1px 0 @text_inverse,
-         1.5px -1px 0 @text_inverse,
-        -1.5px  1px 0 @text_inverse,
-         1.5px  1px 0 @text_inverse,
-        -1px    4px 0 @border_waybar_3d,
-         0      4px 0 @border_waybar_3d,
-         1px    4px 0 @border_waybar_3d;
+        -2px -2px 0 @pure_white,
+         2px -2px 0 @pure_white,
+        -2px  2px 0 @pure_white,
+         2px  2px 0 @pure_white,
+        -2px  0   0 @pure_white,
+         2px  0   0 @pure_white,
+         0   -2px 0 @pure_white,
+         0    2px 0 @pure_white,
+        -1.5px -1px 0 @pure_white,
+         1.5px -1px 0 @pure_white,
+        -1.5px  1px 0 @pure_white,
+         1.5px  1px 0 @pure_white,
+        -1px    4px 0 @dark_ruby,
+         0      4px 0 @dark_ruby,
+         1px    4px 0 @dark_ruby;
     margin-left: 2px;
 }
 
 .weather-hero-unit {
-    color: @bg_waybar;
+    color: @wine_red;
     font-size: 15px;
     font-weight: 800;
     margin-top: 6px;
     margin-left: 3px;
     text-shadow: 
-        -1.2px -1.2px 0 @text_inverse,
-         1.2px -1.2px 0 @text_inverse,
-        -1.2px  1.2px 0 @text_inverse,
-         1.2px  1.2px 0 @text_inverse,
-         0      2.5px 0 @border_waybar_3d;
+        -1.2px -1.2px 0 @pure_white,
+         1.2px -1.2px 0 @pure_white,
+        -1.2px  1.2px 0 @pure_white,
+         1.2px  1.2px 0 @pure_white,
+         0      2.5px 0 @dark_ruby;
 }
 
 .weather-forecast-container {
@@ -216,7 +216,7 @@ window#desktop-widgets-window {
 .tactile-col-box {
     background-color: rgba(255, 255, 255, 0.70);
     border-style: solid;
-    border-color: @border_waybar_3d;
+    border-color: @dark_ruby;
     border-top-width: 1.5px;
     border-left-width: 1.5px;
     border-right-width: 1.5px;
@@ -229,26 +229,26 @@ window#desktop-widgets-window {
 }
 
 .tactile-col-box:hover {
-    background-color: @text_inverse;
-    border-color: @accent;
+    background-color: @pure_white;
+    border-color: @vivid_red;
 }
 
 .forecast-col-day {
     font-size: 9.5px;
     font-weight: 700;
-    color: @bg_waybar;
+    color: @wine_red;
 }
 
 .forecast-col-icon {
     font-size: 16px;
-    color: @bg_waybar;
+    color: @wine_red;
     margin: 1px 0;
 }
 
 .forecast-col-temp {
     font-size: 9px;
     font-weight: 700;
-    color: @bg_waybar;
+    color: @wine_red;
     margin-top: 1px;
 }
 
@@ -267,7 +267,7 @@ window#desktop-widgets-window {
     font-size: 11.5px;
     font-weight: 900;
     letter-spacing: 0.10em;
-    color: @bg_waybar;
+    color: @wine_red;
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.70);
 }
 
@@ -284,7 +284,7 @@ window#desktop-widgets-window {
 .tactile-calendar-box {
     background-color: rgba(255, 255, 255, 0.70);
     border-style: solid;
-    border-color: @border_waybar_3d;
+    border-color: @dark_ruby;
     border-top-width: 1.5px;
     border-left-width: 1.5px;
     border-right-width: 1.5px;
@@ -297,8 +297,8 @@ window#desktop-widgets-window {
 }
 
 .tactile-calendar-box:hover {
-    background-color: @text_inverse;
-    border-color: @accent;
+    background-color: @pure_white;
+    border-color: @vivid_red;
 }
 
 .calendar-day-header {
@@ -308,9 +308,9 @@ window#desktop-widgets-window {
 }
 
 .calendar-cell-today {
-    background-color: @bg_waybar;
+    background-color: @wine_red;
     border-radius: 6px;
-    border-bottom: 2.5px solid @border_waybar_3d;
+    border-bottom: 2.5px solid @dark_ruby;
     margin: 1px;
 }
 

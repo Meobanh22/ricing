@@ -1,46 +1,41 @@
 /* palette.css — Color tokens for Waybar. */
 /* NOTE: Generated from tokens.json. Do not edit directly. */
 
-@define-color bg_window rgba(32, 16, 17, 0.98);
-@define-color bg_card rgba(42, 26, 30, 0.95);
-@define-color bg_card_hover rgba(58, 34, 42, 0.98);
-@define-color bg_subtle rgba(48, 31, 32, 0.95);
-@define-color bg_ghost transparent;
-@define-color bg_ghost_hover rgba(42, 26, 30, 0.50);
+@define-color dark_wine #201011;
+@define-color deep_wine #2A1A1E;
+@define-color soft_wine #301F20;
+@define-color light_wine #3A222A;
+@define-color dark_ruby #4D0A1C;
+@define-color dark_ruby_hover #610E24;
+@define-color wine_red #851733;
+@define-color wine_red_hover #9C2241;
+@define-color vivid_red #DC1A36;
+@define-color light_red #F02D4C;
+@define-color vivid_pink #FF5C8A;
+@define-color soft_pink #E8C2D0;
+@define-color muted_pink #A68595;
+@define-color cream_white #FFF0F5;
+@define-color pure_white #FFFFFF;
+@define-color sky_blue #50A6FF;
+@define-color light_cyan #87F0FF;
+@define-color warm_yellow #FFB86C;
+@define-color soft_green #8FBC8F;
 
-@define-color border_window rgba(255, 255, 255, 0.12);
-@define-color border_card rgba(255, 255, 255, 0.12);
-@define-color border_card_hover rgba(220, 26, 54, 0.65);
-
-@define-color accent #DC1A36;
-@define-color accent_hover #F02D4C;
-
-@define-color scrollbar_slider rgba(220, 26, 54, 0.48);
-@define-color scrollbar_slider_hover #DC1A36;
-
-@define-color text_primary #FFF0F5;
-@define-color text_secondary #E8C2D0;
-@define-color text_muted #A68595;
-@define-color text_inverse #FFFFFF;
-@define-color text_white #FFFFFF;
-
-@define-color status_warning #FFB86C;
-@define-color status_critical #DC1A36;
-@define-color status_success #8FBC8F;
-
-@define-color ribbon_blue #50A6FF;
-@define-color screen_cyan #87F0FF;
-@define-color bg_tactile_cream rgba(255, 240, 245, 0.96);
-@define-color pokepuff_pink #FF5C8A;
-
-@define-color bg_waybar #851733;
-@define-color bg_waybar_hover #9C2241;
-@define-color border_waybar_3d #4D0A1C;
-@define-color border_waybar_3d_hover #610E24;
-@define-color shadow_extrusion #4D0A1C;
-@define-color shadow_extrusion_hover #610E24;
-@define-color border_tactile_white rgba(255, 255, 255, 0.65);
-@define-color border_tactile_white_bright rgba(255, 255, 255, 0.90);
+@define-color dark_wine_98 rgba(32, 16, 17, 0.98);
+@define-color deep_wine_95 rgba(42, 26, 30, 0.95);
+@define-color deep_wine_50 rgba(42, 26, 30, 0.50);
+@define-color soft_wine_95 rgba(48, 31, 32, 0.95);
+@define-color light_wine_98 rgba(58, 34, 42, 0.98);
+@define-color cream_white_96 rgba(255, 240, 245, 0.96);
+@define-color pure_white_12 rgba(255, 255, 255, 0.12);
+@define-color pure_white_65 rgba(255, 255, 255, 0.65);
+@define-color pure_white_90 rgba(255, 255, 255, 0.90);
+@define-color vivid_red_65 rgba(220, 26, 54, 0.65);
+@define-color vivid_red_48 rgba(220, 26, 54, 0.48);
+@define-color vivid_red_40 rgba(220, 26, 54, 0.40);
+@define-color vivid_red_20 rgba(220, 26, 54, 0.20);
+@define-color sky_blue_95 rgba(80, 166, 255, 0.95);
+@define-color light_cyan_55 rgba(135, 240, 255, 0.55);
 
 /* === GRADIENTS === */
 .gradient-sunset,

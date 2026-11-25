@@ -123,8 +123,8 @@ hl.config({
         border_size = 2,
 
         col = {
-            active_border   = palette.accent or "rgb(ff2a55)",
-            inactive_border = palette.border_window or "rgba(ffffff1f)",
+            active_border   = palette.vivid_red or "rgb(ff2a55)",
+            inactive_border = palette.pure_white_12 or "rgba(ffffff1f)",
         },
 
         layout = "dwindle",

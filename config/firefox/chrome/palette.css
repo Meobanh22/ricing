@@ -2,32 +2,34 @@
 /* NOTE: Generated from tokens.json. Do not edit directly. */
 
 :root {
-    --bg-window: #201011;
-    --bg-window-alpha: rgba(32, 16, 17, 0.98);
-    --bg-card: #2A1A1E;
-    --bg-card-alpha: rgba(42, 26, 30, 0.95);
-    --bg-card-hover: #3A222A;
-    --bg-subtle: #301F20;
-    --bg-ghost: transparent;
-    --bg-ghost-hover: rgba(42, 26, 30, 0.50);
+    --dark-wine: #201011;
+    --dark-wine-98: rgba(32, 16, 17, 0.98);
+    --deep-wine: #2A1A1E;
+    --deep-wine-95: rgba(42, 26, 30, 0.95);
+    --deep-wine-50: rgba(42, 26, 30, 0.50);
+    --soft-wine: #301F20;
+    --soft-wine-95: rgba(48, 31, 32, 0.95);
+    --light-wine: #3A222A;
+    --light-wine-98: rgba(58, 34, 42, 0.98);
+    --dark-ruby: #4D0A1C;
+    --wine-red: #851733;
+    --vivid-red: #DC1A36;
+    --light-red: #F02D4C;
+    --vivid-pink: #FF5C8A;
+    --soft-pink: #E8C2D0;
+    --muted-pink: #A68595;
+    --cream-white: #FFF0F5;
+    --pure-white: #FFFFFF;
+    --sky-blue: #50A6FF;
+    --light-cyan: #87F0FF;
+    --warm-yellow: #FFB86C;
+    --soft-green: #8FBC8F;
 
-    --border-window: rgba(255, 255, 255, 0.12);
-    --border-card: rgba(255, 255, 255, 0.12);
-    --border-card-hover: rgba(220, 26, 54, 0.65);
-
-    --accent: #DC1A36;
-    --accent-hover: #F02D4C;
-    --accent-dim: rgba(220, 26, 54, 0.48);
-    --accent-subtle: rgba(220, 26, 54, 0.20);
-
-    --text-primary: #FFF0F5;
-    --text-secondary: #E8C2D0;
-    --text-muted: #A68595;
-    --text-inverse: #FFFFFF;
-
-    --status-warning: #FFB86C;
-    --status-critical: #DC1A36;
-    --status-success: #8FBC8F;
+    --pure-white-12: rgba(255, 255, 255, 0.12);
+    --vivid-red-65: rgba(220, 26, 54, 0.65);
+    --vivid-red-48: rgba(220, 26, 54, 0.48);
+    --vivid-red-40: rgba(220, 26, 54, 0.40);
+    --vivid-red-20: rgba(220, 26, 54, 0.20);
 
     --radius-window: 16px;
     --radius-card: 10px;

@@ -12,9 +12,9 @@ if SCRIPT_DIR not in sys.path:
     sys.path.insert(0, SCRIPT_DIR)
 
 from shelf_pkg.constants import (  # noqa: E402
-    C_ACCENT,
-    C_RUBY_PRI,
-    C_TEXT_INV,
+    VIVID_RED,
+    WINE_RED,
+    PURE_WHITE,
     DROP_TARGETS,
     MODE_FILE,
     PID_FILE,
@@ -162,7 +162,7 @@ class ShelfWindow(
 
         self.btn_tab_clip = Gtk.Button()
         self.lbl_tab_clip = Gtk.Label()
-        self.lbl_tab_clip.set_markup(f"<span font='12' color='{C_TEXT_INV}'>󰅌</span>   <span color='{C_TEXT_INV}'><b>Clipboard</b></span>")
+        self.lbl_tab_clip.set_markup(f"<span font='12' color='{PURE_WHITE}'>󰅌</span>   <span color='{PURE_WHITE}'><b>Clipboard</b></span>")
         self.btn_tab_clip.add(self.lbl_tab_clip)
         self.btn_tab_clip.get_style_context().add_class("tab-btn")
         self.btn_tab_clip.connect("clicked", lambda w: self.switch_tab("clip"))
@@ -170,7 +170,7 @@ class ShelfWindow(
 
         self.btn_tab_shelf = Gtk.Button()
         self.lbl_tab_shelf = Gtk.Label()
-        self.lbl_tab_shelf.set_markup(f"<span font='12' color='{C_ACCENT}'>󰏖</span>   <span color='{C_RUBY_PRI}'>Shelf</span>")
+        self.lbl_tab_shelf.set_markup(f"<span font='12' color='{VIVID_RED}'>󰏖</span>   <span color='{WINE_RED}'>Shelf</span>")
         self.btn_tab_shelf.add(self.lbl_tab_shelf)
         self.btn_tab_shelf.get_style_context().add_class("tab-btn")
         self.btn_tab_shelf.connect("clicked", lambda w: self.switch_tab("shelf"))
@@ -193,7 +193,7 @@ class ShelfWindow(
 
         self.btn_stash_clip = Gtk.Button()
         self.lbl_stash = Gtk.Label()
-        self.lbl_stash.set_markup(f"<span font='11' color='{C_ACCENT}'>󰅍</span>  <span color='{C_RUBY_PRI}'>Stash</span>")
+        self.lbl_stash.set_markup(f"<span font='11' color='{VIVID_RED}'>󰅍</span>  <span color='{WINE_RED}'>Stash</span>")
         self.btn_stash_clip.add(self.lbl_stash)
         self.btn_stash_clip.get_style_context().add_class("action-btn")
         self.btn_stash_clip.connect("clicked", self.on_stash_clipboard_clicked)
@@ -201,7 +201,7 @@ class ShelfWindow(
 
         self.btn_clear_all = Gtk.Button()
         self.lbl_clear = Gtk.Label()
-        self.lbl_clear.set_markup(f"<span font='12' color='{C_ACCENT}'>󰆴</span>")
+        self.lbl_clear.set_markup(f"<span font='12' color='{VIVID_RED}'>󰆴</span>")
         self.btn_clear_all.add(self.lbl_clear)
         self.btn_clear_all.get_style_context().add_class("action-btn")
         self.btn_clear_all.connect("clicked", self.on_clear_clicked)
@@ -209,7 +209,7 @@ class ShelfWindow(
 
         btn_close = Gtk.Button()
         lbl_close = Gtk.Label()
-        lbl_close.set_markup(f"<span font='12' color='{C_RUBY_PRI}'>✕</span>")
+        lbl_close.set_markup(f"<span font='12' color='{WINE_RED}'>✕</span>")
         btn_close.add(lbl_close)
         btn_close.get_style_context().add_class("btn-close")
         btn_close.connect("clicked", lambda w: self.close_window())
@@ -265,7 +265,7 @@ class ShelfWindow(
         if tab_name == "clip":
             self.btn_tab_clip.get_style_context().add_class("active")
             self.btn_tab_shelf.get_style_context().remove_class("active")
-            self.lbl_tab_clip.set_markup(f"<span font='12' color='{C_TEXT_INV}'>󰅌</span>   <span color='{C_TEXT_INV}'><b>Clipboard</b></span>")
+            self.lbl_tab_clip.set_markup(f"<span font='12' color='{PURE_WHITE}'>󰅌</span>   <span color='{PURE_WHITE}'><b>Clipboard</b></span>")
             self.update_shelf_badge()
             self.btn_stash_clip.hide()
             self.stack.set_visible_child_name("clip")
@@ -274,7 +274,7 @@ class ShelfWindow(
         else:
             self.btn_tab_shelf.get_style_context().add_class("active")
             self.btn_tab_clip.get_style_context().remove_class("active")
-            self.lbl_tab_clip.set_markup(f"<span font='12' color='{C_ACCENT}'>󰅌</span>   <span color='{C_RUBY_PRI}'>Clipboard</span>")
+            self.lbl_tab_clip.set_markup(f"<span font='12' color='{VIVID_RED}'>󰅌</span>   <span color='{WINE_RED}'>Clipboard</span>")
             self.update_shelf_badge()
             self.btn_stash_clip.show()
             self.stack.set_visible_child_name("shelf")
@@ -288,9 +288,9 @@ class ShelfWindow(
                 count = 0
         suffix = f" ({count})" if count > 0 else ""
         if self.active_tab == "shelf":
-            txt = f"<span font='12' color='{C_TEXT_INV}'>󰏖</span>   <span color='{C_TEXT_INV}'><b>Shelf{suffix}</b></span>"
+            txt = f"<span font='12' color='{PURE_WHITE}'>󰏖</span>   <span color='{PURE_WHITE}'><b>Shelf{suffix}</b></span>"
         else:
-            txt = f"<span font='12' color='{C_ACCENT}'>󰏖</span>   <span color='{C_RUBY_PRI}'>Shelf{suffix}</span>"
+            txt = f"<span font='12' color='{VIVID_RED}'>󰏖</span>   <span color='{WINE_RED}'>Shelf{suffix}</span>"
         self.lbl_tab_shelf.set_markup(txt)
 
     def show_toast(self, message):

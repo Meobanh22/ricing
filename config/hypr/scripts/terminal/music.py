@@ -66,11 +66,11 @@ BOLD = "\x1b[1m"
 DIM = "\x1b[2m"
 ITALIC = "\x1b[3m"
 
-C_TEXT_PRI = PALETTE["text_primary"]
-C_TEXT_SEC = PALETTE["text_secondary"]
-C_TEXT_MUT = PALETTE["text_muted"]
-C_LYRIC_HIGHLIGHT = PALETTE["accent_hover"]
-C_BG_WIN = PALETTE["bg_window"]
+CREAM_WHITE = PALETTE["cream_white"]
+SOFT_PINK = PALETTE["soft_pink"]
+MUTED_PINK = PALETTE["muted_pink"]
+C_LYRIC_HIGHLIGHT = PALETTE["light_red"]
+DARK_WINE = PALETTE["dark_wine"]
 
 RENDER_FPS = 60
 SPECTRUM_GAIN = 2.0
@@ -206,7 +206,7 @@ def karaoke_text(text, prefix, scale, visibility=1.0):
     previous_color = None
     for index, content in clusters:
         coverage = ease((prefix - index) / len(content))
-        color = mix_color(C_BG_WIN, mix_color(C_TEXT_PRI, C_LYRIC_HIGHLIGHT, coverage), visibility)
+        color = mix_color(DARK_WINE, mix_color(CREAM_WHITE, C_LYRIC_HIGHLIGHT, coverage), visibility)
         if color != previous_color:
             parts.append(fg(color))
             previous_color = color
@@ -215,9 +215,9 @@ def karaoke_text(text, prefix, scale, visibility=1.0):
 
 
 def lyric_text(text, scale, visibility=1.0):
-    color = mix_color(C_TEXT_SEC, PALETTE["text_inverse"], visibility)
+    color = mix_color(SOFT_PINK, PALETTE["pure_white"], visibility)
     content = f"\x1b]66;s={scale};{text}\x07" if scale > 1 else text
-    return BOLD + fg(color) + bg(C_BG_WIN) + content + RESET
+    return BOLD + fg(color) + bg(DARK_WINE) + content + RESET
 
 
 @lru_cache(maxsize=256)
@@ -902,7 +902,7 @@ class LyricsApp:
                                     and self.scaled_lyrics and LyricsCanvas is not None and SpectrumCanvas is not None)
         self.focus_frame_size = None
         self.graphics_frame_size = None
-        self.idle_backdrop = IdleBackdrop(C_BG_WIN, enabled=self.scaled_lyrics, native=True, normal_opacity=0.94)
+        self.idle_backdrop = IdleBackdrop(DARK_WINE, enabled=self.scaled_lyrics, native=True, normal_opacity=0.94)
         self.terminal_input = TerminalInput()
         self.visibility_watcher = HyprlandVisibilityWatcher()
 
@@ -1192,7 +1192,7 @@ class LyricsApp:
                     if text and 0 <= row < spectrum_start:
                         text = ANSI_STYLE.sub("", clip_line(text, max(1, cols - 4)))
                         padding = max(0, (cols - text_width(text)) // 2)
-                        frame.append(f"\x1b[{row + 1};1H" + " " * padding + fg(C_TEXT_SEC) + bg(C_BG_WIN) + text + RESET)
+                        frame.append(f"\x1b[{row + 1};1H" + " " * padding + fg(SOFT_PINK) + bg(DARK_WINE) + text + RESET)
         elif self.lyrics_canvas is not None:
             frame.append(self.lyrics_canvas.clear())
 

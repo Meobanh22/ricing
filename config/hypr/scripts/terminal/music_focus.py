@@ -161,7 +161,7 @@ def run_overlay(fd, parent_pid):
             self.gradient = SUNSET_STOPS
             self.started = time.monotonic()
             self.closing_at = None
-            self.background = tuple(int(PALETTE['bg_window'][i:i + 2], 16) / 255
+            self.background = tuple(int(PALETTE['dark_wine'][i:i + 2], 16) / 255
                                     for i in (1, 3, 5))
             for index in range(display.get_n_monitors()):
                 monitor = display.get_monitor(index)

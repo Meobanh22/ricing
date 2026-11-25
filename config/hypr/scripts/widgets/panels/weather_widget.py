@@ -14,10 +14,10 @@ import cairo
 from gi.repository import GLib, Gtk, PangoCairo
 
 from panels.common import (
-    C_BG_WAYBAR,
-    C_BORDER_3D,
-    C_TEXT_INV,
-    C_TEXT_MUT,
+    WINE_RED,
+    DARK_RUBY,
+    PURE_WHITE,
+    MUTED_PINK,
     HAS_LAYER_SHELL,
     GtkLayerShell,
     on_window_draw_clear,
@@ -73,9 +73,9 @@ class Tactile3DTemperatureWidget(Gtk.DrawingArea):
             layout,
             start_x,
             start_y,
-            core_color=C_BG_WAYBAR,
-            dark_color=C_BORDER_3D,
-            white_color=C_TEXT_INV,
+            core_color=WINE_RED,
+            dark_color=DARK_RUBY,
+            white_color=PURE_WHITE,
             extrusion_h=4.0,
             white_w=4.6,
             dark_extra=1.6,
@@ -143,14 +143,14 @@ class WeatherForecastWindow(Gtk.Window):
 
         self.lbl_title = Gtk.Label()
         self.lbl_title.get_style_context().add_class("weather-hero-title")
-        self.lbl_title.set_markup(f"<span font='9.5' weight='800' color='{C_BG_WAYBAR}'>WEATHER</span>")
+        self.lbl_title.set_markup(f"<span font='9.5' weight='800' color='{WINE_RED}'>WEATHER</span>")
         self.lbl_title.set_halign(Gtk.Align.START)
         self.lbl_title.set_valign(Gtk.Align.CENTER)
         top_row.pack_start(self.lbl_title, False, False, 0)
 
         self.lbl_hero_icon = Gtk.Label()
         self.lbl_hero_icon.get_style_context().add_class("weather-hero-icon")
-        self.lbl_hero_icon.set_markup(f"<span font='50' color='{C_BG_WAYBAR}'>󰼱</span>")
+        self.lbl_hero_icon.set_markup(f"<span font='50' color='{WINE_RED}'>󰼱</span>")
         self.lbl_hero_icon.set_halign(Gtk.Align.END)
         self.lbl_hero_icon.set_valign(Gtk.Align.CENTER)
         top_row.pack_end(self.lbl_hero_icon, False, False, 0)
@@ -172,15 +172,15 @@ class WeatherForecastWindow(Gtk.Window):
 
             lbl_day = Gtk.Label()
             lbl_day.get_style_context().add_class("forecast-col-day")
-            lbl_day.set_markup(f"<span font='9.5' weight='700' color='{C_BG_WAYBAR}'>---</span>")
+            lbl_day.set_markup(f"<span font='9.5' weight='700' color='{WINE_RED}'>---</span>")
 
             lbl_ico = Gtk.Label()
             lbl_ico.get_style_context().add_class("forecast-col-icon")
-            lbl_ico.set_markup(f"<span font='16' color='{C_BG_WAYBAR}'>󰖙</span>")
+            lbl_ico.set_markup(f"<span font='16' color='{WINE_RED}'>󰖙</span>")
 
             lbl_temp = Gtk.Label()
             lbl_temp.get_style_context().add_class("forecast-col-temp")
-            lbl_temp.set_markup(f"<span font='9' color='{C_BG_WAYBAR}'>--° --°</span>")
+            lbl_temp.set_markup(f"<span font='9' color='{WINE_RED}'>--° --°</span>")
 
             col.pack_start(lbl_day, False, False, 0)
             col.pack_start(lbl_ico, False, False, 1)
@@ -281,7 +281,7 @@ class WeatherForecastWindow(Gtk.Window):
 
     def _update_weather_ui_direct(self, temp_c, icon, forecast_list=None, city=None, desc=None):
         if hasattr(self, 'lbl_hero_icon'):
-            self.lbl_hero_icon.set_markup(f"<span font='50' color='{C_BG_WAYBAR}'>{icon}</span>")
+            self.lbl_hero_icon.set_markup(f"<span font='50' color='{WINE_RED}'>{icon}</span>")
         if hasattr(self, 'tactile_temp'):
             self.tactile_temp.set_temperature(temp_c, "°C")
 
@@ -289,11 +289,11 @@ class WeatherForecastWindow(Gtk.Window):
             for idx, item_data in enumerate(forecast_list):
                 if idx < len(self.forecast_items):
                     lbl_day, lbl_ico, lbl_temp = self.forecast_items[idx]
-                    lbl_day.set_markup(f"<span font='9.5' weight='700' color='{C_BG_WAYBAR}'>{item_data['day']}</span>")
-                    lbl_ico.set_markup(f"<span font='16' color='{C_BG_WAYBAR}'>{item_data['icon']}</span>")
+                    lbl_day.set_markup(f"<span font='9.5' weight='700' color='{WINE_RED}'>{item_data['day']}</span>")
+                    lbl_ico.set_markup(f"<span font='16' color='{WINE_RED}'>{item_data['icon']}</span>")
                     lbl_temp.set_markup(
-                        f"<span font='9' weight='700' color='{C_BG_WAYBAR}'>{item_data['max']}°</span> "
-                        f"<span font='8.5' color='{C_TEXT_MUT}'>{item_data['min']}°</span>"
+                        f"<span font='9' weight='700' color='{WINE_RED}'>{item_data['max']}°</span> "
+                        f"<span font='8.5' color='{MUTED_PINK}'>{item_data['min']}°</span>"
                     )
         return False
 

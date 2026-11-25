@@ -6,14 +6,14 @@ import cairo
 from gi.repository import Gdk, GdkPixbuf, GLib, Gtk
 
 from panels.common import (
-    C_ACCENT,
-    C_ACCENT_HOVER,
-    C_BG_WAYBAR,
-    C_BORDER_3D,
-    C_TEXT_INV,
-    C_TEXT_MUT,
-    C_TEXT_PRI,
-    C_TEXT_SEC,
+    VIVID_RED,
+    LIGHT_RED,
+    WINE_RED,
+    DARK_RUBY,
+    PURE_WHITE,
+    MUTED_PINK,
+    CREAM_WHITE,
+    SOFT_PINK,
     HAS_LAYER_SHELL,
     GtkLayerShell,
     get_uptime_str,
@@ -87,7 +87,7 @@ class ProfileCardWindow(Gtk.Window):
         for s in range(steps + 1):
             dy = 3.5 * (s / steps)
             rounded_rect(0, dy, w, h, r)
-            cr.set_source_rgb(*hex_to_rgba(C_BORDER_3D)[:3])
+            cr.set_source_rgb(*hex_to_rgba(DARK_RUBY)[:3])
             cr.fill()
 
         if banner_path and os.path.exists(banner_path):
@@ -103,12 +103,12 @@ class ProfileCardWindow(Gtk.Window):
                 cr.save()
                 rounded_rect(0, 0, w, h, r)
                 cr.clip()
-                cr.set_source_rgb(*hex_to_rgba(C_BG_WAYBAR)[:3])
+                cr.set_source_rgb(*hex_to_rgba(WINE_RED)[:3])
                 cr.paint()
                 cr.restore()
 
         rounded_rect(0, 0, w, h, r)
-        cr.set_source_rgba(*hex_to_rgba(C_BORDER_3D, 0.95))
+        cr.set_source_rgba(*hex_to_rgba(DARK_RUBY, 0.95))
         cr.set_line_width(2.0)
         cr.stroke()
 
@@ -135,7 +135,7 @@ class ProfileCardWindow(Gtk.Window):
         for s in range(steps + 1):
             dy = 3.5 * (s / steps)
             cr.arc(cx, cy + dy, r, 0, 6.2831853)
-            cr.set_source_rgb(*hex_to_rgba(C_BORDER_3D)[:3])
+            cr.set_source_rgb(*hex_to_rgba(DARK_RUBY)[:3])
             cr.fill()
 
         if avatar_path and os.path.exists(avatar_path):
@@ -149,11 +149,11 @@ class ProfileCardWindow(Gtk.Window):
                 cr.restore()
             except Exception:
                 cr.arc(cx, cy, r, 0, 6.2831853)
-                cr.set_source_rgb(*hex_to_rgba(C_BG_WAYBAR)[:3])
+                cr.set_source_rgb(*hex_to_rgba(WINE_RED)[:3])
                 cr.fill()
 
         cr.arc(cx, cy, r, 0, 6.2831853)
-        cr.set_source_rgba(*hex_to_rgba(C_BORDER_3D, 0.95))
+        cr.set_source_rgba(*hex_to_rgba(DARK_RUBY, 0.95))
         cr.set_line_width(2.2)
         cr.stroke()
 
@@ -174,19 +174,19 @@ class ProfileCardWindow(Gtk.Window):
         for s in range(steps + 1):
             dy = 3.6 * (s / steps)
             cr.arc(cx, cy + dy, r, 0, 6.2831853)
-            cr.set_source_rgb(*hex_to_rgba(C_BORDER_3D)[:3])
+            cr.set_source_rgb(*hex_to_rgba(DARK_RUBY)[:3])
             cr.fill()
 
         cr.save()
         cr.arc(cx, cy, r, 0, 6.2831853)
         cr.clip()
 
-        cr.set_source_rgb(*hex_to_rgba(C_TEXT_PRI)[:3])
+        cr.set_source_rgb(*hex_to_rgba(CREAM_WHITE)[:3])
         cr.paint()
 
         pat = cairo.LinearGradient(0, cy - r, 0, cy)
-        pat.add_color_stop_rgb(0, *hex_to_rgba(C_ACCENT_HOVER)[:3])
-        pat.add_color_stop_rgb(1, *hex_to_rgba(C_ACCENT)[:3])
+        pat.add_color_stop_rgb(0, *hex_to_rgba(LIGHT_RED)[:3])
+        pat.add_color_stop_rgb(1, *hex_to_rgba(VIVID_RED)[:3])
         cr.set_source(pat)
         cr.rectangle(cx - r, cy - r, r * 2, r)
         cr.fill()
@@ -198,11 +198,11 @@ class ProfileCardWindow(Gtk.Window):
         cr.stroke()
         cr.restore()
 
-        cr.set_source_rgb(*hex_to_rgba(C_BORDER_3D)[:3])
+        cr.set_source_rgb(*hex_to_rgba(DARK_RUBY)[:3])
         cr.rectangle(cx - r, cy - 2.5, r * 2, 5.0)
         cr.fill()
 
-        for rad, col in ((9.0, C_BORDER_3D), (6.5, C_TEXT_INV), (3.5, C_BORDER_3D), (2.5, C_TEXT_INV)):
+        for rad, col in ((9.0, DARK_RUBY), (6.5, PURE_WHITE), (3.5, DARK_RUBY), (2.5, PURE_WHITE)):
             cr.arc(cx, cy, rad, 0, 6.2831853)
             cr.set_source_rgb(*hex_to_rgba(col)[:3])
             cr.fill()
@@ -210,7 +210,7 @@ class ProfileCardWindow(Gtk.Window):
         cr.restore()
 
         cr.arc(cx, cy, r, 0, 6.2831853)
-        cr.set_source_rgba(*hex_to_rgba(C_BORDER_3D, 0.95))
+        cr.set_source_rgba(*hex_to_rgba(DARK_RUBY, 0.95))
         cr.set_line_width(2.0)
         cr.stroke()
 
@@ -220,7 +220,7 @@ class ProfileCardWindow(Gtk.Window):
     def update_uptime_tick(self):
         try:
             self.lbl_uptime_val.set_markup(
-                f"<span font_family='Inter, Sans' font='13.5' weight='800' color='{C_TEXT_PRI}'>{get_uptime_str()}</span>"
+                f"<span font_family='Inter, Sans' font='13.5' weight='800' color='{CREAM_WHITE}'>{get_uptime_str()}</span>"
             )
         except Exception:
             pass
@@ -252,12 +252,12 @@ class ProfileCardWindow(Gtk.Window):
 
         lbl_name = Gtk.Label()
         lbl_name.get_style_context().add_class("avatar-profile-name")
-        lbl_name.set_markup(f"<span font_family='Inter, Sans' font='14' weight='800' color='{C_BG_WAYBAR}'>Serena</span>")
+        lbl_name.set_markup(f"<span font_family='Inter, Sans' font='14' weight='800' color='{WINE_RED}'>Serena</span>")
         lbl_name.set_halign(Gtk.Align.START)
 
         lbl_sub = Gtk.Label()
         lbl_sub.get_style_context().add_class("avatar-profile-subtitle")
-        lbl_sub.set_markup(f"<span font_family='Inter, Sans' font='8' weight='700' color='{C_TEXT_MUT}'>pokemon performer</span>")
+        lbl_sub.set_markup(f"<span font_family='Inter, Sans' font='8' weight='700' color='{MUTED_PINK}'>pokemon performer</span>")
         lbl_sub.set_halign(Gtk.Align.START)
 
         text_box.pack_start(lbl_name, False, False, 0)
@@ -308,10 +308,10 @@ class ProfileCardWindow(Gtk.Window):
         b1.get_style_context().add_class("gradient-sunset")
         l1_title = Gtk.Label()
         l1_title.get_style_context().add_class("sysinfo-sub-label")
-        l1_title.set_markup(f"<span font_family='Inter, Sans' font='8' weight='700' color='{C_BORDER_3D}'>desktop</span>")
+        l1_title.set_markup(f"<span font_family='Inter, Sans' font='8' weight='700' color='{DARK_RUBY}'>desktop</span>")
         l1_val = Gtk.Label()
         l1_val.get_style_context().add_class("sysinfo-main-label")
-        l1_val.set_markup(f"<span font_family='Inter, Sans' font='13.5' weight='800' color='{C_BORDER_3D}'>hyprland</span>")
+        l1_val.set_markup(f"<span font_family='Inter, Sans' font='13.5' weight='800' color='{DARK_RUBY}'>hyprland</span>")
         b1.pack_start(l1_title, False, False, 2)
         b1.pack_start(l1_val, False, False, 2)
         info_row.pack_start(b1, True, True, 0)
@@ -320,10 +320,10 @@ class ProfileCardWindow(Gtk.Window):
         b2.get_style_context().add_class("sysinfo-box-solid")
         l2_title = Gtk.Label()
         l2_title.get_style_context().add_class("sysinfo-sub-label")
-        l2_title.set_markup(f"<span font_family='Inter, Sans' font='8' weight='700' color='{C_TEXT_SEC}'>uptime</span>")
+        l2_title.set_markup(f"<span font_family='Inter, Sans' font='8' weight='700' color='{SOFT_PINK}'>uptime</span>")
         self.lbl_uptime_val = Gtk.Label()
         self.lbl_uptime_val.get_style_context().add_class("sysinfo-main-label")
-        self.lbl_uptime_val.set_markup(f"<span font_family='Inter, Sans' font='13.5' weight='800' color='{C_TEXT_PRI}'>{get_uptime_str()}</span>")
+        self.lbl_uptime_val.set_markup(f"<span font_family='Inter, Sans' font='13.5' weight='800' color='{CREAM_WHITE}'>{get_uptime_str()}</span>")
         b2.pack_start(l2_title, False, False, 2)
         b2.pack_start(self.lbl_uptime_val, False, False, 2)
         info_row.pack_start(b2, True, True, 0)

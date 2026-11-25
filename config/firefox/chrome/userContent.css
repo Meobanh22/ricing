@@ -6,37 +6,37 @@
 @-moz-document url("about:newtab"), url("about:home"), url-prefix("about:newtab"), url-prefix("about:home"), url("about:blank") {
     /* Native Activity Stream CSS Variables Override */
     :root {
-        --newtab-background-color: var(--bg-window) !important;
-        --newtab-background-color-secondary: var(--bg-card) !important;
-        --newtab-element-hover-color: var(--bg-card-hover) !important;
-        --newtab-element-active-color: var(--bg-subtle) !important;
-        --newtab-text-primary-color: var(--text-primary) !important;
-        --newtab-text-secondary-color: var(--text-secondary) !important;
-        --newtab-wordmark-color: var(--accent) !important;
-        --newtab-primary-action-background: var(--accent) !important;
-        --newtab-search-border-color: var(--border-card) !important;
-        --newtab-search-icon-color: var(--text-secondary) !important;
-        --newtab-card-background-color: var(--bg-card) !important;
-        --newtab-border-color: var(--border-card) !important;
+        --newtab-background-color: var(--dark-wine) !important;
+        --newtab-background-color-secondary: var(--deep-wine) !important;
+        --newtab-element-hover-color: var(--light-wine) !important;
+        --newtab-element-active-color: var(--soft-wine) !important;
+        --newtab-text-primary-color: var(--cream-white) !important;
+        --newtab-text-secondary-color: var(--soft-pink) !important;
+        --newtab-wordmark-color: var(--vivid-red) !important;
+        --newtab-primary-action-background: var(--vivid-red) !important;
+        --newtab-search-border-color: var(--pure-white-12) !important;
+        --newtab-search-icon-color: var(--soft-pink) !important;
+        --newtab-card-background-color: var(--deep-wine) !important;
+        --newtab-border-color: var(--pure-white-12) !important;
     }
 
     body,
     #root,
     .activity-stream {
-        background-color: var(--bg-window) !important;
-        color: var(--text-primary) !important;
+        background-color: var(--dark-wine) !important;
+        color: var(--cream-white) !important;
     }
 
     /* Wordmark & Settings icon */
     .wordmark {
-        fill: var(--accent) !important;
+        fill: var(--vivid-red) !important;
     }
 
     .icon-settings {
-        fill: var(--text-muted) !important;
+        fill: var(--muted-pink) !important;
     }
     .icon-settings:hover {
-        fill: var(--text-primary) !important;
+        fill: var(--cream-white) !important;
     }
 
     /* === FIX: SEARCH BAR DOUBLE BORDER === */
@@ -51,14 +51,14 @@
 
     /* Style the modern <content-search-handoff-ui> Web Component */
     content-search-handoff-ui {
-        --content-search-handoff-ui-background-color: var(--bg-card) !important;
-        --content-search-handoff-ui-unfocused-border-color: var(--border-card) !important;
-        --content-search-handoff-ui-color: var(--text-primary) !important;
-        --content-search-handoff-ui-fill: var(--text-secondary) !important;
-        --content-search-handoff-ui-caret-color: var(--accent) !important;
-        --content-search-handoff-ui-fakefocus-border-color: var(--accent) !important;
-        --content-search-handoff-ui-fakefocus-box-shadow-inner: var(--accent) !important;
-        --content-search-handoff-ui-fakefocus-box-shadow-outer: var(--accent-subtle) !important;
+        --content-search-handoff-ui-background-color: var(--deep-wine) !important;
+        --content-search-handoff-ui-unfocused-border-color: var(--pure-white-12) !important;
+        --content-search-handoff-ui-color: var(--cream-white) !important;
+        --content-search-handoff-ui-fill: var(--soft-pink) !important;
+        --content-search-handoff-ui-caret-color: var(--vivid-red) !important;
+        --content-search-handoff-ui-fakefocus-border-color: var(--vivid-red) !important;
+        --content-search-handoff-ui-fakefocus-box-shadow-inner: var(--vivid-red) !important;
+        --content-search-handoff-ui-fakefocus-box-shadow-outer: var(--vivid-red-20) !important;
         --content-search-handoff-ui-border-radius: 16px !important;
         --content-search-handoff-ui-border-width: 1px !important;
         transition: all 0.2s ease !important;
@@ -67,8 +67,8 @@
     }
 
     content-search-handoff-ui:hover {
-        --content-search-handoff-ui-background-color: var(--bg-card-hover) !important;
-        --content-search-handoff-ui-unfocused-border-color: var(--border-card-hover) !important;
+        --content-search-handoff-ui-background-color: var(--light-wine) !important;
+        --content-search-handoff-ui-unfocused-border-color: var(--vivid-red-65) !important;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35) !important;
     }
 
@@ -77,57 +77,57 @@
     .search-wrapper input[type="search"],
     .search-wrapper input[name="q"],
     .search-wrapper .fake-textbox {
-        background-color: var(--bg-card) !important;
-        border: 1px solid var(--border-card) !important;
+        background-color: var(--deep-wine) !important;
+        border: 1px solid var(--pure-white-12) !important;
         border-radius: 16px !important;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
-        color: var(--text-primary) !important;
+        color: var(--cream-white) !important;
         outline: none !important;
         transition: all 0.2s ease !important;
     }
 
     .search-wrapper .search-handoff-button:hover,
     .search-wrapper input:hover {
-        border-color: var(--border-card-hover) !important;
-        background-color: var(--bg-card-hover) !important;
+        border-color: var(--vivid-red-65) !important;
+        background-color: var(--light-wine) !important;
     }
 
     .search-wrapper .search-handoff-button:focus,
     .search-wrapper input:focus {
-        border-color: var(--accent) !important;
-        box-shadow: 0 0 0 1px var(--accent-border) !important;
+        border-color: var(--vivid-red) !important;
+        box-shadow: 0 0 0 1px var(--vivid-red-40) !important;
     }
 
     /* === SECTION: SHORTCUTS / TOP SITES TILES === */
     .top-site-outer .tile {
-        background-color: var(--bg-card) !important;
-        border: 1px solid var(--border-card) !important;
+        background-color: var(--deep-wine) !important;
+        border: 1px solid var(--pure-white-12) !important;
         border-radius: 12px !important;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25) !important;
         transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease !important;
     }
 
     .top-site-outer:hover .tile {
-        background-color: var(--bg-card-hover) !important;
-        border-color: var(--accent) !important;
+        background-color: var(--light-wine) !important;
+        border-color: var(--vivid-red) !important;
         transform: translateY(-3px) !important;
         box-shadow: 0 6px 16px rgba(220, 26, 54, 0.25) !important;
     }
 
     .top-site-outer .title {
-        color: var(--text-secondary) !important;
+        color: var(--soft-pink) !important;
         font-family: var(--font-primary), "Segoe UI", sans-serif !important;
     }
 
     .top-site-outer:hover .title {
-        color: var(--text-primary) !important;
+        color: var(--cream-white) !important;
     }
 
     /* Context menu in New Tab */
     .context-menu {
-        background-color: var(--bg-card) !important;
-        border: 1px solid var(--border-card) !important;
+        background-color: var(--deep-wine) !important;
+        border: 1px solid var(--pure-white-12) !important;
         border-radius: var(--radius-card) !important;
-        color: var(--text-primary) !important;
+        color: var(--cream-white) !important;
     }
 }

@@ -15,15 +15,15 @@ from settings_pkg.constants import (
     COLOR_RIBBON_BOT,
     COLOR_RIBBON_MID,
     COLOR_RIBBON_TOP,
-    C_ACCENT,
-    C_BG_CARD,
-    C_BG_CARD_HOVER,
-    C_BG_WIN,
-    C_BORDER_3D,
-    C_STATUS_WARN,
-    C_TEXT_MUT,
-    C_TEXT_PRI,
-    C_TEXT_SEC,
+    VIVID_RED,
+    DEEP_WINE,
+    LIGHT_WINE,
+    DARK_WINE,
+    DARK_RUBY,
+    WARM_YELLOW,
+    MUTED_PINK,
+    CREAM_WHITE,
+    SOFT_PINK,
     OPEN_H,
     OPEN_W,
     hex_to_rgba,
@@ -230,11 +230,11 @@ class SettingsRenderMixin:
         cr.clip()
         for wall_x, edge_x in ((left_wall_x, left_wall_x + t_wall), (right_wall_x, right_wall_x)):
             cr.rectangle(wall_x, top_y, t_wall, panel_h)
-            cr.set_source_rgba(*hex_to_rgba(C_BG_CARD, 1.0))
+            cr.set_source_rgba(*hex_to_rgba(DEEP_WINE, 1.0))
             cr.fill()
             cr.move_to(edge_x, top_y)
             cr.line_to(edge_x, bot_y)
-            cr.set_source_rgba(*hex_to_rgba(C_BG_WIN, 0.85))
+            cr.set_source_rgba(*hex_to_rgba(DARK_WINE, 0.85))
             cr.set_line_width(1.0)
             cr.stroke()
         cr.restore()
@@ -265,13 +265,13 @@ class SettingsRenderMixin:
             dy = extrusion_h * (s / steps)
             cr.save()
             path_fn(cr, px, top_y + dy, panel_w, panel_h, corner_r, r_inner)
-            cr.set_source_rgba(*hex_to_rgba(C_BORDER_3D, 0.98))
+            cr.set_source_rgba(*hex_to_rgba(DARK_RUBY, 0.98))
             cr.fill()
             cr.restore()
 
         cr.save()
         path_fn(cr, px, top_y + extrusion_h, panel_w, panel_h, corner_r, r_inner)
-        cr.set_source_rgba(*hex_to_rgba(C_BORDER_3D, 0.98))
+        cr.set_source_rgba(*hex_to_rgba(DARK_RUBY, 0.98))
         cr.set_line_width(1.8)
         cr.stroke()
         cr.restore()
@@ -342,7 +342,7 @@ class SettingsRenderMixin:
 
         cr.save()
         cr.rectangle(cx - 1.0, top_y, 2.0, 585.0)
-        cr.set_source_rgba(*hex_to_rgba(C_BG_WIN, 1.0))
+        cr.set_source_rgba(*hex_to_rgba(DARK_WINE, 1.0))
         cr.fill()
         cr.restore()
 
@@ -418,7 +418,7 @@ class SettingsRenderMixin:
             seam_alpha = min(1.0, (p - 0.92) / 0.08)
             cr.save()
             cr.rectangle(cx - 1.0, top_y, 2.0, panel_h)
-            cr.set_source_rgba(*hex_to_rgba(C_BG_WIN, seam_alpha))
+            cr.set_source_rgba(*hex_to_rgba(DARK_WINE, seam_alpha))
             cr.fill()
             cr.restore()
 
@@ -461,14 +461,14 @@ class SettingsRenderMixin:
     def draw_tile(self, cr, tx, ty, tw, th, icon, label, val, is_hover=False):
         cr.save()
         squircle(cr, tx, ty, tw, th, 8.0)
-        cr.set_source_rgba(*hex_to_rgba(C_BG_CARD_HOVER if is_hover else C_BG_CARD, 0.98 if is_hover else 0.90))
+        cr.set_source_rgba(*hex_to_rgba(LIGHT_WINE if is_hover else DEEP_WINE, 0.98 if is_hover else 0.90))
         cr.fill_preserve()
-        cr.set_source_rgba(*(hex_to_rgba(C_ACCENT, 0.65) if is_hover else (1.0, 1.0, 1.0, 0.12)))
+        cr.set_source_rgba(*(hex_to_rgba(VIVID_RED, 0.65) if is_hover else (1.0, 1.0, 1.0, 0.12)))
         cr.set_line_width(1.0)
         cr.stroke()
 
         layout = PangoCairo.create_layout(cr)
-        cr.set_source_rgba(*hex_to_rgba(C_ACCENT, 1.0))
+        cr.set_source_rgba(*hex_to_rgba(VIVID_RED, 1.0))
         layout.set_text(icon)
         layout.set_font_description(Pango.FontDescription("Symbols Nerd Font 13"))
         cr.move_to(tx + 8.0, ty + 10.0)
@@ -476,13 +476,13 @@ class SettingsRenderMixin:
 
         layout.set_font_description(Pango.FontDescription("Rubik Regular 8.5"))
         layout.set_text(label)
-        cr.set_source_rgba(*hex_to_rgba(C_TEXT_SEC, 0.85))
+        cr.set_source_rgba(*hex_to_rgba(SOFT_PINK, 0.85))
         cr.move_to(tx + 28.0, ty + 10.0)
         PangoCairo.show_layout(cr, layout)
 
         layout.set_font_description(Pango.FontDescription("Rubik Bold 9"))
         layout.set_text(val)
-        cr.set_source_rgba(*hex_to_rgba(C_TEXT_PRI, 1.0))
+        cr.set_source_rgba(*hex_to_rgba(CREAM_WHITE, 1.0))
         cr.move_to(tx + 8.0, ty + 30.0)
         PangoCairo.show_layout(cr, layout)
         cr.restore()
@@ -490,13 +490,13 @@ class SettingsRenderMixin:
     def draw_media_card(self, cr, mx, my, mw, mh):
         cr.save()
         squircle(cr, mx, my, mw, mh, 10.0)
-        cr.set_source_rgba(*hex_to_rgba(C_BG_CARD, 0.70))
+        cr.set_source_rgba(*hex_to_rgba(DEEP_WINE, 0.70))
         cr.fill_preserve()
         cr.set_source_rgba(1.0, 1.0, 1.0, 0.10)
         cr.set_line_width(1.0)
         cr.stroke()
 
-        cr.set_source_rgba(*hex_to_rgba(C_ACCENT, 1.0))
+        cr.set_source_rgba(*hex_to_rgba(VIVID_RED, 1.0))
         layout = PangoCairo.create_layout(cr)
         layout.set_font_description(Pango.FontDescription("Symbols Nerd Font 18"))
         layout.set_text("󰝚")
@@ -506,26 +506,26 @@ class SettingsRenderMixin:
         layout.set_font_description(Pango.FontDescription("Rubik Bold 10"))
         title_str = self.media_title[:22] + ("…" if len(self.media_title) > 22 else "")
         layout.set_text(title_str if title_str else "No media playing")
-        cr.set_source_rgba(*hex_to_rgba(C_TEXT_PRI, 1.0))
+        cr.set_source_rgba(*hex_to_rgba(CREAM_WHITE, 1.0))
         cr.move_to(mx + 42.0, my + 14.0)
         PangoCairo.show_layout(cr, layout)
 
         layout.set_font_description(Pango.FontDescription("Rubik Regular 8.5"))
         layout.set_text(self.media_artist if self.media_artist else "Pokédex Audio")
-        cr.set_source_rgba(*hex_to_rgba(C_TEXT_SEC, 0.75))
+        cr.set_source_rgba(*hex_to_rgba(SOFT_PINK, 0.75))
         cr.move_to(mx + 42.0, my + 32.0)
         PangoCairo.show_layout(cr, layout)
 
         cx = mx + mw / 2.0
         btn_y = my + 82.0
-        cr.set_source_rgba(*hex_to_rgba(C_TEXT_SEC, 0.9))
+        cr.set_source_rgba(*hex_to_rgba(SOFT_PINK, 0.9))
         layout.set_font_description(Pango.FontDescription("Symbols Nerd Font 16"))
         layout.set_text("󰒮")
         cr.move_to(cx - 50.0, btn_y)
         PangoCairo.show_layout(cr, layout)
 
         cr.arc(cx, btn_y + 12.0, 16.0, 0, 2 * math.pi)
-        cr.set_source_rgba(*hex_to_rgba(C_ACCENT, 1.0))
+        cr.set_source_rgba(*hex_to_rgba(VIVID_RED, 1.0))
         cr.fill()
 
         cr.set_source_rgba(1.0, 1.0, 1.0, 1.0)
@@ -534,7 +534,7 @@ class SettingsRenderMixin:
         cr.move_to(cx - 7.0, btn_y + 4.0)
         PangoCairo.show_layout(cr, layout)
 
-        cr.set_source_rgba(*hex_to_rgba(C_TEXT_SEC, 0.9))
+        cr.set_source_rgba(*hex_to_rgba(SOFT_PINK, 0.9))
         layout.set_font_description(Pango.FontDescription("Symbols Nerd Font 16"))
         layout.set_text("󰒭")
         cr.move_to(cx + 34.0, btn_y)
@@ -550,13 +550,13 @@ class SettingsRenderMixin:
             cr.save()
             squircle(cr, tx + 2.0, by, tab_w - 4.0, bh, 6.0)
             if is_active:
-                cr.set_source_rgba(*hex_to_rgba(C_ACCENT, 0.35))
+                cr.set_source_rgba(*hex_to_rgba(VIVID_RED, 0.35))
                 cr.fill_preserve()
-                cr.set_source_rgba(*hex_to_rgba(C_ACCENT, 0.8))
+                cr.set_source_rgba(*hex_to_rgba(VIVID_RED, 0.8))
                 cr.set_line_width(1.0)
                 cr.stroke()
             else:
-                cr.set_source_rgba(*hex_to_rgba(C_BG_CARD, 0.40))
+                cr.set_source_rgba(*hex_to_rgba(DEEP_WINE, 0.40))
                 cr.fill()
 
             layout = PangoCairo.create_layout(cr)
@@ -564,7 +564,7 @@ class SettingsRenderMixin:
             layout.set_text(tlabel)
             _, log = layout.get_pixel_extents()
             cr.move_to(tx + (tab_w - log.width) / 2.0, by + 5.0)
-            cr.set_source_rgba(*hex_to_rgba(C_TEXT_PRI if is_active else C_TEXT_MUT, 1.0))
+            cr.set_source_rgba(*hex_to_rgba(CREAM_WHITE if is_active else MUTED_PINK, 1.0))
             PangoCairo.show_layout(cr, layout)
             cr.restore()
 
@@ -573,10 +573,10 @@ class SettingsRenderMixin:
         layout.set_font_description(Pango.FontDescription("Rubik Bold 10"))
         layout.set_text("󰐥 CONTROLS")
         cr.move_to(sx + 14.0, sy + 14.0)
-        cr.set_source_rgba(*hex_to_rgba(C_ACCENT, 1.0))
+        cr.set_source_rgba(*hex_to_rgba(VIVID_RED, 1.0))
         PangoCairo.show_layout(cr, layout)
 
-        cr.set_source_rgba(*hex_to_rgba(C_ACCENT if self.notifications else C_TEXT_MUT, 1.0))
+        cr.set_source_rgba(*hex_to_rgba(VIVID_RED if self.notifications else MUTED_PINK, 1.0))
         layout.set_font_description(Pango.FontDescription("Symbols Nerd Font 13"))
         layout.set_text("󰂚")
         cr.move_to(sx + sw - 30.0, sy + 12.0)
@@ -584,7 +584,7 @@ class SettingsRenderMixin:
 
         if self.notifications:
             cr.arc(sx + sw - 14.0, sy + 14.0, 7.0, 0, 2 * math.pi)
-            cr.set_source_rgba(*hex_to_rgba(C_ACCENT, 1.0))
+            cr.set_source_rgba(*hex_to_rgba(VIVID_RED, 1.0))
             cr.fill()
             layout.set_font_description(Pango.FontDescription("Rubik Bold 7"))
             layout.set_text(str(min(9, len(self.notifications))))
@@ -595,9 +595,9 @@ class SettingsRenderMixin:
         cx, cy, r_arc = sx + sw / 2.0, sy + 155.0, 68.0
         cr.set_line_cap(cairo.LINE_CAP_ROUND)
 
-        for val, start_m, color_hex in ((self.volume, 1.15, C_ACCENT), (self.brightness, 0.15, C_STATUS_WARN)):
+        for val, start_m, color_hex in ((self.volume, 1.15, VIVID_RED), (self.brightness, 0.15, WARM_YELLOW)):
             cr.arc(cx, cy, r_arc, math.pi * start_m, math.pi * (start_m + 0.70))
-            cr.set_source_rgba(*hex_to_rgba(C_BG_CARD_HOVER, 0.90))
+            cr.set_source_rgba(*hex_to_rgba(LIGHT_WINE, 0.90))
             cr.set_line_width(10.0)
             cr.stroke()
 
@@ -618,7 +618,7 @@ class SettingsRenderMixin:
 
         layout.set_font_description(Pango.FontDescription("Symbols Nerd Font 12"))
         layout.set_text("󰕿" if self.volume < 30 else ("󰖀" if self.volume < 70 else "󰕾"))
-        cr.set_source_rgba(*hex_to_rgba(C_TEXT_SEC, 1.0))
+        cr.set_source_rgba(*hex_to_rgba(SOFT_PINK, 1.0))
         cr.move_to(cx - 36.0, cy - 36.0)
         PangoCairo.show_layout(cr, layout)
         layout.set_font_description(Pango.FontDescription("Rubik Bold 9"))
@@ -628,7 +628,7 @@ class SettingsRenderMixin:
 
         layout.set_font_description(Pango.FontDescription("Symbols Nerd Font 12"))
         layout.set_text("󰃠")
-        cr.set_source_rgba(*hex_to_rgba(C_TEXT_SEC, 1.0))
+        cr.set_source_rgba(*hex_to_rgba(SOFT_PINK, 1.0))
         cr.move_to(cx - 36.0, cy + 20.0)
         PangoCairo.show_layout(cr, layout)
         layout.set_font_description(Pango.FontDescription("Rubik Bold 9"))
@@ -637,21 +637,21 @@ class SettingsRenderMixin:
         PangoCairo.show_layout(cr, layout)
 
         cr.arc(cx, cy, 26.0, 0, 2 * math.pi)
-        cr.set_source_rgba(*hex_to_rgba(C_BG_CARD, 1.0))
+        cr.set_source_rgba(*hex_to_rgba(DEEP_WINE, 1.0))
         cr.fill_preserve()
-        cr.set_source_rgba(*hex_to_rgba(C_ACCENT, 0.8))
+        cr.set_source_rgba(*hex_to_rgba(VIVID_RED, 0.8))
         cr.set_line_width(2.0)
         cr.stroke()
 
         layout.set_font_description(Pango.FontDescription("Symbols Nerd Font 16"))
         layout.set_text("󰐥")
-        cr.set_source_rgba(*hex_to_rgba(C_ACCENT, 1.0))
+        cr.set_source_rgba(*hex_to_rgba(VIVID_RED, 1.0))
         cr.move_to(cx - 9.0, cy - 13.0)
         PangoCairo.show_layout(cr, layout)
 
         pill_y = sy + sh - 48.0
         squircle(cr, sx + 14.0, pill_y, sw - 28.0, 34.0, 8.0)
-        cr.set_source_rgba(*hex_to_rgba(C_BG_CARD, 0.60))
+        cr.set_source_rgba(*hex_to_rgba(DEEP_WINE, 0.60))
         cr.fill_preserve()
         cr.set_source_rgba(1.0, 1.0, 1.0, 0.08)
         cr.set_line_width(1.0)
@@ -660,7 +660,7 @@ class SettingsRenderMixin:
         layout.set_font_description(Pango.FontDescription("Rubik Regular 8.5"))
         layout.set_text(f"Vol: {self.volume}%  ·  Bri: {self.brightness}%  ·  {self.power_mode.capitalize()}")
         _, log = layout.get_pixel_extents()
-        cr.set_source_rgba(*hex_to_rgba(C_TEXT_SEC, 0.9))
+        cr.set_source_rgba(*hex_to_rgba(SOFT_PINK, 0.9))
         cr.move_to(sx + (sw - log.width) / 2.0, pill_y + 9.0)
         PangoCairo.show_layout(cr, layout)
 
@@ -669,12 +669,12 @@ class SettingsRenderMixin:
         layout.set_font_description(Pango.FontDescription("Rubik Bold 10"))
         layout.set_text("󰂚 NOTIFICATIONS")
         cr.move_to(sx + 14.0, sy + 14.0)
-        cr.set_source_rgba(*hex_to_rgba(C_ACCENT, 1.0))
+        cr.set_source_rgba(*hex_to_rgba(VIVID_RED, 1.0))
         PangoCairo.show_layout(cr, layout)
 
         layout.set_font_description(Pango.FontDescription("Symbols Nerd Font 12"))
         layout.set_text(" Back")
-        cr.set_source_rgba(*hex_to_rgba(C_TEXT_SEC, 0.9))
+        cr.set_source_rgba(*hex_to_rgba(SOFT_PINK, 0.9))
         cr.move_to(sx + sw - 60.0, sy + 14.0)
         PangoCairo.show_layout(cr, layout)
 
@@ -682,23 +682,23 @@ class SettingsRenderMixin:
         if not self.notifications:
             layout.set_font_description(Pango.FontDescription("Rubik Regular 10"))
             layout.set_text("No notifications")
-            cr.set_source_rgba(*hex_to_rgba(C_TEXT_MUT, 0.7))
+            cr.set_source_rgba(*hex_to_rgba(MUTED_PINK, 0.7))
             cr.move_to(sx + (sw - 100.0) / 2.0, sy + sh / 2.0)
             PangoCairo.show_layout(cr, layout)
         else:
             for i, notif in enumerate(self.notifications[:4]):
                 ny = list_y + i * (item_h + gap)
                 squircle(cr, sx + 10.0, ny, sw - 20.0, item_h, 8.0)
-                cr.set_source_rgba(*hex_to_rgba(C_BG_CARD, 0.85))
+                cr.set_source_rgba(*hex_to_rgba(DEEP_WINE, 0.85))
                 cr.fill_preserve()
                 cr.set_source_rgba(1.0, 1.0, 1.0, 0.10)
                 cr.set_line_width(1.0)
                 cr.stroke()
 
                 for font_str, txt, col_hex, alpha, dy in (
-                    ("Rubik Bold 8.5", notif.get("app_name", "System"), C_ACCENT, 1.0, 8.0),
-                    ("Rubik Regular 9", notif.get("summary", "")[:24], C_TEXT_PRI, 1.0, 24.0),
-                    ("Rubik Regular 8", notif.get("body", "")[:28], C_TEXT_SEC, 0.75, 38.0),
+                    ("Rubik Bold 8.5", notif.get("app_name", "System"), VIVID_RED, 1.0, 8.0),
+                    ("Rubik Regular 9", notif.get("summary", "")[:24], CREAM_WHITE, 1.0, 24.0),
+                    ("Rubik Regular 8", notif.get("body", "")[:28], SOFT_PINK, 0.75, 38.0),
                 ):
                     layout.set_font_description(Pango.FontDescription(font_str))
                     layout.set_text(txt)
@@ -708,7 +708,7 @@ class SettingsRenderMixin:
 
         cy = sy + sh - 36.0
         squircle(cr, sx + 14.0, cy, sw - 28.0, 28.0, 6.0)
-        cr.set_source_rgba(*hex_to_rgba(C_BG_CARD, 0.90))
+        cr.set_source_rgba(*hex_to_rgba(DEEP_WINE, 0.90))
         cr.fill_preserve()
         cr.set_source_rgba(1.0, 1.0, 1.0, 0.12)
         cr.set_line_width(1.0)
@@ -717,7 +717,7 @@ class SettingsRenderMixin:
         layout.set_font_description(Pango.FontDescription("Rubik Bold 8.5"))
         layout.set_text("󰃢 Clear All Notifications")
         _, log = layout.get_pixel_extents()
-        cr.set_source_rgba(*hex_to_rgba(C_TEXT_PRI, 0.9))
+        cr.set_source_rgba(*hex_to_rgba(CREAM_WHITE, 0.9))
         cr.move_to(sx + (sw - log.width) / 2.0, cy + 6.0)
         PangoCairo.show_layout(cr, layout)
 
@@ -733,7 +733,7 @@ class SettingsRenderMixin:
         cr.curve_to(3.0, -22.0, 12.5, -23.0, 17.5, -17.0)
         cr.curve_to(23.0, -7.0, 19.0, 3.0, 0, 14.0)
         cr.close_path()
-        cr.set_source_rgba(*hex_to_rgba(C_ACCENT, 1.0))
+        cr.set_source_rgba(*hex_to_rgba(VIVID_RED, 1.0))
         cr.fill_preserve()
         cr.set_source_rgba(COLOR_BORDER_SHADOW[0], COLOR_BORDER_SHADOW[1], COLOR_BORDER_SHADOW[2], 0.95)
         cr.set_line_width(1.6 / scale)

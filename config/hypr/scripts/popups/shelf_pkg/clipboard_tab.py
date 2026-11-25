@@ -6,7 +6,7 @@ import subprocess
 
 from gi.repository import GLib, Gtk, Pango
 
-from shelf_pkg.constants import CLIPHIST_DB, C_ACCENT, C_RUBY_MUT, C_RUBY_PRI
+from shelf_pkg.constants import CLIPHIST_DB, VIVID_RED, MUTED_PINK, WINE_RED
 
 
 class ShelfClipboardMixin:
@@ -36,11 +36,11 @@ class ShelfClipboardMixin:
         empty_box.set_margin_bottom(48)
 
         lbl_icon = Gtk.Label()
-        lbl_icon.set_markup(f"<span font='28' color='{C_ACCENT}'>󰅌</span>")
+        lbl_icon.set_markup(f"<span font='28' color='{VIVID_RED}'>󰅌</span>")
         empty_box.pack_start(lbl_icon, False, False, 0)
 
         lbl_msg = Gtk.Label()
-        lbl_msg.set_markup(f"<span font='11' color='{C_RUBY_MUT}'>No clipboard items found</span>")
+        lbl_msg.set_markup(f"<span font='11' color='{MUTED_PINK}'>No clipboard items found</span>")
         empty_box.pack_start(lbl_msg, False, False, 0)
         self.clip_stack.add_named(empty_box, "empty")
 
@@ -180,9 +180,9 @@ class ShelfClipboardMixin:
         lbl_icon = Gtk.Label()
         lbl_icon.set_margin_start(8)
         if item["is_image"]:
-            lbl_icon.set_markup(f"<span font='10.5' color='{C_ACCENT}'>󰋩</span>  <span font='10' color='{C_RUBY_MUT}'>Image</span>")
+            lbl_icon.set_markup(f"<span font='10.5' color='{VIVID_RED}'>󰋩</span>  <span font='10' color='{MUTED_PINK}'>Image</span>")
         else:
-            lbl_icon.set_markup(f"<span font='10.5' color='{C_ACCENT}'>󰈙</span>  <span font='10' color='{C_RUBY_MUT}'>Text</span>")
+            lbl_icon.set_markup(f"<span font='10.5' color='{VIVID_RED}'>󰈙</span>  <span font='10' color='{MUTED_PINK}'>Text</span>")
         top_row.pack_start(lbl_icon, False, False, 0)
 
         right_hdr = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
@@ -194,9 +194,9 @@ class ShelfClipboardMixin:
         lbl_p = Gtk.Label()
         if item.get("is_pinned"):
             btn_pin.get_style_context().add_class("pinned")
-            lbl_p.set_markup(f"<span font='10.5' color='{C_ACCENT}'>󰤲</span>")
+            lbl_p.set_markup(f"<span font='10.5' color='{VIVID_RED}'>󰤲</span>")
         else:
-            lbl_p.set_markup(f"<span font='10.5' color='{C_ACCENT}'>󰤱</span>")
+            lbl_p.set_markup(f"<span font='10.5' color='{VIVID_RED}'>󰤱</span>")
         btn_pin.add(lbl_p)
         btn_pin.connect("clicked", lambda b: self.toggle_pin_clip(item))
         btn_pin.connect("enter-notify-event", lambda w, e: self.hide_popout())
@@ -208,7 +208,7 @@ class ShelfClipboardMixin:
             btn_zoom.get_style_context().add_class("flat")
             btn_zoom.get_style_context().add_class("chip-btn-del")
             lbl_z = Gtk.Label()
-            lbl_z.set_markup(f"<span font='9.5' color='{C_ACCENT}'>󰍉</span>")
+            lbl_z.set_markup(f"<span font='9.5' color='{VIVID_RED}'>󰍉</span>")
             btn_zoom.add(lbl_z)
             btn_zoom.connect("clicked", lambda b: self.open_image_lightbox(item, is_shelf=False))
             btn_zoom.connect("enter-notify-event", lambda w, e: self.hide_popout())
@@ -219,7 +219,7 @@ class ShelfClipboardMixin:
         btn_del.get_style_context().add_class("flat")
         btn_del.get_style_context().add_class("chip-btn-del")
         lbl_x = Gtk.Label()
-        lbl_x.set_markup(f"<span font='9.5' color='{C_RUBY_PRI}'>✕</span>")
+        lbl_x.set_markup(f"<span font='9.5' color='{WINE_RED}'>✕</span>")
         btn_del.add(lbl_x)
         btn_del.connect("clicked", lambda b: self.delete_clip(item))
         btn_del.connect("enter-notify-event", lambda w, e: self.hide_popout())

@@ -7,15 +7,15 @@ import cairo
 from gi.repository import Pango, PangoCairo
 
 from control_center_pkg.constants import (
-    C_ACCENT_HOVER,
-    C_BG_WAYBAR,
-    C_BG_WIN,
-    C_BORDER_3D,
-    C_STATUS_SUCC,
-    C_TEXT_INV,
-    C_TEXT_MUT,
-    C_TEXT_PRI,
-    C_TEXT_SEC,
+    LIGHT_RED,
+    WINE_RED,
+    DARK_WINE,
+    DARK_RUBY,
+    SOFT_GREEN,
+    PURE_WHITE,
+    MUTED_PINK,
+    CREAM_WHITE,
+    SOFT_PINK,
     hex_to_rgba,
 )
 from control_center_pkg.shapes import (
@@ -168,8 +168,8 @@ class ControlCenterRenderMixin:
         tcr.arc_negative(self.cx, 190.0, self.r_outer, geo0["ang_outer_top_start"], geo0["ang_outer_top_end"])
         tcr.close_path()
         silver_pat_top = cairo.LinearGradient(self.x_left, geo0["y_dark_top"], self.x_left, geo0["y_edge_top"])
-        silver_pat_top.add_color_stop_rgb(0.0, *hex_to_rgba(C_TEXT_PRI)[:3])
-        silver_pat_top.add_color_stop_rgb(1.0, *hex_to_rgba(C_TEXT_SEC)[:3])
+        silver_pat_top.add_color_stop_rgb(0.0, *hex_to_rgba(CREAM_WHITE)[:3])
+        silver_pat_top.add_color_stop_rgb(1.0, *hex_to_rgba(SOFT_PINK)[:3])
         tcr.set_source(silver_pat_top)
         tcr.fill_preserve()
         tcr.set_source_rgba(*self.c_border_3d)
@@ -262,8 +262,8 @@ class ControlCenterRenderMixin:
         bcr.arc(self.cx, 590.0, self.r_outer, geo0["ang_outer_bot_start"], geo0["ang_outer_bot_end"])
         bcr.close_path()
         silver_pat_bot = cairo.LinearGradient(self.x_left, geo0["y_edge_bot"], self.x_left, geo0["y_silver_bot"])
-        silver_pat_bot.add_color_stop_rgb(0.0, *hex_to_rgba(C_TEXT_SEC)[:3])
-        silver_pat_bot.add_color_stop_rgb(1.0, *hex_to_rgba(C_TEXT_PRI)[:3])
+        silver_pat_bot.add_color_stop_rgb(0.0, *hex_to_rgba(SOFT_PINK)[:3])
+        silver_pat_bot.add_color_stop_rgb(1.0, *hex_to_rgba(CREAM_WHITE)[:3])
         bcr.set_source(silver_pat_bot)
         bcr.fill_preserve()
         bcr.set_source_rgba(*self.c_border_3d)
@@ -354,7 +354,7 @@ class ControlCenterRenderMixin:
             txt_x = c_x + 32.0
             l_txt = PangoCairo.create_layout(cr)
             l_txt.set_font_description(self.pango_font_tile_title)
-            l_txt.set_markup(f"<span color='{C_BORDER_3D}'>{name}</span>", -1)
+            l_txt.set_markup(f"<span color='{DARK_RUBY}'>{name}</span>", -1)
             cr.move_to(txt_x, c_y + 2.0)
             PangoCairo.show_layout(cr, l_txt)
 
@@ -438,9 +438,9 @@ class ControlCenterRenderMixin:
                 max_text_w = row_w - (50.0 if is_hover else 32.0)
 
                 for font_str, markup, dy in (
-                    ("JetBrains Mono Nerd Font Bold 10", f"<span color='{C_BG_WIN}'>{app}</span>  <span color='{C_BG_WIN}' alpha='50%'>• {time_str}</span>", 0.0),
+                    ("JetBrains Mono Nerd Font Bold 10", f"<span color='{DARK_WINE}'>{app}</span>  <span color='{DARK_WINE}' alpha='50%'>• {time_str}</span>", 0.0),
                     ("JetBrains Mono Nerd Font Bold 9.5", f"<span color='{self.c_accent}'>{title}</span>", 15.0),
-                    ("JetBrains Mono Nerd Font 8.5", f"<span color='{C_BG_WIN}' alpha='75%'>{body}</span>", 29.0),
+                    ("JetBrains Mono Nerd Font 8.5", f"<span color='{DARK_WINE}' alpha='75%'>{body}</span>", 29.0),
                 ):
                     layout = PangoCairo.create_layout(cr)
                     layout.set_font_description(Pango.FontDescription(font_str))
@@ -492,20 +492,20 @@ class ControlCenterRenderMixin:
         cr.save()
         l_htit = PangoCairo.create_layout(cr)
         l_htit.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 12"))
-        l_htit.set_markup(f"<span color='{C_BG_WIN}'>Wi-Fi Networks</span>", -1)
+        l_htit.set_markup(f"<span color='{DARK_WINE}'>Wi-Fi Networks</span>", -1)
         cr.move_to(content_x, 212.0)
         PangoCairo.show_layout(cr, l_htit)
 
         is_tg_hover = (self.hovered_item == "wifi_toggle")
         tg_text = "󰖩 ON" if self.wifi_radio_enabled else "󰖪 OFF"
-        tg_col = self.c_accent if (self.wifi_radio_enabled or is_tg_hover) else C_TEXT_MUT
+        tg_col = self.c_accent if (self.wifi_radio_enabled or is_tg_hover) else MUTED_PINK
         l_tg = PangoCairo.create_layout(cr)
         l_tg.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 10.5"))
         l_tg.set_markup(f"<span color='{tg_col}'><b>{tg_text}</b></span>", -1)
         cr.move_to(content_x + content_w - 105.0, 213.0)
         PangoCairo.show_layout(cr, l_tg)
 
-        sc_col = self.c_accent if self.hovered_item == "wifi_rescan" else C_BG_WIN
+        sc_col = self.c_accent if self.hovered_item == "wifi_rescan" else DARK_WINE
         l_sc = PangoCairo.create_layout(cr)
         l_sc.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 10.5"))
         l_sc.set_markup(f"<span color='{sc_col}'><b>󰑐 Scan</b></span>", -1)
@@ -521,22 +521,22 @@ class ControlCenterRenderMixin:
             cr.move_to(content_x, 238.0)
             PangoCairo.show_layout(cr, l_st)
         elif self.wifi_ssid:
-            l_st.set_markup(f"<span color='{C_BG_WIN}' alpha='80%'>Connected: </span><span color='{self.c_accent}'><b>{self.wifi_ssid}</b></span>", -1)
+            l_st.set_markup(f"<span color='{DARK_WINE}' alpha='80%'>Connected: </span><span color='{self.c_accent}'><b>{self.wifi_ssid}</b></span>", -1)
             cr.move_to(content_x, 238.0)
             PangoCairo.show_layout(cr, l_st)
 
-            dc_col = self.c_accent if self.hovered_item == "wifi_disconnect" else C_BG_WAYBAR
+            dc_col = self.c_accent if self.hovered_item == "wifi_disconnect" else WINE_RED
             l_dc = PangoCairo.create_layout(cr)
             l_dc.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 9.5"))
             l_dc.set_markup(f"<span color='{dc_col}'><b><u>󰖪 Disconnect</u></b></span>", -1)
             cr.move_to(content_x + content_w - 95.0, 238.0)
             PangoCairo.show_layout(cr, l_dc)
         elif not self.wifi_radio_enabled:
-            l_st.set_markup(f"<span color='{C_TEXT_MUT}'>Wi-Fi is currently disabled</span>", -1)
+            l_st.set_markup(f"<span color='{MUTED_PINK}'>Wi-Fi is currently disabled</span>", -1)
             cr.move_to(content_x, 238.0)
             PangoCairo.show_layout(cr, l_st)
         else:
-            l_st.set_markup(f"<span color='{C_BG_WIN}' alpha='75%'>{len(self.wifi_networks)} networks found</span>", -1)
+            l_st.set_markup(f"<span color='{DARK_WINE}' alpha='75%'>{len(self.wifi_networks)} networks found</span>", -1)
             cr.move_to(content_x, 238.0)
             PangoCairo.show_layout(cr, l_st)
         cr.restore()
@@ -554,13 +554,13 @@ class ControlCenterRenderMixin:
         cr.save()
         l_ptit = PangoCairo.create_layout(cr)
         l_ptit.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 12"))
-        l_ptit.set_markup(f"<span color='{C_BG_WIN}'>Password Required</span>", -1)
+        l_ptit.set_markup(f"<span color='{DARK_WINE}'>Password Required</span>", -1)
         cr.move_to(content_x, 275.0)
         PangoCairo.show_layout(cr, l_ptit)
 
         l_pssid = PangoCairo.create_layout(cr)
         l_pssid.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 11"))
-        l_pssid.set_markup(f"<span color='{C_BG_WIN}' alpha='75%'>Network: </span><span color='{self.c_accent}'><b>{self.wifi_password_prompt_ssid}</b></span>", -1)
+        l_pssid.set_markup(f"<span color='{DARK_WINE}' alpha='75%'>Network: </span><span color='{self.c_accent}'><b>{self.wifi_password_prompt_ssid}</b></span>", -1)
         cr.move_to(content_x, 298.0)
         PangoCairo.show_layout(cr, l_pssid)
 
@@ -568,7 +568,7 @@ class ControlCenterRenderMixin:
         draw_rounded_rect(cr, content_x, input_y, content_w, 34.0, 6.0)
         cr.set_source_rgba(0.13, 0.06, 0.07, 0.06)
         cr.fill_preserve()
-        cr.set_source_rgba(*hex_to_rgba(C_BORDER_3D, 0.35))
+        cr.set_source_rgba(*hex_to_rgba(DARK_RUBY, 0.35))
         cr.set_line_width(1.0)
         cr.stroke()
 
@@ -576,25 +576,25 @@ class ControlCenterRenderMixin:
         l_inp.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font 11"))
         if self.wifi_password_input:
             masked = "•" * len(self.wifi_password_input)
-            l_inp.set_markup(f"<span color='{C_BG_WIN}'>{masked}</span><span color='{self.c_accent}'>|</span>", -1)
+            l_inp.set_markup(f"<span color='{DARK_WINE}'>{masked}</span><span color='{self.c_accent}'>|</span>", -1)
         else:
-            l_inp.set_markup(f"<span color='{C_TEXT_MUT}'>Enter password...|</span>", -1)
+            l_inp.set_markup(f"<span color='{MUTED_PINK}'>Enter password...|</span>", -1)
         cr.move_to(content_x + 10.0, input_y + 7.0)
         PangoCairo.show_layout(cr, l_inp)
 
         btn_y = 374.0
         draw_rounded_rect(cr, content_x, btn_y, 110.0, 30.0, 6.0)
         alpha = 1.0 if self.hovered_item == "wifi_pass_connect" else 0.90
-        col = C_ACCENT_HOVER if self.hovered_item == "wifi_pass_connect" else self.c_accent
+        col = LIGHT_RED if self.hovered_item == "wifi_pass_connect" else self.c_accent
         cr.set_source_rgba(*hex_to_rgba(col, alpha))
         cr.fill()
         l_btnc = PangoCairo.create_layout(cr)
         l_btnc.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 10"))
-        l_btnc.set_markup(f"<span color='{C_TEXT_INV}'>Connect ↵</span>", -1)
+        l_btnc.set_markup(f"<span color='{PURE_WHITE}'>Connect ↵</span>", -1)
         cr.move_to(content_x + 16.0, btn_y + 6.0)
         PangoCairo.show_layout(cr, l_btnc)
 
-        cxl_col = self.c_accent if self.hovered_item == "wifi_pass_cancel" else C_BG_WIN
+        cxl_col = self.c_accent if self.hovered_item == "wifi_pass_cancel" else DARK_WINE
         l_btnx = PangoCairo.create_layout(cr)
         l_btnx.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 10"))
         l_btnx.set_markup(f"<span color='{cxl_col}'>Cancel</span>", -1)
@@ -603,7 +603,7 @@ class ControlCenterRenderMixin:
 
         l_hint = PangoCairo.create_layout(cr)
         l_hint.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font 9"))
-        l_hint.set_markup(f"<span color='{C_BG_WIN}' alpha='60%'>Press Enter to connect, Esc to return</span>", -1)
+        l_hint.set_markup(f"<span color='{DARK_WINE}' alpha='60%'>Press Enter to connect, Esc to return</span>", -1)
         cr.move_to(content_x, 420.0)
         PangoCairo.show_layout(cr, l_hint)
         cr.restore()
@@ -637,7 +637,7 @@ class ControlCenterRenderMixin:
 
             sig = net.get("signal", 0)
             sig_icon = "󰤨" if sig >= 80 else "󰤥" if sig >= 60 else "󰤢" if sig >= 40 else "󰤟" if sig >= 20 else "󰤯"
-            ic_col = self.c_accent if (is_active or is_hover) else C_BORDER_3D
+            ic_col = self.c_accent if (is_active or is_hover) else DARK_RUBY
             l_sig = PangoCairo.create_layout(cr)
             l_sig.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font 20"))
             l_sig.set_markup(f"<span color='{ic_col}'>{sig_icon}</span>", -1)
@@ -648,7 +648,7 @@ class ControlCenterRenderMixin:
             ssid_disp = (ssid_str[:17] + "…") if len(ssid_str) > 18 else ssid_str
             l_nm = PangoCairo.create_layout(cr)
             l_nm.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 11.5"))
-            nm_col = self.c_accent if is_active else (C_BORDER_3D if is_hover else C_BG_WIN)
+            nm_col = self.c_accent if is_active else (DARK_RUBY if is_hover else DARK_WINE)
             l_nm.set_markup(f"<span color='{nm_col}'>{ssid_disp}</span>", -1)
             cr.move_to(content_x + 36.0, item_y)
             PangoCairo.show_layout(cr, l_nm)
@@ -657,7 +657,7 @@ class ControlCenterRenderMixin:
             sec_disp = sec_str.replace("WPA1", "").replace("WPA2", "WPA2").strip() if sec_str and sec_str != "--" else "Open"
             l_inf = PangoCairo.create_layout(cr)
             l_inf.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font 9.5"))
-            l_inf.set_markup(f"<span color='{C_BG_WIN}' alpha='70%'>{sig}%  •  {sec_disp}</span>", -1)
+            l_inf.set_markup(f"<span color='{DARK_WINE}' alpha='70%'>{sig}%  •  {sec_disp}</span>", -1)
             cr.move_to(content_x + 36.0, item_y + 21.0)
             PangoCairo.show_layout(cr, l_inf)
 
@@ -665,13 +665,13 @@ class ControlCenterRenderMixin:
             if is_active:
                 l_bg = PangoCairo.create_layout(cr)
                 l_bg.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 9.5"))
-                l_bg.set_markup(f"<span color='{C_STATUS_SUCC}'>✔ Active</span>", -1)
+                l_bg.set_markup(f"<span color='{SOFT_GREEN}'>✔ Active</span>", -1)
                 cr.move_to(badge_x, item_y + 2.0)
                 PangoCairo.show_layout(cr, l_bg)
             elif net.get("saved"):
                 l_bg = PangoCairo.create_layout(cr)
                 l_bg.set_font_description(Pango.FontDescription("JetBrains Mono Nerd Font Bold 9"))
-                l_bg.set_markup(f"<span color='{C_BG_WIN}' alpha='55%'>Saved</span>", -1)
+                l_bg.set_markup(f"<span color='{DARK_WINE}' alpha='55%'>Saved</span>", -1)
                 cr.move_to(badge_x + 10.0, item_y + 2.0)
                 PangoCairo.show_layout(cr, l_bg)
 
@@ -691,7 +691,7 @@ class ControlCenterRenderMixin:
         cr.save()
         total_pages = max(1, (total_items + 4) // 5)
 
-        pv_col = self.c_accent if self.hovered_item == prev_key else (C_BG_WIN if page_idx > 0 else C_TEXT_MUT)
+        pv_col = self.c_accent if self.hovered_item == prev_key else (DARK_WINE if page_idx > 0 else MUTED_PINK)
         l_prv = PangoCairo.create_layout(cr)
         l_prv.set_font_description(Pango.FontDescription(f"JetBrains Mono Nerd Font Bold {btn_font_sz}"))
         l_prv.set_markup(f"<span color='{pv_col}'><b>◀ Prev</b></span>", -1)
@@ -700,12 +700,12 @@ class ControlCenterRenderMixin:
 
         l_pg = PangoCairo.create_layout(cr)
         l_pg.set_font_description(Pango.FontDescription(f"JetBrains Mono Nerd Font Bold {page_font_sz}"))
-        l_pg.set_markup(f"<span color='{C_BG_WIN}' alpha='75%'><b>{page_idx + 1} / {total_pages}</b></span>", -1)
+        l_pg.set_markup(f"<span color='{DARK_WINE}' alpha='75%'><b>{page_idx + 1} / {total_pages}</b></span>", -1)
         ink, _ = l_pg.get_pixel_extents()
         cr.move_to(self.cx - ink.width / 2.0, py_y)
         PangoCairo.show_layout(cr, l_pg)
 
-        nx_col = self.c_accent if self.hovered_item == next_key else (C_BG_WIN if page_idx < total_pages - 1 else C_TEXT_MUT)
+        nx_col = self.c_accent if self.hovered_item == next_key else (DARK_WINE if page_idx < total_pages - 1 else MUTED_PINK)
         l_nxt = PangoCairo.create_layout(cr)
         l_nxt.set_font_description(Pango.FontDescription(f"JetBrains Mono Nerd Font Bold {btn_font_sz}"))
         l_nxt.set_markup(f"<span color='{nx_col}'><b>Next ▶</b></span>", -1)

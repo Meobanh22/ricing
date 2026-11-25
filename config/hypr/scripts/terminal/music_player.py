@@ -55,7 +55,7 @@ class TerminalPlayer:
 
     def colors(self):
         curses.start_color()
-        roles = ['bg_window', 'text_primary', 'text_secondary', 'text_muted', 'accent', 'bg_card_hover']
+        roles = ['dark_wine', 'cream_white', 'soft_pink', 'muted_pink', 'vivid_red', 'light_wine']
         slots = {}
         for i, role in enumerate(roles):
             rgb = tuple(int(PALETTE[role][n:n + 2], 16) for n in (1, 3, 5))
@@ -65,13 +65,13 @@ class TerminalPlayer:
             elif curses.COLORS >= 256:
                 index = 16 + 36 * round(rgb[0] / 51) + 6 * round(rgb[1] / 51) + round(rgb[2] / 51)
             else:
-                index = {'bg_window': curses.COLOR_BLACK, 'text_primary': curses.COLOR_WHITE,
-                         'text_secondary': curses.COLOR_WHITE, 'text_muted': curses.COLOR_WHITE,
-                         'accent': curses.COLOR_RED, 'bg_card_hover': curses.COLOR_BLACK}[role]
+                index = {'dark_wine': curses.COLOR_BLACK, 'cream_white': curses.COLOR_WHITE,
+                         'soft_pink': curses.COLOR_WHITE, 'muted_pink': curses.COLOR_WHITE,
+                         'vivid_red': curses.COLOR_RED, 'light_wine': curses.COLOR_BLACK}[role]
             slots[role] = index
-        for i, (fg, bg) in enumerate([('text_primary', 'bg_window'), ('text_secondary', 'bg_window'),
-                                    ('text_muted', 'bg_window'), ('accent', 'bg_window'),
-                                    ('text_primary', 'bg_card_hover')], 1):
+        for i, (fg, bg) in enumerate([('cream_white', 'dark_wine'), ('soft_pink', 'dark_wine'),
+                                    ('muted_pink', 'dark_wine'), ('vivid_red', 'dark_wine'),
+                                    ('cream_white', 'light_wine')], 1):
             curses.init_pair(i, slots[fg], slots[bg])
 
     def visible(self):

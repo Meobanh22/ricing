@@ -2,23 +2,23 @@
 @import "palette.css";
 
 /* Libadwaita / GTK4 Variables */
-@define-color window_bg_color @bg_window;
-@define-color window_fg_color @text_primary;
-@define-color view_bg_color @bg_window;
-@define-color view_fg_color @text_primary;
-@define-color headerbar_bg_color @bg_window;
-@define-color headerbar_fg_color @text_primary;
-@define-color headerbar_border_color @border_window;
-@define-color card_bg_color @bg_card;
-@define-color card_fg_color @text_primary;
-@define-color card_border_color @border_card;
-@define-color accent_color @accent;
-@define-color accent_bg_color @accent;
-@define-color accent_fg_color @text_inverse;
-@define-color popover_bg_color @bg_card;
-@define-color popover_fg_color @text_primary;
-@define-color dialog_bg_color @bg_window;
-@define-color dialog_fg_color @text_primary;
+@define-color window_bg_color @dark_wine_98;
+@define-color window_fg_color @cream_white;
+@define-color view_bg_color @dark_wine_98;
+@define-color view_fg_color @cream_white;
+@define-color headerbar_bg_color @dark_wine_98;
+@define-color headerbar_fg_color @cream_white;
+@define-color headerbar_border_color @pure_white_12;
+@define-color card_bg_color @deep_wine_95;
+@define-color card_fg_color @cream_white;
+@define-color card_border_color @pure_white_12;
+@define-color accent_color @vivid_red;
+@define-color accent_bg_color @vivid_red;
+@define-color accent_fg_color @pure_white;
+@define-color popover_bg_color @deep_wine_95;
+@define-color popover_fg_color @cream_white;
+@define-color dialog_bg_color @dark_wine_98;
+@define-color dialog_fg_color @cream_white;
 
 * {
     font-family: "JetBrains Mono Nerd Font", "FiraCode Nerd Font", "Segoe UI", sans-serif;
@@ -28,8 +28,8 @@
 
 window,
 .background {
-    background-color: @bg_window;
-    color: @text_primary;
+    background-color: @dark_wine_98;
+    color: @cream_white;
 }
 
 /* Image Viewer (Loupe) */
@@ -37,69 +37,69 @@ window.loupe,
 .loupe-image-view,
 picture-view,
 canvas {
-    background-color: @bg_window;
+    background-color: @dark_wine_98;
 }
 
 headerbar {
-    background-color: @bg_window;
-    border-bottom: 1px solid @border_window;
-    color: @text_primary;
+    background-color: @dark_wine_98;
+    border-bottom: 1px solid @pure_white_12;
+    color: @cream_white;
 }
 
 button {
     background-image: none;
-    background-color: @bg_card;
-    color: @text_secondary;
-    border: 1px solid @border_window;
+    background-color: @deep_wine_95;
+    color: @soft_pink;
+    border: 1px solid @pure_white_12;
     border-radius: 8px;
     padding: 4px 10px;
     transition: background-color 150ms ease, color 150ms ease;
 }
 
 button:hover {
-    background-color: @bg_card_hover;
-    color: @text_primary;
+    background-color: @light_wine_98;
+    color: @cream_white;
 }
 
 button.suggested-action {
-    background-color: @accent;
-    color: @text_inverse;
+    background-color: @vivid_red;
+    color: @pure_white;
 }
 
 button.suggested-action:hover {
-    background-color: @accent_hover;
+    background-color: @light_red;
 }
 
 .navigation-sidebar,
 listview.navigation-sidebar {
-    background-color: @bg_card;
-    color: @text_secondary;
-    border-right: 1px solid @border_window;
+    background-color: @deep_wine_95;
+    color: @soft_pink;
+    border-right: 1px solid @pure_white_12;
 }
 
 .navigation-sidebar row:selected {
-    background-color: @accent;
-    color: @text_inverse;
+    background-color: @vivid_red;
+    color: @pure_white;
 }
 
 entry {
     background-image: none;
-    background-color: @bg_card;
-    color: @text_primary;
-    border: 1px solid @border_window;
+    background-color: @deep_wine_95;
+    color: @cream_white;
+    border: 1px solid @pure_white_12;
     border-radius: 8px;
-    caret-color: @accent;
+    caret-color: @vivid_red;
 }
 
 entry:focus {
-    border: 1px solid @accent;
+    border: 1px solid @vivid_red;
 }
 
 popover contents {
-    background-color: @bg_card;
-    border: 1px solid @border_window;
+    background-color: @deep_wine_95;
+    border: 1px solid @pure_white_12;
     border-radius: 10px;
-    color: @text_secondary;
+    color: @soft_pink;
 }
 
 scrollbar {
@@ -108,7 +108,7 @@ scrollbar {
 }
 
 scrollbar slider {
-    background-color: @scrollbar_slider;
+    background-color: @vivid_red_48;
     border-radius: 4px;
     min-width: 6px;
     min-height: 36px;
@@ -117,6 +117,6 @@ scrollbar slider {
 }
 
 scrollbar slider:hover {
-    background-color: @accent;
+    background-color: @vivid_red;
     min-width: 8px;
 }

@@ -3,74 +3,14 @@
 # NOTE: Generated automatically. Do not edit directly.
 
 PALETTE = {
-    "bg_window": "#201011",
-    "bg_window_alpha": "rgba(32, 16, 17, 0.98)",
-    "bg_window_hypr": "rgba(201011fa)",
-    "bg_card": "#2A1A1E",
-    "bg_card_alpha": "rgba(42, 26, 30, 0.95)",
-    "bg_card_hypr": "rgba(2A1A1Ef2)",
-    "bg_card_hover": "#3A222A",
-    "bg_card_hover_alpha": "rgba(58, 34, 42, 0.98)",
-    "bg_card_hover_hypr": "rgba(3A222Afa)",
-    "bg_subtle": "#301F20",
-    "bg_subtle_alpha": "rgba(48, 31, 32, 0.95)",
-    "bg_subtle_hypr": "rgba(301F20f2)",
-    "bg_ghost": "transparent",
-    "bg_ghost_hover": "rgba(42, 26, 30, 0.50)",
-    "border_window": "rgba(255, 255, 255, 0.12)",
-    "border_window_hypr": "rgba(ffffff1f)",
-    "border_card": "rgba(255, 255, 255, 0.12)",
-    "border_card_hypr": "rgba(ffffff1f)",
-    "border_card_hover": "rgba(220, 26, 54, 0.65)",
-    "border_card_hover_hypr": "rgba(DC1A36a6)",
-    "accent": "#DC1A36",
-    "accent_hypr": "rgb(DC1A36)",
-    "accent_hover": "#F02D4C",
-    "accent_hover_hypr": "rgb(F02D4C)",
-    "accent_dim": "rgba(220, 26, 54, 0.48)",
-    "accent_subtle": "rgba(220, 26, 54, 0.20)",
-    "accent_border": "rgba(220, 26, 54, 0.40)",
-    "text_primary": "#FFF0F5",
-    "text_primary_hypr": "rgb(FFF0F5)",
-    "text_secondary": "#E8C2D0",
-    "text_secondary_hypr": "rgb(E8C2D0)",
-    "text_muted": "#A68595",
-    "text_muted_hypr": "rgb(A68595)",
-    "text_inverse": "#FFFFFF",
-    "text_inverse_hypr": "rgb(FFFFFF)",
-    "status_warning": "#FFB86C",
-    "status_warning_hypr": "rgb(FFB86C)",
-    "status_critical": "#DC1A36",
-    "status_critical_hypr": "rgb(DC1A36)",
-    "status_success": "#8FBC8F",
-    "status_success_hypr": "rgb(8FBC8F)",
-    "ribbon_blue": "#50A6FF",
-    "ribbon_blue_alpha": "rgba(80, 166, 255, 0.95)",
-    "ribbon_blue_hypr": "rgb(50A6FF)",
-    "screen_cyan": "#87F0FF",
-    "screen_cyan_alpha": "rgba(135, 240, 255, 0.55)",
-    "screen_cyan_hypr": "rgb(87F0FF)",
-    "bg_waybar": "#851733",
-    "bg_waybar_hover": "#9C2241",
-    "bg_waybar_hypr": "rgba(851733f2)",
-    "border_waybar_3d": "#4D0A1C",
-    "border_waybar_3d_hover": "#610E24",
-    "border_waybar_3d_hypr": "rgb(4D0A1C)",
-    "shadow_extrusion": "#4D0A1C",
-    "shadow_extrusion_hover": "#610E24",
-    "shadow_extrusion_hypr": "rgb(4D0A1C)",
-    "border_tactile_white": "rgba(255, 255, 255, 0.65)",
-    "border_tactile_white_bright": "rgba(255, 255, 255, 0.90)",
-    "bg_tactile_cream": "rgba(255, 240, 245, 0.96)",
-    "bg_tactile_cream_hypr": "rgba(FFF0F5f5)",
-    "pokepuff_pink": "#FF5C8A",
-    "pokepuff_pink_hypr": "rgb(FF5C8A)",
     "dark_wine": "#201011",
     "deep_wine": "#2A1A1E",
     "soft_wine": "#301F20",
     "light_wine": "#3A222A",
     "dark_ruby": "#4D0A1C",
+    "dark_ruby_hover": "#610E24",
     "wine_red": "#851733",
+    "wine_red_hover": "#9C2241",
     "vivid_red": "#DC1A36",
     "light_red": "#F02D4C",
     "vivid_pink": "#FF5C8A",
@@ -81,7 +21,22 @@ PALETTE = {
     "sky_blue": "#50A6FF",
     "light_cyan": "#87F0FF",
     "warm_yellow": "#FFB86C",
-    "soft_green": "#8FBC8F"
+    "soft_green": "#8FBC8F",
+    "dark_wine_98": "rgba(32, 16, 17, 0.98)",
+    "deep_wine_95": "rgba(42, 26, 30, 0.95)",
+    "deep_wine_50": "rgba(42, 26, 30, 0.50)",
+    "soft_wine_95": "rgba(48, 31, 32, 0.95)",
+    "light_wine_98": "rgba(58, 34, 42, 0.98)",
+    "vivid_red_65": "rgba(220, 26, 54, 0.65)",
+    "vivid_red_48": "rgba(220, 26, 54, 0.48)",
+    "vivid_red_40": "rgba(220, 26, 54, 0.40)",
+    "vivid_red_20": "rgba(220, 26, 54, 0.20)",
+    "cream_white_96": "rgba(255, 240, 245, 0.96)",
+    "pure_white_12": "rgba(255, 255, 255, 0.12)",
+    "pure_white_65": "rgba(255, 255, 255, 0.65)",
+    "pure_white_90": "rgba(255, 255, 255, 0.90)",
+    "sky_blue_95": "rgba(80, 166, 255, 0.95)",
+    "light_cyan_55": "rgba(135, 240, 255, 0.55)"
 }
 TYPOGRAPHY = {
     "font_primary": "JetBrains Mono Nerd Font",
@@ -103,11 +58,13 @@ GEOMETRY = {
     "width_rofi": 640
 }
 
+
 def hex_to_rgba(hex_code: str, alpha: float = 1.0):
-    h = hex_code.strip().lstrip('#')
+    h = hex_code.strip().lstrip("#")
     if len(h) == 3:
-        h = ''.join(c * 2 for c in h)
+        h = "".join(c * 2 for c in h)
     return (int(h[0:2], 16) / 255.0, int(h[2:4], 16) / 255.0, int(h[4:6], 16) / 255.0, float(alpha))
+
 
 # Typography & Geometry constants
 FONT_PRIMARY         = TYPOGRAPHY.get("font_primary", "JetBrains Mono Nerd Font")
@@ -127,31 +84,29 @@ WIDTH_CONTROL_CENTER = int(GEOMETRY.get("width_control_center", 315))
 WIDTH_SHELF          = int(GEOMETRY.get("width_shelf", 464))
 WIDTH_ROFI           = int(GEOMETRY.get("width_rofi", 640))
 
-# Color hex constants
-C_BG_WIN        = PALETTE.get("bg_window", "#201011")
-C_BG_CARD       = PALETTE.get("bg_card", "#2A1A1E")
-C_BG_CARD_HOVER = PALETTE.get("bg_card_hover", "#3A222A")
-C_BG_SUBTLE     = PALETTE.get("bg_subtle", "#301F20")
-C_ACCENT        = PALETTE.get("accent", "#DC1A36")
-C_ACCENT_HOVER  = PALETTE.get("accent_hover", "#F02D4C")
-C_TEXT_PRI      = PALETTE.get("text_primary", "#FFF0F5")
-C_TEXT_SEC      = PALETTE.get("text_secondary", "#E8C2D0")
-C_TEXT_MUT      = PALETTE.get("text_muted", "#A68595")
-C_TEXT_INV      = PALETTE.get("text_inverse", "#FFFFFF")
-C_STATUS_WARN   = PALETTE.get("status_warning", "#FFB86C")
-C_STATUS_CRIT   = PALETTE.get("status_critical", "#DC1A36")
-C_STATUS_SUCC   = PALETTE.get("status_success", "#8FBC8F")
-C_RIBBON        = PALETTE.get("ribbon_blue", "#50A6FF")
-C_SCREEN_CYAN   = PALETTE.get("screen_cyan", "#87F0FF")
-C_BG_CREAM      = PALETTE.get("bg_tactile_cream", "rgba(255, 240, 245, 0.96)")
-C_BG_WAYBAR     = PALETTE.get("bg_waybar", "#851733")
-C_BG_WAYBAR_HOV = PALETTE.get("bg_waybar_hover", "#9C2241")
-C_BORDER_3D     = PALETTE.get("border_waybar_3d", "#4D0A1C")
-C_SHADOW_EXTR   = PALETTE.get("shadow_extrusion", "#4D0A1C")
-C_SHADOW_EXTR_H = PALETTE.get("shadow_extrusion_hover", "#610E24")
-C_POKEPUFF_PINK = PALETTE.get("pokepuff_pink", "#FF5C8A")
-C_SUNSET_PINK   = "#FF7299"
-C_SUNSET_PASTEL = "#EAA2C6"
+# Color constants (aligned 1:1 with tokens.json)
+DARK_WINE       = PALETTE.get("dark_wine", "#201011")
+DEEP_WINE       = PALETTE.get("deep_wine", "#2A1A1E")
+SOFT_WINE       = PALETTE.get("soft_wine", "#301F20")
+LIGHT_WINE      = PALETTE.get("light_wine", "#3A222A")
+DARK_RUBY       = PALETTE.get("dark_ruby", "#4D0A1C")
+DARK_RUBY_HOVER = PALETTE.get("dark_ruby_hover", "#610E24")
+WINE_RED        = PALETTE.get("wine_red", "#851733")
+WINE_RED_HOVER  = PALETTE.get("wine_red_hover", "#9C2241")
+VIVID_RED       = PALETTE.get("vivid_red", "#DC1A36")
+LIGHT_RED       = PALETTE.get("light_red", "#F02D4C")
+VIVID_PINK      = PALETTE.get("vivid_pink", "#FF5C8A")
+SOFT_PINK       = PALETTE.get("soft_pink", "#E8C2D0")
+MUTED_PINK      = PALETTE.get("muted_pink", "#A68595")
+CREAM_WHITE     = PALETTE.get("cream_white", "#FFF0F5")
+CREAM_WHITE_96  = PALETTE.get("cream_white_96", "rgba(255, 240, 245, 0.96)")
+PURE_WHITE      = PALETTE.get("pure_white", "#FFFFFF")
+SKY_BLUE        = PALETTE.get("sky_blue", "#50A6FF")
+LIGHT_CYAN      = PALETTE.get("light_cyan", "#87F0FF")
+WARM_YELLOW     = PALETTE.get("warm_yellow", "#FFB86C")
+SOFT_GREEN      = PALETTE.get("soft_green", "#8FBC8F")
+SUNSET_PINK     = "#FF7299"
+SUNSET_PASTEL   = "#EAA2C6"
 
 # Gradient Design Tokens
 GRADIENTS = {
@@ -166,16 +121,15 @@ SUNSET_STOPS = [
 ]
 
 # Pre-computed Cairo RGBA tuples
-BG_WINDOW_RGBA        = hex_to_rgba(C_BG_WIN, 0.98)
-BG_CARD_RGBA          = hex_to_rgba(C_BG_CARD, 0.95)
-BG_CARD_HOVER_RGBA    = hex_to_rgba(C_BG_CARD_HOVER, 0.98)
-BG_SUBTLE_RGBA        = hex_to_rgba(C_BG_SUBTLE, 0.95)
-BG_WAYBAR_RGBA        = hex_to_rgba(C_BG_WAYBAR, 1.0)
-SHADOW_EXTRUSION_RGBA = hex_to_rgba(C_SHADOW_EXTR, 1.0)
-ACCENT_RGBA           = hex_to_rgba(C_ACCENT, 1.0)
-ACCENT_HOVER_RGBA     = hex_to_rgba(C_ACCENT_HOVER, 1.0)
-ACCENT_DIM_RGBA       = hex_to_rgba(C_ACCENT, 0.48)
-ACCENT_SUBTLE_RGBA    = hex_to_rgba(C_ACCENT, 0.20)
-POKEPUFF_PINK_RGBA    = hex_to_rgba(C_POKEPUFF_PINK, 1.0)
-BORDER_WINDOW_RGBA    = (1.0, 1.0, 1.0, 0.12)
-BORDER_CARD_RGBA      = (1.0, 1.0, 1.0, 0.12)
+DARK_WINE_RGBA        = hex_to_rgba(DARK_WINE, 0.98)
+DEEP_WINE_RGBA        = hex_to_rgba(DEEP_WINE, 0.95)
+LIGHT_WINE_RGBA       = hex_to_rgba(LIGHT_WINE, 0.98)
+SOFT_WINE_RGBA        = hex_to_rgba(SOFT_WINE, 0.95)
+WINE_RED_RGBA         = hex_to_rgba(WINE_RED, 1.0)
+DARK_RUBY_RGBA        = hex_to_rgba(DARK_RUBY, 1.0)
+VIVID_RED_RGBA        = hex_to_rgba(VIVID_RED, 1.0)
+LIGHT_RED_RGBA        = hex_to_rgba(LIGHT_RED, 1.0)
+VIVID_RED_48_RGBA     = hex_to_rgba(VIVID_RED, 0.48)
+VIVID_RED_20_RGBA     = hex_to_rgba(VIVID_RED, 0.20)
+VIVID_PINK_RGBA       = hex_to_rgba(VIVID_PINK, 1.0)
+PURE_WHITE_12_RGBA    = (1.0, 1.0, 1.0, 0.12)

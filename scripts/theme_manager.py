@@ -79,19 +79,19 @@ def build_primitive_colors(overrides: dict, existing_colors: dict) -> dict:
     base = dict(PRESETS["serena-wine"]["colors"])
     base.update({k: v for k, v in existing_colors.items() if k in base})
 
-    bg_win = overrides.get("dark_wine") or overrides.get("bg_window")
+    bg_win = overrides.get("dark_wine")
     if bg_win:
         base["dark_wine"] = bg_win
         base["deep_wine"] = overrides.get("deep_wine") or lighten_hsl(bg_win, 0.038)
         base["soft_wine"] = overrides.get("soft_wine") or lighten_hsl(bg_win, 0.055)
         base["light_wine"] = overrides.get("light_wine") or lighten_hsl(bg_win, 0.085)
 
-    accent = overrides.get("vivid_red") or overrides.get("accent")
+    accent = overrides.get("vivid_red")
     if accent:
         base["vivid_red"] = accent
         base["light_red"] = overrides.get("light_red") or lighten_hsl(accent, 0.09)
 
-    ribbon = overrides.get("sky_blue") or overrides.get("ribbon_blue")
+    ribbon = overrides.get("sky_blue")
     if ribbon:
         base["sky_blue"] = ribbon
 
@@ -389,9 +389,9 @@ def main():
             with open(tokens_path, "r", encoding="utf-8") as f:
                 d = json.load(f)
             c = d.get("colors", {})
-            bg = c.get("dark_wine", c.get("bg_window", "#000000"))
-            ac = c.get("vivid_red", c.get("accent", "#000000"))
-            rb = c.get("sky_blue", c.get("ribbon_blue", "#000000"))
+            bg = c.get("dark_wine", "#000000")
+            ac = c.get("vivid_red", "#000000")
+            rb = c.get("sky_blue", "#000000")
             print(f"Current theme: \033[1;32m{d.get('name', 'N/A')}\033[0m")
             print(f"  Background: {color_badge(bg)}")
             print(f"  Accent:     {color_badge(ac)}")

@@ -10,14 +10,14 @@ gi.require_version('PangoCairo', '1.0')
 from gi.repository import Pango, PangoCairo
 
 try:
-    from system.palette import hex_to_rgba, C_BG_WIN
+    from system.palette import hex_to_rgba, DARK_WINE
 except Exception:
     def hex_to_rgba(h, a=1.0):
         h = h.strip().lstrip('#')
         if len(h) == 3:
             h = ''.join(c * 2 for c in h)
         return (int(h[0:2], 16) / 255.0, int(h[2:4], 16) / 255.0, int(h[4:6], 16) / 255.0, float(a))
-    C_BG_WIN = "#201011"
+    DARK_WINE = "#201011"
 
 
 _CURVED_TEXT_SURFACES = {}
@@ -36,7 +36,7 @@ def draw_curved_kerned(cr: cairo.Context, text: str, cx: float, cy_top: float,
     Renders curved text along an arc with proportional kerning, avoiding letter overlap.
     """
     if color is None:
-        color = hex_to_rgba(C_BG_WIN)[:3]
+        color = hex_to_rgba(DARK_WINE)[:3]
     elif isinstance(color, str):
         color = hex_to_rgba(color)[:3]
 
@@ -81,7 +81,7 @@ def draw_curved_kerned_cached(cr: cairo.Context, text: str, cx: float, cy_top: f
     Renders curved text from an internal surface cache for high-framerate redraws.
     """
     if color is None:
-        color = hex_to_rgba(C_BG_WIN)[:3]
+        color = hex_to_rgba(DARK_WINE)[:3]
     elif isinstance(color, str):
         color = hex_to_rgba(color)[:3]
 

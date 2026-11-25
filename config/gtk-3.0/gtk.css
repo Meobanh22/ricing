@@ -1,19 +1,19 @@
 /* gtk.css — GTK 3 color and widget stylesheet. */
 @import "palette.css";
 
-@define-color border_subtle @border_card;
+@define-color border_subtle @pure_white_12;
 
 /* Standard GTK theme variables override */
-@define-color theme_bg_color @bg_window;
-@define-color theme_fg_color @text_primary;
-@define-color theme_base_color @bg_window;
-@define-color theme_text_color @text_primary;
-@define-color theme_selected_bg_color @accent;
-@define-color theme_selected_fg_color @text_inverse;
-@define-color insensitive_bg_color @bg_subtle;
-@define-color insensitive_fg_color @text_muted;
-@define-color borders @border_window;
-@define-color content_view_bg @bg_window;
+@define-color theme_bg_color @dark_wine_98;
+@define-color theme_fg_color @cream_white;
+@define-color theme_base_color @dark_wine_98;
+@define-color theme_text_color @cream_white;
+@define-color theme_selected_bg_color @vivid_red;
+@define-color theme_selected_fg_color @pure_white;
+@define-color insensitive_bg_color @soft_wine_95;
+@define-color insensitive_fg_color @muted_pink;
+@define-color borders @pure_white_12;
+@define-color content_view_bg @dark_wine_98;
 
 * {
     font-family: "JetBrains Mono Nerd Font", "FiraCode Nerd Font", "Segoe UI", sans-serif;
@@ -26,16 +26,16 @@ window.background,
 .background,
 viewport,
 scrolledwindow {
-    background-color: @bg_window;
-    color: @text_primary;
+    background-color: @dark_wine_98;
+    color: @cream_white;
 }
 
 /* 2. Global Button Styling (Eliminate default GTK grey backgrounds) */
 button {
     background-image: none;
-    background-color: @bg_card;
-    color: @text_secondary;
-    border: 1px solid @border_window;
+    background-color: @deep_wine_95;
+    color: @soft_pink;
+    border: 1px solid @pure_white_12;
     border-radius: 8px;
     box-shadow: none;
     padding: 4px 10px;
@@ -43,14 +43,14 @@ button {
 }
 
 button:hover {
-    background-color: @bg_card_hover;
-    color: @text_primary;
+    background-color: @light_wine_98;
+    color: @cream_white;
 }
 
 button:checked,
 button:active {
-    background-color: @accent;
-    color: @text_inverse;
+    background-color: @vivid_red;
+    color: @pure_white;
 }
 
 button.flat {
@@ -59,33 +59,33 @@ button.flat {
 }
 
 button.flat:hover {
-    background-color: @bg_card_hover;
+    background-color: @light_wine_98;
 }
 
 /* 3. Headerbars & Titlebars */
 headerbar,
 .titlebar {
-    background-color: @bg_window;
-    border-bottom: 1px solid @border_window;
-    color: @text_primary;
+    background-color: @dark_wine_98;
+    border-bottom: 1px solid @pure_white_12;
+    color: @cream_white;
     box-shadow: none;
 }
 
 headerbar label.title {
     font-weight: 600;
-    color: @text_primary;
+    color: @cream_white;
 }
 
 headerbar label.subtitle {
-    color: @text_muted;
+    color: @muted_pink;
     font-size: 11px;
 }
 
 headerbar button,
 headerbar button.titlebutton,
 windowcontrols button {
-    background-color: @bg_card;
-    border: 1px solid @border_window;
+    background-color: @deep_wine_95;
+    border: 1px solid @pure_white_12;
     border-radius: 8px;
     box-shadow: none;
 }
@@ -93,8 +93,8 @@ windowcontrols button {
 headerbar button:hover,
 headerbar button.titlebutton:hover,
 windowcontrols button:hover {
-    background-color: @bg_card_hover;
-    color: @text_primary;
+    background-color: @light_wine_98;
+    color: @cream_white;
 }
 
 /* 4. Thunar & File Manager Specifics */
@@ -104,15 +104,15 @@ windowcontrols button:hover {
 ThunarWindow .sidebar,
 ThunarWindow .sidebar .view,
 scrolledwindow.sidebar {
-    background-color: @bg_card;
-    color: @text_secondary;
-    border-right: 1px solid @border_window;
+    background-color: @deep_wine_95;
+    color: @soft_pink;
+    border-right: 1px solid @pure_white_12;
 }
 
 .sidebar treeview:hover,
 .sidebar .view:hover,
 ThunarWindow .sidebar treeview:hover {
-    background-color: @bg_card;
+    background-color: @deep_wine_95;
 }
 
 .sidebar row:selected,
@@ -125,22 +125,22 @@ ThunarWindow .sidebar treeview:hover {
 .sidebar .view:selected:hover,
 ThunarWindow .sidebar row:selected,
 ThunarWindow .sidebar row:selected:hover {
-    background-color: @accent;
-    color: @text_inverse;
+    background-color: @vivid_red;
+    color: @pure_white;
     border-radius: 8px;
 }
 
 .sidebar row:selected:backdrop,
 .sidebar treeview:selected:backdrop,
 .sidebar .view:selected:backdrop {
-    background-color: alpha(@accent, 0.70);
-    color: @text_inverse;
+    background-color: alpha(@vivid_red, 0.70);
+    color: @pure_white;
     border-radius: 8px;
 }
 
 /* Thunar Splitter / Paned Separator */
 paned > separator {
-    background-color: @border_window;
+    background-color: @pure_white_12;
     min-width: 1px;
     min-height: 1px;
 }
@@ -152,8 +152,8 @@ ThunarIconView,
 .view,
 treeview.view,
 iconview {
-    background-color: @bg_window;
-    color: @text_primary;
+    background-color: @dark_wine_98;
+    color: @cream_white;
 }
 
 .view:selected,
@@ -168,16 +168,16 @@ treeview.view:selected,
 treeview.view:selected:focus,
 treeview.view:selected:hover,
 treeview.view:selected:focus:hover {
-    background-color: @accent;
-    color: @text_inverse;
+    background-color: @vivid_red;
+    color: @pure_white;
     border-radius: 8px;
 }
 
 .view:selected:backdrop,
 iconview:selected:backdrop,
 treeview.view:selected:backdrop {
-    background-color: alpha(@accent, 0.70);
-    color: @text_inverse;
+    background-color: alpha(@vivid_red, 0.70);
+    color: @pure_white;
     border-radius: 8px;
 }
 
@@ -188,8 +188,8 @@ treeview.view rubberband,
 iconview rubberband,
 .rubberband,
 rubberband {
-    background-color: alpha(@accent, 0.22);
-    border: 1px solid @accent;
+    background-color: alpha(@vivid_red, 0.22);
+    border: 1px solid @vivid_red;
     border-radius: 4px;
 }
 
@@ -197,10 +197,10 @@ rubberband {
 treeview header button,
 treeview header button:hover {
     background-image: none;
-    background-color: @bg_card;
-    color: @text_secondary;
+    background-color: @deep_wine_95;
+    color: @soft_pink;
     border: none;
-    border-bottom: 1px solid @border_window;
+    border-bottom: 1px solid @pure_white_12;
     border-right: 1px solid @border_subtle;
     box-shadow: none;
     border-radius: 0;
@@ -211,16 +211,16 @@ toolbar,
 .toolbar,
 .path-bar-box,
 ThunarLocationButtons {
-    background-color: @bg_window;
-    border-bottom: 1px solid @border_window;
-    color: @text_primary;
+    background-color: @dark_wine_98;
+    border-bottom: 1px solid @pure_white_12;
+    color: @cream_white;
     padding: 4px;
 }
 
 toolbar button,
 .path-bar-box button {
-    background-color: @bg_card;
-    color: @text_secondary;
+    background-color: @deep_wine_95;
+    color: @soft_pink;
     border: none;
     border-radius: 8px;
     padding: 6px 10px;
@@ -229,35 +229,35 @@ toolbar button,
 
 toolbar button:hover,
 .path-bar-box button:hover {
-    background-color: @bg_card_hover;
-    color: @text_primary;
+    background-color: @light_wine_98;
+    color: @cream_white;
 }
 
 toolbar button:checked,
 toolbar button:active,
 .path-bar-box button:checked,
 .path-bar-box button:active {
-    background-color: @accent;
-    color: @text_inverse;
+    background-color: @vivid_red;
+    color: @pure_white;
 }
 
 /* 6. Text Entries */
 entry,
 searchentry {
     background-image: none;
-    background-color: @bg_card;
-    color: @text_primary;
-    border: 1px solid @border_window;
+    background-color: @deep_wine_95;
+    color: @cream_white;
+    border: 1px solid @pure_white_12;
     border-radius: 8px;
     padding: 6px 10px;
-    caret-color: @accent;
+    caret-color: @vivid_red;
     box-shadow: none;
 }
 
 entry:focus,
 searchentry:focus {
-    border: 1px solid @accent;
-    background-color: @bg_card;
+    border: 1px solid @vivid_red;
+    background-color: @deep_wine_95;
 }
 
 /* 7. Image Viewers (EOG - Eye of GNOME) */
@@ -265,33 +265,33 @@ EogWindow,
 EogScrollView,
 EogScrollView.view,
 .eog-scroll-view {
-    background-color: @bg_window;
-    color: @text_primary;
+    background-color: @dark_wine_98;
+    color: @cream_white;
 }
 
 /* 8. Menus, Popovers & Menubar */
 menubar,
 .menubar {
-    background-color: @bg_window;
-    border-bottom: 1px solid @border_window;
+    background-color: @dark_wine_98;
+    border-bottom: 1px solid @pure_white_12;
 }
 
 menubar > menuitem {
-    color: @text_secondary;
+    color: @soft_pink;
     padding: 4px 10px;
 }
 
 menubar > menuitem:hover {
-    background-color: @accent;
-    color: @text_inverse;
+    background-color: @vivid_red;
+    color: @pure_white;
 }
 
 menu,
 .menu,
 popover,
 popover.background {
-    background-color: @bg_card;
-    border: 1px solid @border_window;
+    background-color: @deep_wine_95;
+    border: 1px solid @pure_white_12;
     border-radius: 10px;
     padding: 6px;
     box-shadow: none;
@@ -299,7 +299,7 @@ popover.background {
 
 menuitem,
 .menuitem {
-    color: @text_secondary;
+    color: @soft_pink;
     border-radius: 8px;
     padding: 6px 12px;
     margin: 1px 0;
@@ -307,12 +307,12 @@ menuitem,
 
 menuitem:hover,
 .menuitem:hover {
-    background-color: @accent;
-    color: @text_inverse;
+    background-color: @vivid_red;
+    color: @pure_white;
 }
 
 separator {
-    background-color: @border_window;
+    background-color: @pure_white_12;
     min-height: 1px;
     margin: 4px 0;
 }
@@ -320,28 +320,28 @@ separator {
 /* 9. Notebooks & Statusbars */
 notebook,
 notebook > header {
-    background-color: @bg_window;
+    background-color: @dark_wine_98;
     border: none;
 }
 
 notebook > header tab {
-    background-color: @bg_card;
-    color: @text_secondary;
+    background-color: @deep_wine_95;
+    color: @soft_pink;
     border: none;
     border-radius: 8px 8px 0 0;
     padding: 6px 12px;
 }
 
 notebook > header tab:checked {
-    background-color: @bg_window;
-    color: @text_primary;
-    border-bottom: 2px solid @accent;
+    background-color: @dark_wine_98;
+    color: @cream_white;
+    border-bottom: 2px solid @vivid_red;
 }
 
 statusbar,
 .statusbar {
-    background-color: @bg_window;
-    color: @text_muted;
+    background-color: @dark_wine_98;
+    color: @muted_pink;
     font-size: 11px;
     border-top: 1px solid @border_subtle;
     padding: 2px 8px;
@@ -354,7 +354,7 @@ scrollbar {
 }
 
 scrollbar slider {
-    background-color: @scrollbar_slider;
+    background-color: @vivid_red_48;
     border-radius: 4px;
     min-width: 6px;
     min-height: 36px;
@@ -363,6 +363,6 @@ scrollbar slider {
 }
 
 scrollbar slider:hover {
-    background-color: @accent;
+    background-color: @vivid_red;
     min-width: 8px;
 }

@@ -549,7 +549,7 @@ lines:
         payload = re.search(r"\x1b\[(\d+);1H[^H]*?\x1b\]66;s=2;", frame)
         self.assertIsNotNone(payload)
         self.assertEqual(int(payload[1]), 12)
-        self.assertIn(music.fg(music.PALETTE['text_inverse']), frame)
+        self.assertIn(music.fg(music.PALETTE['pure_white']), frame)
         self.assertNotIn(music.fg(music.C_LYRIC_HIGHLIGHT), frame)
         self.assertNotIn("Play/Pause", frame)
 

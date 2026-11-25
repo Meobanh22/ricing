@@ -11,7 +11,7 @@ from gi.repository import Pango, PangoCairo
 
 try:
     from system.palette import (
-        hex_to_rgba, C_BG_WIN, C_BORDER_3D, C_ACCENT
+        hex_to_rgba, DARK_WINE, DARK_RUBY, VIVID_RED
     )
 except Exception:
     def hex_to_rgba(h, a=1.0):
@@ -19,9 +19,9 @@ except Exception:
         if len(h) == 3:
             h = ''.join(c * 2 for c in h)
         return (int(h[0:2], 16) / 255.0, int(h[2:4], 16) / 255.0, int(h[4:6], 16) / 255.0, float(a))
-    C_BG_WIN = "#201011"
-    C_BORDER_3D = "#4D0A1C"
-    C_ACCENT = "#DC1A36"
+    DARK_WINE = "#201011"
+    DARK_RUBY = "#4D0A1C"
+    VIVID_RED = "#DC1A36"
 
 
 def clear_surface(cr: cairo.Context):
@@ -57,9 +57,9 @@ def clip_device_bounds(cr: cairo.Context, x: float, y: float, w: float, h: float
 def draw_anime_grooves(cr: cairo.Context, cx: float, cy: float, grooves, a1: float, a2: float,
                        groove_fill=None, stroke1=None, stroke2=None):
     """Draws tech groove bands along an arc."""
-    fill_rgba = groove_fill or hex_to_rgba(C_BG_WIN, 0.62)
-    s1_rgba = stroke1 or hex_to_rgba(C_BG_WIN, 0.90)
-    s2_rgba = stroke2 or hex_to_rgba(C_BORDER_3D, 0.85)
+    fill_rgba = groove_fill or hex_to_rgba(DARK_WINE, 0.62)
+    s1_rgba = stroke1 or hex_to_rgba(DARK_WINE, 0.90)
+    s2_rgba = stroke2 or hex_to_rgba(DARK_RUBY, 0.85)
 
     for r_inner, r_outer in grooves:
         cr.save()
@@ -83,7 +83,7 @@ def draw_anime_grooves(cr: cairo.Context, cx: float, cy: float, grooves, a1: flo
 def draw_bow_mark(ctx: cairo.Context, cx: float, cy: float, size: float = 24.0, color=None):
     """Draws the solid minimal bow mark centered at (cx, cy)."""
     if color is None:
-        color = hex_to_rgba(C_ACCENT)[:3]
+        color = hex_to_rgba(VIVID_RED)[:3]
     elif isinstance(color, str):
         color = hex_to_rgba(color)[:3]
 
@@ -123,7 +123,7 @@ def draw_bow_mark(ctx: cairo.Context, cx: float, cy: float, size: float = 24.0, 
 def draw_bell_icon(ctx: cairo.Context, cx: float, cy: float, font_size: int = 20, color=None):
     """Draws notification bell icon centered at (cx, cy)."""
     if color is None:
-        color = C_ACCENT
+        color = VIVID_RED
     l = PangoCairo.create_layout(ctx)
     l.set_font_description(Pango.FontDescription(f"JetBrains Mono Nerd Font Bold {font_size}"))
     l.set_markup(f"<span color='{color}'>󰂚</span>", -1)

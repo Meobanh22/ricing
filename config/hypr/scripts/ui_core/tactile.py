@@ -10,7 +10,7 @@ from gi.repository import Pango, PangoCairo
 
 try:
     from system.palette import (
-        hex_to_rgba, C_BG_WAYBAR, C_BORDER_3D, C_TEXT_INV
+        hex_to_rgba, WINE_RED, DARK_RUBY, PURE_WHITE
     )
 except Exception:
     def hex_to_rgba(h, a=1.0):
@@ -18,9 +18,9 @@ except Exception:
         if len(h) == 3:
             h = ''.join(c * 2 for c in h)
         return (int(h[0:2], 16) / 255.0, int(h[2:4], 16) / 255.0, int(h[4:6], 16) / 255.0, float(a))
-    C_BG_WAYBAR = "#851733"
-    C_BORDER_3D = "#4D0A1C"
-    C_TEXT_INV  = "#FFFFFF"
+    WINE_RED = "#851733"
+    DARK_RUBY = "#4D0A1C"
+    PURE_WHITE  = "#FFFFFF"
 
 
 def draw_tactile_3d_text(cr: cairo.Context, layout: Pango.Layout, start_x: float, start_y: float,
@@ -33,17 +33,17 @@ def draw_tactile_3d_text(cr: cairo.Context, layout: Pango.Layout, start_x: float
     3. Core fill color
     """
     if core_color is None:
-        core_color = hex_to_rgba(C_BG_WAYBAR)[:3]
+        core_color = hex_to_rgba(WINE_RED)[:3]
     elif isinstance(core_color, str):
         core_color = hex_to_rgba(core_color)[:3]
 
     if dark_color is None:
-        dark_color = hex_to_rgba(C_BORDER_3D)[:3]
+        dark_color = hex_to_rgba(DARK_RUBY)[:3]
     elif isinstance(dark_color, str):
         dark_color = hex_to_rgba(dark_color)[:3]
 
     if white_color is None:
-        white_color = hex_to_rgba(C_TEXT_INV)[:3]
+        white_color = hex_to_rgba(PURE_WHITE)[:3]
     elif isinstance(white_color, str):
         white_color = hex_to_rgba(white_color)[:3]
 

@@ -27,48 +27,46 @@ for p in (POPUPS_DIR, SCRIPTS_ROOT, SYSTEM_DIR, SERVICES_DIR):
 
 try:
     from palette import (  # noqa: E402,F401
-        ACCENT_HOVER_RGBA,
-        ACCENT_RGBA,
-        BG_CARD_RGBA,
-        BG_WINDOW_RGBA,
-        C_ACCENT,
-        C_ACCENT_HOVER,
-        C_BG_CARD,
-        C_BG_CARD_HOVER,
-        C_BG_SUBTLE,
-        C_BG_WAYBAR,
-        C_BG_WIN,
-        C_BORDER_3D,
-        C_RIBBON,
-        C_SCREEN_CYAN,
-        C_STATUS_CRIT,
-        C_STATUS_SUCC,
-        C_STATUS_WARN,
-        C_TEXT_INV,
-        C_TEXT_MUT,
-        C_TEXT_PRI,
-        C_TEXT_SEC,
+        CREAM_WHITE,
+        DARK_RUBY,
+        DARK_WINE,
+        DARK_WINE_RGBA,
+        DEEP_WINE,
+        DEEP_WINE_RGBA,
+        LIGHT_CYAN,
+        LIGHT_RED,
+        LIGHT_RED_RGBA,
+        LIGHT_WINE,
+        MUTED_PINK,
         PALETTE,
+        PURE_WHITE,
+        SKY_BLUE,
+        SOFT_GREEN,
+        SOFT_PINK,
+        SOFT_WINE,
+        VIVID_RED,
+        VIVID_RED_RGBA,
+        WARM_YELLOW,
+        WINE_RED,
         hex_to_rgba,
     )
 except ImportError:
-    C_BG_WIN = "#201011"
-    C_BG_CARD = "#2A1A1E"
-    C_BG_CARD_HOVER = "#3A222A"
-    C_BG_SUBTLE = "#301F20"
-    C_ACCENT = "#DC1A36"
-    C_ACCENT_HOVER = "#F02D4C"
-    C_TEXT_PRI = "#FFF0F5"
-    C_TEXT_SEC = "#E8C2D0"
-    C_TEXT_MUT = "#A68595"
-    C_TEXT_INV = "#FFFFFF"
-    C_STATUS_WARN = "#FFB86C"
-    C_STATUS_CRIT = "#DC1A36"
-    C_STATUS_SUCC = "#8FBC8F"
-    C_RIBBON = "#50A6FF"
-    C_BG_WAYBAR = "#851733"
-    C_BORDER_3D = "#4D0A1C"
-    C_SCREEN_CYAN = "#87F0FF"
+    DARK_WINE = "#201011"
+    DEEP_WINE = "#2A1A1E"
+    LIGHT_WINE = "#3A222A"
+    SOFT_WINE = "#301F20"
+    VIVID_RED = "#DC1A36"
+    LIGHT_RED = "#F02D4C"
+    CREAM_WHITE = "#FFF0F5"
+    SOFT_PINK = "#E8C2D0"
+    MUTED_PINK = "#A68595"
+    PURE_WHITE = "#FFFFFF"
+    WARM_YELLOW = "#FFB86C"
+    SOFT_GREEN = "#8FBC8F"
+    SKY_BLUE = "#50A6FF"
+    WINE_RED = "#851733"
+    DARK_RUBY = "#4D0A1C"
+    LIGHT_CYAN = "#87F0FF"
 
     def hex_to_rgba(hex_code: str, alpha: float = 1.0):
         h = hex_code.strip().lstrip('#')

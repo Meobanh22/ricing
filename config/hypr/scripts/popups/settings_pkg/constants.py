@@ -41,51 +41,49 @@ ANIM_DURATION = 0.38
 
 try:
     from palette import (  # noqa: E402,F401
-        C_ACCENT,
-        C_ACCENT_HOVER,
-        C_BG_CARD,
-        C_BG_CARD_HOVER,
-        C_BG_CREAM,
-        C_BG_SUBTLE,
-        C_BG_WAYBAR,
-        C_BG_WIN,
-        C_BORDER_3D,
-        C_POKEPUFF_PINK,
-        C_RIBBON,
-        C_STATUS_CRIT,
-        C_STATUS_SUCC,
-        C_STATUS_WARN,
-        C_TEXT_INV,
-        C_TEXT_MUT,
-        C_TEXT_PRI,
-        C_TEXT_SEC,
+        CREAM_WHITE,
+        CREAM_WHITE_96,
+        DARK_RUBY,
+        DARK_WINE,
+        DEEP_WINE,
+        LIGHT_RED,
+        LIGHT_WINE,
+        MUTED_PINK,
+        PURE_WHITE,
+        SKY_BLUE,
+        SOFT_GREEN,
+        SOFT_PINK,
+        SOFT_WINE,
         SUNSET_STOPS,
+        VIVID_PINK,
+        VIVID_RED,
+        WARM_YELLOW,
+        WINE_RED,
         hex_to_rgba,
     )
-    C_SUNSET_PINK = SUNSET_STOPS[2][1]
-    C_SUNSET_PASTEL = SUNSET_STOPS[3][1]
+    SUNSET_PINK = SUNSET_STOPS[2][1]
+    SUNSET_PASTEL = SUNSET_STOPS[3][1]
     C_SUNSET_ROSE = SUNSET_STOPS[0][1]
 except ImportError:
-    C_BG_WIN = "#201011"
-    C_BG_CARD = "#2A1A1E"
-    C_BG_CARD_HOVER = "#3A222A"
-    C_BG_SUBTLE = "#301F20"
-    C_ACCENT = "#DC1A36"
-    C_ACCENT_HOVER = "#F02D4C"
-    C_TEXT_PRI = "#FFF0F5"
-    C_TEXT_SEC = "#E8C2D0"
-    C_TEXT_MUT = "#A68595"
-    C_TEXT_INV = "#FFFFFF"
-    C_STATUS_WARN = "#FFB86C"
-    C_STATUS_CRIT = "#DC1A36"
-    C_STATUS_SUCC = "#8FBC8F"
-    C_RIBBON = "#50A6FF"
-    C_BG_WAYBAR = "#851733"
-    C_BORDER_3D = "#4D0A1C"
-    C_BG_CREAM = "rgba(255, 240, 245, 0.96)"
-    C_POKEPUFF_PINK = "#FF5C8A"
-    C_SUNSET_PINK = "#FF7299"
-    C_SUNSET_PASTEL = "#EAA2C6"
+    DARK_WINE = "#201011"
+    DEEP_WINE = "#2A1A1E"
+    LIGHT_WINE = "#3A222A"
+    SOFT_WINE = "#301F20"
+    VIVID_RED = "#DC1A36"
+    LIGHT_RED = "#F02D4C"
+    CREAM_WHITE = "#FFF0F5"
+    SOFT_PINK = "#E8C2D0"
+    MUTED_PINK = "#A68595"
+    PURE_WHITE = "#FFFFFF"
+    WARM_YELLOW = "#FFB86C"
+    SOFT_GREEN = "#8FBC8F"
+    SKY_BLUE = "#50A6FF"
+    WINE_RED = "#851733"
+    DARK_RUBY = "#4D0A1C"
+    CREAM_WHITE_96 = "rgba(255, 240, 245, 0.96)"
+    VIVID_PINK = "#FF5C8A"
+    SUNSET_PINK = "#FF7299"
+    SUNSET_PASTEL = "#EAA2C6"
     C_SUNSET_ROSE = "#A3183D"
 
     def hex_to_rgba(hex_code, alpha=1.0):
@@ -94,14 +92,14 @@ except ImportError:
             return (int(h[0:2], 16) / 255.0, int(h[2:4], 16) / 255.0, int(h[4:6], 16) / 255.0, alpha)
         return (1.0, 1.0, 1.0, alpha)
 
-COLOR_BORDER_SHADOW = hex_to_rgba(C_BORDER_3D, 0.98)
-COLOR_PINK_TOP = hex_to_rgba(C_SUNSET_PINK, 1.0)
-COLOR_PINK_BOT = hex_to_rgba(C_SUNSET_PASTEL, 1.0)
-COLOR_PINK_INSIDE = hex_to_rgba(C_TEXT_SEC, 1.0)
+COLOR_BORDER_SHADOW = hex_to_rgba(DARK_RUBY, 0.98)
+COLOR_PINK_TOP = hex_to_rgba(SUNSET_PINK, 1.0)
+COLOR_PINK_BOT = hex_to_rgba(SUNSET_PASTEL, 1.0)
+COLOR_PINK_INSIDE = hex_to_rgba(SOFT_PINK, 1.0)
 COLOR_PINK_ROSE = hex_to_rgba(C_SUNSET_ROSE, 1.0)
-COLOR_PINK_3D_DARK = hex_to_rgba(C_BORDER_3D, 1.0)
-COLOR_PINK_3D_BOT = hex_to_rgba(C_BG_WIN, 1.0)
+COLOR_PINK_3D_DARK = hex_to_rgba(DARK_RUBY, 1.0)
+COLOR_PINK_3D_BOT = hex_to_rgba(DARK_WINE, 1.0)
 
-COLOR_RIBBON_TOP = hex_to_rgba(C_ACCENT_HOVER, 1.0)
-COLOR_RIBBON_MID = hex_to_rgba(C_ACCENT, 1.0)
-COLOR_RIBBON_BOT = hex_to_rgba(C_BG_WAYBAR, 1.0)
+COLOR_RIBBON_TOP = hex_to_rgba(LIGHT_RED, 1.0)
+COLOR_RIBBON_MID = hex_to_rgba(VIVID_RED, 1.0)
+COLOR_RIBBON_BOT = hex_to_rgba(WINE_RED, 1.0)

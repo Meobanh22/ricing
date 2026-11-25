@@ -9,10 +9,10 @@ import time
 from gi.repository import Gdk, GLib, Gtk, Pango
 
 from shelf_pkg.constants import (
-    C_ACCENT,
-    C_RUBY_MUT,
-    C_RUBY_PRI,
-    C_TEXT_SEC,
+    VIVID_RED,
+    MUTED_PINK,
+    WINE_RED,
+    SOFT_PINK,
     DRAG_SOURCE_TARGETS,
     DROP_TARGETS,
     SHELF_DIR,
@@ -70,7 +70,7 @@ class ShelfFilesMixin:
         banner_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
         banner_box.set_halign(Gtk.Align.CENTER)
         lbl_b_icon = Gtk.Label()
-        lbl_b_icon.set_markup(f"<span font='11.5' color='{C_ACCENT}'>󰉍</span>  <span font='10.5' color='{C_TEXT_SEC}'>Drop files/images here to add</span>")
+        lbl_b_icon.set_markup(f"<span font='11.5' color='{VIVID_RED}'>󰉍</span>  <span font='10.5' color='{SOFT_PINK}'>Drop files/images here to add</span>")
         banner_box.pack_start(lbl_b_icon, False, False, 0)
         self.drop_banner.add(banner_box)
         self.content_shelf_box.pack_start(self.drop_banner, False, False, 0)
@@ -164,7 +164,7 @@ class ShelfFilesMixin:
         top_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
         lbl_type = Gtk.Label()
         lbl_type.set_margin_start(8)
-        lbl_type.set_markup(f"<span font='9.5' color='{C_ACCENT}'>{icon}</span>  <span font='9.5' color='{C_RUBY_MUT}'>{type_label}</span>")
+        lbl_type.set_markup(f"<span font='9.5' color='{VIVID_RED}'>{icon}</span>  <span font='9.5' color='{MUTED_PINK}'>{type_label}</span>")
         top_row.pack_start(lbl_type, False, False, 0)
 
         right_hdr = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
@@ -174,7 +174,7 @@ class ShelfFilesMixin:
             btn_zoom.get_style_context().add_class("flat")
             btn_zoom.get_style_context().add_class("chip-btn-del")
             lbl_z = Gtk.Label()
-            lbl_z.set_markup(f"<span font='9.5' color='{C_ACCENT}'>󰍉</span>")
+            lbl_z.set_markup(f"<span font='9.5' color='{VIVID_RED}'>󰍉</span>")
             btn_zoom.add(lbl_z)
             btn_zoom.connect("clicked", lambda b: self.open_image_lightbox(fpath, is_shelf=True))
             btn_zoom.connect("enter-notify-event", lambda w, e: self.hide_popout())
@@ -185,7 +185,7 @@ class ShelfFilesMixin:
         btn_del.get_style_context().add_class("flat")
         btn_del.get_style_context().add_class("chip-btn-del")
         lbl_x = Gtk.Label()
-        lbl_x.set_markup(f"<span font='9.5' color='{C_RUBY_PRI}'>✕</span>")
+        lbl_x.set_markup(f"<span font='9.5' color='{WINE_RED}'>✕</span>")
         btn_del.add(lbl_x)
         btn_del.connect("clicked", lambda b: self.remove_shelf_file(fpath))
         btn_del.connect("enter-notify-event", lambda w, e: self.hide_popout())
@@ -253,7 +253,7 @@ class ShelfFilesMixin:
 
         btn_copy = Gtk.Button()
         lbl_cp = Gtk.Label()
-        lbl_cp.set_markup(f"<span font='9.5' color='{C_RUBY_PRI}'>Copy</span>")
+        lbl_cp.set_markup(f"<span font='9.5' color='{WINE_RED}'>Copy</span>")
         btn_copy.add(lbl_cp)
         btn_copy.get_style_context().add_class("chip-btn-action")
         btn_copy.connect("clicked", lambda b: self.copy_shelf_file(fpath, is_image))
@@ -270,7 +270,7 @@ class ShelfFilesMixin:
         icon_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
         icon_box.set_valign(Gtk.Align.CENTER)
         lbl_big = Gtk.Label()
-        lbl_big.set_markup(f"<span font='28' color='{C_ACCENT}'>{icon}</span>")
+        lbl_big.set_markup(f"<span font='28' color='{VIVID_RED}'>{icon}</span>")
         icon_box.pack_start(lbl_big, False, False, 0)
         container.pack_start(icon_box, True, True, 0)
 

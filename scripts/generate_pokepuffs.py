@@ -38,13 +38,13 @@ def parse_stops(gradient_str, fallback):
 TOKENS = load_tokens()
 COLORS = TOKENS.get("colors", {})
 
-POKEPUFF_PINK = COLORS.get("vivid_pink", COLORS.get("pokepuff_pink", "#FF5C8A"))
-DARK_RUBY = COLORS.get("dark_ruby", COLORS.get("border_waybar_3d", "#4D0A1C"))
+POKEPUFF_PINK = COLORS.get("vivid_pink", "#FF5C8A")
+DARK_RUBY = COLORS.get("dark_ruby", "#4D0A1C")
 DARK_RUBY_HOVER = "#610E24"
-VIVID_RED = COLORS.get("vivid_red", COLORS.get("accent", "#DC1A36"))
-SOFT_PINK = COLORS.get("soft_pink", COLORS.get("text_secondary", "#E8C2D0"))
-MUTED_PINK = COLORS.get("muted_pink", COLORS.get("text_muted", "#A68595"))
-CREAM_WHITE = COLORS.get("cream_white", COLORS.get("text_primary", "#FFF0F5"))
+VIVID_RED = COLORS.get("vivid_red", "#DC1A36")
+SOFT_PINK = COLORS.get("soft_pink", "#E8C2D0")
+MUTED_PINK = COLORS.get("muted_pink", "#A68595")
+CREAM_WHITE = COLORS.get("cream_white", "#FFF0F5")
 
 DEFAULT_INACTIVE_STOPS = [
     ("0%", "#A3183D"),

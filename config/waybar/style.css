@@ -15,7 +15,7 @@
 
 window#waybar {
     background: transparent;
-    color: @text_primary;
+    color: @cream_white;
 }
 
 /* === LAYOUT === */
@@ -30,16 +30,16 @@ window#waybar {
 
 /* === APPLICATION MENU === */
 #custom-menu {
-    background-color: @bg_waybar;
-    color: @text_primary;
+    background-color: @wine_red;
+    color: @cream_white;
     border-style: solid;
-    border-color: @border_waybar_3d;
+    border-color: @dark_ruby;
     border-top-width: 1.8px;
     border-left-width: 1.8px;
     border-right-width: 1.8px;
     border-bottom-width: 5.5px;
     border-radius: 16px;
-    box-shadow: inset 0 0 0 2.8px @border_tactile_white;
+    box-shadow: inset 0 0 0 2.8px @pure_white_65;
     padding: 3px 14px 4px 14px;
     margin: 2px 4px 4px 4px;
     font-size: 13px;
@@ -48,9 +48,9 @@ window#waybar {
 }
 
 #custom-menu:hover {
-    background-color: @bg_waybar_hover;
-    border-color: @border_waybar_3d_hover;
-    box-shadow: inset 0 0 0 2.8px @accent_hover;
+    background-color: @wine_red_hover;
+    border-color: @dark_ruby_hover;
+    box-shadow: inset 0 0 0 2.8px @light_red;
 }
 
 /* === WORKSPACES (Bold 3D Poké Puff Buttons) === */
@@ -70,7 +70,7 @@ window#waybar {
     background-color: transparent;
     border: none;
     box-shadow: none;
-    color: @border_waybar_3d;
+    color: @dark_ruby;
     font-size: 13px;
     font-weight: 800;
     text-shadow: 0 1px 1px rgba(255, 255, 255, 0.85);
@@ -86,7 +86,7 @@ window#waybar {
     background-color: transparent;
     border: none;
     box-shadow: none;
-    color: @border_waybar_3d;
+    color: @dark_ruby;
 }
 
 #workspaces button.active {
@@ -112,16 +112,16 @@ window#waybar {
 
 /* === SCREEN RECORDER === */
 #custom-recorder {
-    background-color: @accent;
-    color: @text_inverse;
+    background-color: @vivid_red;
+    color: @pure_white;
     border-style: solid;
-    border-color: @border_waybar_3d;
+    border-color: @dark_ruby;
     border-top-width: 1.8px;
     border-left-width: 1.8px;
     border-right-width: 1.8px;
     border-bottom-width: 5.5px;
     border-radius: 16px;
-    box-shadow: inset 0 0 0 2.8px @border_tactile_white;
+    box-shadow: inset 0 0 0 2.8px @pure_white_65;
     padding: 3px 14px 4px 14px;
     margin: 2px 4px 4px 4px;
     font-size: 13px;
@@ -130,28 +130,28 @@ window#waybar {
 }
 
 #custom-recorder:hover {
-    background-color: @accent_hover;
-    border-color: @border_waybar_3d_hover;
-    box-shadow: inset 0 0 0 2.8px @border_tactile_white_bright;
+    background-color: @light_red;
+    border-color: @dark_ruby_hover;
+    box-shadow: inset 0 0 0 2.8px @pure_white_90;
 }
 
 @keyframes blink-rec {
     0% {
-        background-color: @accent;
-        border-color: @border_waybar_3d;
+        background-color: @vivid_red;
+        border-color: @dark_ruby;
     }
     100% {
-        background-color: @bg_waybar;
-        border-color: @border_waybar_3d;
+        background-color: @wine_red;
+        border-color: @dark_ruby;
     }
 }
 
 /* === MEDIA === */
 #custom-media,
 #mpris {
-    color: @border_waybar_3d;
+    color: @dark_ruby;
     border-style: solid;
-    border-color: @border_waybar_3d;
+    border-color: @dark_ruby;
     border-top-width: 1.8px;
     border-left-width: 1.8px;
     border-right-width: 1.8px;
@@ -168,42 +168,42 @@ window#waybar {
 
 #custom-media:hover,
 #mpris:hover {
-    border-color: @border_waybar_3d_hover;
+    border-color: @dark_ruby_hover;
     box-shadow: none;
-    color: @border_waybar_3d;
+    color: @dark_ruby;
 }
 
 #custom-media.playing,
 #mpris.playing {
-    color: @border_waybar_3d;
-    border-color: @accent;
-    border-bottom-color: @border_waybar_3d;
+    color: @dark_ruby;
+    border-color: @vivid_red;
+    border-bottom-color: @dark_ruby;
     box-shadow: none;
 }
 
 #custom-media.paused,
 #mpris.paused {
-    color: @bg_waybar;
+    color: @wine_red;
 }
 
 #custom-media.stopped,
 #mpris.stopped {
     padding: 3px 14px 4px 14px;
-    color: @border_waybar_3d;
+    color: @dark_ruby;
 }
 
 /* === CLOCK === */
 #clock {
-    color: @text_primary;
-    background-color: @bg_waybar;
+    color: @cream_white;
+    background-color: @wine_red;
     border-style: solid;
-    border-color: @border_waybar_3d;
+    border-color: @dark_ruby;
     border-top-width: 1.8px;
     border-left-width: 1.8px;
     border-right-width: 1.8px;
     border-bottom-width: 5.5px;
     border-radius: 16px;
-    box-shadow: inset 0 0 0 2.8px @border_tactile_white;
+    box-shadow: inset 0 0 0 2.8px @pure_white_65;
     padding: 3px 16px 4px 16px;
     margin: 2px 4px 4px 4px;
     font-size: 13px;
@@ -212,31 +212,31 @@ window#waybar {
 }
 
 #clock:hover {
-    background-color: @bg_waybar_hover;
-    border-color: @border_waybar_3d_hover;
-    box-shadow: inset 0 0 0 2.8px @accent_hover;
+    background-color: @wine_red_hover;
+    border-color: @dark_ruby_hover;
+    box-shadow: inset 0 0 0 2.8px @light_red;
 }
 
 /* === RIGHT MODULES === */
 .modules-right {
-    background-color: @bg_waybar;
+    background-color: @wine_red;
     border-style: solid;
-    border-color: @border_waybar_3d;
+    border-color: @dark_ruby;
     border-top-width: 1.8px;
     border-left-width: 1.8px;
     border-right-width: 1.8px;
     border-bottom-width: 5.5px;
     border-radius: 16px;
-    box-shadow: inset 0 0 0 2.8px @border_tactile_white;
+    box-shadow: inset 0 0 0 2.8px @pure_white_65;
     padding: 3px 6px 4px 6px;
     margin: 2px 4px 4px 4px;
     transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
 .modules-right:hover {
-    border-color: @border_waybar_3d_hover;
-    background-color: @bg_waybar_hover;
-    box-shadow: inset 0 0 0 2.8px @border_tactile_white_bright;
+    border-color: @dark_ruby_hover;
+    background-color: @wine_red_hover;
+    box-shadow: inset 0 0 0 2.8px @pure_white_90;
 }
 
 /* === MODULE BASE === */
@@ -254,7 +254,7 @@ window#waybar {
     border-radius: 10px;
     font-size: 13px;
     font-weight: 600;
-    color: @text_primary;
+    color: @cream_white;
     transition: all 0.15s ease;
 }
 
@@ -265,7 +265,7 @@ window#waybar {
 #custom-notification:hover,
 #custom-power:hover {
     background-color: rgba(255, 240, 245, 0.18);
-    color: @text_inverse;
+    color: @pure_white;
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
 }
 
@@ -286,34 +286,34 @@ window#waybar {
 
 /* === AUDIO === */
 #pulseaudio.muted {
-    color: @text_muted;
+    color: @muted_pink;
 }
 
 /* === NETWORK === */
 #network.disconnected {
-    color: @text_muted;
+    color: @muted_pink;
 }
 
 /* === BATTERY === */
 #battery.charging,
 #battery.plugged {
-    color: @text_secondary;
+    color: @soft_pink;
 }
 
 #battery.warning:not(.charging) {
-    color: @status_warning;
+    color: @warm_yellow;
 }
 
 #battery.critical:not(.charging) {
-    color: @status_critical;
+    color: @vivid_red;
 }
 
 #battery.warning:not(.charging):hover {
-    color: @status_warning;
+    color: @warm_yellow;
 }
 
 #battery.critical:not(.charging):hover {
-    color: @status_critical;
+    color: @vivid_red;
 }
 
 /* === NOTIFICATIONS & POWER === */

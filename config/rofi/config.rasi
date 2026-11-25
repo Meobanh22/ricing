@@ -11,9 +11,9 @@
 window {
     height: 480px;
     border: 2px 2px 6px 2px;
-    border-color: @border-waybar-3d;
+    border-color: @dark-ruby;
     border-radius: 18px;
-    background-color: @bg-tactile-cream;
+    background-color: @cream-white-96;
     padding: 16px;
 }
 
@@ -26,15 +26,15 @@ inputbar {
     children: [prompt, entry];
     background-color: rgba(255, 255, 255, 0.85);
     border: 1.5px 1.5px 3.5px 1.5px;
-    border-color: @border-waybar-3d;
+    border-color: @dark-ruby;
     border-radius: 11px;
     padding: 6px 12px;
 }
 
 prompt {
-    background-color: @accent;
+    background-color: @vivid-red;
     padding: 6px 14px;
-    text-color: @text-inverse;
+    text-color: @pure-white;
     border-radius: @radius-button;
     margin: 0px 8px 0px 0px;
     font-weight: bold;
@@ -42,9 +42,9 @@ prompt {
 
 entry {
     padding: 6px;
-    text-color: @bg-waybar;
+    text-color: @wine-red;
     placeholder: "Search applications...";
-    placeholder-color: @text-muted;
+    placeholder-color: @muted-pink;
     font-weight: 600;
 }
 
@@ -61,7 +61,7 @@ listview {
 element {
     padding: 8px 12px;
     background-color: rgba(255, 255, 255, 0.50);
-    text-color: @bg-waybar;
+    text-color: @wine-red;
     border-radius: @radius-card;
     border: 1px 1px 2px 1px;
     border-color: transparent;
@@ -74,7 +74,7 @@ element alternate.normal,
 element alternate.urgent,
 element alternate.active {
     background-color: rgba(255, 255, 255, 0.50);
-    text-color: @bg-waybar;
+    text-color: @wine-red;
     border-color: transparent;
 }
 
@@ -93,22 +93,22 @@ element-text {
 }
 
 element selected.normal, element selected {
-    background-color: @text-inverse;
+    background-color: @pure-white;
     border: 1.5px 1.5px 3.5px 1.5px;
-    border-color: @border-waybar-3d;
-    text-color: @accent;
+    border-color: @dark-ruby;
+    text-color: @vivid-red;
 }
 
 element selected.urgent {
-    background-color: @text-inverse;
+    background-color: @pure-white;
     border: 1.5px 1.5px 3.5px 1.5px;
-    border-color: @accent;
-    text-color: @accent;
+    border-color: @vivid-red;
+    text-color: @vivid-red;
 }
 
 element selected.active {
-    background-color: @text-inverse;
+    background-color: @pure-white;
     border: 1.5px 1.5px 3.5px 1.5px;
-    border-color: @border-waybar-3d;
-    text-color: @accent;
+    border-color: @dark-ruby;
+    text-color: @vivid-red;
 }

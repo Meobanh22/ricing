@@ -7,7 +7,7 @@ import time
 import cairo
 from gi.repository import Pango, PangoCairo
 
-from control_center_pkg.constants import C_ACCENT, C_BG_WIN, hex_to_rgba
+from control_center_pkg.constants import VIVID_RED, DARK_WINE, hex_to_rgba
 
 
 def create_top_red_casing_path(cr, x_left, x_right, y_dark_top, cx, cy_top, r_dark, ang_dark_top_start, ang_dark_top_end, x_dark_cut, device_r, notch_d=2.0, trans=1.8, y_top=0.0):
@@ -102,13 +102,13 @@ def create_bottom_red_casing_path(cr, x_left, x_right, y_dark_bot, H_canvas, cx,
 
 def draw_pokeball_dual_slider(cr, cx, cy, R=64.0, thickness=12.0, vol_val=0.35, bri_val=0.60, knob_style="round_knob", icon_color=None, accent_rgb=None, dark_color=None, pwr_bg=None):
     if icon_color is None:
-        icon_color = C_ACCENT
+        icon_color = VIVID_RED
     if accent_rgb is None:
-        accent_rgb = hex_to_rgba(C_ACCENT)[:3]
+        accent_rgb = hex_to_rgba(VIVID_RED)[:3]
     if dark_color is None:
-        dark_color = hex_to_rgba(C_BG_WIN)[:3]
+        dark_color = hex_to_rgba(DARK_WINE)[:3]
     if pwr_bg is None:
-        pwr_bg = hex_to_rgba(C_BG_WIN)[:3]
+        pwr_bg = hex_to_rgba(DARK_WINE)[:3]
     gap_ang = math.radians(16.0)
 
     ang_vol_start = math.pi + gap_ang
@@ -246,5 +246,5 @@ def get_badge_info(app_name):
     if "steam" in app_lower:
         return "#1b2838", "󰓓"
     if "terminal" in app_lower or "alacritty" in app_lower or "kitty" in app_lower:
-        return C_ACCENT, "󰆍"
-    return C_ACCENT, "󰒓"
+        return VIVID_RED, "󰆍"
+    return VIVID_RED, "󰒓"

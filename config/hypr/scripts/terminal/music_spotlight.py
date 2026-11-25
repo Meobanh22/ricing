@@ -7,8 +7,8 @@ import cairo
 
 class StageSpotlight:
     def __init__(self, palette):
-        self.cream = self.rgb(palette['text_primary'])
-        self.pink = self.rgb(palette['text_secondary'])
+        self.cream = self.rgb(palette['cream_white'])
+        self.pink = self.rgb(palette['soft_pink'])
         self.size = None
         self.surface = None
 

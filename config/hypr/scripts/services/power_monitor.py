@@ -87,8 +87,8 @@ def render_banner(info, power_w, est_str, is_charging):
     # ANSI Color Palette
     RESET = "\033[0m"
     BOLD = "\033[1m"
-    RED = "\033[38;2;220;26;54m"        # #DC1A36 (--accent)
-    ROSE = "\033[38;2;240;45;76m"       # #F02D4C (--accent-hover)
+    RED = "\033[38;2;220;26;54m"        # #DC1A36 (vivid_red)
+    ROSE = "\033[38;2;240;45;76m"       # #F02D4C (light_red)
     PINK = "\033[38;2;232;194;208m"     # #E8C2D0 (--text-secondary)
     WHITE = "\033[38;2;255;240;245m"    # #FFF0F5 (--text-primary)
     GREEN = "\033[38;2;143;188;143m"    # #8FBC8F (--status-success)

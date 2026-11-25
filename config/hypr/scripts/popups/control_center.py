@@ -13,14 +13,14 @@ if SCRIPT_DIR not in sys.path:
     sys.path.insert(0, SCRIPT_DIR)
 
 from control_center_pkg.constants import (  # noqa: E402
-    C_ACCENT,
-    C_ACCENT_HOVER,
-    C_BG_CARD,
-    C_BG_SUBTLE,
-    C_BG_WIN,
-    C_BORDER_3D,
-    C_SCREEN_CYAN,
-    C_TEXT_SEC,
+    VIVID_RED,
+    LIGHT_RED,
+    DEEP_WINE,
+    SOFT_WINE,
+    DARK_WINE,
+    DARK_RUBY,
+    LIGHT_CYAN,
+    SOFT_PINK,
     HAS_LAYER_SHELL,
     PID_FILE,
     GtkLayerShell,
@@ -130,29 +130,29 @@ class PokedexControlCenter(
         self.socket_well_y = 636.5
         self.top_mark_offset = 32.0
 
-        self.c_casing_l = hex_to_rgba(C_ACCENT)[:3]
-        self.c_casing_m = hex_to_rgba(C_ACCENT_HOVER)[:3]
-        self.c_casing_r = hex_to_rgba(C_ACCENT)[:3]
-        self.c_border_3d = hex_to_rgba(C_BORDER_3D, 0.98)
+        self.c_casing_l = hex_to_rgba(VIVID_RED)[:3]
+        self.c_casing_m = hex_to_rgba(LIGHT_RED)[:3]
+        self.c_casing_r = hex_to_rgba(VIVID_RED)[:3]
+        self.c_border_3d = hex_to_rgba(DARK_RUBY, 0.98)
         self.c_tactile_white = (1.0, 1.0, 1.0, 0.65)
         self.c_casing_border = self.c_border_3d
 
-        self.c_band_stop0 = hex_to_rgba(C_BG_WIN)[:3]
-        self.c_band_stop1 = hex_to_rgba(C_BG_CARD)[:3]
-        self.c_band_stop2 = hex_to_rgba(C_BG_WIN)[:3]
+        self.c_band_stop0 = hex_to_rgba(DARK_WINE)[:3]
+        self.c_band_stop1 = hex_to_rgba(DEEP_WINE)[:3]
+        self.c_band_stop2 = hex_to_rgba(DARK_WINE)[:3]
         self.c_band_stroke = self.c_border_3d
-        self.c_slider_dark = hex_to_rgba(C_BG_SUBTLE)[:3]
-        self.c_pwr_bg = hex_to_rgba(C_BG_SUBTLE)[:3]
-        self.c_chassis = hex_to_rgba(C_TEXT_SEC)[:3]
-        self.c_flange = hex_to_rgba(C_BG_WIN)[:3]
+        self.c_slider_dark = hex_to_rgba(SOFT_WINE)[:3]
+        self.c_pwr_bg = hex_to_rgba(SOFT_WINE)[:3]
+        self.c_chassis = hex_to_rgba(SOFT_PINK)[:3]
+        self.c_flange = hex_to_rgba(DARK_WINE)[:3]
 
-        self.c_accent = C_ACCENT
-        self.c_accent_rgb = hex_to_rgba(C_ACCENT)[:3]
-        self.c_accent_hover = C_ACCENT_HOVER
-        self.c_accent_hover_rgb = hex_to_rgba(C_ACCENT_HOVER)[:3]
-        self.c_holo_top = hex_to_rgba(C_SCREEN_CYAN)[:3]
-        self.c_holo_mid = hex_to_rgba(C_SCREEN_CYAN)[:3]
-        self.c_holo_bot = hex_to_rgba(C_SCREEN_CYAN)[:3]
+        self.c_accent = VIVID_RED
+        self.c_accent_rgb = hex_to_rgba(VIVID_RED)[:3]
+        self.c_accent_hover = LIGHT_RED
+        self.c_accent_hover_rgb = hex_to_rgba(LIGHT_RED)[:3]
+        self.c_holo_top = hex_to_rgba(LIGHT_CYAN)[:3]
+        self.c_holo_mid = hex_to_rgba(LIGHT_CYAN)[:3]
+        self.c_holo_bot = hex_to_rgba(LIGHT_CYAN)[:3]
         self.holo_alpha_top = 0.58
         self.holo_alpha_mid = 0.52
         self.holo_alpha_bot = 0.58

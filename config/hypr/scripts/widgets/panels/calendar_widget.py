@@ -8,11 +8,11 @@ import cairo
 from gi.repository import GLib, Gtk, PangoCairo
 
 from panels.common import (
-    C_ACCENT,
-    C_BG_WAYBAR,
-    C_BORDER_3D,
-    C_TEXT_INV,
-    C_TEXT_MUT,
+    VIVID_RED,
+    WINE_RED,
+    DARK_RUBY,
+    PURE_WHITE,
+    MUTED_PINK,
     HAS_LAYER_SHELL,
     GtkLayerShell,
     on_window_draw_clear,
@@ -66,9 +66,9 @@ class Tactile3DMonthWidget(Gtk.DrawingArea):
             layout,
             start_x,
             start_y,
-            core_color=C_BG_WAYBAR,
-            dark_color=C_BORDER_3D,
-            white_color=C_TEXT_INV,
+            core_color=WINE_RED,
+            dark_color=DARK_RUBY,
+            white_color=PURE_WHITE,
             extrusion_h=3.8,
             white_w=4.2,
             dark_extra=1.5,
@@ -137,7 +137,7 @@ class DesktopCalendarWindow(Gtk.Window):
         title_event.connect("button-press-event", self.on_reset_today)
         lbl_title = Gtk.Label()
         lbl_title.get_style_context().add_class("calendar-hero-title")
-        lbl_title.set_markup(f"<span font='9.5' weight='800' color='{C_BG_WAYBAR}'>CALENDAR</span>")
+        lbl_title.set_markup(f"<span font='9.5' weight='800' color='{WINE_RED}'>CALENDAR</span>")
         lbl_title.set_halign(Gtk.Align.START)
         lbl_title.set_valign(Gtk.Align.CENTER)
         title_event.add(lbl_title)
@@ -145,7 +145,7 @@ class DesktopCalendarWindow(Gtk.Window):
 
         self.lbl_year = Gtk.Label()
         self.lbl_year.get_style_context().add_class("calendar-hero-title")
-        self.lbl_year.set_markup(f"<span font='10' weight='800' color='{C_BG_WAYBAR}'>{self._view_year}</span>")
+        self.lbl_year.set_markup(f"<span font='10' weight='800' color='{WINE_RED}'>{self._view_year}</span>")
         self.lbl_year.set_halign(Gtk.Align.END)
         self.lbl_year.set_valign(Gtk.Align.CENTER)
         top_row.pack_end(self.lbl_year, False, False, 0)
@@ -157,7 +157,7 @@ class DesktopCalendarWindow(Gtk.Window):
         btn_prev.set_visible_window(False)
         btn_prev.get_style_context().add_class("calendar-nav-btn")
         lbl_prev = Gtk.Label()
-        lbl_prev.set_markup(f"<span font='13' weight='900' color='{C_BG_WAYBAR}'>❮</span>")
+        lbl_prev.set_markup(f"<span font='13' weight='900' color='{WINE_RED}'>❮</span>")
         btn_prev.add(lbl_prev)
         btn_prev.connect("button-press-event", self.on_prev_month)
 
@@ -173,7 +173,7 @@ class DesktopCalendarWindow(Gtk.Window):
         btn_next.set_visible_window(False)
         btn_next.get_style_context().add_class("calendar-nav-btn")
         lbl_next = Gtk.Label()
-        lbl_next.set_markup(f"<span font='13' weight='900' color='{C_BG_WAYBAR}'>❯</span>")
+        lbl_next.set_markup(f"<span font='13' weight='900' color='{WINE_RED}'>❯</span>")
         btn_next.add(lbl_next)
         btn_next.connect("button-press-event", self.on_next_month)
 
@@ -200,7 +200,7 @@ class DesktopCalendarWindow(Gtk.Window):
 
     def update_month_title(self):
         self.tactile_month.set_month(MONTHS_EN[self._view_month - 1])
-        self.lbl_year.set_markup(f"<span font='10' weight='800' color='{C_BG_WAYBAR}'>{self._view_year}</span>")
+        self.lbl_year.set_markup(f"<span font='10' weight='800' color='{WINE_RED}'>{self._view_year}</span>")
 
     def rebuild_calendar_grid(self):
         for child in self.cal_grid.get_children():
@@ -209,7 +209,7 @@ class DesktopCalendarWindow(Gtk.Window):
         for col_idx, d_name in enumerate(['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']):
             lbl = Gtk.Label()
             lbl.get_style_context().add_class("calendar-day-header")
-            col = C_ACCENT if col_idx >= 5 else C_BG_WAYBAR
+            col = VIVID_RED if col_idx >= 5 else WINE_RED
             lbl.set_markup(f"<span font='8.5' weight='800' color='{col}'>{d_name}</span>")
             self.cal_grid.attach(lbl, col_idx, 0, 1, 1)
 
@@ -223,14 +223,14 @@ class DesktopCalendarWindow(Gtk.Window):
 
                 if d == today:
                     cell_box.get_style_context().add_class("calendar-cell-today")
-                    cell_lbl.set_markup(f"<span font='9' weight='800' color='{C_TEXT_INV}'>{d.day}</span>")
+                    cell_lbl.set_markup(f"<span font='9' weight='800' color='{PURE_WHITE}'>{d.day}</span>")
                 elif d.month == self._view_month:
                     cell_box.get_style_context().add_class("calendar-cell-current")
-                    col = C_ACCENT if col_idx >= 5 else C_BORDER_3D
+                    col = VIVID_RED if col_idx >= 5 else DARK_RUBY
                     cell_lbl.set_markup(f"<span font='9' weight='700' color='{col}'>{d.day}</span>")
                 else:
                     cell_box.get_style_context().add_class("calendar-cell-other")
-                    cell_lbl.set_markup(f"<span font='9' weight='500' color='{C_TEXT_MUT}'>{d.day}</span>")
+                    cell_lbl.set_markup(f"<span font='9' weight='500' color='{MUTED_PINK}'>{d.day}</span>")
 
                 cell_box.set_size_request(28, 20)
                 cell_lbl.set_halign(Gtk.Align.CENTER)

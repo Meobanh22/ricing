@@ -7,11 +7,11 @@ import subprocess
 from gi.repository import Gdk, GdkPixbuf, GLib, Gtk, GtkLayerShell, Pango
 
 from shelf_pkg.constants import (
-    C_ACCENT,
-    C_BORDER_3D,
-    C_RUBY_MUT,
-    C_RUBY_PRI,
-    C_TEXT_PRI,
+    VIVID_RED,
+    DARK_RUBY,
+    MUTED_PINK,
+    WINE_RED,
+    CREAM_WHITE,
     WIDTH_SHELF,
     hex_to_rgba,
 )
@@ -26,9 +26,9 @@ class ShelfPopoutMixin:
         alloc = widget.get_allocation()
         pad = 1.0
         draw_rounded_rect(cr, pad, pad, float(alloc.width) - pad * 2.0, float(alloc.height) - pad * 2.0, 14.0)
-        cr.set_source_rgba(*hex_to_rgba(C_TEXT_PRI, 0.98))
+        cr.set_source_rgba(*hex_to_rgba(CREAM_WHITE, 0.98))
         cr.fill_preserve()
-        cr.set_source_rgba(*hex_to_rgba(C_BORDER_3D, 1.0))
+        cr.set_source_rgba(*hex_to_rgba(DARK_RUBY, 1.0))
         cr.set_line_width(2.0)
         cr.stroke()
         return False
@@ -38,9 +38,9 @@ class ShelfPopoutMixin:
         alloc = widget.get_allocation()
         pad = 1.0
         draw_rounded_rect(cr, pad, pad, float(alloc.width) - pad * 2.0, float(alloc.height) - pad * 2.0, 16.0)
-        cr.set_source_rgba(*hex_to_rgba(C_TEXT_PRI, 0.98))
+        cr.set_source_rgba(*hex_to_rgba(CREAM_WHITE, 0.98))
         cr.fill_preserve()
-        cr.set_source_rgba(*hex_to_rgba(C_BORDER_3D, 1.0))
+        cr.set_source_rgba(*hex_to_rgba(DARK_RUBY, 1.0))
         cr.set_line_width(2.5)
         cr.stroke()
         return False
@@ -138,21 +138,21 @@ class ShelfPopoutMixin:
             btn_zoom_pop.set_relief(Gtk.ReliefStyle.NONE)
             btn_zoom_pop.get_style_context().add_class("action-btn")
             lbl_zp = Gtk.Label()
-            lbl_zp.set_markup(f"<span font='9.5' color='{C_ACCENT}'>󰍉 Zoom</span>")
+            lbl_zp.set_markup(f"<span font='9.5' color='{VIVID_RED}'>󰍉 Zoom</span>")
             btn_zoom_pop.add(lbl_zp)
             target_ref = item if not is_shelf else fpath
             btn_zoom_pop.connect("clicked", lambda b: self.open_image_lightbox(target_ref, is_shelf))
             right_actions.pack_start(btn_zoom_pop, False, False, 0)
 
         lbl_hint = Gtk.Label()
-        lbl_hint.set_markup(f"<span font='9.5' color='{C_ACCENT}'>󰆏 Copy</span>" if not is_shelf else f"<span font='9.5' color='{C_ACCENT}'>󰅍 Open</span>")
+        lbl_hint.set_markup(f"<span font='9.5' color='{VIVID_RED}'>󰆏 Copy</span>" if not is_shelf else f"<span font='9.5' color='{VIVID_RED}'>󰅍 Open</span>")
         lbl_hint.set_margin_end(6)
         right_actions.pack_end(lbl_hint, False, False, 0)
         top_row.pack_end(right_actions, False, False, 0)
 
         if not is_shelf and item:
             if item["is_image"]:
-                lbl_type.set_markup(f"<span font='10.5' color='{C_ACCENT}'>󰋩</span>  <span font='10' color='{C_TEXT_PRI}'><b>Image Preview</b></span>")
+                lbl_type.set_markup(f"<span font='10.5' color='{VIVID_RED}'>󰋩</span>  <span font='10' color='{CREAM_WHITE}'><b>Image Preview</b></span>")
                 top_row.pack_start(lbl_type, False, False, 0)
                 vbox.pack_start(top_row, False, False, 0)
 
@@ -163,12 +163,12 @@ class ShelfPopoutMixin:
                 self.load_clip_thumbnail_async(item, 230, 130, img)
 
                 lbl_meta = Gtk.Label()
-                lbl_meta.set_markup(f"<span font='9.5' color='{C_RUBY_MUT}'>PNG Image</span>")
+                lbl_meta.set_markup(f"<span font='9.5' color='{MUTED_PINK}'>PNG Image</span>")
                 lbl_meta.set_halign(Gtk.Align.START)
                 lbl_meta.set_margin_start(8)
                 vbox.pack_start(lbl_meta, False, False, 0)
             else:
-                lbl_type.set_markup(f"<span font='10.5' color='{C_ACCENT}'>󰈙</span>  <span font='10' color='{C_RUBY_PRI}'><b>Text Preview</b></span>")
+                lbl_type.set_markup(f"<span font='10.5' color='{VIVID_RED}'>󰈙</span>  <span font='10' color='{WINE_RED}'><b>Text Preview</b></span>")
                 top_row.pack_start(lbl_type, False, False, 0)
                 vbox.pack_start(top_row, False, False, 0)
 
@@ -195,7 +195,7 @@ class ShelfPopoutMixin:
                 vbox.pack_start(lbl_text, False, False, 2)
 
                 lbl_meta = Gtk.Label()
-                lbl_meta.set_markup(f"<span font='9.5' color='{C_RUBY_MUT}'>{len(lines)} line{'s' if len(lines) > 1 else ''} · {len(full_text)} chars</span>")
+                lbl_meta.set_markup(f"<span font='9.5' color='{MUTED_PINK}'>{len(lines)} line{'s' if len(lines) > 1 else ''} · {len(full_text)} chars</span>")
                 lbl_meta.set_halign(Gtk.Align.START)
                 lbl_meta.set_margin_start(8)
                 vbox.pack_start(lbl_meta, False, False, 0)
@@ -205,7 +205,7 @@ class ShelfPopoutMixin:
             fsize = os.path.getsize(fpath) if os.path.exists(fpath) else 0
             size_str = self.format_file_size(fsize)
             icon, _, category = self.get_file_info(fpath)
-            lbl_type.set_markup(f"<span font='10.5' color='{C_ACCENT}'>{icon}</span>  <span font='10' color='{C_RUBY_PRI}'><b>{GLib.markup_escape_text(fname[:22])}</b></span>")
+            lbl_type.set_markup(f"<span font='10.5' color='{VIVID_RED}'>{icon}</span>  <span font='10' color='{WINE_RED}'><b>{GLib.markup_escape_text(fname[:22])}</b></span>")
             top_row.pack_start(lbl_type, False, False, 0)
             vbox.pack_start(top_row, False, False, 0)
 
@@ -217,7 +217,7 @@ class ShelfPopoutMixin:
                         img.set_halign(Gtk.Align.CENTER)
                         vbox.pack_start(img, False, False, 2)
                     lbl_meta = Gtk.Label()
-                    lbl_meta.set_markup(f"<span font='9.5' color='{C_RUBY_MUT}'>{size_str}</span>")
+                    lbl_meta.set_markup(f"<span font='9.5' color='{MUTED_PINK}'>{size_str}</span>")
                     lbl_meta.set_halign(Gtk.Align.START)
                     lbl_meta.set_margin_start(8)
                     vbox.pack_start(lbl_meta, False, False, 0)
@@ -245,7 +245,7 @@ class ShelfPopoutMixin:
                     vbox.pack_start(lbl_text, False, False, 2)
 
                 lbl_meta = Gtk.Label()
-                lbl_meta.set_markup(f"<span font='9.5' color='{C_RUBY_MUT}'>{size_str} · {GLib.markup_escape_text(fname)}</span>")
+                lbl_meta.set_markup(f"<span font='9.5' color='{MUTED_PINK}'>{size_str} · {GLib.markup_escape_text(fname)}</span>")
                 lbl_meta.set_halign(Gtk.Align.START)
                 lbl_meta.set_margin_start(8)
                 vbox.pack_start(lbl_meta, False, False, 0)
@@ -350,14 +350,14 @@ class ShelfPopoutMixin:
 
         hdr = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
         lbl_t = Gtk.Label()
-        lbl_t.set_markup(f"<span font='11' color='{C_ACCENT}'>󰋩</span>  <span font='11' color='{C_RUBY_PRI}'><b>{GLib.markup_escape_text(title_str[:30])}</b></span>  <span font='9.5' color='{C_RUBY_MUT}'>({orig_w}×{orig_h})</span>")
+        lbl_t.set_markup(f"<span font='11' color='{VIVID_RED}'>󰋩</span>  <span font='11' color='{WINE_RED}'><b>{GLib.markup_escape_text(title_str[:30])}</b></span>  <span font='9.5' color='{MUTED_PINK}'>({orig_w}×{orig_h})</span>")
         hdr.pack_start(lbl_t, False, False, 0)
 
         actions = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
 
         btn_open = Gtk.Button()
         lbl_o = Gtk.Label()
-        lbl_o.set_markup(f"<span font='9.5' color='{C_RUBY_PRI}'>󰅍 Open in App</span>")
+        lbl_o.set_markup(f"<span font='9.5' color='{WINE_RED}'>󰅍 Open in App</span>")
         btn_open.add(lbl_o)
         btn_open.get_style_context().add_class("action-btn")
 
@@ -374,7 +374,7 @@ class ShelfPopoutMixin:
 
         btn_copy = Gtk.Button()
         lbl_c = Gtk.Label()
-        lbl_c.set_markup(f"<span font='9.5' color='{C_RUBY_PRI}'>󰆏 Copy</span>")
+        lbl_c.set_markup(f"<span font='9.5' color='{WINE_RED}'>󰆏 Copy</span>")
         btn_copy.add(lbl_c)
         btn_copy.get_style_context().add_class("action-btn")
 
@@ -390,7 +390,7 @@ class ShelfPopoutMixin:
 
         btn_cl = Gtk.Button()
         lbl_x = Gtk.Label()
-        lbl_x.set_markup(f"<span font='12' color='{C_RUBY_PRI}'>✕</span>")
+        lbl_x.set_markup(f"<span font='12' color='{WINE_RED}'>✕</span>")
         btn_cl.add(lbl_x)
         btn_cl.get_style_context().add_class("btn-close")
         btn_cl.connect("clicked", lambda b: win.destroy())
@@ -408,7 +408,7 @@ class ShelfPopoutMixin:
         frame.pack_start(img_widget, True, True, 4)
 
         lbl_foot = Gtk.Label()
-        lbl_foot.set_markup(f"<span font='9.5' color='{C_RUBY_MUT}'>Esc to close · Click Open in App to inspect in Loupe</span>")
+        lbl_foot.set_markup(f"<span font='9.5' color='{MUTED_PINK}'>Esc to close · Click Open in App to inspect in Loupe</span>")
         frame.pack_end(lbl_foot, False, False, 0)
 
         win.add(frame)

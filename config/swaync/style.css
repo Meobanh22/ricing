@@ -8,12 +8,12 @@
 
 /* === CONTROL CENTER WINDOW === */
 .control-center {
-    background: @bg_window;
-    border: 1px solid @border_window;
+    background: @dark_wine_98;
+    border: 1px solid @pure_white_12;
     border-radius: 16px;
     box-shadow: none;
     padding: 14px;
-    color: @text_primary;
+    color: @cream_white;
 }
 
 .control-center-list {
@@ -22,7 +22,7 @@
 }
 
 .control-center-list-placeholder {
-    color: @text_muted;
+    color: @muted_pink;
     font-size: 13px;
     padding: 20px;
 }
@@ -33,8 +33,8 @@
 
 /* === STATUS LABEL === */
 .widget-label {
-    background: @bg_card;
-    border: 1px solid @border_card;
+    background: @deep_wine_95;
+    border: 1px solid @pure_white_12;
     border-radius: 10px;
     padding: 6px 12px;
     margin: 4px 8px 6px 8px;
@@ -43,35 +43,35 @@
 .widget-label > label {
     font-size: 12px;
     font-weight: 700;
-    color: @text_primary;
+    color: @cream_white;
     letter-spacing: 0.02em;
 }
 
 /* === DO NOT DISTURB === */
 .widget-dnd {
-    background: @bg_card;
-    border: 1px solid @border_card;
+    background: @deep_wine_95;
+    border: 1px solid @pure_white_12;
     border-radius: 10px;
     padding: 6px 12px;
     margin: 4px 8px;
-    color: @text_primary;
+    color: @cream_white;
 }
 
 .widget-dnd > switch {
-    background: @bg_subtle;
+    background: @soft_wine_95;
     border-radius: 10px;
-    border: 1px solid @border_card;
+    border: 1px solid @pure_white_12;
     box-shadow: none;
     padding: 2px;
 }
 
 .widget-dnd > switch:checked {
-    background: @accent;
-    border-color: @accent;
+    background: @vivid_red;
+    border-color: @vivid_red;
 }
 
 .widget-dnd > switch slider {
-    background: @text_inverse;
+    background: @pure_white;
     border-radius: 10px;
     border: none;
     min-width: 14px;
@@ -80,45 +80,45 @@
 
 /* === VOLUME === */
 .widget-volume {
-    background: @bg_card;
-    border: 1px solid @border_card;
+    background: @deep_wine_95;
+    border: 1px solid @pure_white_12;
     border-radius: 10px;
     padding: 8px 12px;
     margin: 4px 8px;
-    color: @text_primary;
+    color: @cream_white;
 }
 
 .widget-volume label {
     font-size: 16px;
-    color: @accent;
+    color: @vivid_red;
     margin-right: 8px;
     min-width: 24px;
 }
 
 .widget-volume > box > button {
-    background: @bg_subtle;
-    color: @text_secondary;
+    background: @soft_wine_95;
+    color: @soft_pink;
     border-radius: 8px;
-    border: 1px solid @border_card;
+    border: 1px solid @pure_white_12;
     padding: 4px 8px;
     font-size: 12px;
     transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 .widget-volume > box > button:hover {
-    background: @bg_card_hover;
-    color: @text_primary;
-    border-color: @border_card_hover;
+    background: @light_wine_98;
+    color: @cream_white;
+    border-color: @vivid_red_65;
 }
 
 .widget-volume scale trough highlight {
-    background: @accent;
+    background: @vivid_red;
     border-radius: 3px;
 }
 
 .widget-volume scale slider {
-    background-color: @text_inverse;
-    border: 2px solid @accent;
+    background-color: @pure_white;
+    border: 2px solid @vivid_red;
     border-radius: 50%;
     min-width: 12px;
     min-height: 12px;
@@ -126,29 +126,29 @@
 
 /* === BACKLIGHT === */
 .widget-backlight {
-    background: @bg_card;
-    border: 1px solid @border_card;
+    background: @deep_wine_95;
+    border: 1px solid @pure_white_12;
     border-radius: 10px;
     padding: 8px 12px;
     margin: 4px 8px;
-    color: @text_primary;
+    color: @cream_white;
 }
 
 .widget-backlight label {
     font-size: 16px;
-    color: @accent;
+    color: @vivid_red;
     margin-right: 8px;
     min-width: 24px;
 }
 
 .widget-backlight scale trough highlight {
-    background: @accent;
+    background: @vivid_red;
     border-radius: 3px;
 }
 
 .widget-backlight scale slider {
-    background-color: @text_inverse;
-    border: 2px solid @accent;
+    background-color: @pure_white;
+    border: 2px solid @vivid_red;
     border-radius: 50%;
     min-width: 12px;
     min-height: 12px;
@@ -161,20 +161,20 @@ scale {
 }
 
 scale trough {
-    background-color: @bg_subtle;
+    background-color: @soft_wine_95;
     border: none;
     border-radius: 3px;
     min-height: 5px;
 }
 
 scale highlight {
-    background-color: @accent;
+    background-color: @vivid_red;
     border-radius: 3px;
 }
 
 scale slider {
-    background-color: @text_inverse;
-    border: 2px solid @accent;
+    background-color: @pure_white;
+    border: 2px solid @vivid_red;
     border-radius: 50%;
     min-width: 12px;
     min-height: 12px;
@@ -183,14 +183,14 @@ scale slider {
 }
 
 scale slider:hover {
-    background-color: @text_primary;
-    border-color: @accent_hover;
+    background-color: @cream_white;
+    border-color: @light_red;
 }
 
 /* === QUICK ACTIONS === */
 .widget-buttons-grid {
-    background: @bg_card;
-    border: 1px solid @border_card;
+    background: @deep_wine_95;
+    border: 1px solid @pure_white_12;
     border-radius: 10px;
     padding: 6px 4px;
     margin: 6px 8px;
@@ -210,36 +210,36 @@ scale slider:hover {
     margin: 2px 4px;
     padding: 8px 0;
     min-width: 76px;
-    background: @bg_card;
-    border: 1px solid @border_card;
+    background: @deep_wine_95;
+    border: 1px solid @pure_white_12;
     border-radius: 10px;
-    color: @accent;
+    color: @vivid_red;
     font-size: 17px;
     box-shadow: none;
     transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .widget-buttons-grid > flowbox > flowboxchild > button:hover {
-    background: @bg_card_hover;
-    border-color: @border_card_hover;
-    color: @accent_hover;
+    background: @light_wine_98;
+    border-color: @vivid_red_65;
+    color: @light_red;
 }
 
 /* === POWER ACTION === */
 .widget-buttons-grid > flowbox > flowboxchild:last-child > button {
-    background: @accent;
-    border-color: @accent;
-    color: @text_inverse;
+    background: @vivid_red;
+    border-color: @vivid_red;
+    color: @pure_white;
 }
 
 .widget-buttons-grid > flowbox > flowboxchild:last-child > button:hover {
-    background: @accent_hover;
-    border-color: @accent_hover;
+    background: @light_red;
+    border-color: @light_red;
 }
 
 /* === NOTIFICATION TITLE === */
 .widget-title {
-    color: @text_primary;
+    color: @cream_white;
     background: transparent;
     padding: 6px 12px 2px 12px;
     margin: 4px 8px;
@@ -250,19 +250,19 @@ scale slider:hover {
 .widget-title > button {
     font-size: 12px;
     font-weight: 700;
-    color: @text_secondary;
+    color: @soft_pink;
     border-radius: 8px;
-    background: @bg_subtle;
-    border: 1px solid @border_card;
+    background: @soft_wine_95;
+    border: 1px solid @pure_white_12;
     padding: 4px 10px;
     box-shadow: none;
     transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 .widget-title > button:hover {
-    background: @bg_card_hover;
-    color: @text_primary;
-    border-color: @border_card_hover;
+    background: @light_wine_98;
+    color: @cream_white;
+    border-color: @vivid_red_65;
 }
 
 /* === NOTIFICATION CARDS === */
@@ -279,23 +279,23 @@ scale slider:hover {
 }
 
 .notification {
-    background: @bg_card;
+    background: @deep_wine_95;
     padding: 10px 14px;
     margin: 4px 8px;
     border-radius: 10px;
-    border: 1px solid @border_card;
+    border: 1px solid @pure_white_12;
     box-shadow: none;
     transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
 .notification:hover {
-    border-color: @border_card_hover;
-    background: @bg_card_hover;
+    border-color: @vivid_red_65;
+    background: @light_wine_98;
 }
 
 .notification.critical {
-    border: 1px solid @status_critical;
-    background: @bg_window;
+    border: 1px solid @vivid_red;
+    background: @dark_wine_98;
 }
 
 .notification-default-action {
@@ -307,14 +307,14 @@ scale slider:hover {
 .summary {
     font-size: 13px;
     font-weight: 700;
-    color: @text_primary;
+    color: @cream_white;
     background: transparent;
 }
 
 .time {
     font-size: 11px;
     font-weight: 600;
-    color: @text_muted;
+    color: @muted_pink;
     background: transparent;
     margin-right: 12px;
 }
@@ -322,7 +322,7 @@ scale slider:hover {
 .body {
     font-size: 12px;
     font-weight: 500;
-    color: @text_secondary;
+    color: @soft_pink;
     background: transparent;
     margin-top: 4px;
 }
@@ -333,10 +333,10 @@ scale slider:hover {
 }
 
 .close-button {
-    background: @bg_subtle;
-    color: @text_muted;
+    background: @soft_wine_95;
+    color: @muted_pink;
     border-radius: 8px;
-    border: 1px solid @border_card;
+    border: 1px solid @pure_white_12;
     padding: 2px 6px;
     margin-top: 4px;
     margin-right: 4px;
@@ -345,16 +345,16 @@ scale slider:hover {
 }
 
 .close-button:hover {
-    background: @bg_card_hover;
-    color: @text_primary;
-    border-color: @border_card_hover;
+    background: @light_wine_98;
+    color: @cream_white;
+    border-color: @vivid_red_65;
 }
 
 .notification-action {
-    border: 1px solid @border_card;
-    background: @bg_subtle;
+    border: 1px solid @pure_white_12;
+    background: @soft_wine_95;
     border-radius: 8px;
-    color: @text_primary;
+    color: @cream_white;
     margin: 4px 2px;
     padding: 4px 10px;
     font-size: 12px;
@@ -364,9 +364,9 @@ scale slider:hover {
 }
 
 .notification-action:hover {
-    background: @bg_card_hover;
-    border-color: @border_card_hover;
-    color: @text_primary;
+    background: @light_wine_98;
+    border-color: @vivid_red_65;
+    color: @cream_white;
 }
 
 .floating-notifications {
@@ -380,7 +380,7 @@ scrollbar {
 }
 
 scrollbar slider {
-    background: @scrollbar_slider;
+    background: @vivid_red_48;
     border-radius: 4px;
     min-width: 6px;
     min-height: 36px;
@@ -389,6 +389,6 @@ scrollbar slider {
 }
 
 scrollbar slider:hover {
-    background: @accent;
+    background: @vivid_red;
     min-width: 8px;
 }

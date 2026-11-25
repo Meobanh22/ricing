@@ -29,9 +29,9 @@ window#shelf-lightbox-root.background,
 
 /* === MAIN WINDOW (Cream Cel-shaded 3D Card) === */
 .shelf-window {
-    background-color: @bg_tactile_cream;
+    background-color: @cream_white_96;
     border-style: solid;
-    border-color: @border_waybar_3d;
+    border-color: @dark_ruby;
     border-top-width: 2px;
     border-left-width: 2px;
     border-right-width: 2px;
@@ -55,7 +55,7 @@ button {
 .tab-switcher {
     background-color: rgba(255, 255, 255, 0.70);
     border-style: solid;
-    border-color: @border_waybar_3d;
+    border-color: @dark_ruby;
     border-top-width: 1.5px;
     border-left-width: 1.5px;
     border-right-width: 1.5px;
@@ -67,7 +67,7 @@ button {
 button.tab-btn {
     background-image: none;
     background-color: transparent;
-    color: @bg_waybar;
+    color: @wine_red;
     font-size: 11.5px;
     font-weight: 700;
     border: none;
@@ -77,15 +77,15 @@ button.tab-btn {
 }
 
 button.tab-btn:hover {
-    color: @accent;
+    color: @vivid_red;
     background-color: rgba(255, 255, 255, 0.90);
 }
 
 button.tab-btn.active {
-    background-color: @accent;
-    color: @text_inverse;
+    background-color: @vivid_red;
+    color: @pure_white;
     border-style: solid;
-    border-color: @border_waybar_3d;
+    border-color: @dark_ruby;
     border-top-width: 1px;
     border-left-width: 1px;
     border-right-width: 1px;
@@ -93,18 +93,18 @@ button.tab-btn.active {
 }
 
 button.tab-btn.active:hover {
-    background-color: @accent_hover;
+    background-color: @light_red;
 }
 
 /* === ACTION BUTTONS === */
 .action-btn {
     background-image: none;
     background-color: rgba(255, 255, 255, 0.75);
-    color: @bg_waybar;
+    color: @wine_red;
     font-size: 11px;
     font-weight: 700;
     border-style: solid;
-    border-color: @border_waybar_3d;
+    border-color: @dark_ruby;
     border-top-width: 1.5px;
     border-left-width: 1.5px;
     border-right-width: 1.5px;
@@ -115,19 +115,19 @@ button.tab-btn.active:hover {
 }
 
 .action-btn:hover {
-    background-color: @text_inverse;
-    color: @accent;
-    border-color: @accent;
+    background-color: @pure_white;
+    color: @vivid_red;
+    border-color: @vivid_red;
 }
 
 .btn-close {
     background-image: none;
     background-color: rgba(255, 255, 255, 0.75);
-    color: @bg_waybar;
+    color: @wine_red;
     font-size: 12px;
     font-weight: 800;
     border-style: solid;
-    border-color: @border_waybar_3d;
+    border-color: @dark_ruby;
     border-top-width: 1.5px;
     border-left-width: 1.5px;
     border-right-width: 1.5px;
@@ -138,9 +138,9 @@ button.tab-btn.active:hover {
 }
 
 .btn-close:hover {
-    background-color: @text_inverse;
-    color: @accent;
-    border-color: @accent;
+    background-color: @pure_white;
+    color: @vivid_red;
+    border-color: @vivid_red;
 }
 
 /* Header Drag Handle Zone */
@@ -164,11 +164,11 @@ entry,
 searchentry {
     background-image: none;
     background-color: rgba(255, 255, 255, 0.85);
-    color: @bg_waybar;
+    color: @wine_red;
     font-size: 11.5px;
     font-weight: 600;
     border-style: solid;
-    border-color: @border_waybar_3d;
+    border-color: @dark_ruby;
     border-top-width: 1.5px;
     border-left-width: 1.5px;
     border-right-width: 1.5px;
@@ -176,20 +176,20 @@ searchentry {
     border-radius: 11px;
     padding: 6px 12px;
     margin-bottom: 8px;
-    caret-color: @accent;
+    caret-color: @vivid_red;
     box-shadow: none;
     transition: border-color 150ms ease, background-color 150ms ease;
 }
 
 entry:focus,
 searchentry:focus {
-    background-color: @text_inverse;
-    border-color: @accent;
+    background-color: @pure_white;
+    border-color: @vivid_red;
 }
 
 entry image,
 searchentry image {
-    color: @accent;
+    color: @vivid_red;
     margin-left: 6px;
     margin-right: 6px;
 }
@@ -220,9 +220,9 @@ flowboxchild:selected {
 }
 
 .chip-card {
-    background-color: @text_inverse;
+    background-color: @pure_white;
     border-style: solid;
-    border-color: @border_waybar_3d;
+    border-color: @dark_ruby;
     border-top-width: 1.5px;
     border-left-width: 1.5px;
     border-right-width: 1.5px;
@@ -234,29 +234,29 @@ flowboxchild:selected {
 }
 
 .chip-card:hover {
-    background-color: @text_inverse;
-    border-color: @accent;
+    background-color: @pure_white;
+    border-color: @vivid_red;
 }
 
 .chip-card.pinned {
-    background-color: @bg_tactile_cream;
-    border-color: @accent;
+    background-color: @cream_white_96;
+    border-color: @vivid_red;
     border-bottom-width: 4.5px;
 }
 
 .chip-card.pinned:hover {
-    background-color: @text_inverse;
-    border-color: @accent;
+    background-color: @pure_white;
+    border-color: @vivid_red;
 }
 
 .chip-text {
-    color: @bg_waybar;
+    color: @wine_red;
     font-size: 11px;
     font-weight: 600;
 }
 
 .chip-meta {
-    color: @text_muted;
+    color: @muted_pink;
     font-size: 9.5px;
     font-weight: 500;
     margin-top: 4px;
@@ -277,14 +277,14 @@ button.chip-btn-del,
     min-height: 0;
     min-width: 0;
     border-radius: 6px;
-    color: @bg_waybar;
+    color: @wine_red;
     transition: all 150ms ease;
 }
 
 button.chip-btn-del:hover,
 .chip-btn-del:hover {
-    background-color: @accent;
-    color: @text_inverse;
+    background-color: @vivid_red;
+    color: @pure_white;
 }
 
 /* Pin button */
@@ -302,25 +302,25 @@ button.chip-btn-pin,
     min-height: 0;
     min-width: 0;
     border-radius: 6px;
-    color: @accent;
+    color: @vivid_red;
     transition: all 150ms ease;
 }
 
 button.chip-btn-pin:hover,
 .chip-btn-pin:hover {
-    background-color: @accent;
-    color: @text_inverse;
+    background-color: @vivid_red;
+    color: @pure_white;
 }
 
 button.chip-btn-pin.pinned,
 .chip-btn-pin.pinned {
-    background-color: @accent;
-    color: @text_inverse;
+    background-color: @vivid_red;
+    color: @pure_white;
 }
 
 button.chip-btn-pin.pinned:hover {
-    background-color: @accent_hover;
-    color: @text_inverse;
+    background-color: @light_red;
+    color: @pure_white;
 }
 
 /* Card Action Button (Zoom / Copy) */
@@ -329,7 +329,7 @@ button.chip-btn-action,
     background-image: none;
     background-color: rgba(255, 255, 255, 0.85);
     border-style: solid;
-    border-color: @border_waybar_3d;
+    border-color: @dark_ruby;
     border-top-width: 1px;
     border-left-width: 1px;
     border-right-width: 1px;
@@ -340,15 +340,15 @@ button.chip-btn-action,
     min-height: 0;
     min-width: 0;
     border-radius: 6px;
-    color: @bg_waybar;
+    color: @wine_red;
     transition: all 150ms ease;
 }
 
 button.chip-btn-action:hover,
 .chip-btn-action:hover {
-    background-color: @text_inverse;
-    border-color: @accent;
-    color: @accent;
+    background-color: @pure_white;
+    border-color: @vivid_red;
+    color: @vivid_red;
 }
 
 /* External Floating Popout Card */
@@ -360,13 +360,13 @@ button.chip-btn-action:hover,
 }
 
 .popout-text {
-    color: @bg_waybar;
+    color: @wine_red;
     font-size: 11.5px;
     font-weight: 600;
 }
 
 .popout-meta {
-    color: @text_muted;
+    color: @muted_pink;
     font-size: 9.5px;
 }
 
@@ -380,7 +380,7 @@ button.chip-btn-action:hover,
 
 /* === DROP ZONE & FILE STASH === */
 .drop-zone {
-    border: 2px dashed @border_waybar_3d;
+    border: 2px dashed @dark_ruby;
     border-radius: 12px;
     background-color: rgba(255, 255, 255, 0.65);
     padding: 32px 16px;
@@ -389,12 +389,12 @@ button.chip-btn-action:hover,
 }
 
 .drop-zone:hover {
-    border-color: @accent;
-    background-color: @text_inverse;
+    border-color: @vivid_red;
+    background-color: @pure_white;
 }
 
 .drop-banner {
-    border: 1.5px dashed @border_waybar_3d;
+    border: 1.5px dashed @dark_ruby;
     border-radius: 10px;
     background-color: rgba(255, 255, 255, 0.75);
     padding: 6px 12px;
@@ -403,30 +403,30 @@ button.chip-btn-action:hover,
 }
 
 .drop-banner:hover {
-    border-color: @accent;
-    background-color: @text_inverse;
+    border-color: @vivid_red;
+    background-color: @pure_white;
 }
 
 .drop-icon {
-    color: @accent;
+    color: @vivid_red;
     font-size: 30px;
 }
 
 .drop-title {
-    color: @bg_waybar;
+    color: @wine_red;
     font-size: 12px;
     font-weight: 700;
     margin-top: 4px;
 }
 
 .drop-subtitle {
-    color: @text_muted;
+    color: @muted_pink;
     font-size: 10.5px;
     margin-top: 2px;
 }
 
 .status-bar {
-    color: @bg_waybar;
+    color: @wine_red;
     font-size: 10.5px;
     font-weight: 600;
     margin-top: 6px;
@@ -456,6 +456,6 @@ scrollbar.vertical slider {
 }
 
 scrollbar.vertical slider:hover {
-    background-color: @accent;
+    background-color: @vivid_red;
     min-width: 8px;
 }
