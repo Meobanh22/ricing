@@ -837,20 +837,33 @@ class LyricsCanvasTests(unittest.TestCase):
             self.assertEqual(data[alpha_offset], 0)
         self.assertTrue(all(left > right for left, right in zip(centroids, centroids[1:])))
 
-    def test_graphics_payload_is_chunked_png_and_reuses_one_image_id(self):
+    def test_graphics_payload_reuses_one_image_id_and_falls_back_to_png(self):
         canvas = self.make_canvas()
+        self.addCleanup(canvas.clear)
         lines = [(0, "Test lyric"), (5, "Next")]
         _, command = canvas.render(lines, 0, 80, 24, "track", now=0, cell_dimensions=(9, 20))
         chunks = re.findall(r"\x1b_G([^;]*);([^\x1b]*)\x1b\\", command)
         self.assertTrue(chunks)
         self.assertIn(f"i={canvas.image_id}", chunks[0][0])
         self.assertIn("C=1", chunks[0][0])
-        self.assertTrue(all(len(payload) <= 4096 for _, payload in chunks))
-        self.assertTrue(base64.b64decode(''.join(payload for _, payload in chunks)).startswith(b'\x89PNG\r\n\x1a\n'))
+        self.assertIn("t=t,", chunks[0][0])
+        self.assertEqual(len(canvas.pending), 1)
+        path = canvas.pending[0][0]
+        self.assertEqual(base64.b64decode(chunks[0][1]), bytes(path))
+        _, canvas_rows, _ = music.visualizer_regions(24)
+        self.assertEqual(path.stat().st_size, 720 * (canvas_rows * 20) * 4)
         _, unchanged = canvas.render(lines, 0, 80, 24, "track", now=1, cell_dimensions=(9, 20))
         self.assertEqual(unchanged, '')
         self.assertIn(f"i={canvas.image_id}", canvas.clear())
+        self.assertFalse(path.exists())
         self.assertEqual(canvas.clear(), '')
+
+        canvas.file_transport = False
+        _, png_command = canvas.render(lines, 0, 80, 24, "track", now=2, cell_dimensions=(9, 20))
+        png_chunks = re.findall(r"\x1b_G([^;]*);([^\x1b]*)\x1b\\", png_command)
+        self.assertTrue(png_chunks)
+        self.assertTrue(all(len(payload) <= 4096 for _, payload in png_chunks))
+        self.assertTrue(base64.b64decode(''.join(payload for _, payload in png_chunks)).startswith(b'\x89PNG\r\n\x1a\n'))
 
 
 class VisibilityWatcherTests(unittest.TestCase):

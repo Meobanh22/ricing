@@ -73,6 +73,30 @@ class MusicFocusTests(unittest.TestCase):
         focus.close()
         process.wait.assert_called_once()
 
+    def test_toggle_off_reaps_overlay_without_blocking_caller(self):
+        process = Mock()
+        process.poll.return_value = None
+        peers = []
+
+        def spawn(*args, **kwargs):
+            peer = socket.socket(fileno=os.dup(kwargs['pass_fds'][0]))
+            peer.setblocking(False)
+            peers.append(peer)
+            self.addCleanup(peer.close)
+            return process
+
+        focus = MusicFocus()
+        with patch('music_focus.subprocess.Popen', side_effect=spawn):
+            focus.toggle()
+        with patch('music_focus.threading.Thread') as thread:
+            focus.toggle()
+        self.assertFalse(focus.active)
+        self.assertEqual(receive_messages(peers[0]), [{'type': 'close'}])
+        process.wait.assert_not_called()
+        thread.assert_called_once()
+        thread.call_args.kwargs['target']()
+        process.wait.assert_called_once()
+
     def test_unavailable_or_crashed_overlay_does_not_leave_focus_enabled(self):
         focus = MusicFocus(enabled=False)
         with patch('music_focus.subprocess.Popen') as spawn:

@@ -21,7 +21,7 @@ class StageSpotlight:
         # Mesh alpha fades across the cone and at its lower end. This provides
         # soft edges without blurring a full-screen image on every music frame.
         mesh = cairo.MeshPattern()
-        across, down = 20, 10
+        across, down = 14, 6
         for row in range(down):
             for column in range(across):
                 corners = ((column, row), (column + 1, row),
@@ -82,18 +82,22 @@ class StageSpotlight:
         self.pool(context, 960, floor + 44, 410, 110, 0.18)
         return surface
 
+    def warm(self, width, height):
+        if width <= 0 or height <= 0 or self.size == (width, height):
+            return
+        source = self.build(width, height)
+        self.surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
+        scaled = cairo.Context(self.surface)
+        scaled.scale(width / source.get_width(), height / source.get_height())
+        scaled.set_source_surface(source, 0, 0)
+        scaled.get_source().set_filter(cairo.FILTER_BILINEAR)
+        scaled.paint()
+        self.size = (width, height)
+
     def paint(self, context, width, height, opacity=1.0):
         if width <= 0 or height <= 0 or opacity <= 0:
             return
-        if self.size != (width, height):
-            source = self.build(width, height)
-            self.surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
-            scaled = cairo.Context(self.surface)
-            scaled.scale(width / source.get_width(), height / source.get_height())
-            scaled.set_source_surface(source, 0, 0)
-            scaled.get_source().set_filter(cairo.FILTER_BILINEAR)
-            scaled.paint()
-            self.size = (width, height)
+        self.warm(width, height)
         context.save()
         context.set_source_surface(self.surface, 0, 0)
         context.paint_with_alpha(max(0.0, min(1.0, opacity)))

@@ -8,8 +8,19 @@ import signal
 import socket
 import subprocess
 import sys
+import threading
 import time
 import zlib
+
+FADE_IN_SECONDS = 0.36
+FADE_OUT_SECONDS = 0.28
+SPOTLIGHT_DELAY = 0.08
+SPOTLIGHT_SECONDS = 0.68
+
+
+def smoothstep(value):
+    value = max(0.0, min(1.0, value))
+    return value * value * (3 - 2 * value)
 
 
 def send_message(connection, message):
@@ -58,7 +69,7 @@ class MusicFocus:
 
     def toggle(self):
         if self.active:
-            self.close()
+            self.close(wait=False)
             return
         if not self.enabled:
             return
@@ -96,12 +107,16 @@ class MusicFocus:
                 keys.append(message['value'])
         return keys
 
-    def close(self):
+    def close(self, wait=True):
         process, connection = self.process, self.connection
         self.process, self.connection, self.ready = None, None, False
         if connection is not None:
             send_message(connection, {'type': 'close'})
-        if process is not None:
+            connection.close()
+        if process is None:
+            return
+
+        def reap():
             try:
                 process.wait(timeout=0.5)
             except subprocess.TimeoutExpired:
@@ -111,8 +126,11 @@ class MusicFocus:
                 except subprocess.TimeoutExpired:
                     process.kill()
                     process.wait()
-        if connection is not None:
-            connection.close()
+
+        if wait:
+            reap()
+        else:
+            threading.Thread(target=reap, daemon=True).start()
 
 
 def run_overlay(fd, parent_pid):
@@ -159,10 +177,14 @@ def run_overlay(fd, parent_pid):
             self.drawn_lyric_state = None
             self.lyric_animating = False
             self.gradient = SUNSET_STOPS
-            self.started = time.monotonic()
+            self.opened_at = None
             self.closing_at = None
+            self.ready_sent = False
+            self.animating = True
             self.background = tuple(int(PALETTE['dark_wine'][i:i + 2], 16) / 255
                                     for i in (1, 3, 5))
+            geometry = target.get_geometry()
+            self.spotlight.warm(geometry.width, geometry.height)
             for index in range(display.get_n_monitors()):
                 monitor = display.get_monitor(index)
                 self.add_window(monitor, monitor == target)
@@ -173,7 +195,6 @@ def run_overlay(fd, parent_pid):
             GLib.timeout_add(16, self.animate)
             GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGTERM, self.quit)
             GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGINT, self.quit)
-            GLib.idle_add(lambda: send_message(connection, {'type': 'ready'}) and False)
 
         def add_window(self, monitor, content):
             window = Gtk.Window(title='Music Focus')
@@ -214,19 +235,25 @@ def run_overlay(fd, parent_pid):
         def receive(self, *_):
             for message in receive_messages(connection):
                 if message.get('type') == 'close':
-                    self.closing_at = time.monotonic()
-                    GLib.timeout_add(16, self.animate)
+                    if self.closing_at is None:
+                        self.closing_at = time.monotonic()
+                        if not self.animating:
+                            self.animating = True
+                            GLib.timeout_add(16, self.animate)
                 elif message.get('type') == 'frame':
                     self.frame = message
                     gradient = message.get('gradient', self.gradient)
                     if gradient != self.gradient:
                         self.gradient = gradient
                         self.spectrum = SpectrumCanvas(gradient)
-            self.redraw()
+            if not self.animating:
+                self.redraw()
             return True
 
         def redraw(self):
-            full = self.closing_at is not None or time.monotonic() - self.started < 0.9
+            now = time.monotonic()
+            intro_done = self.opened_at is not None and now - self.opened_at >= SPOTLIGHT_DELAY + SPOTLIGHT_SECONDS
+            full = self.closing_at is not None or not intro_done
             state = (self.frame.get('track', ''), self.frame.get('index', 0),
                      tuple(tuple(line) for line in self.frame.get('lines', [])))
             for window, _, content in self.windows:
@@ -243,10 +270,15 @@ def run_overlay(fd, parent_pid):
                                                math.ceil(count * height / rows) + 2)
 
         def animate(self):
-            if self.closing_at is not None and time.monotonic() - self.closing_at >= 0.18:
+            now = time.monotonic()
+            if self.closing_at is not None and now - self.closing_at >= FADE_OUT_SECONDS:
+                self.animating = False
                 return self.quit()
             self.redraw()
-            return self.closing_at is not None or time.monotonic() - self.started < 0.9
+            intro_done = self.opened_at is not None and now - self.opened_at >= SPOTLIGHT_DELAY + SPOTLIGHT_SECONDS
+            keep_running = self.closing_at is not None or not intro_done
+            self.animating = keep_running
+            return keep_running
 
         def check_parent(self):
             if os.getppid() != parent_pid:
@@ -275,11 +307,21 @@ def run_overlay(fd, parent_pid):
 
         def draw(self, window, context, content):
             width, height = window.get_allocated_width(), window.get_allocated_height()
+            if not self.frame and self.closing_at is None:
+                context.set_operator(cairo.OPERATOR_SOURCE)
+                context.set_source_rgba(0, 0, 0, 0)
+                context.paint()
+                return True
             now = time.monotonic()
-            alpha = min(1.0, (now - self.started) / 0.18)
+            if self.opened_at is None:
+                self.opened_at = now
+            alpha = smoothstep((now - self.opened_at) / FADE_IN_SECONDS)
             if self.closing_at is not None:
-                alpha *= max(0.0, 1 - (now - self.closing_at) / 0.18)
-            if now - self.started >= 0.9 and self.closing_at is None:
+                alpha *= 1.0 - smoothstep((now - self.closing_at) / FADE_OUT_SECONDS)
+            if not self.ready_sent and self.frame:
+                self.ready_sent = True
+                GLib.idle_add(lambda: send_message(connection, {'type': 'ready'}) and False)
+            if now - self.opened_at >= SPOTLIGHT_DELAY + SPOTLIGHT_SECONDS and self.closing_at is None:
                 scale = window.get_scale_factor()
                 key = (width, height, content, scale)
                 if key not in self.backgrounds:
@@ -301,22 +343,16 @@ def run_overlay(fd, parent_pid):
                     self.draw_content(context, width, height, now, scale)
                 return True
             context.set_operator(cairo.OPERATOR_SOURCE)
-            context.set_source_rgba(0, 0, 0, 0)
+            context.set_source_rgba(*self.background, 0.85 * alpha)
             context.paint()
             context.set_operator(cairo.OPERATOR_OVER)
-            context.push_group()
-            context.set_source_rgba(*self.background, 0.85)
-            context.paint()
-            if content:
-                light = max(0.0, min(1.0, (now - self.started - 0.1) / 0.8))
-                light = light * light * (3 - 2 * light)
-                self.spotlight.paint(context, width, height, light)
-                self.draw_content(context, width, height, now, window.get_scale_factor())
-            context.pop_group_to_source()
-            context.paint_with_alpha(alpha)
+            if content and alpha > 0:
+                light = smoothstep((now - self.opened_at - SPOTLIGHT_DELAY) / SPOTLIGHT_SECONDS)
+                self.spotlight.paint(context, width, height, alpha * light)
+                self.draw_content(context, width, height, now, window.get_scale_factor(), alpha)
             return True
 
-        def draw_content(self, context, width, height, now, scale):
+        def draw_content(self, context, width, height, now, scale, content_alpha=1.0):
             rows = max(12, int(height / 24))
             cell_height = height / rows
             lyric_top, lyric_rows, spectrum_top = visualizer_regions(rows)
@@ -337,7 +373,10 @@ def run_overlay(fd, parent_pid):
                 self.lyric_animating = abs(scroll - index) > 0.000001
                 context.set_source_surface(self.lyric_surface, (width - lyric_width) / 2,
                                            lyric_top * cell_height)
-                context.paint()
+                if content_alpha < 0.999:
+                    context.paint_with_alpha(content_alpha)
+                else:
+                    context.paint()
             else:
                 self.lyric_scene = self.lyric_surface = None
                 self.lyric_animating = False
@@ -348,8 +387,17 @@ def run_overlay(fd, parent_pid):
                 gain = self.frame.get('gain', 1.0)
                 heights = [min(wave_height, max(0, round(value / 100 * gain * wave_height))) for value in bars]
                 context.save()
-                context.translate(0, wave_top)
-                self.spectrum.paint_cached(context, heights, len(bars) * 3 - 1, width, wave_height, scale)
+                if content_alpha < 0.999:
+                    context.rectangle(0, wave_top, width, wave_height)
+                    context.clip()
+                    context.push_group()
+                    context.translate(0, wave_top)
+                    self.spectrum.paint_cached(context, heights, len(bars) * 3 - 1, width, wave_height, scale)
+                    context.pop_group_to_source()
+                    context.paint_with_alpha(content_alpha)
+                else:
+                    context.translate(0, wave_top)
+                    self.spectrum.paint_cached(context, heights, len(bars) * 3 - 1, width, wave_height, scale)
                 context.restore()
 
     overlay = Overlay()

@@ -8,10 +8,12 @@ import math
 import os
 import struct
 import sys
+import tempfile
 import termios
 import time
 import unicodedata
 from functools import lru_cache
+from pathlib import Path
 
 from music_layout import visualizer_regions
 
@@ -74,6 +76,9 @@ class LyricsCanvas:
         self.origin = 0.0
         self.started_at = 0.0
         self.last_scene = None
+        self.file_transport = Image is not None and sys.byteorder == 'little'
+        self.buffers = None
+        self.pending = []
         self.layout_context = cairo.Context(cairo.ImageSurface(cairo.FORMAT_ARGB32, 8, 8))
         options = cairo.FontOptions()
         options.set_antialias(cairo.ANTIALIAS_GRAY)
@@ -206,8 +211,35 @@ class LyricsCanvas:
         scene = (track_key, tuple(lines), index, round(scroll, 5), cols, rows, placement_cols, width, height, top, left)
         command = ''
         if scene != self.last_scene:
-            png = self.render_png(lines, scroll, width, height, cell_height)
-            command = f'\x1b[{top + 1};{left + 1}H' + image_command(png, self.image_id, placement_cols, canvas_rows)
+            self.pending = [(path, created) for path, created in self.pending if path.exists()]
+            if self.file_transport and len(self.pending) >= 4 and now - self.pending[0][1] >= 0.25:
+                # A remote or restricted terminal may not read and unlink local temp files.
+                self.file_transport = False
+                for path, _ in self.pending:
+                    path.unlink(missing_ok=True)
+                self.pending.clear()
+            graphic = None
+            if self.file_transport and Image is not None and sys.byteorder == 'little':
+                try:
+                    surface = self.draw_surface(lines, scroll, width, height, cell_height)
+                    surface.flush()
+                    rgba = Image.frombuffer('RGBA', (width, height), surface.get_data(), 'raw',
+                                            'BGRa', surface.get_stride(), 1).tobytes()
+                    if self.buffers is None:
+                        self.buffers = tempfile.TemporaryDirectory(prefix='tty-graphics-protocol-lyrics-')
+                    fd, name = tempfile.mkstemp(dir=self.buffers.name, suffix='.rgba')
+                    with os.fdopen(fd, 'wb') as output:
+                        output.write(rgba)
+                    path = Path(name)
+                    self.pending.append((path, now))
+                    graphic = image_command(b'', self.image_id, placement_cols, canvas_rows,
+                                            pixel_dimensions=(width, height), temporary_path=path)
+                except OSError:
+                    self.file_transport = False
+            if graphic is None:
+                png = self.render_png(lines, scroll, width, height, cell_height)
+                graphic = image_command(png, self.image_id, placement_cols, canvas_rows)
+            command = f'\x1b[{top + 1};{left + 1}H' + graphic
             self.last_scene = scene
             self.shown = True
         return spectrum_top, command
@@ -217,4 +249,10 @@ class LyricsCanvas:
         self.shown = False
         self.last_scene = None
         self.target = None
+        for path, _ in self.pending:
+            path.unlink(missing_ok=True)
+        self.pending.clear()
+        if self.buffers is not None:
+            self.buffers.cleanup()
+            self.buffers = None
         return command

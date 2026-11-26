@@ -676,7 +676,7 @@ def cava_worker():
     conf_path = os.path.join(config_dir.name, "cava.conf")
     conf_content = f"""[general]
 bars = {NUM_BARS}
-framerate = 35
+framerate = {RENDER_FPS}
 autosens = 1
 lower_cutoff_freq = 50
 higher_cutoff_freq = 12000
@@ -695,7 +695,7 @@ channels = mono
 [smoothing]
 monstercat = 0
 waves = 0
-noise_reduction = 70
+noise_reduction = 64
 """
     try:
         with open(conf_path, "w", encoding="utf-8") as f:
@@ -1397,12 +1397,14 @@ class LyricsApp:
                         self.idle_backdrop.interact()
                     for key in keys:
                         self.handle_key(key)
+                        next_frame = 0
                         if not self.running:
                             break
                 if focus_connection is not None and focus_connection in readable:
                     for key in self.focus_mode.read_keys():
                         self.idle_backdrop.interact()
                         self.handle_key(key)
+                        next_frame = 0
                         if not self.running:
                             break
         finally:
